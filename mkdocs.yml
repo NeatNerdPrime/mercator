@@ -62,20 +62,27 @@ plugins:
           build: true
           nav_translations:
             GETTING STARTED: DÉMARRAGE
+            -- Introduction: -- Introduction
+            -- Cartography: -- Cartographie
+            -- Features: -- Fonctionnalités
+            -- Use Cases: -- Cas d'usage
             DATA MODEL: MODÈLE DE DONNÉES
+            -- Data Model: -- Modèle de données
+            -- Maturity: -- Maturité
             PROCESS & ANALYSIS: PROCESSUS & ANALYSE
+            -- BPMN: -- BPMN
+            -- Application: -- Application
+            -- Queries: -- Requêtes
+            -- Reports: -- Rapports
             API & INTEGRATION: API & INTÉGRATION
+            -- API: -- API
+            -- API Filters: -- Filtres d'API
+            -- Import: -- Import
+            -- Vulnerabilities: -- Vulnérabilités
             OPERATIONS: OPÉRATIONS
-            Cartography: Cartographie
-            Features: Fonctionnalités
-            Use Cases: Cas d'usage
-            Data Model: Modèle de données
-            Maturity: Maturité
-            Queries: Requêtes
-            Reports: Rapports
-            API Filters: Filtres d'API
-            Vulnerabilities: Vulnérabilités
-            References: Références
+            -- Administration: -- Administration
+            -- Configuration: -- Configuration
+            -- References: -- Références
       reconfigure_material: true
 
 markdown_extensions:
