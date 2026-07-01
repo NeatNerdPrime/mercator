@@ -15,7 +15,7 @@ Concrètement, être cartographe d'un objet signifie :
 Le système des cartographes permet de **déléguer finement la maintenance** de la cartographie aux personnes les plus proches du terrain, sans leur ouvrir l'ensemble de la cartographie du système d'information.
 
 !!! info "Un cartographe n'est pas un administrateur"
-  Le rôle de cartographe est limité aux objets qui lui sont explicitement assignés. Il ne donne pas accès à l'ensemble de la cartographie ni aux fonctions d'administration de Mercator.
+    Le rôle de cartographe est limité aux objets qui lui sont explicitement assignés. Il ne donne pas accès à l'ensemble de la cartographie ni aux fonctions d'administration de Mercator.
 
 ## Gestion des cartographes
 
@@ -39,7 +39,7 @@ Pour assigner un cartographe à un objet :
 Il est possible d'assigner plusieurs cartographes au même objet, et un même utilisateur peut être cartographe de plusieurs objets.
 
 !!! tip "Assigner un rôle plutôt qu'un utilisateur"
-  Il est possible d'assigner un **rôle** comme cartographe d'un objet. Tous les utilisateurs ayant ce rôle bénéficieront alors des mêmes droits sur cet objet. Cela facilite la gestion lors des changements d'équipe.
+    Il est possible d'assigner un **rôle** comme cartographe d'un objet. Tous les utilisateurs ayant ce rôle bénéficieront alors des mêmes droits sur cet objet. Cela facilite la gestion lors des changements d'équipe.
 
 ## Ce que permet le rôle de cartographe
 
@@ -75,7 +75,7 @@ Le tableau de bord de Mercator affiche uniquement les objets auxquels l'utilisat
 Les cartographes ont accès à la liste consolidée des objets dont ils sont responsables via le menu **Préférences → Cartographie**. Cette liste regroupe tous les objets assignés, quel que soit leur type, et permet d'accéder directement à chaque fiche et historiques des changements.
 
 !!! info "Menu visible uniquement si des objets sont assignés"
-  Le menu **Préférences → Cartographie** n'apparaît que si au moins un objet a été assigné à l'utilisateur. Il est invisible pour les utilisateurs sans responsabilité de cartographie.
+    Le menu **Préférences → Cartographie** n'apparaît que si au moins un objet a été assigné à l'utilisateur. Il est invisible pour les utilisateurs sans responsabilité de cartographie.
 
 ### Filtrage dans les listes
 
@@ -95,7 +95,7 @@ Un rappel périodique peut être configuré par l'administrateur pour inciter le
 La fréquence des rappels (hebdomadaire, mensuelle…) et le contenu du message sont définis par l'administrateur dans **Administration → Configuration → Notifications**.
 
 !!! note "Pas de rappel si aucune configuration n'est définie"
-   Les rappels ne sont envoyés que si l'administrateur a activé et configuré cette fonctionnalité. En l'absence de configuration, aucun e-mail n'est envoyé.
+    Les rappels ne sont envoyés que si l'administrateur a activé et configuré cette fonctionnalité. En l'absence de configuration, aucun e-mail n'est envoyé.
 
 ### Notification lors d'une modification par un autre cartographe
 
@@ -125,6 +125,6 @@ Si un objet dont vous êtes cartographe évolue significativement (décommission
 - contacter l'administrateur si une action hors de votre portée est nécessaire (suppression, fusion d'objets, changement de catégorie…).
 
 !!! warning "Un objet obsolète est une fausse information"
-  Une fiche non mise à jour peut induire en erreur d'autres utilisateurs ou fausser les analyses de sécurité. La mise à jour est une responsabilité à part entière du cartographe.
+    Une fiche non mise à jour peut induire en erreur d'autres utilisateurs ou fausser les analyses de sécurité. La mise à jour est une responsabilité à part entière du cartographe.
 
 

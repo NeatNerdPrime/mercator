@@ -65,6 +65,7 @@ plugins:
             -- Introduction: -- Introduction
             -- Cartography: -- Cartographie
             -- Features: -- Fonctionnalités
+            -- Cartographers: -- Cartographes
             -- Use Cases: -- Cas d'usage
             DATA MODEL: MODÈLE DE DONNÉES
             -- Data Model: -- Modèle de données
@@ -99,6 +100,7 @@ nav:
       - Introduction: index.md
       - -- Cartography: cartography.md
       - -- Features: features.md
+      - -- Cartographers: cartographers.md
       - -- Use Cases: usecases.md
   - DATA MODEL:
       - -- Data Model: model.md
