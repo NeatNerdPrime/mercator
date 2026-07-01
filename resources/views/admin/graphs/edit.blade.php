@@ -299,7 +299,7 @@
                             </div>
 
                             <div id="graph-container" tabindex="-1"
-                                 style="position: relative; overflow: hidden; width: 100%; height: 600px; cursor: default; touch-action: none; outline: none;">
+                                 style="position: relative; overflow: hidden; width: 100%; cursor: default; touch-action: none; outline: none;">
                             </div>
                         </div>
                     </div>
@@ -307,7 +307,7 @@
             </div>
         </div>
         </div>
-        <div class="form-group">
+        <div class="form-group" id="graph-buttons">
             <a id="btn-cancel" class="btn btn-default" href="{{ route('admin.graphs.index') }}">
                 {{ trans('global.back_to_list') }}
             </a>
@@ -463,6 +463,7 @@
                     if (sidebarFooter) sidebarFooter.style.display = 'none';
                     document.getElementById('maximizeBtn').innerHTML = "&#8615;";
                 }
+                fitGraph();
             });
             //--------------------------------------------------------------
             // Chargement du graphe
@@ -481,6 +482,17 @@
                 // Now submit the form
                 form.submit();
             });
+
+            const container = document.getElementById('graph-container');
+            const buttons   = document.getElementById('graph-buttons');
+            function fitGraph() {
+                const top     = container.getBoundingClientRect().top;
+                const btnH    = buttons ? buttons.offsetHeight : 0;
+                container.style.height = (window.innerHeight - top - btnH - 36) + 'px';
+            }
+            fitGraph();
+            window.addEventListener('load', fitGraph);
+            window.addEventListener('resize', fitGraph);
 
         });
     </script>

@@ -880,7 +880,51 @@ function modelCenter(cell: Cell): Point {
     return new Point(x + w / 2, y + h / 2);
 }
 
-function refreshParallelEdges(): void {
+function pairKeyOf(source: Cell, target: Cell): string {
+    const a = String(source.id), b = String(target.id);
+    return a < b ? `${a}|${b}` : `${b}|${a}`;
+}
+
+// Calcule, avant suppression, les paires de sommets dont le nombre de liens
+// parallèles va changer — pour ne recalculer ensuite que celles-ci et ne
+// jamais déplacer les points d'inflexion des liens non concernés.
+function collectAffectedPairs(cells: Cell[]): Set<string> {
+    const pairs = new Set<string>();
+    for (const cell of cells) {
+        if (cell.isEdge()) {
+            const s = cell.source, t = cell.target;
+            if (s && t) pairs.add(pairKeyOf(s, t));
+        } else if (cell.isVertex()) {
+            for (const edge of graph.getEdges(cell)) {
+                const s = edge.source, t = edge.target;
+                if (s && t) pairs.add(pairKeyOf(s, t));
+            }
+        }
+    }
+    return pairs;
+}
+
+// Exécute une mutation (ajout de nœud(s)/lien(s)) et renvoie les paires de
+// sommets pour lesquelles un nouveau lien vient d'apparaître — pour ne
+// recalculer ensuite que celles-ci et ne jamais déplacer les points
+// d'inflexion des liens déjà présents ailleurs dans le graphe.
+function collectNewEdgePairs(parent: Cell, mutate: () => void): Set<string> {
+    const before = new Set(graph.getChildEdges(parent).map((e) => String(e.id)));
+    mutate();
+    const pairs = new Set<string>();
+    for (const edge of graph.getChildEdges(parent)) {
+        if (before.has(String(edge.id))) continue;
+        const s = edge.source, t = edge.target;
+        if (s && t) pairs.add(pairKeyOf(s, t));
+    }
+    return pairs;
+}
+
+// Ne recalcule que les paires de sommets dont un lien vient d'être retiré,
+// pour ne jamais toucher aux liens des autres paires du graphe.
+function refreshParallelEdges(onlyPairs?: Set<string>): void {
+    if (onlyPairs && onlyPairs.size === 0) return;
+
     const parent = graph.getDefaultParent();
     const edges = graph.getChildEdges(parent);
 
@@ -888,8 +932,8 @@ function refreshParallelEdges(): void {
     for (const edge of edges) {
         const s = edge.source, t = edge.target;
         if (!s || !t) continue;
-        const a = String(s.id), b = String(t.id);
-        const key = a < b ? `${a}|${b}` : `${b}|${a}`;
+        const key = pairKeyOf(s, t);
+        if (onlyPairs && !onlyPairs.has(key)) continue;
         const list = groups.get(key);
         if (list) list.push(edge); else groups.set(key, [edge]);
     }
@@ -897,23 +941,45 @@ function refreshParallelEdges(): void {
     graph.batchUpdate(() => {
         for (const list of groups.values()) {
             const n = list.length;
+
+            if (n <= 1) {
+                // Arête déjà seule entre ces deux sommets : on ne touche pas à sa
+                // géométrie, sinon les points d'inflexion / angles droits placés
+                // manuellement par l'utilisateur seraient effacés à chaque ajout
+                // de nœud ou de lien manquant. On ne remet à plat que les arêtes
+                // qui avaient été mises en arc par cette fonction (style.curved).
+                list.forEach((edge) => {
+                    const style: CellStateStyle = edge.style ?? {};
+                    if (!style.curved) return;
+                    const geo = edge.getGeometry()?.clone();
+                    if (!geo) return;
+                    geo.points = null;
+                    style.curved = false;
+                    edge.style = style;
+                    edge.setGeometry(geo);
+                });
+                continue;
+            }
+
+            // Groupe de liens parallèles : si l'un d'eux a déjà des points définis
+            // (angle/arc chargé depuis la sauvegarde ou posé manuellement), on
+            // laisse tout le groupe tel quel plutôt que d'écraser un
+            // positionnement déjà établi (notamment au chargement du graphe).
+            const alreadyPositioned = list.some((edge) => (edge.getGeometry()?.points?.length ?? 0) > 0);
+            if (alreadyPositioned) continue;
+
             list.forEach((edge, i) => {
                 const geo = edge.getGeometry()?.clone();
                 if (!geo) return;
                 const style: CellStateStyle = edge.style ?? {};
-                if (n <= 1) {
-                    geo.points = null;
-                    style.curved = false;
-                } else {
-                    const cs = modelCenter(edge.source!), ct = modelCenter(edge.target!);
-                    const mx = (cs.x + ct.x) / 2, my = (cs.y + ct.y) / 2;
-                    const dx = ct.x - cs.x, dy = ct.y - cs.y;
-                    const len = Math.hypot(dx, dy) || 1;
-                    const nx = -dy / len, ny = dx / len;
-                    const offset = (i - (n - 1) / 2) * 22;
-                    geo.points = [new Point(mx + nx * offset, my + ny * offset)];
-                    style.curved = true;
-                }
+                const cs = modelCenter(edge.source!), ct = modelCenter(edge.target!);
+                const mx = (cs.x + ct.x) / 2, my = (cs.y + ct.y) / 2;
+                const dx = ct.x - cs.x, dy = ct.y - cs.y;
+                const len = Math.hypot(dx, dy) || 1;
+                const nx = -dy / len, ny = dx / len;
+                const offset = (i - (n - 1) / 2) * 22;
+                geo.points = [new Point(mx + nx * offset, my + ny * offset)];
+                style.curved = true;
                 edge.style = style;
                 edge.setGeometry(geo);
             });
@@ -1016,55 +1082,57 @@ container.addEventListener('drop', (event: DragEvent) => {
 
     if (type === 'icon-node' && nodeIcon?.src && nodeSelector) {
         const nodeId = nodeSelector.value;
-        graph.batchUpdate(() => {
-            const existing = model.getCell(nodeId) as Cell | null;
-            if (existing) {
-                restoreMissingEdgesForNode(nodeId, parent);
-                graph.setSelectionCells([existing]);
-                return;
-            }
-
-            const node = _nodes.get(nodeId);
-            if (!node) return;
-
-            const newVertex = graph.insertVertex({
-                parent,
-                id: nodeId,
-                value: buildLabel(node),
-                position: [pt.x - 16, pt.y - 16],
-                size: [32, 32],
-                style: {
-                    shape: 'image',
-                    image: nodeIcon.src,
-                    editable: false,
-                    resizable: true,
-                    verticalLabelPosition: 'bottom',
-                    spacingTop: -15,
-                },
-            });
-
-            node.edges.forEach((edge) => {
-                const targetCell = model.getCell(edge.attachedNodeId) as Cell | null;
-                if (targetCell) {
-                    graph.insertEdge({
-                        parent,
-                        value: '',
-                        source: newVertex,
-                        target: targetCell,
-                        style: {
-                            editable: false,
-                            strokeColor: '#ff0000',
-                            strokeWidth: 2,
-                            startArrow: 'none',
-                            endArrow: 'none',
-                        },
-                    });
+        const affectedPairs = collectNewEdgePairs(parent, () => {
+            graph.batchUpdate(() => {
+                const existing = model.getCell(nodeId) as Cell | null;
+                if (existing) {
+                    restoreMissingEdgesForNode(nodeId, parent);
+                    graph.setSelectionCells([existing]);
+                    return;
                 }
-            });
 
-            graph.setSelectionCell(newVertex);
+                const node = _nodes.get(nodeId);
+                if (!node) return;
+
+                const newVertex = graph.insertVertex({
+                    parent,
+                    id: nodeId,
+                    value: buildLabel(node),
+                    position: [pt.x - 16, pt.y - 16],
+                    size: [32, 32],
+                    style: {
+                        shape: 'image',
+                        image: nodeIcon.src,
+                        editable: false,
+                        resizable: true,
+                        verticalLabelPosition: 'bottom',
+                        spacingTop: -15,
+                    },
+                });
+
+                node.edges.forEach((edge) => {
+                    const targetCell = model.getCell(edge.attachedNodeId) as Cell | null;
+                    if (targetCell) {
+                        graph.insertEdge({
+                            parent,
+                            value: '',
+                            source: newVertex,
+                            target: targetCell,
+                            style: {
+                                editable: false,
+                                strokeColor: '#ff0000',
+                                strokeWidth: 2,
+                                startArrow: 'none',
+                                endArrow: 'none',
+                            },
+                        });
+                    }
+                });
+
+                graph.setSelectionCell(newVertex);
+            });
         });
-        refreshParallelEdges();
+        refreshParallelEdges(affectedPairs);
     }
 });
 
@@ -1086,8 +1154,9 @@ function deleteSelectedCells(): void {
     const cells = graph.getSelectionCells().filter((c) => !isBackgroundCell(c));
     if (cells.length === 0) return;
 
+    const affectedPairs = collectAffectedPairs(cells);
     graph.removeCells(cells);
-    refreshParallelEdges();
+    refreshParallelEdges(affectedPairs);
 }
 
 // Sur window en phase capture : s'exécute avant TOUT listener tiers
@@ -1299,80 +1368,83 @@ graph.addListener(InternalEvent.DOUBLE_CLICK, (_sender: unknown, evt: EventObjec
     const node = _nodes.get(cell.id as string);
     if (!node) return;
 
-    graph.batchUpdate(() => {
-        // Plusieurs liens peuvent exister entre les deux mêmes nœuds : on les
-        // regroupe par cible pour n'insérer le sommet qu'une fois tout en
-        // conservant chacun des liens (refreshParallelEdges les écartera en arc).
-        const newEdgesByTarget = new Map<string, Edge[]>();
-        const parent = graph.getDefaultParent();
-        const filter = getFilter();
-        const attrFilter = getAttrFilter();
-        const direction = getDirection();
+    const doubleClickParent = graph.getDefaultParent();
+    const affectedPairs = collectNewEdgePairs(doubleClickParent, () => {
+        graph.batchUpdate(() => {
+            // Plusieurs liens peuvent exister entre les deux mêmes nœuds : on les
+            // regroupe par cible pour n'insérer le sommet qu'une fois tout en
+            // conservant chacun des liens (refreshParallelEdges les écartera en arc).
+            const newEdgesByTarget = new Map<string, Edge[]>();
+            const parent = graph.getDefaultParent();
+            const filter = getFilter();
+            const attrFilter = getAttrFilter();
+            const direction = getDirection();
 
-        node.edges.forEach((edge) => {
-            const targetNode = _nodes.get(edge.attachedNodeId);
-            if (!targetNode) return;
-            if (model.getCell(edge.attachedNodeId)) return; // déjà présent : traité par la passe globale ci-dessous
+            node.edges.forEach((edge) => {
+                const targetNode = _nodes.get(edge.attachedNodeId);
+                if (!targetNode) return;
+                if (model.getCell(edge.attachedNodeId)) return; // déjà présent : traité par la passe globale ci-dessous
 
-            if (
-                (
-                    filter.length === 0 ||
-                    filter.includes(targetNode.vue) ||
-                    (filter.includes('8') && edge.edgeType === 'CABLE') ||
-                    (filter.includes('9') && edge.edgeType === 'FLUX')
-                ) &&
-                matchesAttrFilter(targetNode, attrFilter) &&
-                matchesDirection(direction, node, targetNode)
-            ) {
-                const list = newEdgesByTarget.get(edge.attachedNodeId);
-                if (list) list.push(edge); else newEdgesByTarget.set(edge.attachedNodeId, [edge]);
-            }
-        });
+                if (
+                    (
+                        filter.length === 0 ||
+                        filter.includes(targetNode.vue) ||
+                        (filter.includes('8') && edge.edgeType === 'CABLE') ||
+                        (filter.includes('9') && edge.edgeType === 'FLUX')
+                    ) &&
+                    matchesAttrFilter(targetNode, attrFilter) &&
+                    matchesDirection(direction, node, targetNode)
+                ) {
+                    const list = newEdgesByTarget.get(edge.attachedNodeId);
+                    if (list) list.push(edge); else newEdgesByTarget.set(edge.attachedNodeId, [edge]);
+                }
+            });
 
-        const geom = cell.getGeometry();
-        if (geom && newEdgesByTarget.size > 0) {
-            const targetIds = Array.from(newEdgesByTarget.keys());
-            const positions = placeObjectsOnCircle({x: geom.x, y: geom.y}, 80, targetIds.length);
+            const geom = cell.getGeometry();
+            if (geom && newEdgesByTarget.size > 0) {
+                const targetIds = Array.from(newEdgesByTarget.keys());
+                const positions = placeObjectsOnCircle({x: geom.x, y: geom.y}, 80, targetIds.length);
 
-            for (let i = 0; i < positions.length; i++) {
-                const attachedNodeId = targetIds[i];
-                const edgesToTarget = newEdgesByTarget.get(attachedNodeId)!;
-                const newNode = _nodes.get(attachedNodeId);
-                if (!newNode) continue;
+                for (let i = 0; i < positions.length; i++) {
+                    const attachedNodeId = targetIds[i];
+                    const edgesToTarget = newEdgesByTarget.get(attachedNodeId)!;
+                    const newNode = _nodes.get(attachedNodeId);
+                    if (!newNode) continue;
 
-                const vertex = graph.insertVertex({
-                    parent,
-                    id: newNode.id,
-                    value: buildLabel(newNode),
-                    position: [positions[i].x, positions[i].y],
-                    size: [32, 32],
-                    style: {
-                        shape: 'image',
-                        image: newNode.image,
-                        editable: false,
-                        resizable: true,
-                        verticalLabelPosition: 'bottom',
-                        spacingTop: -15,
-                    },
-                });
-
-                for (const edge of edgesToTarget) {
-                    graph.insertEdge({
+                    const vertex = graph.insertVertex({
                         parent,
-                        value: edge.name,
-                        source: cell,
-                        target: vertex,
-                        style: buildEdgeStyle(edge),
+                        id: newNode.id,
+                        value: buildLabel(newNode),
+                        position: [positions[i].x, positions[i].y],
+                        size: [32, 32],
+                        style: {
+                            shape: 'image',
+                            image: newNode.image,
+                            editable: false,
+                            resizable: true,
+                            verticalLabelPosition: 'bottom',
+                            spacingTop: -15,
+                        },
                     });
+
+                    for (const edge of edgesToTarget) {
+                        graph.insertEdge({
+                            parent,
+                            value: edge.name,
+                            source: cell,
+                            target: vertex,
+                            style: buildEdgeStyle(edge),
+                        });
+                    }
                 }
             }
-        }
 
-        // Restaure les liens manquants entre le nœud double-cliqué et les
-        // nœuds déjà présents dans le graphe.
-        restoreMissingEdgesForNode(node.id, parent);
+            // Restaure les liens manquants entre le nœud double-cliqué et les
+            // nœuds déjà présents dans le graphe.
+            restoreMissingEdgesForNode(node.id, parent);
+        });
     });
-    refreshParallelEdges();
+    refreshParallelEdges(affectedPairs);
     if (physicsEnabled) startPhysics();
 });
 
@@ -1475,12 +1547,15 @@ document.getElementById('deploy-btn')?.addEventListener('click', (e) => {
     const depthSelect = document.getElementById('depth') as HTMLSelectElement | null;
     const depth = parseInt(depthSelect?.value ?? '3', 10) || 3;
 
-    graph.batchUpdate(() => {
-        const parent = graph.getDefaultParent();
-        deployFromNode(selected.id as string, depth, new Set(), getFilter(), getAttrFilter(), getDirection(), parent);
-        completeMissingEdgesAmongPlacedNodes(parent);
+    const deployParent = graph.getDefaultParent();
+    const deployAffectedPairs = collectNewEdgePairs(deployParent, () => {
+        graph.batchUpdate(() => {
+            const parent = graph.getDefaultParent();
+            deployFromNode(selected.id as string, depth, new Set(), getFilter(), getAttrFilter(), getDirection(), parent);
+            completeMissingEdgesAmongPlacedNodes(parent);
+        });
     });
-    refreshParallelEdges();
+    refreshParallelEdges(deployAffectedPairs);
     if (physicsEnabled) startPhysics();
 });
 
@@ -1493,10 +1568,13 @@ document.getElementById('add-node-btn')?.addEventListener('click', () => {
 
     if (model.getCell(nodeId)) {
         const existingCell = model.getCell(nodeId) as Cell;
-        graph.batchUpdate(() => {
-            restoreMissingEdgesForNode(nodeId, graph.getDefaultParent());
+        const restoreParent = graph.getDefaultParent();
+        const restoreAffectedPairs = collectNewEdgePairs(restoreParent, () => {
+            graph.batchUpdate(() => {
+                restoreMissingEdgesForNode(nodeId, restoreParent);
+            });
         });
-        refreshParallelEdges();
+        refreshParallelEdges(restoreAffectedPairs);
         graph.setSelectionCells([existingCell]);
         return;
     }
@@ -1504,37 +1582,40 @@ document.getElementById('add-node-btn')?.addEventListener('click', () => {
     const node = _nodes.get(nodeId);
     if (!node) return;
 
-    graph.batchUpdate(() => {
-        const parent = graph.getDefaultParent();
+    const addNodeParent = graph.getDefaultParent();
+    const addNodeAffectedPairs = collectNewEdgePairs(addNodeParent, () => {
+        graph.batchUpdate(() => {
+            const parent = graph.getDefaultParent();
 
-        // Centre de la partie VISIBLE du graphe (et non de son contenu, qui
-        // peut être vide ou hors champ), converti en coordonnées modèle.
-        const view = graph.getView();
-        const center = {
-            x: container.clientWidth / 2 / view.scale - view.translate.x,
-            y: container.clientHeight / 2 / view.scale - view.translate.y,
-        };
+            // Centre de la partie VISIBLE du graphe (et non de son contenu, qui
+            // peut être vide ou hors champ), converti en coordonnées modèle.
+            const view = graph.getView();
+            const center = {
+                x: container.clientWidth / 2 / view.scale - view.translate.x,
+                y: container.clientHeight / 2 / view.scale - view.translate.y,
+            };
 
-        const newVertex = graph.insertVertex({
-            parent,
-            id: node.id,
-            value: buildLabel(node),
-            position: [center.x - 16, center.y - 16],
-            size: [32, 32],
-            style: {
-                shape: 'image',
-                image: node.image,
-                editable: false,
-                resizable: true,
-                verticalLabelPosition: 'bottom',
-                spacingTop: -15,
-            },
+            const newVertex = graph.insertVertex({
+                parent,
+                id: node.id,
+                value: buildLabel(node),
+                position: [center.x - 16, center.y - 16],
+                size: [32, 32],
+                style: {
+                    shape: 'image',
+                    image: node.image,
+                    editable: false,
+                    resizable: true,
+                    verticalLabelPosition: 'bottom',
+                    spacingTop: -15,
+                },
+            });
+
+            completeMissingEdgesAmongPlacedNodes(parent);
+            graph.setSelectionCell(newVertex);
         });
-
-        completeMissingEdgesAmongPlacedNodes(parent);
-        graph.setSelectionCell(newVertex);
     });
-    refreshParallelEdges();
+    refreshParallelEdges(addNodeAffectedPairs);
 });
 
 //-------------------------------------------------------------------------
