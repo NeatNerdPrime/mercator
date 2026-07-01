@@ -250,8 +250,9 @@
                                     </select>
                                     <label for="edge-routing-select" style="margin-right: 5px;">Routage</label>
                                     <select id="edge-routing-select">
-                                        <option value="straight">&#x2192; Ligne droite</option>
-                                        <option value="orthogonal">&#x21AA; Angles droits</option>
+                                        <option value="straight">&#x2192; Droite</option>
+                                        <option value="arc">&#x219D; Arc</option>
+                                        <option value="orthogonal">&#x21AA; Angles</option>
                                     </select>
                                 </div>
                                 <div>

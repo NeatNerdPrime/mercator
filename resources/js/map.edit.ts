@@ -292,9 +292,13 @@ function showEdgeMenu(x: number, y: number, style: CellStateStyle): void {
     }
     if (routingSelect) {
         const es = style.edgeStyle;
-        routingSelect.value = (es === 'orthogonalEdgeStyle' || es === 'elbowEdgeStyle')
-            ? 'orthogonal'
-            : 'straight';
+        if (style.curved && (es === 'straightEdgeStyle' || !es)) {
+            routingSelect.value = 'arc';
+        } else if (es === 'orthogonalEdgeStyle' || es === 'elbowEdgeStyle') {
+            routingSelect.value = 'orthogonal';
+        } else {
+            routingSelect.value = 'straight';
+        }
     }
     textContextMenu.style.display = 'none';
 }
@@ -326,10 +330,74 @@ function isEdgeStyleTarget(cell: Cell): boolean {
     return false;
 }
 
+function distanceToSegment(px: number, py: number, ax: number, ay: number, bx: number, by: number): number {
+    const dx = bx - ax, dy = by - ay;
+    const lenSq = dx * dx + dy * dy;
+    let t = lenSq > 0 ? ((px - ax) * dx + (py - ay) * dy) / lenSq : 0;
+    t = Math.max(0, Math.min(1, t));
+    return Math.hypot(px - (ax + t * dx), py - (ay + t * dy));
+}
+
+// graph.getCellAt() teste la distance au tracé avec une tolérance de clic
+// fixe (4px, graph.tolerance), quelle que soit l'épaisseur du trait — un
+// lien épais est pourtant visuellement bien plus large que ça. De plus, pour
+// un arc (style.curved), il teste la ligne brisée source → point d'inflexion
+// → cible (state.absolutePoints), pas la courbe réellement affichée :
+// paintCurvedLine() dessine une quadratique dont le point n'est qu'un point
+// de contrôle — la courbe ne passe jamais par lui et s'en écarte de moitié à
+// son sommet. On complète ici en cherchant, pour tout type d'edge, le tracé
+// réellement affiché (segments pour droit/angles droits, courbe de Bézier
+// pour un arc) le plus proche du point cliqué, avec une tolérance qui suit
+// l'épaisseur du trait.
+function findEdgeAt(x: number, y: number): Cell | null {
+    const baseTolerance = 8;
+    const scale = graph.getView().scale || 1;
+    let closest: Cell | null = null;
+    let closestDist = Infinity;
+
+    for (const edge of graph.getChildEdges(graph.getDefaultParent())) {
+        const pts = graph.getView().getState(edge)?.absolutePoints;
+        if (!pts || pts.length < 2) continue;
+
+        // La tolérance suit l'épaisseur du trait (en unités modèle, converties
+        // à l'échelle de vue courante) : un trait épais est visuellement plus
+        // large, le clic doit pouvoir toucher n'importe quel point du tracé.
+        const strokeWidth = edge.style?.strokeWidth ?? 1;
+        const tolerance = baseTolerance + (strokeWidth * scale) / 2;
+
+        if (edge.style?.curved && pts.length === 3) {
+            const [p0, p1, p2] = pts;
+            if (!p0 || !p1 || !p2) continue;
+            for (let t = 0; t <= 1; t += 0.05) {
+                const mt = 1 - t;
+                const bx = mt * mt * p0.x + 2 * mt * t * p1.x + t * t * p2.x;
+                const by = mt * mt * p0.y + 2 * mt * t * p1.y + t * t * p2.y;
+                const dist = Math.hypot(bx - x, by - y);
+                if (dist <= tolerance && dist < closestDist) {
+                    closestDist = dist;
+                    closest = edge;
+                }
+            }
+        } else {
+            for (let i = 1; i < pts.length; i++) {
+                const a = pts[i - 1], b = pts[i];
+                if (!a || !b) continue;
+                const dist = distanceToSegment(x, y, a.x, a.y, b.x, b.y);
+                if (dist <= tolerance && dist < closestDist) {
+                    closestDist = dist;
+                    closest = edge;
+                }
+            }
+        }
+    }
+    return closest;
+}
+
 graph.container.addEventListener('contextmenu', (event: MouseEvent) => {
     event.preventDefault();
 
-    const cell = graph.getCellAt(event.offsetX, event.offsetY) as Cell | null;
+    const cell = (graph.getCellAt(event.offsetX, event.offsetY) as Cell | null)
+        ?? findEdgeAt(event.offsetX, event.offsetY);
     if (!cell) return;
 
     if (isBackgroundCell(cell)) {
@@ -414,9 +482,39 @@ document.getElementById('apply-edge-style')?.addEventListener('click', (e) => {
                 s.fixDash = true;
             }
 
-            style.edgeStyle = routingSelect?.value === 'orthogonal'
-                ? 'orthogonalEdgeStyle'
-                : 'straightEdgeStyle';
+            const routing = routingSelect?.value;
+            style.edgeStyle = routing === 'orthogonal' ? 'orthogonalEdgeStyle' : 'straightEdgeStyle';
+
+            if (routing === 'arc') {
+                style.curved = true;
+                // Ne pose le point d'inflexion par défaut, au milieu de l'edge,
+                // que si aucun point n'existe déjà — pour ne jamais déplacer un
+                // arc ou un angle déjà positionné (manuellement ou en arc).
+                const geo = cell.getGeometry()?.clone();
+                const s = cell.source, t = cell.target;
+                if (geo && (!geo.points || geo.points.length === 0) && s && t) {
+                    const cs = modelCenter(s), ct = modelCenter(t);
+                    const mx = (cs.x + ct.x) / 2, my = (cs.y + ct.y) / 2;
+                    const dx = ct.x - cs.x, dy = ct.y - cs.y;
+                    const len = Math.hypot(dx, dy) || 1;
+                    const nx = -dy / len, ny = dx / len;
+                    const offset = 30;
+                    geo.points = [new Point(mx + nx * offset, my + ny * offset)];
+                    cell.setGeometry(geo);
+                }
+            } else {
+                // On ne retire le point que s'il provenait du mode arc :
+                // un angle posé manuellement en mode droit/orthogonal n'est
+                // jamais effacé par un simple changement de routage.
+                if (style.curved) {
+                    const geo = cell.getGeometry()?.clone();
+                    if (geo) {
+                        geo.points = null;
+                        cell.setGeometry(geo);
+                    }
+                }
+                style.curved = false;
+            }
 
             cell.style = style;
             graph.refresh(cell);
@@ -942,24 +1040,14 @@ function refreshParallelEdges(onlyPairs?: Set<string>): void {
         for (const list of groups.values()) {
             const n = list.length;
 
-            if (n <= 1) {
-                // Arête déjà seule entre ces deux sommets : on ne touche pas à sa
-                // géométrie, sinon les points d'inflexion / angles droits placés
-                // manuellement par l'utilisateur seraient effacés à chaque ajout
-                // de nœud ou de lien manquant. On ne remet à plat que les arêtes
-                // qui avaient été mises en arc par cette fonction (style.curved).
-                list.forEach((edge) => {
-                    const style: CellStateStyle = edge.style ?? {};
-                    if (!style.curved) return;
-                    const geo = edge.getGeometry()?.clone();
-                    if (!geo) return;
-                    geo.points = null;
-                    style.curved = false;
-                    edge.style = style;
-                    edge.setGeometry(geo);
-                });
-                continue;
-            }
+            // Arête seule entre ces deux sommets (qu'elle l'ait toujours été ou
+            // qu'elle vienne de le redevenir après suppression d'un lien
+            // parallèle) : on ne touche jamais à sa géométrie ni à son style.
+            // Un arc (style.curved) — automatique ou posé volontairement via le
+            // menu de routage — ne doit jamais perdre son point d'inflexion
+            // pendant l'édition du graphe ; seul un changement explicite de
+            // routage (menu contextuel) peut le retirer.
+            if (n <= 1) continue;
 
             // Groupe de liens parallèles : si l'un d'eux a déjà des points définis
             // (angle/arc chargé depuis la sauvegarde ou posé manuellement), on
@@ -1964,6 +2052,12 @@ function startPhysics(): void {
 }
 
 function stopPhysics(): void {
+    // Toujours resynchroniser physicsEnabled avec l'état réel (bouton relâché),
+    // y compris lors d'un arrêt automatique (stabilisation, interaction
+    // manuelle) : sinon un clic sur l'icône bascule physicsEnabled à false
+    // (rappelant stopPhysics en pure perte) et il faut un second clic pour
+    // relancer réellement le moteur.
+    physicsEnabled = false;
     physicsRunning = false;
     if (physicsRafId !== null) {
         cancelAnimationFrame(physicsRafId);
