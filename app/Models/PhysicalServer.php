@@ -118,7 +118,6 @@ class PhysicalServer extends Model implements HasIconContract, HasPrefix
             ->whereNotNull('description')
             ->whereNotNull('configuration')
             ->whereNotNull('site_id')
-            ->whereNotNull('building_id')
             ->whereNotNull('responsible');
     }
 }

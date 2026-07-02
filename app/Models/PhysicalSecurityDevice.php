@@ -93,7 +93,6 @@ class PhysicalSecurityDevice extends Model implements HasIconContract, HasPrefix
         return $query
             ->whereNotNull('description')
             ->whereNotNull('type')
-            ->whereNotNull('site_id')
-            ->whereNotNull('building_id');
+            ->whereNotNull('site_id');
     }
 }
