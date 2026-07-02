@@ -77,7 +77,6 @@ class Phone extends Model implements HasPrefix
         return $query
             ->whereNotNull('type')
             ->whereNotNull('description')
-            ->whereNotNull('site_id')
-            ->whereNotNull('building_id');
+            ->whereNotNull('site_id');
     }
 }

@@ -108,7 +108,6 @@ class Peripheral extends Model implements HasIconContract, HasPrefix
             ->whereNotNull('type')
             ->whereNotNull('description')
             ->whereNotNull('responsible')
-            ->whereNotNull('site_id')
-            ->whereNotNull('building_id');
+            ->whereNotNull('site_id');
     }
 }
