@@ -63,15 +63,17 @@ plugins:
           nav_translations:
             GETTING STARTED: DÉMARRAGE
             -- Introduction: -- Introduction
-            -- Cartography: -- Cartographie
+            -- Application: -- Application
             -- Features: -- Fonctionnalités
+            -- Cartography: -- Cartographie
+            -- Cartographers: -- Cartographes
             -- Use Cases: -- Cas d'usage
             DATA MODEL: MODÈLE DE DONNÉES
             -- Data Model: -- Modèle de données
             -- Maturity: -- Maturité
             PROCESS & ANALYSIS: PROCESSUS & ANALYSE
+            -- Maps: -- Cartes
             -- BPMN: -- BPMN
-            -- Application: -- Application
             -- Queries: -- Requêtes
             -- Reports: -- Rapports
             API & INTEGRATION: API & INTÉGRATION
@@ -98,14 +100,16 @@ nav:
   - GETTING STARTED:
       - Introduction: index.md
       - -- Cartography: cartography.md
+      - -- Application: application.md
       - -- Features: features.md
+      - -- Cartographers: cartographers.md
       - -- Use Cases: usecases.md
   - DATA MODEL:
       - -- Data Model: model.md
       - -- Maturity: maturity.md
   - PROCESS & ANALYSIS:
+      - -- Maps: maps.md
       - -- BPMN: bpmn.md
-      - -- Application: application.md
       - -- Queries: queries.md
       - -- Reports: reports.md
   - API & INTEGRATION:

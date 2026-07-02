@@ -23,7 +23,7 @@ beforeEach(function () {
         RoleUserTableSeeder::class,
     ]);
 
-    $this->user = User::query()->where('login','admin@admin.com')->first();
+    $this->user = User::query()->where('login', 'admin@admin.com')->first();
     $this->actingAs($this->user);
 
 });
@@ -147,6 +147,28 @@ describe('update', function () {
                 'dest_port' => $destPort,
                 'peripheral_src_id' => $peripheralSrc->id,
                 'peripheral_dest_id' => $peripheralDest->id,
+            ]);
+    });
+
+    test('can update PhysicalLink attributes as array', function () {
+        $physicalLink = PhysicalLink::factory()->create();
+
+        $data = [
+            'src_id' => '',
+            'dest_id' => '',
+            'attributes' => ['fibre', 'redondant'],
+        ];
+
+        $response = $this->put(
+            route('admin.links.update', $physicalLink),
+            $data);
+        $response->assertRedirect(route('admin.links.index'));
+        $response->assertSessionDoesntHaveErrors('attributes');
+
+        $this->assertDatabaseHas('physical_links',
+            [
+                'id' => $physicalLink->id,
+                'attributes' => 'fibre redondant',
             ]);
     });
 });

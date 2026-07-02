@@ -20,7 +20,8 @@ class StorePhysicalLinkRequest extends FormRequest
         return [
             'type' => 'nullable|string|max:255',
             'color' => 'nullable|regex:/^#[0-9a-fA-F]{6}$/',
-            'attributes' => 'nullable|string|max:255',
+            'attributes' => 'nullable|array',
+            'attributes.*' => 'string|max:255',
             'description' => 'nullable|string',
             // Sources
             'peripheral_src_id' => [
