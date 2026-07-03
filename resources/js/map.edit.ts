@@ -22,6 +22,7 @@ import {
     VertexHandler,
     VertexHandlerConfig,
 } from '@maxgraph/core';
+import { downloadGraphSVG } from './svg-export';
 
 //-----------------------------------------------------------------------
 // Interfaces métier
@@ -153,6 +154,27 @@ const _isSelectable = graph.isCellSelectable.bind(graph);
 graph.isCellSelectable = (cell) => !isBackgroundCell(cell) && _isSelectable(cell);
 const _isMovable = graph.isCellMovable.bind(graph);
 graph.isCellMovable = (cell) => !isBackgroundCell(cell) && _isMovable(cell);
+
+// Sélection rectangle (multi-sélection) par-dessus le fond de carte.
+// RubberBandHandler ne démarre normalement que si aucune cellule n'est sous
+// le curseur (`!me.getState()`) — or le fond (isBackground) EST une cellule,
+// et SelectionHandler.mouseDown consomme le mousedown dès qu'une cellule
+// existe (branche isMoveEnabled), même non déplaçable. Résultat : dès qu'un
+// fond d'écran est présent, un clic-gauche sur la carte n'atteint jamais
+// RubberBandHandler et la sélection rectangle ne peut pas démarrer.
+// On force donc le rubberband via isForceRubberbandEvent (comme le fait
+// déjà MaxGraph pour Alt), qui se déclenche en amont de SelectionHandler et
+// PanningHandler et consomme l'événement avant eux. On exclut le clic
+// droit pour laisser le correctif bgPanning (ci-dessous) gérer seul le
+// panoramique sur le fond, sans double appel concurrent.
+const rubberBandHandler = graph.getPlugin<RubberBandHandler>('RubberBandHandler');
+if (rubberBandHandler) {
+    const _isForceRubberbandEvent = rubberBandHandler.isForceRubberbandEvent.bind(rubberBandHandler);
+    rubberBandHandler.isForceRubberbandEvent = (me: InternalMouseEvent) => {
+        if (_isForceRubberbandEvent(me)) return true;
+        return me.getEvent()?.button !== 2 && isBackgroundCell(me.getCell());
+    };
+}
 
 // La taille d'un groupe ne doit jamais être modifiée manuellement (elle est
 // calculée à la création et doit rester cohérente avec son contenu).
@@ -453,7 +475,7 @@ document.getElementById('apply-edge-style')?.addEventListener('click', (e) => {
 
     graph.batchUpdate(() => {
         for (const cell of cells) {
-            const style: CellStateStyle = cell.style ?? {};
+            const style: CellStateStyle = { ...(cell.style ?? {}) };
 
             if (cell.isEdge()) {
                 style.strokeColor = edgeColorSelect!.value;
@@ -516,7 +538,7 @@ document.getElementById('apply-edge-style')?.addEventListener('click', (e) => {
                 style.curved = false;
             }
 
-            cell.style = style;
+            model.setStyle(cell, style);
             graph.refresh(cell);
         }
     });
@@ -529,7 +551,7 @@ document.getElementById('apply-text-style')?.addEventListener('click', (e) => {
     if (!selectedCell || !textFontSelect || !textColorSelect || !textSizeSelect) return;
 
     graph.batchUpdate(() => {
-        const style: CellStateStyle = selectedCell!.style ?? {};
+        const style: CellStateStyle = { ...(selectedCell!.style ?? {}) };
 
         style.fontFamily = textFontSelect!.value;
         style.fontColor = textColorSelect!.value;
@@ -541,7 +563,7 @@ document.getElementById('apply-text-style')?.addEventListener('click', (e) => {
         if (textUnderlineSelect?.classList.contains('selected')) flag |= 4;
         style.fontStyle = flag;
 
-        selectedCell!.style = style;
+        model.setStyle(selectedCell!, style);
 
         // Pour un champ texte libre, la taille de la cellule doit refléter
         // celle du texte (police/taille pouvant changer ses dimensions) —
@@ -1059,7 +1081,7 @@ function refreshParallelEdges(onlyPairs?: Set<string>): void {
             list.forEach((edge, i) => {
                 const geo = edge.getGeometry()?.clone();
                 if (!geo) return;
-                const style: CellStateStyle = edge.style ?? {};
+                const style: CellStateStyle = { ...(edge.style ?? {}) };
                 const cs = modelCenter(edge.source!), ct = modelCenter(edge.target!);
                 const mx = (cs.x + ct.x) / 2, my = (cs.y + ct.y) / 2;
                 const dx = ct.x - cs.x, dy = ct.y - cs.y;
@@ -1068,7 +1090,7 @@ function refreshParallelEdges(onlyPairs?: Set<string>): void {
                 const offset = (i - (n - 1) / 2) * 22;
                 geo.points = [new Point(mx + nx * offset, my + ny * offset)];
                 style.curved = true;
-                edge.style = style;
+                model.setStyle(edge, style);
                 edge.setGeometry(geo);
             });
         }
@@ -1736,10 +1758,10 @@ document.getElementById('update-btn')?.addEventListener('click', () => {
 
                 // Un lien physique conserve sa couleur et son type lors de la mise à jour.
                 cell.value = data.name;
-                const style: CellStateStyle = cell.style ?? {};
+                const style: CellStateStyle = { ...(cell.style ?? {}) };
                 style.strokeColor = data.color ?? '#000000';
                 style.strokeWidth = 2;
-                cell.style = style;
+                model.setStyle(cell, style);
                 return;
             }
             const style = styleOf(cell);
@@ -1761,59 +1783,7 @@ document.getElementById('update-btn')?.addEventListener('click', () => {
 //---------------------------------------------------------------------------
 // Export SVG
 
-const svgElement = graph.container.querySelector('svg') as SVGSVGElement | null;
-
-async function embedImagesInSVG(svg: SVGSVGElement): Promise<void> {
-    const images = Array.from(svg.querySelectorAll('image'));
-    await Promise.all(images.map(async (img) => {
-        const href = img.getAttribute('xlink:href') ?? img.getAttribute('href');
-        if (!href || href.startsWith('data:')) return;
-        try {
-            const response = await fetch(href);
-            const blob = await response.blob();
-            const dataUrl = await new Promise<string>((resolve, reject) => {
-                const reader = new FileReader();
-                reader.onloadend = () => resolve(reader.result as string);
-                reader.onerror = reject;
-                reader.readAsDataURL(blob);
-            });
-            img.setAttribute('href', dataUrl);
-            img.removeAttribute('xlink:href');
-        } catch (err) {
-            console.error('Erreur embed image SVG', err);
-        }
-    }));
-}
-
-async function downloadSVG(): Promise<void> {
-    if (!svgElement) {
-        alert('SVG introuvable');
-        return;
-    }
-
-    await embedImagesInSVG(svgElement);
-
-    const serializer = new XMLSerializer();
-    const svgString = serializer.serializeToString(svgElement);
-    const blob = new Blob([svgString], {type: 'image/svg+xml;charset=utf-8'});
-    const url = URL.createObjectURL(blob);
-
-    const now = new Date();
-    const timestamp =
-        now.getFullYear() +
-        String(now.getMonth() + 1).padStart(2, '0') +
-        String(now.getDate()).padStart(2, '0') +
-        String(now.getHours()).padStart(2, '0') +
-        String(now.getMinutes()).padStart(2, '0');
-
-    const link = document.createElement('a');
-    link.href = url;
-    link.download = `graph-${timestamp}.svg`;
-    link.click();
-    URL.revokeObjectURL(url);
-}
-
-document.getElementById('download-btn')?.addEventListener('click', downloadSVG);
+document.getElementById('download-btn')?.addEventListener('click', () => downloadGraphSVG(graph));
 
 //---------------------------------------------------------------------------
 // Moteur physique (force-directed) start / stop
@@ -2120,9 +2090,9 @@ function setBackground(image: string, w: number, h: number): void {
         const parent = graph.getDefaultParent();
         let bg = model.getCell(BACKGROUND_ID) as Cell | null;
         if (bg) {
-            const style: AppCellStyle = bg.style ?? {};
+            const style: AppCellStyle = { ...(bg.style ?? {}) };
             style.image = image;
-            bg.style = style;
+            model.setStyle(bg, style);
             const geo = bg.getGeometry()?.clone();
             if (geo) {
                 geo.width = w;

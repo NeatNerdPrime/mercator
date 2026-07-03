@@ -7,6 +7,7 @@ import {
     InternalEvent,
     ModelXmlSerializer,
 } from '@maxgraph/core';
+import { downloadGraphSVG } from './svg-export';
 
 //-----------------------------------------------------------------------
 // Interfaces métier
@@ -140,56 +141,4 @@ graph.addMouseListener({
 //---------------------------------------------------------------------------
 // Export SVG
 
-const svgElement = graph.container.querySelector('svg') as SVGSVGElement | null;
-
-async function embedImagesInSVG(svg: SVGSVGElement): Promise<void> {
-    const images = Array.from(svg.querySelectorAll('image'));
-    await Promise.all(images.map(async (img) => {
-        const href = img.getAttribute('xlink:href') ?? img.getAttribute('href');
-        if (!href || href.startsWith('data:')) return;
-        try {
-            const response = await fetch(href);
-            const blob     = await response.blob();
-            const dataUrl  = await new Promise<string>((resolve, reject) => {
-                const reader     = new FileReader();
-                reader.onloadend = () => resolve(reader.result as string);
-                reader.onerror   = reject;
-                reader.readAsDataURL(blob);
-            });
-            img.setAttribute('href', dataUrl);
-            img.removeAttribute('xlink:href');
-        } catch (err) {
-            console.error('Erreur embed image SVG', err);
-        }
-    }));
-}
-
-async function downloadSVG(): Promise<void> {
-    if (!svgElement) {
-        alert('SVG introuvable');
-        return;
-    }
-
-    await embedImagesInSVG(svgElement);
-
-    const serializer = new XMLSerializer();
-    const svgString  = serializer.serializeToString(svgElement);
-    const blob       = new Blob([svgString], { type: 'image/svg+xml;charset=utf-8' });
-    const url        = URL.createObjectURL(blob);
-
-    const now = new Date();
-    const timestamp =
-        now.getFullYear() +
-        String(now.getMonth() + 1).padStart(2, '0') +
-        String(now.getDate()).padStart(2, '0') +
-        String(now.getHours()).padStart(2, '0') +
-        String(now.getMinutes()).padStart(2, '0');
-
-    const link    = document.createElement('a');
-    link.href     = url;
-    link.download = `graph-${timestamp}.svg`;
-    link.click();
-    URL.revokeObjectURL(url);
-}
-
-document.getElementById('download-btn')?.addEventListener('click', downloadSVG);
+document.getElementById('download-btn')?.addEventListener('click', () => downloadGraphSVG(graph));

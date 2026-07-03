@@ -40,6 +40,10 @@
       "_chart-CNK8zqEL.js"
     ]
   },
+  "_svg-export-D_1j75ll.js": {
+    "file": "assets/svg-export-D_1j75ll.js",
+    "name": "svg-export"
+  },
   "node_modules/bootstrap-icons/font/fonts/bootstrap-icons.woff": {
     "file": "assets/bootstrap-icons-BeopsB42.woff",
     "src": "node_modules/bootstrap-icons/font/fonts/bootstrap-icons.woff"
@@ -129,22 +133,24 @@
     "isEntry": true
   },
   "resources/js/map.edit.ts": {
-    "file": "assets/map.edit-CTUWmFxf.js",
+    "file": "assets/map.edit--sLIKRDB.js",
     "name": "map.edit",
     "src": "resources/js/map.edit.ts",
     "isEntry": true,
     "imports": [
       "_ModelXmlSerializer-Vsuvejvr.js",
-      "_UndoManager-Cv60WtBm.js"
+      "_UndoManager-Cv60WtBm.js",
+      "_svg-export-D_1j75ll.js"
     ]
   },
   "resources/js/map.show.ts": {
-    "file": "assets/map.show-DWdeeFMB.js",
+    "file": "assets/map.show-CFweePMW.js",
     "name": "map.show",
     "src": "resources/js/map.show.ts",
     "isEntry": true,
     "imports": [
-      "_ModelXmlSerializer-Vsuvejvr.js"
+      "_ModelXmlSerializer-Vsuvejvr.js",
+      "_svg-export-D_1j75ll.js"
     ]
   },
   "resources/js/sql-parser.js": {
