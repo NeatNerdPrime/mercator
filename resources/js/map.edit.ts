@@ -453,7 +453,7 @@ document.getElementById('apply-edge-style')?.addEventListener('click', (e) => {
 
     graph.batchUpdate(() => {
         for (const cell of cells) {
-            const style: CellStateStyle = cell.style ?? {};
+            const style: CellStateStyle = { ...(cell.style ?? {}) };
 
             if (cell.isEdge()) {
                 style.strokeColor = edgeColorSelect!.value;
@@ -516,7 +516,7 @@ document.getElementById('apply-edge-style')?.addEventListener('click', (e) => {
                 style.curved = false;
             }
 
-            cell.style = style;
+            model.setStyle(cell, style);
             graph.refresh(cell);
         }
     });
@@ -529,7 +529,7 @@ document.getElementById('apply-text-style')?.addEventListener('click', (e) => {
     if (!selectedCell || !textFontSelect || !textColorSelect || !textSizeSelect) return;
 
     graph.batchUpdate(() => {
-        const style: CellStateStyle = selectedCell!.style ?? {};
+        const style: CellStateStyle = { ...(selectedCell!.style ?? {}) };
 
         style.fontFamily = textFontSelect!.value;
         style.fontColor = textColorSelect!.value;
@@ -541,7 +541,7 @@ document.getElementById('apply-text-style')?.addEventListener('click', (e) => {
         if (textUnderlineSelect?.classList.contains('selected')) flag |= 4;
         style.fontStyle = flag;
 
-        selectedCell!.style = style;
+        model.setStyle(selectedCell!, style);
 
         // Pour un champ texte libre, la taille de la cellule doit refléter
         // celle du texte (police/taille pouvant changer ses dimensions) —
@@ -1059,7 +1059,7 @@ function refreshParallelEdges(onlyPairs?: Set<string>): void {
             list.forEach((edge, i) => {
                 const geo = edge.getGeometry()?.clone();
                 if (!geo) return;
-                const style: CellStateStyle = edge.style ?? {};
+                const style: CellStateStyle = { ...(edge.style ?? {}) };
                 const cs = modelCenter(edge.source!), ct = modelCenter(edge.target!);
                 const mx = (cs.x + ct.x) / 2, my = (cs.y + ct.y) / 2;
                 const dx = ct.x - cs.x, dy = ct.y - cs.y;
@@ -1068,7 +1068,7 @@ function refreshParallelEdges(onlyPairs?: Set<string>): void {
                 const offset = (i - (n - 1) / 2) * 22;
                 geo.points = [new Point(mx + nx * offset, my + ny * offset)];
                 style.curved = true;
-                edge.style = style;
+                model.setStyle(edge, style);
                 edge.setGeometry(geo);
             });
         }
@@ -1736,10 +1736,10 @@ document.getElementById('update-btn')?.addEventListener('click', () => {
 
                 // Un lien physique conserve sa couleur et son type lors de la mise à jour.
                 cell.value = data.name;
-                const style: CellStateStyle = cell.style ?? {};
+                const style: CellStateStyle = { ...(cell.style ?? {}) };
                 style.strokeColor = data.color ?? '#000000';
                 style.strokeWidth = 2;
-                cell.style = style;
+                model.setStyle(cell, style);
                 return;
             }
             const style = styleOf(cell);
@@ -2120,9 +2120,9 @@ function setBackground(image: string, w: number, h: number): void {
         const parent = graph.getDefaultParent();
         let bg = model.getCell(BACKGROUND_ID) as Cell | null;
         if (bg) {
-            const style: AppCellStyle = bg.style ?? {};
+            const style: AppCellStyle = { ...(bg.style ?? {}) };
             style.image = image;
-            bg.style = style;
+            model.setStyle(bg, style);
             const geo = bg.getGeometry()?.clone();
             if (geo) {
                 geo.width = w;
