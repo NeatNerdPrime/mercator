@@ -154,6 +154,27 @@ graph.isCellSelectable = (cell) => !isBackgroundCell(cell) && _isSelectable(cell
 const _isMovable = graph.isCellMovable.bind(graph);
 graph.isCellMovable = (cell) => !isBackgroundCell(cell) && _isMovable(cell);
 
+// Sélection rectangle (multi-sélection) par-dessus le fond de carte.
+// RubberBandHandler ne démarre normalement que si aucune cellule n'est sous
+// le curseur (`!me.getState()`) — or le fond (isBackground) EST une cellule,
+// et SelectionHandler.mouseDown consomme le mousedown dès qu'une cellule
+// existe (branche isMoveEnabled), même non déplaçable. Résultat : dès qu'un
+// fond d'écran est présent, un clic-gauche sur la carte n'atteint jamais
+// RubberBandHandler et la sélection rectangle ne peut pas démarrer.
+// On force donc le rubberband via isForceRubberbandEvent (comme le fait
+// déjà MaxGraph pour Alt), qui se déclenche en amont de SelectionHandler et
+// PanningHandler et consomme l'événement avant eux. On exclut le clic
+// droit pour laisser le correctif bgPanning (ci-dessous) gérer seul le
+// panoramique sur le fond, sans double appel concurrent.
+const rubberBandHandler = graph.getPlugin<RubberBandHandler>('RubberBandHandler');
+if (rubberBandHandler) {
+    const _isForceRubberbandEvent = rubberBandHandler.isForceRubberbandEvent.bind(rubberBandHandler);
+    rubberBandHandler.isForceRubberbandEvent = (me: InternalMouseEvent) => {
+        if (_isForceRubberbandEvent(me)) return true;
+        return me.getEvent()?.button !== 2 && isBackgroundCell(me.getCell());
+    };
+}
+
 // La taille d'un groupe ne doit jamais être modifiée manuellement (elle est
 // calculée à la création et doit rester cohérente avec son contenu).
 const _isResizable = graph.isCellResizable.bind(graph);
