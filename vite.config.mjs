@@ -34,8 +34,8 @@ export default defineConfig({
                 'resources/js/graphviz.js',
                 'resources/js/vis-network.js',
                 // Maps
-                'resources/js/map.show.ts',
-                'resources/js/map.edit.ts',
+                'resources/graphs/map.show.ts',
+                'resources/graphs/map.edit.ts',
                 // BPMN (ex-package autonome)
                 'resources/BPMN/bpmn.ts',
                 'resources/BPMN/bpmn-show.ts',

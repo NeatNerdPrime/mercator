@@ -498,6 +498,6 @@
         });
     </script>
 
-    @vite('resources/js/map.edit.ts')
+    @vite('resources/graphs/map.edit.ts')
 
 @endsection
