@@ -24,10 +24,10 @@ export default defineConfig({
                 'resources/js/app.js',
                 'resources/css/app.css',
                 // Charts
-                'resources/js/chart-home.js',
-                'resources/js/chart-maturity.js',
-                'resources/js/chart-relation.js',
-                'resources/js/chart-patching.js',
+                'resources/charts/chart-home.js',
+                'resources/charts/chart-maturity.js',
+                'resources/charts/chart-relation.js',
+                'resources/charts/chart-patching.js',
                 // Mapping
                 'resources/css/mapping.css',
                 // D3 / Viz

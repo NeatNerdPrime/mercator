@@ -530,7 +530,7 @@ window.chartData = {
 };
 </script>
 
-@vite(['resources/js/chart-maturity.js'])
+@vite(['resources/charts/chart-maturity.js'])
 
 @endsection
 

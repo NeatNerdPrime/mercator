@@ -453,7 +453,7 @@ var topTags = [
 
 </script>
 
-@vite(['resources/js/chart-home.js'])
+@vite(['resources/charts/chart-home.js'])
 
 @parent
 @endsection

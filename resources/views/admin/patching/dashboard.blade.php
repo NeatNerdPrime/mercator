@@ -359,5 +359,5 @@ document.addEventListener("DOMContentLoaded", function () {
 });
 
 </script>
-@vite(['resources/js/chart-patching.js'])
+@vite(['resources/charts/chart-patching.js'])
 @endsection
