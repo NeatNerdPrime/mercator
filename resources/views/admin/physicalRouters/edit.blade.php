@@ -183,3 +183,11 @@
         </div>
     </form>
 @endsection
+
+@section('scripts')
+    @parent
+    @include('partials.location-cascade', [
+        'buildingSiteMap' => $buildingSiteMap,
+        'bayBuildingMap' => $bayBuildingMap ?? null,
+    ])
+@endsection
