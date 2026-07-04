@@ -55,6 +55,8 @@ class PeripheralController extends Controller
         $entities = Entity::all()->sortBy('name')->pluck('name', 'id');
         $applications = Application::all()->sortBy('name')->pluck('name', 'id');
         $icons = Peripheral::select('icon_id')->whereNotNull('icon_id')->orderBy('icon_id')->distinct()->pluck('icon_id');
+        $buildingSiteMap = Building::pluck('site_id', 'id');
+        $bayBuildingMap = Bay::pluck('building_id', 'id');
 
         // lists
         $type_list = Peripheral::select('type')->where('type', '<>', null)->distinct()->orderBy('type')->pluck('type');
@@ -67,6 +69,8 @@ class PeripheralController extends Controller
                 'sites',
                 'buildings',
                 'bays',
+                'buildingSiteMap',
+                'bayBuildingMap',
                 'entities',
                 'applications',
                 'icons',
@@ -87,6 +91,8 @@ class PeripheralController extends Controller
         $entities = Entity::query()->orderBy('name')->pluck('name', 'id');
         $applications = Application::query()->orderBy('name')->pluck('name', 'id');
         $icons = Peripheral::query()->select('icon_id')->whereNotNull('icon_id')->orderBy('icon_id')->distinct()->pluck('icon_id');
+        $buildingSiteMap = Building::pluck('site_id', 'id');
+        $bayBuildingMap = Bay::pluck('building_id', 'id');
 
         // lists
         $type_list = Peripheral::query()->select('type')->where('type', '<>', null)->distinct()->orderBy('type')->pluck('type');
@@ -109,6 +115,8 @@ class PeripheralController extends Controller
                 'sites',
                 'buildings',
                 'bays',
+                'buildingSiteMap',
+                'bayBuildingMap',
                 'entities',
                 'applications',
                 'icons',
@@ -147,6 +155,8 @@ class PeripheralController extends Controller
         $entities = Entity::all()->sortBy('name')->pluck('name', 'id');
         $applications = Application::all()->sortBy('name')->pluck('name', 'id');
         $icons = Peripheral::select('icon_id')->whereNotNull('icon_id')->orderBy('icon_id')->distinct()->pluck('icon_id');
+        $buildingSiteMap = Building::pluck('site_id', 'id');
+        $bayBuildingMap = Bay::pluck('building_id', 'id');
 
         // lists
         $type_list = Peripheral::select('type')->where('type', '<>', null)->distinct()->orderBy('type')->pluck('type');
@@ -161,6 +171,8 @@ class PeripheralController extends Controller
                 'sites',
                 'buildings',
                 'bays',
+                'buildingSiteMap',
+                'bayBuildingMap',
                 'entities',
                 'applications',
                 'icons',

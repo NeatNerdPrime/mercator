@@ -49,13 +49,15 @@ class StorageDeviceController extends Controller
         $sites = Site::all()->sortBy('name')->pluck('name', 'id')->prepend(trans('global.pleaseSelect'), '');
         $buildings = Building::all()->sortBy('name')->pluck('name', 'id')->prepend(trans('global.pleaseSelect'), '');
         $bays = Bay::all()->sortBy('name')->pluck('name', 'id')->prepend(trans('global.pleaseSelect'), '');
+        $buildingSiteMap = Building::pluck('site_id', 'id');
+        $bayBuildingMap = Bay::pluck('building_id', 'id');
         $logicalServers = LogicalServer::query()->orderBy('name')->pluck('name', 'id');
 
         $type_list = StorageDevice::select('type')->where('type', '<>', null)->distinct()->orderBy('type')->pluck('type');
 
         return view(
             'admin.storageDevices.create',
-            compact('sites', 'buildings', 'bays', 'type_list', 'logicalServers')
+            compact('sites', 'buildings', 'bays', 'buildingSiteMap', 'bayBuildingMap', 'type_list', 'logicalServers')
         );
     }
 
@@ -78,6 +80,8 @@ class StorageDeviceController extends Controller
         $sites = Site::all()->sortBy('name')->pluck('name', 'id')->prepend(trans('global.pleaseSelect'), '');
         $buildings = Building::all()->sortBy('name')->pluck('name', 'id')->prepend(trans('global.pleaseSelect'), '');
         $bays = Bay::all()->sortBy('name')->pluck('name', 'id')->prepend(trans('global.pleaseSelect'), '');
+        $buildingSiteMap = Building::pluck('site_id', 'id');
+        $bayBuildingMap = Bay::pluck('building_id', 'id');
         $logicalServers = LogicalServer::query()->orderBy('name')->pluck('name', 'id');
 
         $type_list = StorageDevice::select('type')->where('type', '<>', null)->distinct()->orderBy('type')->pluck('type');
@@ -86,7 +90,7 @@ class StorageDeviceController extends Controller
 
         return view(
             'admin.storageDevices.edit',
-            compact('sites', 'buildings', 'bays', 'type_list', 'storageDevice', 'logicalServers')
+            compact('sites', 'buildings', 'bays', 'buildingSiteMap', 'bayBuildingMap', 'type_list', 'storageDevice', 'logicalServers')
         );
     }
 

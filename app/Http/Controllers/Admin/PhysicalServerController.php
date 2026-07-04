@@ -57,6 +57,8 @@ class PhysicalServerController extends Controller
         $bays = Bay::all()->sortBy('name')->pluck('name', 'id');
         $clusters = Cluster::all()->sortBy('name')->pluck('name', 'id');
         $icons = PhysicalServer::select('icon_id')->whereNotNull('icon_id')->orderBy('icon_id')->distinct()->pluck('icon_id');
+        $buildingSiteMap = Building::pluck('site_id', 'id');
+        $bayBuildingMap = Bay::pluck('building_id', 'id');
 
         // List
         $application_list = Application::orderBy('name')->pluck('name', 'id');
@@ -73,6 +75,8 @@ class PhysicalServerController extends Controller
                 'bays',
                 'clusters',
                 'icons',
+                'buildingSiteMap',
+                'bayBuildingMap',
                 'application_list',
                 'operating_system_list',
                 'responsible_list',
@@ -91,6 +95,8 @@ class PhysicalServerController extends Controller
         $bays = Bay::all()->sortBy('name')->pluck('name', 'id');
         $clusters = Cluster::all()->sortBy('name')->pluck('name', 'id');
         $icons = PhysicalServer::select('icon_id')->whereNotNull('icon_id')->orderBy('icon_id')->distinct()->pluck('icon_id');
+        $buildingSiteMap = Building::pluck('site_id', 'id');
+        $bayBuildingMap = Bay::pluck('building_id', 'id');
 
         // List
         $application_list = Application::orderBy('name')->pluck('name', 'id');
@@ -119,6 +125,8 @@ class PhysicalServerController extends Controller
                 'bays',
                 'icons',
                 'clusters',
+                'buildingSiteMap',
+                'bayBuildingMap',
                 'application_list',
                 'operating_system_list',
                 'responsible_list',
@@ -155,6 +163,8 @@ class PhysicalServerController extends Controller
         $bays = Bay::all()->sortBy('name')->pluck('name', 'id');
         $clusters = Cluster::all()->sortBy('name')->pluck('name', 'id');
         $icons = PhysicalServer::select('icon_id')->whereNotNull('icon_id')->orderBy('icon_id')->distinct()->pluck('icon_id');
+        $buildingSiteMap = Building::pluck('site_id', 'id');
+        $bayBuildingMap = Bay::pluck('building_id', 'id');
 
         // List
         $operating_system_list = PhysicalServer::select('operating_system')->where('operating_system', '<>', null)->distinct()->orderBy('operating_system')->pluck('operating_system');
@@ -173,6 +183,8 @@ class PhysicalServerController extends Controller
                 'bays',
                 'clusters',
                 'icons',
+                'buildingSiteMap',
+                'bayBuildingMap',
                 'application_list',
                 'logical_server_list',
                 'responsible_list',

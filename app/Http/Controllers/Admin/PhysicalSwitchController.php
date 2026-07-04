@@ -54,6 +54,8 @@ class PhysicalSwitchController extends Controller
         $sites = Site::all()->sortBy('name')->pluck('name', 'id')->prepend(trans('global.pleaseSelect'), '');
         $buildings = Building::all()->sortBy('name')->pluck('name', 'id')->prepend(trans('global.pleaseSelect'), '');
         $bays = Bay::all()->sortBy('name')->pluck('name', 'id')->prepend(trans('global.pleaseSelect'), '');
+        $buildingSiteMap = Building::pluck('site_id', 'id');
+        $bayBuildingMap = Bay::pluck('building_id', 'id');
 
         // NetworkSwitches
         $networkSwitches = NetworkSwitch::all()->sortBy('name')->pluck('name', 'id');
@@ -63,7 +65,7 @@ class PhysicalSwitchController extends Controller
 
         return view(
             'admin.physicalSwitches.create',
-            compact('icons', 'sites', 'buildings', 'bays', 'networkSwitches', 'type_list')
+            compact('icons', 'sites', 'buildings', 'bays', 'buildingSiteMap', 'bayBuildingMap', 'networkSwitches', 'type_list')
         );
     }
 
@@ -78,6 +80,8 @@ class PhysicalSwitchController extends Controller
         $sites = Site::all()->sortBy('name')->pluck('name', 'id')->prepend(trans('global.pleaseSelect'), '');
         $buildings = Building::all()->sortBy('name')->pluck('name', 'id')->prepend(trans('global.pleaseSelect'), '');
         $bays = Bay::all()->sortBy('name')->pluck('name', 'id')->prepend(trans('global.pleaseSelect'), '');
+        $buildingSiteMap = Building::pluck('site_id', 'id');
+        $bayBuildingMap = Bay::pluck('building_id', 'id');
 
         // NetworkSwitches
         $networkSwitches = NetworkSwitch::all()->sortBy('name')->pluck('name', 'id');
@@ -97,7 +101,7 @@ class PhysicalSwitchController extends Controller
 
         return view(
             'admin.physicalSwitches.create',
-            compact('icons', 'sites', 'buildings', 'bays', 'networkSwitches', 'type_list')
+            compact('icons', 'sites', 'buildings', 'bays', 'buildingSiteMap', 'bayBuildingMap', 'networkSwitches', 'type_list')
         );
     }
 
@@ -125,6 +129,8 @@ class PhysicalSwitchController extends Controller
         $sites = Site::all()->sortBy('name')->pluck('name', 'id')->prepend(trans('global.pleaseSelect'), '');
         $buildings = Building::all()->sortBy('name')->pluck('name', 'id')->prepend(trans('global.pleaseSelect'), '');
         $bays = Bay::all()->sortBy('name')->pluck('name', 'id')->prepend(trans('global.pleaseSelect'), '');
+        $buildingSiteMap = Building::pluck('site_id', 'id');
+        $bayBuildingMap = Bay::pluck('building_id', 'id');
 
         // NetworkSwitches
         $networkSwitches = NetworkSwitch::all()->sortBy('name')->pluck('name', 'id');
@@ -136,7 +142,7 @@ class PhysicalSwitchController extends Controller
 
         return view(
             'admin.physicalSwitches.edit',
-            compact('icons', 'sites', 'buildings', 'bays', 'physicalSwitch', 'networkSwitches', 'type_list')
+            compact('icons', 'sites', 'buildings', 'bays', 'buildingSiteMap', 'bayBuildingMap', 'physicalSwitch', 'networkSwitches', 'type_list')
         );
     }
 

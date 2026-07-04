@@ -49,6 +49,8 @@ class PhysicalRouterController extends Controller
         $buildings = Building::all()->sortBy('name')->pluck('name', 'id');
         $bays = Bay::all()->sortBy('name')->pluck('name', 'id');
         $routers = Router::all()->sortBy('name')->pluck('name', 'id');
+        $buildingSiteMap = Building::pluck('site_id', 'id');
+        $bayBuildingMap = Bay::pluck('building_id', 'id');
 
         $vlans = Vlan::all()->sortBy('name')->pluck('name', 'id');
 
@@ -56,7 +58,7 @@ class PhysicalRouterController extends Controller
 
         return view(
             'admin.physicalRouters.create',
-            compact('sites', 'buildings', 'bays', 'routers', 'vlans', 'type_list')
+            compact('sites', 'buildings', 'bays', 'buildingSiteMap', 'bayBuildingMap', 'routers', 'vlans', 'type_list')
         );
     }
 
@@ -68,6 +70,8 @@ class PhysicalRouterController extends Controller
         $buildings = Building::all()->sortBy('name')->pluck('name', 'id');
         $bays = Bay::all()->sortBy('name')->pluck('name', 'id');
         $routers = Router::all()->sortBy('name')->pluck('name', 'id');
+        $buildingSiteMap = Building::pluck('site_id', 'id');
+        $bayBuildingMap = Bay::pluck('building_id', 'id');
 
         $vlans = Vlan::all()->sortBy('name')->pluck('name', 'id');
 
@@ -86,7 +90,7 @@ class PhysicalRouterController extends Controller
 
         return view(
             'admin.physicalRouters.create',
-            compact('sites', 'buildings', 'bays', 'routers', 'vlans', 'type_list')
+            compact('sites', 'buildings', 'bays', 'buildingSiteMap', 'bayBuildingMap', 'routers', 'vlans', 'type_list')
         );
     }
 
@@ -108,6 +112,8 @@ class PhysicalRouterController extends Controller
         $bays = Bay::all()->sortBy('name')->pluck('name', 'id');
         $vlans = Vlan::all()->sortBy('name')->pluck('name', 'id');
         $routers = Router::all()->sortBy('name')->pluck('name', 'id');
+        $buildingSiteMap = Building::pluck('site_id', 'id');
+        $bayBuildingMap = Bay::pluck('building_id', 'id');
 
         $type_list = PhysicalRouter::select('type')->where('type', '<>', null)->distinct()->orderBy('type')->pluck('type');
 
@@ -115,7 +121,7 @@ class PhysicalRouterController extends Controller
 
         return view(
             'admin.physicalRouters.edit',
-            compact('sites', 'buildings', 'bays', 'vlans', 'physicalRouter', 'routers', 'type_list')
+            compact('sites', 'buildings', 'bays', 'buildingSiteMap', 'bayBuildingMap', 'vlans', 'physicalRouter', 'routers', 'type_list')
         );
     }
 
