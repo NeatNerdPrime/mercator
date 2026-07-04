@@ -106,7 +106,7 @@
                     <div class="row">
                         <div class="col-md-6">
                             <div class="form-group">
-                                <label for="site_id">{{ trans('cruds.building.fields.site') }}</label>
+                                <label class="label-maturity-1" for="site_id">{{ trans('cruds.building.fields.site') }}</label>
                                 <select class="form-control select2 {{ $errors->has('site') ? 'is-invalid' : '' }}"
                                         name="site_id"
                                         id="site_id">
