@@ -8,5 +8,5 @@
     "esModuleInterop": true,
     "skipLibCheck": true
   },
-  "include": ["resources/ts/*.ts"]
+  "include": ["resources/BPMN/*.ts"]
 }

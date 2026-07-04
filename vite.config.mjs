@@ -37,8 +37,8 @@ export default defineConfig({
                 'resources/js/map.show.ts',
                 'resources/js/map.edit.ts',
                 // BPMN (ex-package autonome)
-                'resources/ts/bpmn.ts',
-                'resources/ts/bpmn-show.ts',
+                'resources/BPMN/bpmn.ts',
+                'resources/BPMN/bpmn-show.ts',
                 // Parser
                 'resources/js/sql-parser.js',
             ],
@@ -58,7 +58,6 @@ export default defineConfig({
         dedupe: ['chart.js'],
         alias: {
             '@': '/resources/js',
-            '@ts': path.resolve(__dirname, 'resources/ts'), // imports BPMN
             '@sourcentis/chartjs-gauge': path.resolve(
                 __dirname,
                 'vendor/sourcentis/chartjs-gauge/js/index.js'
