@@ -10,7 +10,7 @@
       - baie choisie       → bâtiment et site auto-sélectionnés
 --}}
 <script>
-    (function () {
+    document.addEventListener('DOMContentLoaded', function () {
         'use strict';
 
         const buildingSiteMap = @json($buildingSiteMap);
@@ -143,7 +143,7 @@
         // État initial : édition ou old() après erreur de validation.
         // On part des valeurs présentes et on les complète vers le haut
         // (une baie renseignée implique bâtiment et site).
-        $(function () {
+        (function initialRender() {
             let site = val($site);
             let building = val($building);
             let bay = hasBay ? val($bay) : '';
@@ -154,6 +154,6 @@
                 site = String(buildingSiteMap[building] ?? '');
             }
             render({ site: site, building: building, bay: bay });
-        });
-    })();
+        })();
+    });
 </script>
