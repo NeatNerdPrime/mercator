@@ -100,7 +100,7 @@ suivants :
 | **Infrastructure physique**      |        |                                                                                                        |
 | Sites                            | 1      | Description                                                                                            |
 | Buildings                        | 1      | Description, site                                                                                      |
-| Baies                            | 1      | Description                                                                                            |
+| Baies                            | 1      | Description, site, building                                                                                            |
 | Serveurs physique                | 1      | Description, configuration, site, building, responsable                                                |
 | Poste de travail                 | 1      | Description, site, building                                                                            |
 | Téléphones                       | 1      | Description, site, building                                                                            |
