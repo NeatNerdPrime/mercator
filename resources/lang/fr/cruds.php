@@ -314,6 +314,8 @@ return [
         ],
         'errors' => [
             'cycle_detected' => 'Cette opération créerait une boucle dans la hiérarchie des bâtiments. Un bâtiment ne peut pas être son propre parent, direct ou indirect.',
+            'parent_different_site' => 'Le bâtiment / salle parent doit se trouver sur le même site.',
+            'children_different_site' => 'Les bâtiments / salles enfant doivent se trouver sur le même site.',
         ],
         'title' => 'Bâtiments / Salles',
         'title_singular' => 'Bâtiment / Salle',

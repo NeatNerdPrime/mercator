@@ -179,3 +179,10 @@
         </div>
     </form>
 @endsection
+
+@section('scripts')
+    @parent
+    @include('admin.buildings._site-scope-filter', [
+        'buildingSiteMap' => $buildingSiteMap,
+    ])
+@endsection
