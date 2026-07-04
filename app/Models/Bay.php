@@ -109,6 +109,9 @@ class Bay extends Model implements HasPrefix, HasIconContract
     /** @param Builder<static> $query */
     public function scopeMaturityLevel1(Builder $query): Builder
     {
-        return $query->whereNotNull('description');
+        return $query
+            ->whereNotNull('description')
+            ->whereNotNull('site_id')
+            ->whereNotNull('building_id');
     }
 }

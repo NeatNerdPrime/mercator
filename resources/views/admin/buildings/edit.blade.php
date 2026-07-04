@@ -107,7 +107,7 @@
                     </div>
                 </div>
                 <div class="row">
-                    <div class="col-md-6">
+                    <div class="col-md-4">
                         <div class="form-group">
                             <label class="label-maturity-1" for="site_id">{{ trans('cruds.building.fields.site') }}</label>
                             <select class="form-control select2 {{ $errors->has('site') ? 'is-invalid' : '' }}"
@@ -126,7 +126,7 @@
                             <span class="help-block">{{ trans('cruds.building.fields.site_helper') }}</span>
                         </div>
                     </div>
-                    <div class="col-md-6">
+                    <div class="col-md-4">
                         <div class="form-group">
                             <label for="building_id">{{ trans('cruds.building.fields.parent') }}</label>
                             <select class="form-control select2 {{ $errors->has('building') ? 'is-invalid' : '' }}"

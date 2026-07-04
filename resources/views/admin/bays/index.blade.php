@@ -48,7 +48,9 @@
                     @foreach($bays as $bay)
                         <tr data-entry-id="{{ $bay->id }}"
                             @if(
-                                ($bay->description===null)
+                                ($bay->description===null)||
+                                ($bay->site_id===null)||
+                                ($bay->building_id===null)
                                 )
                                 class="table-warning"
                                 @endif
