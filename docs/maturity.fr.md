@@ -99,7 +99,7 @@ suivants :
 | Certificats                      | 2      | Description, Type, date de début de validité, date de fin de validité, applications ou serveur logique |
 | **Infrastructure physique**      |        |                                                                                                        |
 | Sites                            | 1      | Description                                                                                            |
-| Buildings                        | 1      | Description                                                                                            |
+| Buildings                        | 1      | Description, site                                                                                      |
 | Baies                            | 1      | Description                                                                                            |
 | Serveurs physique                | 1      | Description, configuration, site, building, responsable                                                |
 | Poste de travail                 | 1      | Description, site, building                                                                            |
