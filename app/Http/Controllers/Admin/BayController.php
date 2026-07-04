@@ -61,8 +61,9 @@ class BayController extends Controller
 
         $sites = Site::all()->sortBy('name')->pluck('name', 'id');
         $buildings = Building::all()->sortBy('name')->pluck('name', 'id');
+        $buildingSiteMap = Building::pluck('site_id', 'id');
 
-        return view('admin.bays.create', compact('sites', 'buildings'));
+        return view('admin.bays.create', compact('sites', 'buildings', 'buildingSiteMap'));
     }
 
     /**
@@ -80,11 +81,12 @@ class BayController extends Controller
 
         $sites = Site::all()->sortBy('name')->pluck('name', 'id');
         $buildings = Building::all()->sortBy('name')->pluck('name', 'id');
+        $buildingSiteMap = Building::pluck('site_id', 'id');
 
         $request->merge($bay->only($bay->getFillable()));
         $request->flash();
 
-        return view('admin.bays.create', compact('sites', 'buildings'));
+        return view('admin.bays.create', compact('sites', 'buildings', 'buildingSiteMap'));
     }
 
     /**
@@ -112,10 +114,11 @@ class BayController extends Controller
 
         $sites = Site::all()->sortBy('name')->pluck('name', 'id');
         $buildings = Building::all()->sortBy('name')->pluck('name', 'id');
+        $buildingSiteMap = Building::pluck('site_id', 'id');
 
         $bay->load('site', 'building');
 
-        return view('admin.bays.edit', compact('sites', 'buildings', 'bay'));
+        return view('admin.bays.edit', compact('sites', 'buildings', 'buildingSiteMap', 'bay'));
     }
 
     /**

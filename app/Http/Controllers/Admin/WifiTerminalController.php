@@ -44,12 +44,13 @@ class WifiTerminalController extends Controller
 
         $sites = Site::all()->sortBy('name')->pluck('name', 'id')->prepend(trans('global.pleaseSelect'), '');
         $buildings = Building::all()->sortBy('name')->pluck('name', 'id')->prepend(trans('global.pleaseSelect'), '');
+        $buildingSiteMap = Building::pluck('site_id', 'id');
 
         $type_list = WifiTerminal::select('type')->where('type', '<>', null)->distinct()->orderBy('type')->pluck('type');
 
         return view(
             'admin.wifiTerminals.create',
-            compact('type_list', 'sites', 'buildings')
+            compact('type_list', 'sites', 'buildings', 'buildingSiteMap')
         );
     }
 
@@ -59,6 +60,7 @@ class WifiTerminalController extends Controller
 
         $sites = Site::all()->sortBy('name')->pluck('name', 'id')->prepend(trans('global.pleaseSelect'), '');
         $buildings = Building::all()->sortBy('name')->pluck('name', 'id')->prepend(trans('global.pleaseSelect'), '');
+        $buildingSiteMap = Building::pluck('site_id', 'id');
 
         $type_list = WifiTerminal::select('type')->where('type', '<>', null)->distinct()->orderBy('type')->pluck('type');
 
@@ -73,7 +75,7 @@ class WifiTerminalController extends Controller
 
         return view(
             'admin.wifiTerminals.create',
-            compact('type_list', 'sites', 'buildings')
+            compact('type_list', 'sites', 'buildings', 'buildingSiteMap')
         );
     }
 
@@ -90,6 +92,7 @@ class WifiTerminalController extends Controller
 
         $sites = Site::all()->sortBy('name')->pluck('name', 'id')->prepend(trans('global.pleaseSelect'), '');
         $buildings = Building::all()->sortBy('name')->pluck('name', 'id')->prepend(trans('global.pleaseSelect'), '');
+        $buildingSiteMap = Building::pluck('site_id', 'id');
 
         $type_list = WifiTerminal::select('type')->where('type', '<>', null)->distinct()->orderBy('type')->pluck('type');
 
@@ -97,7 +100,7 @@ class WifiTerminalController extends Controller
 
         return view(
             'admin.wifiTerminals.edit',
-            compact('sites', 'buildings', 'wifiTerminal', 'type_list')
+            compact('sites', 'buildings', 'buildingSiteMap', 'wifiTerminal', 'type_list')
         );
     }
 

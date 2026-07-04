@@ -44,12 +44,13 @@ class PhoneController extends Controller
 
         $sites = Site::all()->sortBy('name')->pluck('name', 'id')->prepend(trans('global.pleaseSelect'), '');
         $buildings = Building::all()->sortBy('name')->pluck('name', 'id')->prepend(trans('global.pleaseSelect'), '');
+        $buildingSiteMap = Building::pluck('site_id', 'id');
 
         $type_list = Phone::select('type')->where('type', '<>', null)->distinct()->orderBy('type')->pluck('type');
 
         return view(
             'admin.phones.create',
-            compact('sites', 'buildings', 'type_list')
+            compact('sites', 'buildings', 'buildingSiteMap', 'type_list')
         );
     }
 
@@ -59,6 +60,7 @@ class PhoneController extends Controller
 
         $sites = Site::all()->sortBy('name')->pluck('name', 'id')->prepend(trans('global.pleaseSelect'), '');
         $buildings = Building::all()->sortBy('name')->pluck('name', 'id')->prepend(trans('global.pleaseSelect'), '');
+        $buildingSiteMap = Building::pluck('site_id', 'id');
 
         $type_list = Phone::select('type')->where('type', '<>', null)->distinct()->orderBy('type')->pluck('type');
 
@@ -73,7 +75,7 @@ class PhoneController extends Controller
 
         return view(
             'admin.phones.create',
-            compact('sites', 'buildings', 'type_list')
+            compact('sites', 'buildings', 'buildingSiteMap', 'type_list')
         );
     }
 
@@ -90,6 +92,7 @@ class PhoneController extends Controller
 
         $sites = Site::all()->sortBy('name')->pluck('name', 'id')->prepend(trans('global.pleaseSelect'), '');
         $buildings = Building::all()->sortBy('name')->pluck('name', 'id')->prepend(trans('global.pleaseSelect'), '');
+        $buildingSiteMap = Building::pluck('site_id', 'id');
 
         $type_list = Phone::select('type')->where('type', '<>', null)->distinct()->orderBy('type')->pluck('type');
 
@@ -97,7 +100,7 @@ class PhoneController extends Controller
 
         return view(
             'admin.phones.edit',
-            compact('sites', 'buildings', 'type_list', 'phone')
+            compact('sites', 'buildings', 'buildingSiteMap', 'type_list', 'phone')
         );
     }
 

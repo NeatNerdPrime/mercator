@@ -203,4 +203,8 @@
 
         });
     </script>
+    @include('partials.location-cascade', [
+        'buildingSiteMap' => $buildingSiteMap,
+        'bayBuildingMap' => $bayBuildingMap ?? null,
+    ])
 @endsection

@@ -49,6 +49,8 @@ class PhysicalSecurityDeviceController extends Controller
         $sites = Site::all()->sortBy('name')->pluck('name', 'id');
         $buildings = Building::all()->sortBy('name')->pluck('name', 'id');
         $bays = Bay::all()->sortBy('name')->pluck('name', 'id');
+        $buildingSiteMap = Building::pluck('site_id', 'id');
+        $bayBuildingMap = Bay::pluck('building_id', 'id');
 
         $securityDevices = SecurityDevice::all()->sortBy('name')->pluck('name', 'id');
 
@@ -66,6 +68,8 @@ class PhysicalSecurityDeviceController extends Controller
                 'sites',
                 'buildings',
                 'bays',
+                'buildingSiteMap',
+                'bayBuildingMap',
                 'type_list',
                 'attributes_list',
                 'icons')
@@ -98,6 +102,8 @@ class PhysicalSecurityDeviceController extends Controller
         $sites = Site::all()->sortBy('name')->pluck('name', 'id')->prepend(trans('global.pleaseSelect'), '');
         $buildings = Building::all()->sortBy('name')->pluck('name', 'id')->prepend(trans('global.pleaseSelect'), '');
         $bays = Bay::all()->sortBy('name')->pluck('name', 'id')->prepend(trans('global.pleaseSelect'), '');
+        $buildingSiteMap = Building::pluck('site_id', 'id');
+        $bayBuildingMap = Bay::pluck('building_id', 'id');
 
         $securityDevices = SecurityDevice::all()->sortBy('name')->pluck('name', 'id');
 
@@ -117,6 +123,8 @@ class PhysicalSecurityDeviceController extends Controller
                 'sites',
                 'buildings',
                 'bays',
+                'buildingSiteMap',
+                'bayBuildingMap',
                 'physicalSecurityDevice',
                 'type_list',
                 'attributes_list',
