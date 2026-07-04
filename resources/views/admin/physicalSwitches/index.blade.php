@@ -59,8 +59,7 @@
                             @if (
                                 ($physicalSwitch->description===null)||
                                 ($physicalSwitch->type===null)||
-                                ($physicalSwitch->site_id===null)||
-                                ($physicalSwitch->building_id===null)
+                                ($physicalSwitch->site_id===null)
                                 )
                                 class="table-warning"
                                 @endif

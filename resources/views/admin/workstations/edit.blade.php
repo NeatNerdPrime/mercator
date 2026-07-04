@@ -439,8 +439,7 @@
                     </div>
                     <div class="col-sm-4">
                         <div class="form-group">
-                            <label class="label-maturity-1"
-                                   for="building_id">{{ trans('cruds.workstation.fields.building') }}</label>
+                            <label for="building_id">{{ trans('cruds.workstation.fields.building') }}</label>
                             <select class="form-control select2 {{ $errors->has('building') ? 'is-invalid' : '' }}"
                                     name="building_id" id="building_id">
                                 @foreach($buildings as $id => $building)
