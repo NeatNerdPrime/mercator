@@ -119,8 +119,7 @@
                 <div class="row">
                     <div class="col-lg-4">
                         <div class="form-group">
-                            <label for="site_id"
-                                   class="label-maturity-1">{{ trans('cruds.physicalSwitch.fields.site') }}</label>
+                            <label for="site_id" class="label-maturity-1">{{ trans('cruds.physicalSwitch.fields.site') }}</label>
                             <select class="form-control select2 {{ $errors->has('site') ? 'is-invalid' : '' }}"
                                     name="site_id" id="site_id">
                                 @foreach($sites as $id => $site)
@@ -137,8 +136,7 @@
                     </div>
                     <div class="col-lg-4">
                         <div class="form-group">
-                            <label for="building_id"
-                                   class="label-maturity-1">{{ trans('cruds.physicalSwitch.fields.building') }}</label>
+                            <label for="building_id">{{ trans('cruds.physicalSwitch.fields.building') }}</label>
                             <select class="form-control select2 {{ $errors->has('building') ? 'is-invalid' : '' }}"
                                     name="building_id" id="building_id">
                                 @foreach($buildings as $id => $building)
@@ -205,4 +203,8 @@
 
         });
     </script>
+    @include('partials.location-cascade', [
+        'buildingSiteMap' => $buildingSiteMap,
+        'bayBuildingMap' => $bayBuildingMap ?? null,
+    ])
 @endsection

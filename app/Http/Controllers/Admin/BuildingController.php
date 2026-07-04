@@ -52,6 +52,7 @@ class BuildingController extends Controller
 
         $sites = Site::query()->orderBy('name')->pluck('name', 'id');
         $buildings = Building::query()->orderBy('name')->pluck('name', 'id');
+        $buildingSiteMap = Building::pluck('site_id', 'id');
 
         // Lists
         $attributes_list = $this->getAttributes();
@@ -62,7 +63,7 @@ class BuildingController extends Controller
 
         return view(
             'admin.buildings.create',
-            compact('sites', 'buildings', 'icons', 'attributes_list', 'type_list')
+            compact('sites', 'buildings', 'buildingSiteMap', 'icons', 'attributes_list', 'type_list')
         );
     }
 
@@ -72,6 +73,7 @@ class BuildingController extends Controller
 
         $sites = Site::query()->orderBy('name')->pluck('name', 'id')->prepend(trans('global.pleaseSelect'), '');
         $buildings = Building::query()->orderBy('name')->pluck('name', 'id');
+        $buildingSiteMap = Building::pluck('site_id', 'id');
 
         $attributes_list = $this->getAttributes();
         $type_list = Building::query()->select('type')->where('type', '<>', null)->distinct()->orderBy('type')->pluck('type');
@@ -90,7 +92,7 @@ class BuildingController extends Controller
 
         return view(
             'admin.buildings.create',
-            compact('sites', 'buildings', 'icons', 'attributes_list', 'type_list')
+            compact('sites', 'buildings', 'buildingSiteMap', 'icons', 'attributes_list', 'type_list')
         );
     }
 
@@ -138,6 +140,7 @@ class BuildingController extends Controller
 
         $sites = Site::all()->sortBy('name')->pluck('name', 'id');
         $buildings = Building::all()->sortBy('name')->pluck('name', 'id');
+        $buildingSiteMap = Building::pluck('site_id', 'id');
         $attributes_list = $this->getAttributes();
         $type_list = Building::query()->select('type')->where('type', '<>', null)->distinct()->orderBy('type')->pluck('type');
         // Select icons
@@ -147,7 +150,7 @@ class BuildingController extends Controller
 
         return view(
             'admin.buildings.edit',
-            compact('building', 'sites', 'buildings', 'icons', 'attributes_list', 'type_list')
+            compact('building', 'sites', 'buildings', 'buildingSiteMap', 'icons', 'attributes_list', 'type_list')
         );
     }
 

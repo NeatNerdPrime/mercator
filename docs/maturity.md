@@ -98,8 +98,8 @@ The calculation of conformity levels for each mapping object is based on the pre
 | Certificates                | 2     | Description, Type, validity start date, validity end date, applications or logical server      |
 | **Physical infrastructure** |       |                                                                                                |
 | Sites                       | 1     | Description                                                                                    |
-| Buildings                   | 1     | Description                                                                                    |
-| Bays                        | 1     | Description                                                                                    |
+| Buildings                   | 1     | Description, site                                                                              |
+| Bays                        | 1     | Description, site, building                                                                    |
 | Physical servers            | 1     | Description, configuration, site, building, responsible                                        |
 | Workstations                | 1     | Description, site, building                                                                    |
 | Telephones                  | 1     | Description, site, building                                                                    |

@@ -310,6 +310,8 @@ return [
         ],
         'errors' => [
             'cycle_detected' => 'This operation would create a loop in the building hierarchy. A building cannot be its own parent, direct or indirect.',
+            'parent_different_site' => 'The parent building/room must be on the same site.',
+            'children_different_site' => 'The children buildings/rooms must be on the same site.',
         ],
         'title' => 'Buildings / Rooms',
         'title_singular' => 'Building / Room',

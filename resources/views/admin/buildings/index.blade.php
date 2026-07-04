@@ -57,7 +57,8 @@
                     @foreach($buildings as $building)
                         <tr data-entry-id="{{ $building->id }}"
                             @if (
-                                ($building->description===null)
+                                ($building->description===null)||
+                                ($building->site_id===null)
                                 )
                                 class="table-warning"
                                 @endif

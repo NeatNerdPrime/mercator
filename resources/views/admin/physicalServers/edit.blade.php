@@ -342,7 +342,7 @@
                     </div>
                     <div class="col-md-4">
                         <div class="form-group">
-                            <label class="label-maturity-1"
+                            <label
                                    for="building_id">{{ trans('cruds.physicalServer.fields.building') }}</label>
                             <select class="form-control select2 {{ $errors->has('building') ? 'is-invalid' : '' }}"
                                     name="building_id" id="building_id">
@@ -389,4 +389,12 @@
             </button>
         </div>
     </form>
+@endsection
+
+@section('scripts')
+    @parent
+    @include('partials.location-cascade', [
+        'buildingSiteMap' => $buildingSiteMap,
+        'bayBuildingMap' => $bayBuildingMap ?? null,
+    ])
 @endsection

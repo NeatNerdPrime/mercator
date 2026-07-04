@@ -177,5 +177,5 @@ document.addEventListener('DOMContentLoaded', function () {
     });
 });
 </script>
-@vite('resources/js/map.show.ts')
+@vite('resources/graphs/map.show.ts')
 @endsection

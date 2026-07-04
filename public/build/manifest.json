@@ -52,6 +52,66 @@
     "file": "assets/bootstrap-icons-mSm7cUeB.woff2",
     "src": "node_modules/bootstrap-icons/font/fonts/bootstrap-icons.woff2"
   },
+  "resources/BPMN/bpmn-show.ts": {
+    "file": "assets/bpmn-show-CfwzF4up.js",
+    "name": "bpmn-show",
+    "src": "resources/BPMN/bpmn-show.ts",
+    "isEntry": true,
+    "imports": [
+      "_ModelXmlSerializer-Vsuvejvr.js",
+      "_bpmn-save-BNgNzEMR.js"
+    ]
+  },
+  "resources/BPMN/bpmn.ts": {
+    "file": "assets/bpmn-B7gGWHxT.js",
+    "name": "bpmn",
+    "src": "resources/BPMN/bpmn.ts",
+    "isEntry": true,
+    "imports": [
+      "_ModelXmlSerializer-Vsuvejvr.js",
+      "_bpmn-save-BNgNzEMR.js"
+    ]
+  },
+  "resources/charts/chart-home.js": {
+    "file": "assets/chart-home-CFDcCHnM.js",
+    "name": "chart-home",
+    "src": "resources/charts/chart-home.js",
+    "isEntry": true,
+    "imports": [
+      "_chart-CNK8zqEL.js",
+      "_chartjs-plugin-datalabels.esm-CTcaW7_s.js",
+      "_js-6VohDMNv.js"
+    ]
+  },
+  "resources/charts/chart-maturity.js": {
+    "file": "assets/chart-maturity-QuIbHETL.js",
+    "name": "chart-maturity",
+    "src": "resources/charts/chart-maturity.js",
+    "isEntry": true,
+    "imports": [
+      "_chart-CNK8zqEL.js",
+      "_js-6VohDMNv.js"
+    ]
+  },
+  "resources/charts/chart-patching.js": {
+    "file": "assets/chart-patching-CstbjPvH.js",
+    "name": "chart-patching",
+    "src": "resources/charts/chart-patching.js",
+    "isEntry": true,
+    "imports": [
+      "_chart-CNK8zqEL.js",
+      "_chartjs-plugin-datalabels.esm-CTcaW7_s.js"
+    ]
+  },
+  "resources/charts/chart-relation.js": {
+    "file": "assets/chart-relation-Drr7d_8v.js",
+    "name": "chart-relation",
+    "src": "resources/charts/chart-relation.js",
+    "isEntry": true,
+    "imports": [
+      "_chart-CNK8zqEL.js"
+    ]
+  },
   "resources/css/app.css": {
     "file": "assets/app-COau4-0B.css",
     "name": "app",
@@ -74,6 +134,27 @@
     "src": "resources/css/mapping.css",
     "isEntry": true
   },
+  "resources/graphs/map.edit.ts": {
+    "file": "assets/map.edit--sLIKRDB.js",
+    "name": "map.edit",
+    "src": "resources/graphs/map.edit.ts",
+    "isEntry": true,
+    "imports": [
+      "_ModelXmlSerializer-Vsuvejvr.js",
+      "_UndoManager-Cv60WtBm.js",
+      "_svg-export-D_1j75ll.js"
+    ]
+  },
+  "resources/graphs/map.show.ts": {
+    "file": "assets/map.show-CFweePMW.js",
+    "name": "map.show",
+    "src": "resources/graphs/map.show.ts",
+    "isEntry": true,
+    "imports": [
+      "_ModelXmlSerializer-Vsuvejvr.js",
+      "_svg-export-D_1j75ll.js"
+    ]
+  },
   "resources/js/app.js": {
     "file": "assets/app-DT4dVLOD.js",
     "name": "app",
@@ -86,72 +167,11 @@
       "assets/app-BEp0SxZ_.css"
     ]
   },
-  "resources/js/chart-home.js": {
-    "file": "assets/chart-home-CFDcCHnM.js",
-    "name": "chart-home",
-    "src": "resources/js/chart-home.js",
-    "isEntry": true,
-    "imports": [
-      "_chart-CNK8zqEL.js",
-      "_chartjs-plugin-datalabels.esm-CTcaW7_s.js",
-      "_js-6VohDMNv.js"
-    ]
-  },
-  "resources/js/chart-maturity.js": {
-    "file": "assets/chart-maturity-QuIbHETL.js",
-    "name": "chart-maturity",
-    "src": "resources/js/chart-maturity.js",
-    "isEntry": true,
-    "imports": [
-      "_chart-CNK8zqEL.js",
-      "_js-6VohDMNv.js"
-    ]
-  },
-  "resources/js/chart-patching.js": {
-    "file": "assets/chart-patching-CstbjPvH.js",
-    "name": "chart-patching",
-    "src": "resources/js/chart-patching.js",
-    "isEntry": true,
-    "imports": [
-      "_chart-CNK8zqEL.js",
-      "_chartjs-plugin-datalabels.esm-CTcaW7_s.js"
-    ]
-  },
-  "resources/js/chart-relation.js": {
-    "file": "assets/chart-relation-Drr7d_8v.js",
-    "name": "chart-relation",
-    "src": "resources/js/chart-relation.js",
-    "isEntry": true,
-    "imports": [
-      "_chart-CNK8zqEL.js"
-    ]
-  },
   "resources/js/graphviz.js": {
     "file": "assets/graphviz-DrHE7G3G.js",
     "name": "graphviz",
     "src": "resources/js/graphviz.js",
     "isEntry": true
-  },
-  "resources/js/map.edit.ts": {
-    "file": "assets/map.edit--sLIKRDB.js",
-    "name": "map.edit",
-    "src": "resources/js/map.edit.ts",
-    "isEntry": true,
-    "imports": [
-      "_ModelXmlSerializer-Vsuvejvr.js",
-      "_UndoManager-Cv60WtBm.js",
-      "_svg-export-D_1j75ll.js"
-    ]
-  },
-  "resources/js/map.show.ts": {
-    "file": "assets/map.show-CFweePMW.js",
-    "name": "map.show",
-    "src": "resources/js/map.show.ts",
-    "isEntry": true,
-    "imports": [
-      "_ModelXmlSerializer-Vsuvejvr.js",
-      "_svg-export-D_1j75ll.js"
-    ]
   },
   "resources/js/sql-parser.js": {
     "file": "assets/sql-parser-B7P4stFK.js",
@@ -166,26 +186,6 @@
     "isEntry": true,
     "imports": [
       "_chunk-aKtaBQYM.js"
-    ]
-  },
-  "resources/ts/bpmn-show.ts": {
-    "file": "assets/bpmn-show-CfwzF4up.js",
-    "name": "bpmn-show",
-    "src": "resources/ts/bpmn-show.ts",
-    "isEntry": true,
-    "imports": [
-      "_ModelXmlSerializer-Vsuvejvr.js",
-      "_bpmn-save-BNgNzEMR.js"
-    ]
-  },
-  "resources/ts/bpmn.ts": {
-    "file": "assets/bpmn-B7gGWHxT.js",
-    "name": "bpmn",
-    "src": "resources/ts/bpmn.ts",
-    "isEntry": true,
-    "imports": [
-      "_ModelXmlSerializer-Vsuvejvr.js",
-      "_bpmn-save-BNgNzEMR.js"
     ]
   }
 }

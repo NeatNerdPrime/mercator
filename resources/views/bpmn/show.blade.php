@@ -231,7 +231,7 @@
 @endsection
 
 @section('scripts')
-@vite('resources/ts/bpmn-show.ts')
+@vite('resources/BPMN/bpmn-show.ts')
 
 <script>
 document.addEventListener("DOMContentLoaded", function () {

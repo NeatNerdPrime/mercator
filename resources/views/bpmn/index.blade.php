@@ -160,7 +160,7 @@
 @endsection
 
 @section('scripts')
-    @vite('resources/ts/bpmn-show.ts')
+    @vite('resources/BPMN/bpmn-show.ts')
 
     <script>
         @include('partials.datatable', [

@@ -161,6 +161,8 @@ class Building extends Model implements HasIconContract, HasPrefix
     /** @param Builder<static> $query */
     public function scopeMaturityLevel1(Builder $query): Builder
     {
-        return $query->whereNotNull('description');
+        return $query
+            ->whereNotNull('description')
+            ->whereNotNull('site_id');
     }
 }

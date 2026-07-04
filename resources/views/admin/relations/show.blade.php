@@ -177,7 +177,7 @@
 
 @section('scripts')
 @if ($relation->values()->count()>1)
-@vite(['resources/js/chart-relation.js'])
+@vite(['resources/charts/chart-relation.js'])
 <script>
 window.data = [
     @foreach($relation->values()->get() as $value)

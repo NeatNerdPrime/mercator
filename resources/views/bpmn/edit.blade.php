@@ -432,7 +432,7 @@ input[type="file"] {
 @endsection
 
 @section('scripts')
-@vite('resources/ts/bpmn.ts')
+@vite('resources/BPMN/bpmn.ts')
 
 <script>
 document.addEventListener("DOMContentLoaded", function () {

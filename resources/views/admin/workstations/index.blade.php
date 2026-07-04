@@ -70,8 +70,7 @@
                         <tr data-entry-id="{{ $workstation->id }}"
                             @if (
                                 ($workstation->description===null)||
-                                ($workstation->site_id===null)||
-                                ($workstation->building_id===null)
+                                ($workstation->site_id===null)
                                 )
                                 class="table-warning"
                                 @endif

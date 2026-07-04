@@ -62,16 +62,13 @@
                     <tbody>
                     @foreach($physicalServers as $physicalServer)
                         <tr data-entry-id="{{ $physicalServer->id }}"
-
                             @if (($physicalServer->description==null)||
                                 ($physicalServer->configuration==null)||
                                 ($physicalServer->site_id==null)||
-                                ($physicalServer->building_id==null)||
                                 ($physicalServer->responsible==null)
-                                /* ($physicalServer->logicalServers()->count()==0) */
                                 )
                                 class="table-warning"
-                                @endif
+                            @endif
                         >
                             <td>
 

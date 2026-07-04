@@ -59,8 +59,7 @@
                             @if (
                                 ($physicalRouter->description===null)||
                                 ($physicalRouter->type===null)||
-                                ($physicalRouter->site_id===null)||
-                                ($physicalRouter->building_id===null)
+                                ($physicalRouter->site_id===null)
                                 )
                                 class="table-warning"
                                 @endif

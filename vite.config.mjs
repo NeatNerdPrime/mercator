@@ -24,21 +24,21 @@ export default defineConfig({
                 'resources/js/app.js',
                 'resources/css/app.css',
                 // Charts
-                'resources/js/chart-home.js',
-                'resources/js/chart-maturity.js',
-                'resources/js/chart-relation.js',
-                'resources/js/chart-patching.js',
+                'resources/charts/chart-home.js',
+                'resources/charts/chart-maturity.js',
+                'resources/charts/chart-relation.js',
+                'resources/charts/chart-patching.js',
                 // Mapping
                 'resources/css/mapping.css',
                 // D3 / Viz
                 'resources/js/graphviz.js',
                 'resources/js/vis-network.js',
                 // Maps
-                'resources/js/map.show.ts',
-                'resources/js/map.edit.ts',
+                'resources/graphs/map.show.ts',
+                'resources/graphs/map.edit.ts',
                 // BPMN (ex-package autonome)
-                'resources/ts/bpmn.ts',
-                'resources/ts/bpmn-show.ts',
+                'resources/BPMN/bpmn.ts',
+                'resources/BPMN/bpmn-show.ts',
                 // Parser
                 'resources/js/sql-parser.js',
             ],
@@ -58,7 +58,6 @@ export default defineConfig({
         dedupe: ['chart.js'],
         alias: {
             '@': '/resources/js',
-            '@ts': path.resolve(__dirname, 'resources/ts'), // imports BPMN
             '@sourcentis/chartjs-gauge': path.resolve(
                 __dirname,
                 'vendor/sourcentis/chartjs-gauge/js/index.js'
