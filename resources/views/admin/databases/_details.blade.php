@@ -183,7 +183,7 @@
                 @if ($database->security_need_t==3)<span class="mediumRisk">{{ trans('global.strong') }}</span>@endif
                 @if ($database->security_need_t==4)<span class="highRisk">{{ trans('global.very_strong') }}</span>@endif
             &nbsp;
-            @if (false)
+            @if (config('mercator.parameters.security_need_auth'))
             {{ trans('global.authenticity') }} :
                 @if ($database->security_need_auth==0){{ trans('global.none') }}@endif
                 @if ($database->security_need_auth==1)<span class="veryLowRisk">{{ trans('global.low') }}</span>@endif

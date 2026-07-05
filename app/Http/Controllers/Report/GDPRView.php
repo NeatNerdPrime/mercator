@@ -10,6 +10,7 @@ use App\Models\DataProcessing;
 use App\Models\MacroProcessus;
 use App\Models\Application;
 use App\Models\Process;
+use App\Models\SecurityControl;
 use Symfony\Component\HttpFoundation\Response;
 
 class GDPRView extends Controller
@@ -19,7 +20,7 @@ class GDPRView extends Controller
     */
     public function generate(Request $request)
     {
-        $allowed = Gate::allows('explore_access') || Cartographer::canAccessAny([\App\Models\DataProcessing::class, \App\Models\MacroProcessus::class, \App\Models\Process::class]);
+        $allowed = Gate::allows('explore_access') || Cartographer::canAccessAny([\App\Models\DataProcessing::class, \App\Models\MacroProcessus::class, \App\Models\Process::class, SecurityControl::class]);
         abort_if(!$allowed, Response::HTTP_FORBIDDEN, '403 Forbidden');
 
         if ($request->macroprocess == null) {

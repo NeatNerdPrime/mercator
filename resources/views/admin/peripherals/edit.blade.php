@@ -32,20 +32,16 @@
 
                     <div class="col-md-2">
                         <div class="form-group">
-                            <label for="type">{{ trans('cruds.peripheral.fields.domain') }}</label>
-                            <select class="form-control select2-free {{ $errors->has('domain') ? 'is-invalid' : '' }}"
-                                    name="domain" id="domain">
-                                <option value="">{{ trans('global.pleaseSelect') }}</option>
-                                @if (!$domain_list->contains(old('domain')))
-                                    <option>{{ old('domain') }}</option>
-                                @endif
-                                @foreach($domain_list as $d)
-                                    <option {{ (old('domain') ? old('domain') : $peripheral->domain) == $d ? 'selected' : '' }}>{{$d}}</option>
+                            <label for="domain_id">{{ trans('cruds.peripheral.fields.domain') }}</label>
+                            <select class="form-control select2 {{ $errors->has('domain_id') ? 'is-invalid' : '' }}"
+                                    name="domain_id" id="domain_id">
+                                @foreach($domains as $id => $name)
+                                    <option value="{{ $id }}" {{ ($peripheral->domain ? $peripheral->domain->id : old('domain_id')) == $id ? 'selected' : '' }}>{{$name}}</option>
                                 @endforeach
                             </select>
-                            @if($errors->has('domain'))
+                            @if($errors->has('domain_id'))
                                 <div class="invalid-feedback">
-                                    {{ $errors->first('domain') }}
+                                    {{ $errors->first('domain_id') }}
                                 </div>
                             @endif
                             <span class="help-block">{{ trans('cruds.peripheral.fields.domain_helper') }}</span>

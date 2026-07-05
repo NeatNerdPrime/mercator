@@ -69,7 +69,7 @@
         @endcanAccess
         <tr>
             <th>
-                <dt>{{ trans('cruds.adminUser.fields.description') }}</dt>
+                {{ trans('cruds.adminUser.fields.description') }}
             </th>
             <td colspan="3">
                 {!! $adminUser->description !!}

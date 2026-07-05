@@ -64,19 +64,19 @@
             <tbody>
             <tr>
                 <th width="10%">
-                    {{ trans('cruds.application.fields.vendor') }}
+                    {{ trans('cruds.wifiTerminal.fields.vendor') }}
                 </th>
                 <td width="22%">
                     {{ $wifiTerminal->vendor }}
                 </td>
                 <th width="10%">
-                    {{ trans('cruds.application.fields.product') }}
+                    {{ trans('cruds.wifiTerminal.fields.product') }}
                 </th>
                 <td width="22%">
                     {{ $wifiTerminal->product }}
                 </td>
                 <th width="10%">
-                    {{ trans('cruds.application.fields.version') }}
+                    {{ trans('cruds.wifiTerminal.fields.version') }}
                 </th>
                 <td width="22%">
                     {{ $wifiTerminal->version }}

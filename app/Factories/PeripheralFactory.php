@@ -4,6 +4,7 @@ namespace App\Factories;
 
 use App\Models\Bay;
 use App\Models\Building;
+use App\Models\Domain;
 use App\Models\Entity;
 use App\Models\Peripheral;
 use App\Models\Site;
@@ -26,7 +27,6 @@ class PeripheralFactory extends Factory
             'version' => $this->faker->word(),
             'responsible' => $this->faker->word(),
             'address_ip' => $this->faker->ipv4(),
-            'domain' => $this->faker->word(),
             'created_at' => Carbon::now(),
             'updated_at' => Carbon::now(),
 
@@ -34,6 +34,7 @@ class PeripheralFactory extends Factory
             'building_id' => Building::factory(),
             'bay_id' => Bay::factory(),
             'provider_id' => Entity::factory(),
+            'domain_id' => Domain::factory(),
         ];
     }
 }

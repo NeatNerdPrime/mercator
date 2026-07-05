@@ -24,7 +24,7 @@
             {{ trans('cruds.vlan.fields.vlan_id') }}
             </th>
             <td>
-            {{ $vlan->id }}
+            {{ $vlan->vlan_id }}
             </td>
         </tr>
         <tr>

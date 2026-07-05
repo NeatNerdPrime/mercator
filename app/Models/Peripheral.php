@@ -48,7 +48,7 @@ class Peripheral extends Model implements HasIconContract, HasPrefix
     protected $fillable = [
         'ext_refs',
         'name',
-        'domain',
+        'domain_id',
         'type',
         'description',
         'icon_id',
@@ -99,6 +99,12 @@ class Peripheral extends Model implements HasIconContract, HasPrefix
     public function bay(): BelongsTo
     {
         return $this->belongsTo(Bay::class, 'bay_id');
+    }
+
+    /** @return BelongsTo<Domain, $this> */
+    public function domain(): BelongsTo
+    {
+        return $this->belongsTo(Domain::class, 'domain_id');
     }
 
     /** @param Builder<static> $query */

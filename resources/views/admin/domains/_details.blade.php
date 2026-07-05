@@ -63,7 +63,7 @@
         @canAccess(App\Models\ForestAd::class)
         <tr>
             <th>
-                {{ trans('cruds.forestAd.title') }}
+                {{ trans('cruds.domaine.fields.forestAds') }}
             </th>
             <td>
                 @foreach($domain->forestAds as $forestAd)
@@ -84,7 +84,7 @@
         @canAccess(App\Models\LogicalServer::class)
         <tr>
             <th>
-                {{ trans('cruds.logicalServer.title') }}
+                {{ trans('cruds.domaine.fields.logical_servers') }}
             </th>
             <td>
                 @foreach($domain->logicalServers as $logicalServer)

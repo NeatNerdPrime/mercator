@@ -36,7 +36,7 @@ class AdministrationView extends Controller
         $annuaires = Cartographer::scopedQuery(Annuaire::query())->get();
         $forests = Cartographer::scopedQuery(ForestAd::query())->get();
         $domains = Cartographer::scopedQuery(Domain::query())->get();
-        $adminUsers = AdminUser::All();
+        $adminUsers = Cartographer::scopedQuery(AdminUser::query())->get();
 
         return view('admin/reports/administration')
             ->with('zones', $zones)
