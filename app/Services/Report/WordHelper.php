@@ -109,6 +109,18 @@ class WordHelper
     private const MAX_GRAPH_WIDTH_PT = 450;
 
     /**
+     * Extra scale-down applied to graphs that don't already span the full page width, so they
+     * don't look disproportionately large next to the surrounding body text. Deliberately applied
+     * as its own named ratio rather than folded into the pixel-to-point conversion itself (an
+     * earlier version substituted 52 for 72 directly in that conversion, which happened to produce
+     * the same rendered sizes but made GRAPH_DPI/the conversion math read as wrong — there really
+     * are 72 points per inch, and GRAPH_DPI really is 300). 52/72 reproduces that exact result.
+     * Graphs already wide enough to hit MAX_GRAPH_WIDTH_PT are unaffected either way, since they're
+     * capped after this scale-down is applied.
+     */
+    private const NARROW_GRAPH_SCALE = 52 / 72;
+
+    /**
      * Icon size (points, width and height) used inside report tables — half of the previous
      * hard-coded 60pt addImageRow() default, named explicitly rather than left as a magic value.
      */
@@ -623,7 +635,7 @@ class WordHelper
      */
     private static function capWidthToPt(int $widthPx, int $dpi): float
     {
-        $naturalWidthPt = $widthPx * 52 / $dpi;
+        $naturalWidthPt = $widthPx * 72 / $dpi * self::NARROW_GRAPH_SCALE;
 
         return min($naturalWidthPt, self::MAX_GRAPH_WIDTH_PT);
     }
