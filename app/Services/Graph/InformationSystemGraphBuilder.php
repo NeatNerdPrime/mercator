@@ -143,6 +143,6 @@ class InformationSystemGraphBuilder
     {
         $href = $withHref ? ' href="#'.$uid.'"' : '';
 
-        return $prefix.$id.' [label="'.e($name ?? '').'" shape=none labelloc="b"  width=1 height=1.1 image="'.$image.'"'.$href.']';
+        return DotNode::withImage($prefix.$id, $image, [e($name ?? '')], $href);
     }
 }

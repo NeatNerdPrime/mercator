@@ -42,5 +42,6 @@ test('buildDot draws parent-child zone edges plus building and admin user member
         ->toContain('ZONE'.$parentZone->id.' -> ZONE'.$childZone->id)
         ->toContain('ZONE'.$parentZone->id.' -> BUILD'.$building->id)
         ->toContain('ZONE'.$parentZone->id.' -> AU'.$adminUser->id)
-        ->toContain('label="jdoe"');
+        ->toContain('AU'.$adminUser->id.' [shape=none label=<')
+        ->toContain('jdoe');
 });

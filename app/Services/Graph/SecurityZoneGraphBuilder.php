@@ -30,15 +30,15 @@ class SecurityZoneGraphBuilder
         ];
 
         foreach ($zones as $zone) {
-            $lines[] = 'ZONE'.$zone->id.' [label="'.$this->escapeLabel($zone->name).'" shape=none labelloc="b" width=1 height=1.1 image="'.$iconResolver(null, '/images/zone.png').'"'.$this->href($zone, $withHref).']';
+            $lines[] = DotNode::withImage('ZONE'.$zone->id, $iconResolver(null, '/images/zone.png'), [$this->escapeLabel($zone->name)], $this->href($zone, $withHref));
         }
 
         foreach ($buildings as $building) {
-            $lines[] = 'BUILD'.$building->id.' [label="'.$this->escapeLabel($building->name).'" shape=none labelloc="b" width=1 height=1.1 image="'.$iconResolver(null, '/images/building.png').'"'.$this->href($building, $withHref).']';
+            $lines[] = DotNode::withImage('BUILD'.$building->id, $iconResolver(null, '/images/building.png'), [$this->escapeLabel($building->name)], $this->href($building, $withHref));
         }
 
         foreach ($adminUsers as $adminUser) {
-            $lines[] = 'AU'.$adminUser->id.' [label="'.$this->escapeLabel($adminUser->user_id).'" shape=none labelloc="b" width=1 height=1.1 image="'.$iconResolver(null, '/images/user.png').'"'.$this->href($adminUser, $withHref).']';
+            $lines[] = DotNode::withImage('AU'.$adminUser->id, $iconResolver(null, '/images/user.png'), [$this->escapeLabel($adminUser->user_id)], $this->href($adminUser, $withHref));
         }
 
         foreach ($zones as $zone) {
@@ -78,7 +78,7 @@ class SecurityZoneGraphBuilder
 
     private function escapeLabel(?string $value): string
     {
-        return e(addslashes($value ?? ''));
+        return e($value ?? '');
     }
 
     private function href(mixed $model, bool $withHref): string

@@ -39,12 +39,12 @@ class ApplicationGraphBuilder
         $lines = ['digraph  {'];
 
         foreach ($applicationBlocks as $ab) {
-            $lines[] = 'AB'.$ab->id.' [label="'.e($ab->name).'" shape=none labelloc="b"  width=1 height=1.1 image="'.$iconResolver(null, '/images/applicationblock.png').'"'.$this->href($ab, $withHref).']';
+            $lines[] = DotNode::withImage('AB'.$ab->id, $iconResolver(null, '/images/applicationblock.png'), [e($ab->name)], $this->href($ab, $withHref));
         }
 
         foreach ($applications as $application) {
             $image = $iconResolver($application->icon_id, '/images/application.png');
-            $lines[] = 'A'.$application->id.' [label="'.e($application->name).'" shape=none labelloc="b"  width=1 height=1.1 image="'.$image.'"'.$this->href($application, $withHref).']';
+            $lines[] = DotNode::withImage('A'.$application->id, $image, [e($application->name)], $this->href($application, $withHref));
 
             foreach ($application->services as $service) {
                 if ($applicationServices->contains('id', $service->id)) {
@@ -64,7 +64,7 @@ class ApplicationGraphBuilder
         }
 
         foreach ($applicationServices as $service) {
-            $lines[] = 'AS'.$service->id.' [label="'.e($service->name).'" shape=none labelloc="b"  width=1 height=1.1 image="'.$iconResolver(null, '/images/applicationservice.png').'"'.$this->href($service, $withHref).']';
+            $lines[] = DotNode::withImage('AS'.$service->id, $iconResolver(null, '/images/applicationservice.png'), [e($service->name)], $this->href($service, $withHref));
 
             foreach ($service->modules as $module) {
                 if ($applicationModules->contains('id', $module->id)) {
@@ -74,12 +74,12 @@ class ApplicationGraphBuilder
         }
 
         foreach ($applicationModules as $module) {
-            $lines[] = 'M'.$module->id.' [label="'.e($module->name).'" shape=none labelloc="b"  width=1 height=1.1 image="'.$iconResolver(null, '/images/applicationmodule.png').'"'.$this->href($module, $withHref).']';
+            $lines[] = DotNode::withImage('M'.$module->id, $iconResolver(null, '/images/applicationmodule.png'), [e($module->name)], $this->href($module, $withHref));
         }
 
         foreach ($databases as $database) {
             $image = $iconResolver($database->icon_id, '/images/database.png');
-            $lines[] = 'DB'.$database->id.' [label="'.e($database->name).'" shape=none labelloc="b"  width=1 height=1.1 image="'.$image.'"'.$this->href($database, $withHref).']';
+            $lines[] = DotNode::withImage('DB'.$database->id, $image, [e($database->name)], $this->href($database, $withHref));
         }
 
         $lines[] = '}';

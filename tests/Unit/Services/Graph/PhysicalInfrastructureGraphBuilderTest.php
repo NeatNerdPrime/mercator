@@ -81,11 +81,12 @@ test('buildLocationDot groups 5 or more workstations in a building into a single
     $firstId = $building->workstations()->first()->id;
 
     expect($dot)
-        ->toContain('WG'.$firstId.' [label="5 ')
+        ->toContain('WG'.$firstId.' [shape=none label=<')
+        ->toContain('5 Workstations')
         ->toContain('B'.$building->id.' -> WG'.$firstId);
 
     foreach ($workstations as $workstation) {
-        expect($dot)->not->toContain('W'.$workstation->id.' [label="');
+        expect($dot)->not->toContain('W'.$workstation->id.' [shape=none label=<');
     }
 });
 
@@ -146,6 +147,6 @@ test('buildConnectivityDot draws a physical server and a storage device attached
     );
 
     expect($dot)
-        ->toContain('PSERVER'.$server->id.' [label="')
-        ->toContain('SD'.$storageDevice->id.' [label="');
+        ->toContain('PSERVER'.$server->id.' [shape=none label=<')
+        ->toContain('SD'.$storageDevice->id.' [shape=none label=<');
 });

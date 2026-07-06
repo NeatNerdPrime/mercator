@@ -58,12 +58,12 @@ test('buildDot links a network to its subnetwork and a logical server found by I
         ->toContain('SUBNET'.$subnetwork->id.' -> LOGICAL_SERVER'.$logicalServer->id);
 });
 
-test('nodeWithIp appends the IP and grows the height only when show_ip is enabled', function () {
+test('nodeWithIp appends the IP as its own label row only when show_ip is enabled', function () {
     $network = Network::factory()->create();
     $subnetwork = Subnetwork::factory()->create(['network_id' => $network->id, 'address' => '10.0.0.0/24']);
 
     $builder = new LogicalInfrastructureGraphBuilder;
-    $dotWithIp = $builder->buildDot(
+    $buildDot = fn (bool $showIp) => $builder->buildDot(
         networks: new Collection,
         subnetworks: Subnetwork::all(),
         gateways: new Collection,
@@ -84,10 +84,9 @@ test('nodeWithIp appends the IP and grows the height only when show_ip is enable
         peripherals: new Collection,
         physicalSecurityDevices: new Collection,
         storageDevices: new Collection,
-        showIp: true,
+        showIp: $showIp,
     );
 
-    expect($dotWithIp)
-        ->toContain('height=1.7')
-        ->toContain(chr(13).'10.0.0.0/24');
+    expect($buildDot(true))->toContain('<TR><TD>10.0.0.0/24</TD></TR>');
+    expect($buildDot(false))->not->toContain('10.0.0.0/24');
 });

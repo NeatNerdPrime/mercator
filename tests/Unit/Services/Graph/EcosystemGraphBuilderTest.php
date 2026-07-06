@@ -33,8 +33,10 @@ test('buildDot draws entity nodes, a parent edge and a relation edge', function 
     $dot = (new EcosystemGraphBuilder)->buildDot($entities, $relations);
 
     expect($dot)
-        ->toContain('E'.$parent->id.' [label="Parent Co"')
-        ->toContain('E'.$child->id.' [label="Child Co"')
+        ->toContain('E'.$parent->id.' [shape=none label=<')
+        ->toContain('Parent Co')
+        ->toContain('E'.$child->id.' [shape=none label=<')
+        ->toContain('Child Co')
         ->toContain('E'.$parent->id.' -> E'.$child->id)
         ->toContain('label="Owns"')
         ->toContain('#'.$relation->getUID());

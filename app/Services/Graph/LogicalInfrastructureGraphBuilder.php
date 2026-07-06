@@ -63,7 +63,7 @@ class LogicalInfrastructureGraphBuilder
 
         if (Cartographer::canAccess(Network::class)) {
             foreach ($networks as $network) {
-                $lines[] = 'NET'.$network->id.' [label="'.e($network->name).'" shape=none labelloc="b"  width=1 height=1.1 image="'.$iconResolver(null, '/images/cloud.png').'"'.$this->href($network, $withHref).']';
+                $lines[] = DotNode::withImage('NET'.$network->id, $iconResolver(null, '/images/cloud.png'), [e($network->name)], $this->href($network, $withHref));
             }
         }
 
@@ -75,7 +75,7 @@ class LogicalInfrastructureGraphBuilder
 
         if (Cartographer::canAccess(Subnetwork::class)) {
             foreach ($subnetworks as $subnetwork) {
-                $lines[] = $this->nodeWithIp('SUBNET', $subnetwork->id, $subnetwork->name, $subnetwork->address, $iconResolver(null, '/images/network.png'), $subnetwork->getUID(), $showIp, $withHref, '1.7');
+                $lines[] = $this->nodeWithIp('SUBNET', $subnetwork->id, $subnetwork->name, $subnetwork->address, $iconResolver(null, '/images/network.png'), $subnetwork->getUID(), $showIp, $withHref);
 
                 if ($subnetwork->vlan_id !== null && $vlans->contains('id', $subnetwork->vlan_id)) {
                     $lines[] = 'SUBNET'.$subnetwork->id.' -> VLAN'.$subnetwork->vlan_id;
@@ -101,7 +101,7 @@ class LogicalInfrastructureGraphBuilder
 
         if (Cartographer::canAccess(ExternalConnectedEntity::class)) {
             foreach ($externalConnectedEntities as $entity) {
-                $lines[] = 'E'.$entity->id.' [label="'.e($entity->name).'" shape=none labelloc="b"  width=1 height=1.1 image="'.$iconResolver(null, '/images/entity.png').'"'.$this->href($entity, $withHref).']';
+                $lines[] = DotNode::withImage('E'.$entity->id, $iconResolver(null, '/images/entity.png'), [e($entity->name)], $this->href($entity, $withHref));
 
                 if ($entity->network_id !== null && $networks->contains('id', $entity->network_id)) {
                     $lines[] = 'E'.$entity->id.' -> NET'.$entity->network_id;
@@ -120,7 +120,7 @@ class LogicalInfrastructureGraphBuilder
                     continue;
                 }
 
-                $lines[] = $this->nodeWithIp('CLUSTER', $cluster->id, $cluster->name, $cluster->address_ip, $iconResolver(null, '/images/cluster.png'), $cluster->getUID(), $showIp, $withHref, '1.7');
+                $lines[] = $this->nodeWithIp('CLUSTER', $cluster->id, $cluster->name, $cluster->address_ip, $iconResolver(null, '/images/cluster.png'), $cluster->getUID(), $showIp, $withHref);
 
                 if (Cartographer::canAccess(LogicalServer::class)) {
                     foreach ($cluster->logicalServers as $logicalServer) {
@@ -193,7 +193,7 @@ class LogicalInfrastructureGraphBuilder
         if (Cartographer::canAccess(Certificate::class)) {
             foreach ($certificates as $certificate) {
                 if ($certificate->logicalServers->count() > 0) {
-                    $lines[] = 'CERT'.$certificate->id.' [label="'.e($certificate->name).'" shape=none labelloc="b"  width=1 height=1.1 image="'.$iconResolver(null, '/images/certificate.png').'"'.$this->href($certificate, $withHref).']';
+                    $lines[] = DotNode::withImage('CERT'.$certificate->id, $iconResolver(null, '/images/certificate.png'), [e($certificate->name)], $this->href($certificate, $withHref));
                 }
             }
         }
@@ -202,7 +202,7 @@ class LogicalInfrastructureGraphBuilder
             foreach ($containers as $container) {
                 if ($container->logicalServers->count() > 0) {
                     $image = $iconResolver($container->icon_id, '/images/container.png');
-                    $lines[] = 'CONT'.$container->id.' [label="'.e($container->name).'" shape=none labelloc="b"  width=1 height=1.1 image="'.$image.'"'.$this->href($container, $withHref).']';
+                    $lines[] = DotNode::withImage('CONT'.$container->id, $image, [e($container->name)], $this->href($container, $withHref));
 
                     foreach ($container->logicalServers as $logicalServer) {
                         if ($logicalServers->contains('id', $logicalServer->id)) {
@@ -326,7 +326,7 @@ class LogicalInfrastructureGraphBuilder
 
         if (Cartographer::canAccess(Vlan::class)) {
             foreach ($vlans as $vlan) {
-                $lines[] = 'VLAN'.$vlan->id.' [label="'.e($vlan->name).'" shape=none labelloc="b" width=1 height=1.1 image="'.$iconResolver(null, '/images/vlan.png').'"'.$this->href($vlan, $withHref).']';
+                $lines[] = DotNode::withImage('VLAN'.$vlan->id, $iconResolver(null, '/images/vlan.png'), [e($vlan->name)], $this->href($vlan, $withHref));
             }
         }
 
@@ -377,16 +377,14 @@ class LogicalInfrastructureGraphBuilder
         return $manifest;
     }
 
-    private function nodeWithIp(string $prefix, int $id, ?string $name, ?string $ip, string $image, string $uid, bool $showIp, bool $withHref, string $heightWithIp = '1.5'): string
+    private function nodeWithIp(string $prefix, int $id, ?string $name, ?string $ip, string $image, string $uid, bool $showIp, bool $withHref): string
     {
-        $label = e($name ?? '');
-        $height = '1.1';
+        $labelLines = [e($name ?? '')];
         if ($showIp && $ip !== null) {
-            $label .= chr(13).e($ip);
-            $height = $heightWithIp;
+            $labelLines[] = e($ip);
         }
 
-        return $prefix.$id.' [label="'.$label.'" shape=none labelloc="b"  width=1 height='.$height.' image="'.$image.'"'.($withHref ? ' href="#'.$uid.'"' : '').']';
+        return DotNode::withImage($prefix.$id, $image, $labelLines, $withHref ? ' href="#'.$uid.'"' : '');
     }
 
     /**

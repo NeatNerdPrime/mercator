@@ -47,5 +47,6 @@ test('buildDot draws the zone-annuaire-forest-domain-adminUser chain', function 
         ->toContain('Z'.$zone->id.' -> F'.$forest->id)
         ->toContain('F'.$forest->id.' -> D'.$domain->id)
         ->toContain('D'.$domain->id.' -> U'.$adminUser->id)
-        ->toContain('label="jdoe"');
+        ->toContain('U'.$adminUser->id.' [shape=none label=<')
+        ->toContain('jdoe');
 });

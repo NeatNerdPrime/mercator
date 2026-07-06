@@ -25,11 +25,11 @@ class GdprGraphBuilder
         $lines = ['digraph  {'];
 
         foreach ($macroProcessuses as $macroProcess) {
-            $lines[] = 'MP'.$macroProcess->id.' [label="'.e($macroProcess->name).'" shape=none labelloc="b"  width=1 height=1.1 image="'.$iconPath('/images/macroprocess.png').'"]';
+            $lines[] = DotNode::withImage('MP'.$macroProcess->id, $iconPath('/images/macroprocess.png'), [e($macroProcess->name)]);
         }
 
         foreach ($processes as $process) {
-            $lines[] = 'P'.$process->id.' [label="'.e($process->name).'" shape=none labelloc="b"  width=1 height=1.1 image="'.$iconPath('/images/process.png').'"]';
+            $lines[] = DotNode::withImage('P'.$process->id, $iconPath('/images/process.png'), [e($process->name)]);
 
             if ($process->macroprocess_id !== null && $macroProcessuses->contains('id', $process->macroprocess_id)) {
                 $lines[] = 'MP'.$process->macroprocess_id.' -> P'.$process->id;
@@ -44,7 +44,7 @@ class GdprGraphBuilder
 
         foreach ($dataProcessings as $dp) {
             $href = $withHref ? ' href="#'.$dp->getUID().'"' : '';
-            $lines[] = 'DP'.$dp->id.' [label="'.e($dp->name).'" shape=none labelloc="b"  width=1 height=1.1 image="'.$iconPath('/images/dataprocessing.png').'"'.$href.']';
+            $lines[] = DotNode::withImage('DP'.$dp->id, $iconPath('/images/dataprocessing.png'), [e($dp->name)], $href);
 
             foreach ($dp->applications as $app) {
                 if ($applications->contains('id', $app->id)) {
@@ -54,7 +54,7 @@ class GdprGraphBuilder
         }
 
         foreach ($applications as $app) {
-            $lines[] = 'APP'.$app->id.' [label="'.e($app->name).'" shape=none labelloc="b"  width=1 height=1.1 image="'.$iconPath('/images/application.png').'"]';
+            $lines[] = DotNode::withImage('APP'.$app->id, $iconPath('/images/application.png'), [e($app->name)]);
         }
 
         $lines[] = '}';

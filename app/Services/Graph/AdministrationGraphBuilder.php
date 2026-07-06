@@ -34,7 +34,7 @@ class AdministrationGraphBuilder
         $lines = ['digraph  {'];
 
         foreach ($zones as $zone) {
-            $lines[] = 'Z'.$zone->id.' [label="'.e($zone->name).'" shape=none labelloc="b"  width=1 height=1.1 image="'.$iconPath('/images/zoneadmin.png').'"'.$this->href($zone, $withHref).']';
+            $lines[] = DotNode::withImage('Z'.$zone->id, $iconPath('/images/zoneadmin.png'), [e($zone->name)], $this->href($zone, $withHref));
 
             foreach ($zone->annuaires as $annuaire) {
                 if ($annuaires->contains('id', $annuaire->id)) {
@@ -50,11 +50,11 @@ class AdministrationGraphBuilder
         }
 
         foreach ($annuaires as $annuaire) {
-            $lines[] = 'A'.$annuaire->id.' [label="'.e($annuaire->name).'" shape=none labelloc="b"  width=1 height=1.1 image="'.$iconPath('/images/annuaire.png').'"'.$this->href($annuaire, $withHref).']';
+            $lines[] = DotNode::withImage('A'.$annuaire->id, $iconPath('/images/annuaire.png'), [e($annuaire->name)], $this->href($annuaire, $withHref));
         }
 
         foreach ($forests as $forest) {
-            $lines[] = 'F'.$forest->id.' [label="'.e($forest->name).'" shape=none labelloc="b"  width=1 height=1.1 image="'.$iconPath('/images/ldap.png').'"'.$this->href($forest, $withHref).']';
+            $lines[] = DotNode::withImage('F'.$forest->id, $iconPath('/images/ldap.png'), [e($forest->name)], $this->href($forest, $withHref));
 
             foreach ($forest->domains as $domain) {
                 if ($domains->contains('id', $domain->id)) {
@@ -64,13 +64,13 @@ class AdministrationGraphBuilder
         }
 
         foreach ($domains as $domain) {
-            $lines[] = 'D'.$domain->id.' [label="'.e($domain->name).'" shape=none labelloc="b"  width=1 height=1.1 image="'.$iconPath('/images/domain.png').'"'.$this->href($domain, $withHref).']';
+            $lines[] = DotNode::withImage('D'.$domain->id, $iconPath('/images/domain.png'), [e($domain->name)], $this->href($domain, $withHref));
         }
 
         if (Cartographer::canAccess(AdminUser::class)) {
             foreach ($adminUsers as $user) {
                 if ($user->domain_id !== null && $domains->contains('id', $user->domain_id)) {
-                    $lines[] = 'U'.$user->id.' [label="'.e($user->user_id).'" shape=none labelloc="b"  width=1 height=1.1 image="'.$iconPath('/images/user.png').'"'.$this->href($user, $withHref).']';
+                    $lines[] = DotNode::withImage('U'.$user->id, $iconPath('/images/user.png'), [e($user->user_id)], $this->href($user, $withHref));
                     $lines[] = 'D'.$user->domain_id.' -> U'.$user->id;
                 }
             }

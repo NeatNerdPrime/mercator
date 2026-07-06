@@ -38,25 +38,25 @@ class ApplicationFlowGraphBuilder
         if (Cartographer::canAccess(Application::class)) {
             foreach ($applications as $application) {
                 $image = $iconResolver($application->icon_id, '/images/application.png');
-                $lines[] = 'A'.$application->id.' [label="'.e($application->name).'" shape=none labelloc="b"  width=1 height=1.1 image="'.$image.'"'.$this->href($application, $withHref).']';
+                $lines[] = DotNode::withImage('A'.$application->id, $image, [e($application->name)], $this->href($application, $withHref));
             }
         }
 
         if (Cartographer::canAccess(ApplicationService::class)) {
             foreach ($applicationServices as $service) {
-                $lines[] = 'S'.$service->id.' [label="'.e($service->name).'" shape=none labelloc="b"  width=1 height=1.1 image="'.$iconResolver(null, '/images/applicationservice.png').'"'.$this->href($service, $withHref).']';
+                $lines[] = DotNode::withImage('S'.$service->id, $iconResolver(null, '/images/applicationservice.png'), [e($service->name)], $this->href($service, $withHref));
             }
         }
 
         if (Cartographer::canAccess(ApplicationModule::class)) {
             foreach ($applicationModules as $module) {
-                $lines[] = 'M'.$module->id.' [label="'.e($module->name).'" shape=none labelloc="b"  width=1 height=1.1 image="'.$iconResolver(null, '/images/applicationmodule.png').'"'.$this->href($module, $withHref).']';
+                $lines[] = DotNode::withImage('M'.$module->id, $iconResolver(null, '/images/applicationmodule.png'), [e($module->name)], $this->href($module, $withHref));
             }
         }
 
         if (Cartographer::canAccess(Database::class)) {
             foreach ($databases as $database) {
-                $lines[] = 'DB'.$database->id.' [label="'.e($database->name).'" shape=none labelloc="b"  width=1 height=1.1 image="'.$iconResolver(null, '/images/database.png').'"'.$this->href($database, $withHref).']';
+                $lines[] = DotNode::withImage('DB'.$database->id, $iconResolver(null, '/images/database.png'), [e($database->name)], $this->href($database, $withHref));
             }
         }
 

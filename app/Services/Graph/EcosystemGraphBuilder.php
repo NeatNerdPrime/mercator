@@ -22,11 +22,10 @@ class EcosystemGraphBuilder
 
         $lines = [];
         $lines[] = 'digraph  {';
-        $lines[] = 'node [shape=none labelloc="b"  width=1 height=1.1]';
 
         foreach ($entities as $entity) {
             $href = $withHref ? ' href="#'.$entity->getUID().'"' : '';
-            $lines[] = 'E'.$entity->id.' [label="'.$this->escapeLabel($entity->name).'" image="'.$iconResolver($entity).'"'.$href.']';
+            $lines[] = DotNode::withImage('E'.$entity->id, $iconResolver($entity), [$this->escapeLabel($entity->name)], $href);
 
             if ($entity->parentEntity !== null && $entities->contains('id', $entity->parentEntity->id)) {
                 $lines[] = 'E'.$entity->parentEntity->id.' -> E'.$entity->id;

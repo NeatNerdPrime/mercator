@@ -554,7 +554,7 @@ class WordHelper
             return;
         }
 
-        $imagePath = $this->generateGraphImage($this->applyGraphFontSize($dot));
+        $imagePath = $this->generateGraphImage($this->applyGraphDefaults($dot));
 
         if (is_file($imagePath) && filesize($imagePath) > 0) {
             $section->addImage($imagePath, [
@@ -602,8 +602,13 @@ class WordHelper
      * visually consistent with the surrounding Word text. Inserted first so a builder's own
      * attribute statements (e.g. SecurityZoneGraphBuilder's "node [fontname=...]") still apply on
      * top of it — Graphviz default-attribute statements are cumulative, not a full reset.
+     *
+     * Node images no longer need an imagescale/fixedsize default here: every graph builder now
+     * draws its nodes via DotNode::withImage()'s HTML-like label (an image inside a fixed-size
+     * table cell), which Graphviz scales correctly on its own regardless of the source file's
+     * native pixel size, and without capping the label text's own width like fixedsize=true did.
      */
-    private function applyGraphFontSize(string $dot): string
+    private function applyGraphDefaults(string $dot): string
     {
         $fontSize = max(1, Settings::getDefaultFontSize() - 1);
         $attrs = sprintf('graph [fontsize=%1$d];node [fontsize=%1$d];edge [fontsize=%1$d];', $fontSize);

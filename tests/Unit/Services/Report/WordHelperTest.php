@@ -36,12 +36,12 @@ describe('WordHelper::countGraphNodes (private, via reflection)', function () {
     });
 });
 
-describe('WordHelper::applyGraphFontSize (private, via reflection)', function () {
+describe('WordHelper::applyGraphDefaults (private, via reflection)', function () {
     test('injects graph/node/edge fontsize 1pt below the document default, before any node', function () {
         $dot = "digraph  {\nA [label=\"A\"]\n}";
         $expectedSize = Settings::getDefaultFontSize() - 1;
 
-        $result = callWordHelperPrivateMethod(new WordHelper, 'applyGraphFontSize', [$dot]);
+        $result = callWordHelperPrivateMethod(new WordHelper, 'applyGraphDefaults', [$dot]);
 
         expect($result)
             ->toContain('graph [fontsize='.$expectedSize.']')
