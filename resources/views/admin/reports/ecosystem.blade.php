@@ -144,32 +144,10 @@
 @section('scripts')
 @vite(['resources/js/graphviz.js'])
 <script id="dot-input">
-let dotSrc = `
-digraph  {
-node [shape=none labelloc="b"  width=1 height=1.1]
-@foreach($entities as $entity)
-    E{{ $entity->id }} [label="{{ $entity->name }}"  image="{{ $entity->icon_id === null ? '/images/entity.png' : route('admin.documents.show', $entity->icon_id) }}" href="#{{ $entity->getUID() }}"]
-    @if (($entity->parentEntity!=null)&&($entities->contains("id",$entity->parentEntity->id)))
-    E{{ $entity->parentEntity->id }} -> E{{ $entity->id }}
-    @endif
-    @endforEach
-
-    @foreach($relations as $relation)
-    @if($entities->contains('id', $relation->source_id) && $entities->contains('id', $relation->destination_id))
-    E{{ $relation->source_id }} -> E{{ $relation->destination_id }} [label=\"{{ $relation ->name }}\" href=\"#{{ $relation->getUID() }}\"]
-    @endif
-    @endforEach
-}`;
+let dotSrc = `{!! $dotSrc !!}`;
 
 document.addEventListener('graphvizReady', () => {
-    const images = [
-        { path: "/images/entity.png", width: "64px", height: "64px" },
-        @foreach($entities as $entity)
-        @if ($entity->icon_id !== null)
-        { path: "{{ route('admin.documents.show', $entity->icon_id) }}", width: "64px", height: "64px" },
-        @endif
-        @endforeach
-    ];
+    const images = @json($imageManifest);
 
     document.getElementById("graph").innerHTML = window.graphviz.layout(
         dotSrc,
@@ -178,7 +156,5 @@ document.addEventListener('graphvizReady', () => {
         { images: images }
     );
 });
-
-
 </script>
 @endsection

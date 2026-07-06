@@ -4,25 +4,47 @@ namespace App\Models;
 
 use App\Contracts\HasIconContract;
 use App\Contracts\HasPrefix;
+use App\Contracts\HasUniqueIdentifierContract;
 use App\Factories\InformationFactory;
 use App\Traits\Auditable;
+use App\Traits\HasCartographers;
 use App\Traits\HasIcon;
 use App\Traits\HasUniqueIdentifier;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\Factory;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
-use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
+use Illuminate\Support\Carbon;
 use Illuminate\Support\Collection;
-use App\Traits\HasCartographers;
 
 /**
  * App\Information
+ *
+ * @property int $id
+ * @property string $name
+ * @property string|null $type
+ * @property string|null $attributes
+ * @property string|null $description
+ * @property string|null $owner
+ * @property string|null $administrator
+ * @property string|null $storage
+ * @property int|null $security_need_c
+ * @property int|null $security_need_i
+ * @property int|null $security_need_a
+ * @property int|null $security_need_t
+ * @property int|null $security_need_auth
+ * @property string|null $sensitivity
+ * @property string|null $constraints
+ * @property string|null $retention
+ * @property Carbon|null $created_at
+ * @property Carbon|null $updated_at
+ * @property Carbon|null $deleted_at
  */
-class Information extends Model implements HasPrefix, HasIconContract
+class Information extends Model implements HasIconContract, HasPrefix, HasUniqueIdentifierContract
 {
-    use Auditable, HasIcon, HasUniqueIdentifier, HasFactory, SoftDeletes;
+    use Auditable, HasFactory, HasIcon, HasUniqueIdentifier, SoftDeletes;
     use HasCartographers;
 
     public $table = 'information';
@@ -88,7 +110,6 @@ class Information extends Model implements HasPrefix, HasIconContract
         return $this->belongsToMany(ApplicationFlow::class, 'application_flow_information', 'information_id', 'flux_id');
     }
 
-
     /**
      * Informations membres de cette catégorie.
      * Une information "catégorie" regroupe plusieurs informations enfants.
@@ -122,8 +143,8 @@ class Information extends Model implements HasPrefix, HasIconContract
 
     public function graphs(): Collection
     {
-        return once(fn() => Graph::query()
-            ->select('id','name')
+        return once(fn () => Graph::query()
+            ->select('id', 'name')
             ->where('class', '=', '2')
             ->whereLike('content', '%"#'.$this->getUID().'"%')
             ->get()
@@ -150,5 +171,4 @@ class Information extends Model implements HasPrefix, HasIconContract
             ->whereNotNull('security_need_t')
             ->whereNotNull('sensitivity');
     }
-
 }

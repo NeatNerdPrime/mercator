@@ -240,79 +240,14 @@
 @section('scripts')
 @vite(['resources/js/graphviz.js'])
 <script>
-const dotSrc = `digraph  {
-
-@foreach($applicationBlocks as $ab)
-AB{{ $ab->id }} [label="{{ $ab->name }}" shape=none labelloc="b"  width=1 height=1.1 image="/images/applicationblock.png" href="#{{$ab->getUID()}}"]
-@endforeach
-
-@foreach($applications as $application)
-A{{ $application->id }} [label="{{ $application->name }}" shape=none labelloc="b"  width=1 height=1.1 image="{{ $application->icon_id === null ? '/images/application.png' : route('admin.documents.show', $application->icon_id) }}" href="#{{$application->getUID()}}"]
-
-@foreach($application->services as $service)
-    @if($applicationServices->contains('id', $service->id))
-    A{{ $application->id }} -> AS{{ $service->id}}
-    @endif
-@endforeach
-
-@foreach($application->databases as $database)
-    @if($databases->contains('id', $database->id))
-    A{{ $application->id }} -> DB{{ $database->id}}
-    @endif
-@endforeach
-
-@if ($application->application_block_id!=null && $applicationBlocks->contains('id', $application->application_block_id))
-    AB{{ $application->application_block_id }} -> A{{ $application->id}}
-@endif
-
-@endforeach
-
-@foreach($applicationServices as $service)
-AS{{ $service->id }} [label="{{ $service->name }}" shape=none labelloc="b"  width=1 height=1.1 image="/images/applicationservice.png" href="#{{$service->getUID()}}"]
-@foreach($service->modules as $module)
-    @if($applicationModules->contains('id', $module->id))
-    AS{{ $service->id }} -> M{{$module->id}}
-    @endif
-@endforeach
-@endforeach
-
-@foreach($applicationModules as $module)
-M{{ $module->id }} [label="{{ $module->name }}" shape=none labelloc="b"  width=1 height=1.1 image="/images/applicationmodule.png" href="#{{$module->getUID()}}"]
-@endforeach
-
-@foreach($databases as $database)
-DB{{ $database->id }} [label="{{ $database->name }}" shape=none labelloc="b"  width=1 height=1.1 image="{{ $database->icon_id === null ? '/images/database.png' : route('admin.documents.show', $database->icon_id) }}" href="#{{$database->getUID()}}"]
-@endforeach
-}`;
+const dotSrc = `{!! $dotSrc !!}`;
 
 document.addEventListener('graphvizReady', () => {
     document.getElementById("graph").innerHTML = window.graphviz.layout(
         dotSrc,
         "svg",
         "{{ $engine }}",
-        {
-            images: [
-                { path: "/images/applicationblock.png",   width: "64px", height: "64px" },
-                { path: "/images/application.png",        width: "64px", height: "64px" },
-                { path: "/images/applicationservice.png", width: "64px", height: "64px" },
-                { path: "/images/applicationmodule.png",  width: "64px", height: "64px" },
-                { path: "/images/database.png",           width: "64px", height: "64px" },
-                @canAccess(App\Models\Application::class)
-                @foreach($applications as $application)
-                @if ($application->icon_id !== null)
-                { path: "{{ route('admin.documents.show', $application->icon_id) }}", width: "64px", height: "64px" },
-                @endif
-                @endforeach
-                @endcan
-                @canAccess(App\Models\Database::class)
-                @foreach($databases as $database)
-                @if ($database->icon_id !== null)
-                { path: "{{ route('admin.documents.show', $database->icon_id) }}", width: "64px", height: "64px" },
-                @endif
-                @endforeach
-                @endcan
-            ]
-        }
+        { images: @json($imageManifest) }
     );
 });
 </script>

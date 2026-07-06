@@ -1451,8 +1451,6 @@ return [
             'applications' => 'Applications',
             'ecosystem' => 'Écosystème',
             'gdpr' => 'RGPD',
-            'granularity' => 'Granularité',
-            'granularity_helper' => 'Niveau de granularité du rapport',
             'information_system' => "Système d'information",
             'logical_infrastructure' => 'Infrastructure logique',
             'physical_infrastructure' => 'Infrastructure physique',
@@ -1461,6 +1459,8 @@ return [
             'views' => 'Vues',
             'views_helper' => 'Vues présentes dans le rapport',
             'graph_helper' => 'avec schémas',
+            'generated_on' => 'Généré le',
+            'version' => 'Version de Mercator',
         ],
         'lists' => [
             'applications' => 'Applications par groupe applicatif',

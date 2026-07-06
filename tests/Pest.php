@@ -21,7 +21,9 @@ use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
 
 uses(TestCase::class, RefreshDatabase::class)
-    ->in('Feature/Api', 'Feature/Controller', 'Feature/View', 'Feature/Security', 'Feature/Cartographer');
+    ->in('Feature/Api', 'Feature/Controller', 'Feature/View', 'Feature/Security', 'Feature/Cartographer', 'Feature/Report');
+
+uses(TestCase::class, RefreshDatabase::class)->in('Unit');
 
 // Grouper automatiquement certains dossiers
 uses()->group('api')->in('Feature/Api');
@@ -60,4 +62,3 @@ function something()
 {
     // ..
 }
-

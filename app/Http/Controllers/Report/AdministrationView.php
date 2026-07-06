@@ -11,6 +11,7 @@ use App\Models\Annuaire;
 use App\Models\Domain;
 use App\Models\ForestAd;
 use App\Models\ZoneAdmin;
+use App\Services\Graph\AdministrationGraphBuilder;
 use Symfony\Component\HttpFoundation\Response;
 
 class AdministrationView extends Controller
@@ -38,11 +39,15 @@ class AdministrationView extends Controller
         $domains = Cartographer::scopedQuery(Domain::query())->get();
         $adminUsers = Cartographer::scopedQuery(AdminUser::query())->get();
 
+        $graphBuilder = new AdministrationGraphBuilder;
+
         return view('admin/reports/administration')
             ->with('zones', $zones)
             ->with('annuaires', $annuaires)
             ->with('forests', $forests)
             ->with('domains', $domains)
-            ->with('adminUsers', $adminUsers);
+            ->with('adminUsers', $adminUsers)
+            ->with('dotSrc', $graphBuilder->buildDot($zones, $annuaires, $forests, $domains, $adminUsers))
+            ->with('imageManifest', $graphBuilder->imageManifest());
     }
 }

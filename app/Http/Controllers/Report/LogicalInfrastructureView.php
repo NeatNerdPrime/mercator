@@ -24,6 +24,7 @@ use App\Models\Subnetwork;
 use App\Models\Vlan;
 use App\Models\WifiTerminal;
 use App\Models\Workstation;
+use App\Services\Graph\LogicalInfrastructureGraphBuilder;
 use Gate;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -369,6 +370,34 @@ class LogicalInfrastructureView extends Controller
 
         }
 
+        $showIp = (bool) $request->session()->get('show_ip');
+
+        $graphBuilder = new LogicalInfrastructureGraphBuilder;
+        $dotSrc = $graphBuilder->buildDot(
+            $networks,
+            $subnetworks,
+            $gateways,
+            $externalConnectedEntities,
+            $vlans,
+            $networkSwitches,
+            $clusters,
+            $logicalServers,
+            $dhcpServers,
+            $dnsservers,
+            $certificates,
+            $containers,
+            $routers,
+            $securityDevices,
+            $workstations,
+            $wifiTerminals,
+            $phones,
+            $peripherals,
+            $physicalSecurityDevices,
+            $storageDevices,
+            $showIp
+        );
+        $imageManifest = $graphBuilder->imageManifest($containers, $logicalServers, $securityDevices, $physicalSecurityDevices, $peripherals, $workstations);
+
         return view(
             'admin/reports/logical_infrastructure',
             compact(
@@ -393,7 +422,9 @@ class LogicalInfrastructureView extends Controller
                 'logicalServers',
                 'certificates',
                 'containers',
-                'vlans'
+                'vlans',
+                'dotSrc',
+                'imageManifest'
             )
         );
     }

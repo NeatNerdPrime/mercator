@@ -4,6 +4,7 @@ namespace App\Models;
 
 use App\Contracts\HasIconContract;
 use App\Contracts\HasPrefix;
+use App\Contracts\HasUniqueIdentifierContract;
 use App\Factories\ApplicationModuleFactory;
 use App\Traits\Auditable;
 use App\Traits\HasIcon;
@@ -20,7 +21,7 @@ use App\Traits\HasCartographers;
 /**
  * App\ApplicationModule
  */
-class ApplicationModule extends Model implements HasPrefix, HasIconContract
+class ApplicationModule extends Model implements HasPrefix, HasIconContract, HasUniqueIdentifierContract
 {
     use Auditable, HasUniqueIdentifier, HasIcon, HasFactory, SoftDeletes;
     use HasCartographers;

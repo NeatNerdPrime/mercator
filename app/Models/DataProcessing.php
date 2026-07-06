@@ -4,6 +4,7 @@ namespace App\Models;
 
 use App\Contracts\HasIconContract;
 use App\Contracts\HasPrefix;
+use App\Contracts\HasUniqueIdentifierContract;
 use App\Factories\DataProcessingFactory;
 use App\Traits\Auditable;
 use App\Traits\HasIcon;
@@ -17,7 +18,7 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 /**
  * App\Actor
  */
-class DataProcessing extends Model implements HasPrefix, HasIconContract
+class DataProcessing extends Model implements HasPrefix, HasIconContract, HasUniqueIdentifierContract
 {
     use Auditable, HasIcon, HasUniqueIdentifier, HasFactory, SoftDeletes;
 

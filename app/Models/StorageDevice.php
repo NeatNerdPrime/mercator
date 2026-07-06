@@ -4,6 +4,7 @@ namespace App\Models;
 
 use App\Contracts\HasIconContract;
 use App\Contracts\HasPrefix;
+use App\Contracts\HasUniqueIdentifierContract;
 use App\Factories\StorageDeviceFactory;
 use App\Traits\Auditable;
 use App\Traits\HasIcon;
@@ -20,7 +21,7 @@ use App\Traits\HasCartographers;
 /**
  * App\StorageDevice
  */
-class StorageDevice extends Model implements HasIconContract, HasPrefix
+class StorageDevice extends Model implements HasIconContract, HasPrefix, HasUniqueIdentifierContract
 {
     use Auditable, HasIcon, HasUniqueIdentifier, HasFactory, SoftDeletes;
     use HasCartographers;

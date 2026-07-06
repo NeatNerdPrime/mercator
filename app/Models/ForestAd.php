@@ -4,6 +4,7 @@ namespace App\Models;
 
 use App\Contracts\HasIconContract;
 use App\Contracts\HasPrefix;
+use App\Contracts\HasUniqueIdentifierContract;
 use App\Factories\ForestAdFactory;
 use App\Traits\Auditable;
 use App\Traits\HasIcon;
@@ -20,7 +21,7 @@ use App\Traits\HasCartographers;
 /**
  * App\ForestAd
  */
-class ForestAd extends Model implements HasPrefix, HasIconContract
+class ForestAd extends Model implements HasPrefix, HasIconContract, HasUniqueIdentifierContract
 {
     use Auditable, HasIcon, HasUniqueIdentifier, HasFactory, SoftDeletes;
     use HasCartographers;

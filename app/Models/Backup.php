@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use App\Contracts\HasIconContract;
+use App\Contracts\HasUniqueIdentifierContract;
 use App\Factories\BackupFactory;
 use App\Traits\Auditable;
 use App\Traits\HasIcon;
@@ -14,7 +15,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use App\Traits\HasCartographers;
 
-class Backup extends Model implements HasIconContract
+class Backup extends Model implements HasIconContract, HasUniqueIdentifierContract
 {
     use Auditable, HasIcon, HasUniqueIdentifier, HasFactory, SoftDeletes;
     use HasCartographers;

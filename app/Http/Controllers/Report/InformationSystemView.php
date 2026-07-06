@@ -14,6 +14,7 @@ use App\Models\MacroProcessus;
 use App\Models\Operation;
 use App\Models\Process;
 use App\Models\Task;
+use App\Services\Graph\InformationSystemGraphBuilder;
 use Symfony\Component\HttpFoundation\Response;
 
 class InformationSystemView extends Controller
@@ -197,6 +198,8 @@ class InformationSystemView extends Controller
             $all_process = null;
         }
 
+        $graphBuilder = new InformationSystemGraphBuilder;
+
         return view('admin/reports/information_system')
             ->with('all_macroprocess', $all_macroprocess)
             ->with('macroProcessuses', $macroProcessuses)
@@ -206,6 +209,8 @@ class InformationSystemView extends Controller
             ->with('operations', $operations)
             ->with('tasks', $tasks)
             ->with('actors', $actors)
-            ->with('informations', $informations);
+            ->with('informations', $informations)
+            ->with('dotSrc', $graphBuilder->buildDot($macroProcessuses, $processes, $activities, $operations, $tasks, $actors, $informations))
+            ->with('imageManifest', $graphBuilder->imageManifest());
     }
 }

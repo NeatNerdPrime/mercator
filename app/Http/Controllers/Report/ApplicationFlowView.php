@@ -13,6 +13,7 @@ use App\Models\ApplicationService;
 use App\Models\Database;
 use App\Models\ApplicationFlow;
 use App\Models\Application;
+use App\Services\Graph\ApplicationFlowGraphBuilder;
 use Symfony\Component\HttpFoundation\Response;
 
 class ApplicationFlowView extends Controller
@@ -171,6 +172,8 @@ class ApplicationFlowView extends Controller
         $all_applications = Cartographer::scopedQuery(Application::query())->orderBy('name')->pluck('name', 'id');
         $all_databases = Cartographer::scopedQuery(Database::query())->orderBy('name')->pluck('name', 'id');
 
+        $graphBuilder = new ApplicationFlowGraphBuilder;
+
         // return
         return view('admin/reports/application_flows')
             ->with('all_applicationBlocks', $all_applicationBlocks)
@@ -180,6 +183,8 @@ class ApplicationFlowView extends Controller
             ->with('applicationServices', $applicationServices)
             ->with('applicationModules', $applicationModules)
             ->with('databases', $databases)
-            ->with('flows', $flows);
+            ->with('flows', $flows)
+            ->with('dotSrc', $graphBuilder->buildDot($applications, $applicationServices, $applicationModules, $databases, $flows))
+            ->with('imageManifest', $graphBuilder->imageManifest($applications));
     }
 }

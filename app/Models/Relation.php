@@ -4,6 +4,7 @@ namespace App\Models;
 
 use App\Contracts\HasIconContract;
 use App\Contracts\HasPrefix;
+use App\Contracts\HasUniqueIdentifierContract;
 use App\Factories\RelationFactory;
 use App\Traits\Auditable;
 use App\Traits\HasIcon;
@@ -20,7 +21,7 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 /**
  * App\Relation
  */
-class Relation extends Model implements HasPrefix, HasIconContract
+class Relation extends Model implements HasPrefix, HasIconContract, HasUniqueIdentifierContract
 {
     use Auditable, HasIcon, HasUniqueIdentifier, HasFactory, SoftDeletes;
 

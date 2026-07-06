@@ -10,6 +10,7 @@ use App\Models\ApplicationModule;
 use App\Models\ApplicationService;
 use App\Models\Cartographer;
 use App\Models\Database;
+use App\Services\Graph\ApplicationGraphBuilder;
 use Gate;
 use Illuminate\Http\Request;
 use Illuminate\View\View;
@@ -114,6 +115,8 @@ class ApplicationView extends Controller
             $all_applications = null;
         }
 
+        $graphBuilder = new ApplicationGraphBuilder;
+
         return view('admin/reports/applications')
             ->with('all_applicationBlocks', $all_applicationBlocks)
             ->with('all_applications', $all_applications)
@@ -122,6 +125,8 @@ class ApplicationView extends Controller
             ->with('applicationServices', $applicationServices)
             ->with('applicationModules', $applicationModules)
             ->with('databases', $databases)
-            ->with('flows', $flows);
+            ->with('flows', $flows)
+            ->with('dotSrc', $graphBuilder->buildDot($applicationBlocks, $applications, $applicationServices, $applicationModules, $databases))
+            ->with('imageManifest', $graphBuilder->imageManifest($applications, $databases));
     }
 }

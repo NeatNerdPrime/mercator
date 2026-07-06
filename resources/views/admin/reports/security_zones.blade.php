@@ -126,55 +126,14 @@
 @section('scripts')
 @vite(['resources/js/graphviz.js'])
 <script>
-let dotSrc = `
-digraph {
-    graph [rankdir=TB fontname="FreeSans"]
-    node  [fontname="FreeSans"]
-    edge  [fontname="FreeSans"]
-
-@foreach($zones as $zone)
-ZONE{{ $zone->id }} [label="{{ addslashes($zone->name) }}" shape=none labelloc="b" width=1 height=1.1 image="/images/zone.png" href="#{{ $zone->getUID() }}"]
-@endforeach
-
-@foreach($buildings as $building)
-BUILD{{ $building->id }} [label="{{ addslashes($building->name) }}" shape=none labelloc="b" width=1 height=1.1 image="/images/building.png" href="#{{ $building->getUID() }}"]
-@endforeach
-
-@foreach($adminUsers as $adminUser)
-AU{{ $adminUser->id }} [label="{{ addslashes($adminUser->user_id) }}" shape=none labelloc="b" width=1 height=1.1 image="/images/user.png" href="#{{ $adminUser->getUID() }}"]
-@endforeach
-
-@foreach($zones as $zone)
-    @foreach($zone->childZones as $child)
-        @if($zones->contains('id', $child->id))
-ZONE{{ $zone->id }} -> ZONE{{ $child->id }}
-        @endif
-    @endforeach
-    @foreach($zone->buildings as $building)
-        @if($buildings->contains('id', $building->id))
-ZONE{{ $zone->id }} -> BUILD{{ $building->id }}
-        @endif
-    @endforeach
-    @foreach($zone->adminUsers as $adminUser)
-        @if($adminUsers->contains('id', $adminUser->id))
-ZONE{{ $zone->id }} -> AU{{ $adminUser->id }}
-        @endif
-    @endforeach
-@endforeach
-}`;
+let dotSrc = `{!! $dotSrc !!}`;
 
 document.addEventListener('graphvizReady', () => {
     document.getElementById('graph').innerHTML = window.graphviz.layout(
         dotSrc,
         'svg',
         '{{ $engine }}',
-        {
-            images: [
-                { path: '/images/zone.png', width: '64px', height: '64px' },
-                { path: '/images/building.png', width: '64px', height: '64px' },
-                { path: '/images/user.png',     width: '64px', height: '64px' },
-            ]
-        }
+        { images: @json($imageManifest) }
     );
 
     // Download SVG

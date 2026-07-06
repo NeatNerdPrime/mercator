@@ -3,22 +3,63 @@
 namespace App\Models;
 
 use App\Contracts\HasPrefix;
+use App\Contracts\HasUniqueIdentifierContract;
 use App\Factories\LogicalFlowFactory;
 use App\Traits\Auditable;
+use App\Traits\HasCartographers;
 use App\Traits\HasUniqueIdentifier;
 use Illuminate\Database\Eloquent\Factories\Factory;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\SoftDeletes;
-use App\Traits\HasCartographers;
+use Illuminate\Support\Carbon;
 
 /**
  * App\LogicalFlow
+ *
+ * @property int $id
+ * @property string $name
+ * @property string|null $type
+ * @property string|null $attributes
+ * @property string|null $description
+ * @property string|null $chain
+ * @property string|null $interface
+ * @property int|null $router_id
+ * @property string|null $priority
+ * @property string|null $protocol
+ * @property string|null $source_ip_range
+ * @property string|null $dest_ip_range
+ * @property string|null $source_port
+ * @property string|null $dest_port
+ * @property int|null $logical_server_source_id
+ * @property int|null $peripheral_source_id
+ * @property int|null $physical_server_source_id
+ * @property int|null $storage_device_source_id
+ * @property int|null $workstation_source_id
+ * @property int|null $physical_security_device_source_id
+ * @property int|null $security_device_source_id
+ * @property int|null $subnetwork_source_id
+ * @property int|null $cluster_source_id
+ * @property int|null $logical_server_dest_id
+ * @property int|null $peripheral_dest_id
+ * @property int|null $physical_server_dest_id
+ * @property int|null $storage_device_dest_id
+ * @property int|null $workstation_dest_id
+ * @property int|null $physical_security_device_dest_id
+ * @property int|null $security_device_dest_id
+ * @property int|null $subnetwork_dest_id
+ * @property int|null $cluster_dest_id
+ * @property string|null $users
+ * @property string|null $schedule
+ * @property string|null $action
+ * @property Carbon|null $created_at
+ * @property Carbon|null $updated_at
+ * @property Carbon|null $deleted_at
  */
-class LogicalFlow extends Model implements HasPrefix
+class LogicalFlow extends Model implements HasPrefix, HasUniqueIdentifierContract
 {
-    use Auditable, HasUniqueIdentifier, HasFactory, SoftDeletes;
+    use Auditable, HasFactory, HasUniqueIdentifier, SoftDeletes;
     use HasCartographers;
 
     public $table = 'logical_flows';
@@ -268,7 +309,7 @@ class LogicalFlow extends Model implements HasPrefix
     {
         return $this->getEntityUID(self::DEST_RELATIONS);
     }
-    
+
     /* '*~-.,¸¸.-~·*'¨¯'*~-.,¸¸.-~·*'¨¯ Private ¯¨'*·~-.¸¸,.-~*''*~-.,¸¸.-~·*'¨¯ */
 
     /**
@@ -282,7 +323,8 @@ class LogicalFlow extends Model implements HasPrefix
             // Get mask bits
             $parts = explode('/', $cidr);
             if (count($parts) !== 2) {
-                \Log::warning("LogicalFlow: invalid CIDR format", ['cidr' => $cidr, 'id' => $this->id]);
+                \Log::warning('LogicalFlow: invalid CIDR format', ['cidr' => $cidr, 'id' => $this->id]);
+
                 return false;
             }
             [$net, $maskBits] = $parts;

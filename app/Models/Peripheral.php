@@ -4,6 +4,7 @@ namespace App\Models;
 
 use App\Contracts\HasIconContract;
 use App\Contracts\HasPrefix;
+use App\Contracts\HasUniqueIdentifierContract;
 use App\Factories\PeripheralFactory;
 use App\Traits\Auditable;
 use App\Traits\HasIcon;
@@ -20,7 +21,7 @@ use App\Traits\HasCartographers;
 /**
  * App\Peripheral
  */
-class Peripheral extends Model implements HasIconContract, HasPrefix
+class Peripheral extends Model implements HasIconContract, HasPrefix, HasUniqueIdentifierContract
 {
     use Auditable, HasFactory, HasUniqueIdentifier, HasIcon, SoftDeletes;
     use HasCartographers;

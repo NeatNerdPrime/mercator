@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use App\Contracts\HasPrefix;
+use App\Contracts\HasUniqueIdentifierContract;
 use App\Factories\ApplicationFlowFactory;
 use App\Traits\Auditable;
 use App\Traits\HasUniqueIdentifier;
@@ -37,7 +38,7 @@ use App\Traits\HasCartographers;
  * @property \Illuminate\Support\Carbon|null $updated_at
  * @property \Illuminate\Support\Carbon|null $deleted_at
  */
-class ApplicationFlow extends Model implements HasPrefix
+class ApplicationFlow extends Model implements HasPrefix, HasUniqueIdentifierContract
 {
     use Auditable, HasFactory, HasUniqueIdentifier, SoftDeletes;
     use HasCartographers;

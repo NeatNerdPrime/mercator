@@ -4,6 +4,7 @@ namespace App\Models;
 
 use App\Contracts\HasIconContract;
 use App\Contracts\HasPrefix;
+use App\Contracts\HasUniqueIdentifierContract;
 use App\Factories\BuildingFactory;
 use App\Traits\Auditable;
 use App\Traits\HasIcon;
@@ -21,7 +22,7 @@ use App\Traits\HasCartographers;
 /**
  * App\Building
  */
-class Building extends Model implements HasIconContract, HasPrefix
+class Building extends Model implements HasIconContract, HasPrefix, HasUniqueIdentifierContract
 {
     use Auditable, HasIcon, HasUniqueIdentifier, HasFactory, SoftDeletes;
     use HasCartographers;

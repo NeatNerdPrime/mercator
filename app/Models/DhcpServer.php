@@ -4,6 +4,7 @@ namespace App\Models;
 
 use App\Contracts\HasIconContract;
 use App\Contracts\HasPrefix;
+use App\Contracts\HasUniqueIdentifierContract;
 use App\Factories\DhcpServerFactory;
 use App\Traits\Auditable;
 use App\Traits\HasIcon;
@@ -18,7 +19,7 @@ use App\Traits\HasCartographers;
 /**
  * App\DhcpServer
  */
-class DhcpServer extends Model implements HasPrefix, HasIconContract
+class DhcpServer extends Model implements HasPrefix, HasIconContract, HasUniqueIdentifierContract
 {
     use Auditable, HasFactory, HasIcon, HasUniqueIdentifier, SoftDeletes;
     use HasCartographers;

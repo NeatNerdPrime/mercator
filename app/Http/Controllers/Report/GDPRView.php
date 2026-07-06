@@ -11,6 +11,7 @@ use App\Models\MacroProcessus;
 use App\Models\Application;
 use App\Models\Process;
 use App\Models\SecurityControl;
+use App\Services\Graph\GdprGraphBuilder;
 use Symfony\Component\HttpFoundation\Response;
 
 class GDPRView extends Controller
@@ -145,12 +146,16 @@ class GDPRView extends Controller
         }
         $applications = $appQuery->get();
 
+        $graphBuilder = new GdprGraphBuilder;
+
         return view('admin/reports/gdpr')
             ->with('all_macroprocess', $all_macroprocess)
             ->with('macroProcessuses', $macroProcessuses)
             ->with('processes', $processes)
             ->with('all_process', $all_process)
             ->with('dataProcessings', $dataProcessings)
-            ->with('applications', $applications);
+            ->with('applications', $applications)
+            ->with('dotSrc', $graphBuilder->buildDot($macroProcessuses, $processes, $dataProcessings, $applications))
+            ->with('imageManifest', $graphBuilder->imageManifest());
     }
 }

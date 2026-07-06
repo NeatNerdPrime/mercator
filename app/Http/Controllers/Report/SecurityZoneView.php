@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Report;
 use App\Http\Controllers\Controller;
 use App\Models\Cartographer;
 use App\Models\Zone;
+use App\Services\Graph\SecurityZoneGraphBuilder;
 use Gate;
 use Illuminate\Http\Request;
 use Symfony\Component\HttpFoundation\Response;
@@ -35,12 +36,18 @@ class SecurityZoneView extends Controller
         $buildings  = $zones->flatMap(fn($z) => $z->buildings)->unique('id')->sortBy('name');
         $adminUsers = $zones->flatMap(fn($z) => $z->adminUsers)->unique('id')->sortBy('user_id');
 
+        $graphBuilder = new SecurityZoneGraphBuilder;
+        $dotSrc = $graphBuilder->buildDot($zones, $buildings, $adminUsers);
+        $imageManifest = $graphBuilder->imageManifest();
+
         return view('admin/reports/security_zones', compact(
             'allZones',
             'selectedIds',
             'zones',
             'buildings',
             'adminUsers',
+            'dotSrc',
+            'imageManifest',
         ));
     }
 }

@@ -4,6 +4,7 @@ namespace App\Models;
 
 use App\Contracts\HasIconContract;
 use App\Contracts\HasPrefix;
+use App\Contracts\HasUniqueIdentifierContract;
 use App\Factories\PhysicalSecurityDeviceFactory;
 use App\Traits\Auditable;
 use App\Traits\HasIcon;
@@ -20,7 +21,7 @@ use App\Traits\HasCartographers;
 /**
  * App\PhysicalSecurityDevice
  */
-class PhysicalSecurityDevice extends Model implements HasIconContract, HasPrefix
+class PhysicalSecurityDevice extends Model implements HasIconContract, HasPrefix, HasUniqueIdentifierContract
 {
     use Auditable, HasIcon, HasFactory, HasUniqueIdentifier, SoftDeletes;
     use HasCartographers;

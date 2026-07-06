@@ -4,6 +4,7 @@ namespace App\Models;
 
 use App\Contracts\HasIconContract;
 use App\Contracts\HasPrefix;
+use App\Contracts\HasUniqueIdentifierContract;
 use App\Factories\ProcessFactory;
 use App\Traits\Auditable;
 use App\Traits\HasCartographers;
@@ -22,7 +23,7 @@ use Illuminate\Support\Collection;
 /**
  * App\Process
  */
-class Process extends Model implements HasIconContract, HasPrefix
+class Process extends Model implements HasIconContract, HasPrefix, HasUniqueIdentifierContract
 {
     use Auditable, HasFactory, HasUniqueIdentifier, HasIcon, SoftDeletes;
     use HasCartographers;

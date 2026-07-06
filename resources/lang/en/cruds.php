@@ -1440,8 +1440,6 @@ return [
             'applications' => 'Applications',
             'ecosystem' => 'Ecosystem',
             'gdpr' => 'GDPR',
-            'granularity' => 'Granularity',
-            'granularity_helper' => 'Report granularity level',
             'network_infrastructure' => 'Network infrastructure',
             'information_system' => 'Information system',
             'logical_infrastructure' => 'Logical infrastructure',
@@ -1450,6 +1448,8 @@ return [
             'views' => 'Views',
             'views_helper' => 'Views in the report',
             'graph_helper' => 'with schemas',
+            'generated_on' => 'Generated on',
+            'version' => 'Mercator version',
         ],
         'lists' => [
             'applications' => 'Applications by application group',

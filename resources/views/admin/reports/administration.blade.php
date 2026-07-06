@@ -180,59 +180,14 @@
 @vite(['resources/js/graphviz.js'])
 
 <script>
-let dotSrc = `
-digraph  {
-@foreach($zones as $zone)
-Z{{ $zone->id }} [label="{{ $zone->name }}" shape=none labelloc="b"  width=1 height=1.1 image="/images/zoneadmin.png" href="#{{$zone->getUID()}}"]
-@foreach($zone->annuaires as $annuaire)
-@if($annuaires->contains('id', $annuaire->id))
-Z{{ $zone->id }} -> A{{$annuaire->id}}
-@endif
-@endforeach
-@foreach($zone->forestAds as $forest)
-@if($forests->contains('id', $forest->id))
-Z{{ $zone->id }} -> F{{$forest->id}}
-@endif
-@endforeach
-@endforEach
-@foreach($annuaires as $annuaire)
-A{{ $annuaire->id }} [label="{{ $annuaire->name }}" shape=none labelloc="b"  width=1 height=1.1 image="/images/annuaire.png" href="#{{$annuaire->getUID()}}"]
-@endforEach
-@foreach($forests as $forest)
-F{{ $forest->id }} [label="{{ $forest->name }}" shape=none labelloc="b"  width=1 height=1.1 image="/images/ldap.png" href="#{{$forest->getUID()}}"]
-@foreach($forest->domains as $domain)
-@if($domains->contains('id', $domain->id))
-F{{ $forest->id }} -> D{{ $domain->id }}
-@endif
-@endforeach
-@endforeach
-@foreach($domains as $domain)
-D{{ $domain->id }} [label="{{ $domain->name }}" shape=none labelloc="b"  width=1 height=1.1 image="/images/domain.png" href="#{{$domain->getUID()}}"]
-@endforeach
-@canAccess(App\Models\AdminUser::class)
-@foreach($adminUsers as $user)
-@if ($user->domain_id!==null && $domains->contains('id', $user->domain_id))
-U{{$user->id}} [label="{{ $user->user_id }}" shape=none labelloc="b"  width=1 height=1.1 image="/images/user.png" href="#{{$user->getUID()}}"]
-D{{$user->domain_id}} -> U{{$user->id}}
-@endif
-@endforeach
-@endcan
-}`;
+let dotSrc = `{!! $dotSrc !!}`;
 
 document.addEventListener('graphvizReady', () => {
     document.getElementById("graph").innerHTML = window.graphviz.layout(
         dotSrc,
         "svg",
         "{{ $engine }}",
-        {
-            images: [
-                { path: "/images/zoneadmin.png", width: "64px", height: "64px" },
-                { path: "/images/annuaire.png",  width: "64px", height: "64px" },
-                { path: "/images/ldap.png",      width: "64px", height: "64px" },
-                { path: "/images/domain.png",    width: "64px", height: "64px" },
-                { path: "/images/user.png",      width: "64px", height: "64px" },
-            ]
-        }
+        { images: @json($imageManifest) }
     );
 });
 </script>
