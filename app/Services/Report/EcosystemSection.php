@@ -65,8 +65,7 @@ class EcosystemSection implements ReportSection
                 $helper->addLinkListRow($table, trans('cruds.entity.fields.subsidiaries'), $entity->entities, $selectedVues);
             }
 
-            $helper->addHTMLRow($table, trans('cruds.entity.fields.description'), $entity->description);
-            $helper->addImageRow($table, '', $helper->resolveIconPath($entity->icon_id, '/images/application.png'));
+            $helper->addDescriptionCellWithIcon($table, trans('cruds.entity.fields.description'), $entity->description, $entity, '/images/application.png');
 
             $helper->addHTMLRow($table, trans('cruds.entity.fields.security_level'), $entity->security_level);
             $helper->addHTMLRow($table, trans('cruds.entity.fields.contact_point'), $entity->contact_point);

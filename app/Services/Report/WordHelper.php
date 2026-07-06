@@ -2,6 +2,7 @@
 
 namespace App\Services\Report;
 
+use App\Contracts\HasIconContract;
 use App\Contracts\HasUniqueIdentifierContract;
 use App\Models\Activity;
 use App\Models\Actor;
@@ -61,6 +62,7 @@ use App\Models\Zone;
 use App\Models\ZoneAdmin;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\Log;
+use PhpOffice\PhpWord\Element\Cell;
 use PhpOffice\PhpWord\Element\Section;
 use PhpOffice\PhpWord\Element\Table;
 use PhpOffice\PhpWord\Element\TextRun;
@@ -69,6 +71,8 @@ use PhpOffice\PhpWord\Settings;
 use PhpOffice\PhpWord\Shared\Html;
 use PhpOffice\PhpWord\SimpleType\Jc;
 use PhpOffice\PhpWord\SimpleType\JcTable;
+use PhpOffice\PhpWord\SimpleType\TblWidth;
+use PhpOffice\PhpWord\Style\Table as TableStyle;
 
 class WordHelper
 {
@@ -86,6 +90,13 @@ class WordHelper
     ];
 
     /**
+     * Twentieths of a point (twips) of space added below Heading 1/2/3 titles (addTitleStyle
+     * depths 1-3, used by every Section::addBookmarkedTitle()/addTitle() call), so a title isn't
+     * flush against the content that immediately follows it. 120 twips = 6pt.
+     */
+    private const TITLE_SPACE_AFTER = 120;
+
+    /**
      * DPI used to rasterize DOT graphs with Graphviz (must match the `-Gdpi=` flag passed to
      * `dot` in generateGraphImage()) — needed to convert the resulting PNG's pixel dimensions
      * back to points for Word insertion.
@@ -96,6 +107,42 @@ class WordHelper
      * Maximum width (in points) a graph is displayed at in the report; the usable page width.
      */
     private const MAX_GRAPH_WIDTH_PT = 450;
+
+    /**
+     * Icon size (points, width and height) used inside report tables — half of the previous
+     * hard-coded 60pt addImageRow() default, named explicitly rather than left as a magic value.
+     */
+    public const TABLE_ICON_SIZE = 30;
+
+    /**
+     * Twip width of the icon column in the description+icon nested table built by
+     * addDescriptionCellWithIcon(): just enough room for TABLE_ICON_SIZE (20 twips = 1pt, the same
+     * unit every other add*Row() cell width already uses) plus a small internal margin.
+     */
+    private const DESCRIPTION_ICON_COLUMN_WIDTH = 700;
+
+    /**
+     * Twip width of the description text column.
+     */
+    private const DESCRIPTION_TEXT_COLUMN_WIDTH = 5000;
+
+    /**
+     * Twip total width of the description+icon nested table — deliberately LESS than the outer
+     * "value" cell's own width (6000 twips, the convention every other add*Row() method already
+     * uses), leaving real, unoccupied space to its right. This is what actually keeps the icon
+     * clear of the outer table's right border: a cell-margin/padding trick was tried first and
+     * proved unreliable (Word's default "autofit" table layout recomputes column widths from
+     * content and can discard a declared margin entirely), whereas a nested table that is simply
+     * narrower than its container is guaranteed to leave a gap, regardless of layout quirks.
+     */
+    private const DESCRIPTION_NESTED_TABLE_WIDTH = 5700;
+
+    /**
+     * Twip right margin applied to the icon column: cosmetic breathing room between the
+     * description text and the icon, not what keeps the icon clear of the outer border (see
+     * DESCRIPTION_NESTED_TABLE_WIDTH for that).
+     */
+    private const DESCRIPTION_ICON_RIGHT_MARGIN = 60;
 
     /**
      * Maps each cartographied model to the `vues[]` id of the report section it belongs to.
@@ -171,9 +218,9 @@ class WordHelper
         $phpWord->addNumberingStyle(
             'hNum',
             ['type' => 'multilevel', 'levels' => [
-                ['pStyle' => 'Heading1', 'format' => 'decimal', 'text' => '%1.'],
-                ['pStyle' => 'Heading2', 'format' => 'decimal', 'text' => '%1.%2.'],
-                ['pStyle' => 'Heading3', 'format' => 'decimal', 'text' => '%1.%2.%3.'],
+                ['pStyle' => 'Heading1', 'format' => 'decimal', 'text' => '%1.', 'suffix' => 'space'],
+                ['pStyle' => 'Heading2', 'format' => 'decimal', 'text' => '%1.%2.', 'suffix' => 'space'],
+                ['pStyle' => 'Heading3', 'format' => 'decimal', 'text' => '%1.%2.%3.', 'suffix' => 'space'],
             ],
             ]
         );
@@ -185,17 +232,17 @@ class WordHelper
         $phpWord->addTitleStyle(
             1,
             ['size' => 16, 'bold' => true],
-            ['numStyle' => 'hNum', 'numLevel' => 0]
+            ['numStyle' => 'hNum', 'numLevel' => 0, 'spaceBefore' => self::TITLE_SPACE_AFTER, 'spaceAfter' => self::TITLE_SPACE_AFTER]
         );
         $phpWord->addTitleStyle(
             2,
             ['size' => 14, 'bold' => true],
-            ['numStyle' => 'hNum', 'numLevel' => 1]
+            ['numStyle' => 'hNum', 'numLevel' => 1, 'spaceBefore' => self::TITLE_SPACE_AFTER, 'spaceAfter' => self::TITLE_SPACE_AFTER]
         );
         $phpWord->addTitleStyle(
             3,
             ['size' => 12, 'bold' => true],
-            ['numStyle' => 'hNum', 'numLevel' => 2]
+            ['numStyle' => 'hNum', 'numLevel' => 2, 'spaceBefore' => self::TITLE_SPACE_AFTER, 'spaceAfter' => self::TITLE_SPACE_AFTER]
         );
 
         return $phpWord;
@@ -294,15 +341,47 @@ class WordHelper
         return public_path($fallbackImage);
     }
 
-    public function addImageRow(Table $table, string $title, string $imagePath, int $width = 60, int $height = 60): void
+    /**
+     * Adds a description row whose value cell shows the description text on the left and the
+     * object's icon (TABLE_ICON_SIZE, half of the interactive screens' own size) on the right, via
+     * a borderless nested table — replaces the old pattern of a description row immediately
+     * followed by its own separate icon-only row. Falls back to a plain description cell (no
+     * nested table) when the object has no icon and the fallback image file doesn't exist either.
+     */
+    public function addDescriptionCellWithIcon(Table $table, string $title, ?string $description, Model&HasIconContract $model, string $fallbackIcon): void
     {
+        $imagePath = $this->resolveIconPath($model->getIconId(), $fallbackIcon);
+
         $table->addRow();
         $table->addCell(2000, self::NO_SPACE)->addText($title, self::FANCY_LEFT_TABLE_CELL_STYLE, self::NO_SPACE);
         $cell = $table->addCell(6000);
 
-        if (is_file($imagePath)) {
-            $cell->addImage($imagePath, ['width' => $width, 'height' => $height]);
+        if (! is_file($imagePath)) {
+            $this->addHtmlSafely($cell, $description);
+
+            return;
         }
+
+        // borderColor is set to white (not left unset) alongside borderSize 0: some renderers draw
+        // a hairline for a sz=0 border rather than fully suppressing it, so an explicit
+        // background-matching color is the only reliable way to make it disappear everywhere.
+        // LAYOUT_FIXED + an explicit width narrower than the outer "value" cell (see
+        // DESCRIPTION_NESTED_TABLE_WIDTH) is what keeps the icon clear of the outer table's right
+        // border: it leaves real unoccupied space to the nested table's right, which — unlike a
+        // cell margin — can't be discarded by a layout engine recomputing column widths.
+        $nested = $cell->addTable([
+            'borderSize' => 0,
+            'borderColor' => 'FFFFFF',
+            'cellMargin' => 0,
+            'cellMarginRight' => self::DESCRIPTION_ICON_RIGHT_MARGIN,
+            'layout' => TableStyle::LAYOUT_FIXED,
+            'unit' => TblWidth::TWIP,
+            'width' => self::DESCRIPTION_NESTED_TABLE_WIDTH,
+        ]);
+        $nested->addRow();
+        $this->addHtmlSafely($nested->addCell(self::DESCRIPTION_TEXT_COLUMN_WIDTH, ['vAlign' => 'center']), $description);
+        $nested->addCell(self::DESCRIPTION_ICON_COLUMN_WIDTH, ['vAlign' => 'center'])
+            ->addImage($imagePath, ['width' => self::TABLE_ICON_SIZE, 'height' => self::TABLE_ICON_SIZE, 'alignment' => Jc::RIGHT]);
     }
 
     /**
@@ -544,7 +623,7 @@ class WordHelper
      */
     private static function capWidthToPt(int $widthPx, int $dpi): float
     {
-        $naturalWidthPt = $widthPx * 72 / $dpi;
+        $naturalWidthPt = $widthPx * 52 / $dpi;
 
         return min($naturalWidthPt, self::MAX_GRAPH_WIDTH_PT);
     }
@@ -593,8 +672,17 @@ class WordHelper
     {
         $table->addRow();
         $table->addCell(2000)->addText($title, self::FANCY_LEFT_TABLE_CELL_STYLE, self::NO_SPACE);
+        $this->addHtmlSafely($table->addCell(6000), $value);
+    }
+
+    /**
+     * Shared by addHTMLRow() and addDescriptionCellWithIcon(): PhpWord's Shared\Html::addHtml()
+     * throws on malformed markup, logged and swallowed rather than failing the whole report.
+     */
+    private function addHtmlSafely(Cell $cell, ?string $value): void
+    {
         try {
-            Html::addHtml($table->addCell(6000), str_replace('<br>', '<br/>', $value ?? ''));
+            Html::addHtml($cell, str_replace('<br>', '<br/>', $value ?? ''));
         } catch (\Exception $e) {
             Log::error('WordHelper - Invalid HTML '.$value);
         }

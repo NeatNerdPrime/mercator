@@ -144,8 +144,7 @@ class PhysicalInfrastructureSection implements ReportSection
 
             $helper->addTextRow($table, trans('cruds.site.fields.type'), $site->type);
             $helper->addTextRow($table, trans('cruds.site.fields.attributes'), $this->formatAttributes($site->attributes));
-            $helper->addHTMLRow($table, trans('cruds.site.fields.description'), $site->description);
-            $helper->addImageRow($table, '', $helper->resolveIconPath($site->icon_id, '/images/site.png'));
+            $helper->addDescriptionCellWithIcon($table, trans('cruds.site.fields.description'), $site->description, $site, '/images/site.png');
 
             if ($site->buildings->isNotEmpty()) {
                 $helper->addLinkListRow($table, trans('cruds.site.fields.buildings'), $site->buildings, $selectedVues);
@@ -282,8 +281,7 @@ class PhysicalInfrastructureSection implements ReportSection
 
             $helper->addTextRow($table, trans('cruds.building.fields.type'), $building->type);
             $helper->addTextRow($table, trans('cruds.building.fields.attributes'), $this->formatAttributes($building->attributes));
-            $helper->addHTMLRow($table, trans('cruds.building.fields.description'), $building->description);
-            $helper->addImageRow($table, '', $helper->resolveIconPath($building->icon_id, '/images/building.png'));
+            $helper->addDescriptionCellWithIcon($table, trans('cruds.building.fields.description'), $building->description, $building, '/images/building.png');
 
             if ($building->site !== null) {
                 $run = $helper->addTextRunRow($table, trans('cruds.building.fields.site'));
@@ -414,8 +412,7 @@ class PhysicalInfrastructureSection implements ReportSection
             $table = $helper->addTable($section, (string) $physicalServer->name);
 
             $helper->addTextRow($table, trans('cruds.physicalServer.fields.type'), $physicalServer->type);
-            $helper->addHTMLRow($table, trans('cruds.physicalServer.fields.description'), $physicalServer->description);
-            $helper->addImageRow($table, '', $helper->resolveIconPath($physicalServer->icon_id, '/images/server.png'));
+            $helper->addDescriptionCellWithIcon($table, trans('cruds.physicalServer.fields.description'), $physicalServer->description, $physicalServer, '/images/server.png');
             $helper->addHTMLRow($table, trans('cruds.physicalServer.fields.cpu'), $physicalServer->cpu);
             $helper->addHTMLRow($table, trans('cruds.physicalServer.fields.memory'), $physicalServer->memory);
             $helper->addHTMLRow($table, trans('cruds.physicalServer.fields.disk'), $physicalServer->disk);
@@ -475,8 +472,7 @@ class PhysicalInfrastructureSection implements ReportSection
 
             $helper->addTextRow($table, trans('cruds.workstation.fields.type'), $workstation->type);
             $helper->addTextRow($table, trans('cruds.workstation.fields.status'), $workstation->status);
-            $helper->addHTMLRow($table, trans('cruds.workstation.fields.description'), $workstation->description);
-            $helper->addImageRow($table, '', $helper->resolveIconPath($workstation->icon_id, '/images/workstation.png'));
+            $helper->addDescriptionCellWithIcon($table, trans('cruds.workstation.fields.description'), $workstation->description, $workstation, '/images/workstation.png');
             $helper->addTextRow($table, trans('cruds.workstation.fields.manufacturer'), $workstation->manufacturer);
             $helper->addTextRow($table, trans('cruds.workstation.fields.model'), $workstation->model);
             $helper->addTextRow($table, trans('cruds.workstation.fields.serial_number'), $workstation->serial_number);
@@ -586,8 +582,7 @@ class PhysicalInfrastructureSection implements ReportSection
             }
 
             $helper->addTextRow($table, trans('cruds.peripheral.fields.type'), $peripheral->type);
-            $helper->addHTMLRow($table, trans('cruds.peripheral.fields.description'), $peripheral->description);
-            $helper->addImageRow($table, '', $helper->resolveIconPath($peripheral->icon_id, '/images/peripheral.png'));
+            $helper->addDescriptionCellWithIcon($table, trans('cruds.peripheral.fields.description'), $peripheral->description, $peripheral, '/images/peripheral.png');
 
             if ($peripheral->provider !== null) {
                 $run = $helper->addTextRunRow($table, trans('cruds.peripheral.fields.provider'));
@@ -671,8 +666,7 @@ class PhysicalInfrastructureSection implements ReportSection
             $table = $helper->addTable($section, (string) $physicalSwitch->name);
 
             $helper->addTextRow($table, trans('cruds.physicalSwitch.fields.type'), $physicalSwitch->type);
-            $helper->addHTMLRow($table, trans('cruds.physicalSwitch.fields.description'), $physicalSwitch->description);
-            $helper->addImageRow($table, '', $helper->resolveIconPath($physicalSwitch->icon_id, '/images/switch.png'));
+            $helper->addDescriptionCellWithIcon($table, trans('cruds.physicalSwitch.fields.description'), $physicalSwitch->description, $physicalSwitch, '/images/switch.png');
 
             if ($physicalSwitch->site !== null) {
                 $run = $helper->addTextRunRow($table, trans('cruds.physicalSwitch.fields.site'));
@@ -792,8 +786,7 @@ class PhysicalInfrastructureSection implements ReportSection
 
             $helper->addTextRow($table, trans('cruds.physicalSecurityDevice.fields.type'), $physicalSecurityDevice->type);
             $helper->addTextRow($table, trans('cruds.physicalSecurityDevice.fields.attributes'), $this->formatAttributes($physicalSecurityDevice->attributes));
-            $helper->addHTMLRow($table, trans('cruds.physicalSecurityDevice.fields.description'), $physicalSecurityDevice->description);
-            $helper->addImageRow($table, '', $helper->resolveIconPath($physicalSecurityDevice->icon_id, '/images/securitydevice.png'));
+            $helper->addDescriptionCellWithIcon($table, trans('cruds.physicalSecurityDevice.fields.description'), $physicalSecurityDevice->description, $physicalSecurityDevice, '/images/securitydevice.png');
             $helper->addTextRow($table, trans('cruds.physicalSecurityDevice.fields.address_ip'), $physicalSecurityDevice->address_ip);
 
             if ($physicalSecurityDevice->securityDevices->isNotEmpty()) {

@@ -463,8 +463,7 @@ class LogicalInfrastructureSection implements ReportSection
 
             $helper->addTextRow($table, trans('cruds.securityDevice.fields.type'), $securityDevice->type);
             $helper->addTextRow($table, trans('cruds.securityDevice.fields.attributes'), $this->formatAttributes($securityDevice->attributes));
-            $helper->addHTMLRow($table, trans('cruds.securityDevice.fields.description'), $securityDevice->description);
-            $helper->addImageRow($table, '', $helper->resolveIconPath($securityDevice->icon_id, '/images/securitydevice.png'));
+            $helper->addDescriptionCellWithIcon($table, trans('cruds.securityDevice.fields.description'), $securityDevice->description, $securityDevice, '/images/securitydevice.png');
             $helper->addTextRow($table, trans('cruds.securityDevice.fields.address_ip'), $securityDevice->address_ip);
 
             if ($securityDevice->applications->isNotEmpty()) {
@@ -535,8 +534,7 @@ class LogicalInfrastructureSection implements ReportSection
 
             $helper->addTextRow($table, trans('cruds.logicalServer.fields.type'), $logicalServer->type);
             $helper->addTextRow($table, trans('cruds.logicalServer.fields.attributes'), $this->formatAttributes($logicalServer->attributes));
-            $helper->addHTMLRow($table, trans('cruds.logicalServer.fields.description'), $logicalServer->description);
-            $helper->addImageRow($table, '', $helper->resolveIconPath($logicalServer->icon_id, '/images/lserver.png'));
+            $helper->addDescriptionCellWithIcon($table, trans('cruds.logicalServer.fields.description'), $logicalServer->description, $logicalServer, '/images/lserver.png');
             $helper->addTextRow($table, trans('cruds.logicalServer.fields.operating_system'), $logicalServer->operating_system);
 
             if ($logicalServer->install_date !== null) {
@@ -626,8 +624,7 @@ class LogicalInfrastructureSection implements ReportSection
 
             $helper->addTextRow($table, trans('cruds.cluster.fields.type'), $cluster->type);
             $helper->addTextRow($table, trans('cruds.cluster.fields.attributes'), $this->formatAttributes($cluster->attributes));
-            $helper->addHTMLRow($table, trans('cruds.cluster.fields.description'), $cluster->description);
-            $helper->addImageRow($table, '', $helper->resolveIconPath($cluster->icon_id, '/images/cluster.png'));
+            $helper->addDescriptionCellWithIcon($table, trans('cruds.cluster.fields.description'), $cluster->description, $cluster, '/images/cluster.png');
             $helper->addTextRow($table, trans('cruds.cluster.fields.address_ip'), $cluster->address_ip);
 
             if ($cluster->logicalServers->isNotEmpty()) {
@@ -694,8 +691,7 @@ class LogicalInfrastructureSection implements ReportSection
             $table = $helper->addTable($section, (string) $container->name);
 
             $helper->addTextRow($table, trans('cruds.container.fields.type'), $container->type);
-            $helper->addHTMLRow($table, trans('cruds.container.fields.description'), $container->description);
-            $helper->addImageRow($table, '', $helper->resolveIconPath($container->icon_id, '/images/container.png'));
+            $helper->addDescriptionCellWithIcon($table, trans('cruds.container.fields.description'), $container->description, $container, '/images/container.png');
 
             if ($container->logicalServers->isNotEmpty()) {
                 $helper->addLinkListRow($table, trans('cruds.container.fields.logical_servers'), $container->logicalServers, $selectedVues);

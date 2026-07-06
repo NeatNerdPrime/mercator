@@ -238,8 +238,7 @@ class ApplicationSection implements ReportSection
             }
 
             $helper->addTextRow($table, trans('cruds.application.fields.attributes'), $application->attributes);
-            $helper->addHTMLRow($table, trans('cruds.application.fields.description'), $application->description);
-            $helper->addImageRow($table, '', $helper->resolveIconPath($application->icon_id, '/images/application.png'));
+            $helper->addDescriptionCellWithIcon($table, trans('cruds.application.fields.description'), $application->description, $application, '/images/application.png');
 
             if (config('mercator.parameters.application_documents') && $application->documents->isNotEmpty()) {
                 $helper->addDocumentLinksRow($table, trans('cruds.application.fields.documents'), $application->documents);
@@ -415,8 +414,7 @@ class ApplicationSection implements ReportSection
             $table = $helper->addTable($section, (string) $database->name);
 
             $helper->addTextRow($table, trans('cruds.database.fields.type'), $database->type);
-            $helper->addHTMLRow($table, trans('cruds.database.fields.description'), $database->description);
-            $helper->addImageRow($table, '', $helper->resolveIconPath($database->icon_id, '/images/database.png'));
+            $helper->addDescriptionCellWithIcon($table, trans('cruds.database.fields.description'), $database->description, $database, '/images/database.png');
 
             if ($database->entities->isNotEmpty()) {
                 $helper->addTextRow($table, trans('cruds.database.fields.entities'), $database->entities->pluck('name')->implode(', '));

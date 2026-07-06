@@ -204,8 +204,7 @@ class InformationSystemSection implements ReportSection
                 $helper->linkOrText($run, $process->macroProcess, $selectedVues);
             }
 
-            $helper->addHTMLRow($table, trans('cruds.process.fields.description'), $process->description);
-            $helper->addImageRow($table, '', $helper->resolveIconPath($process->icon_id, '/images/process.png'));
+            $helper->addDescriptionCellWithIcon($table, trans('cruds.process.fields.description'), $process->description, $process, '/images/process.png');
             $helper->addHTMLRow($table, trans('cruds.process.fields.in_out'), $process->in_out);
             $helper->addSecurityNeedRow(
                 $table,
