@@ -110,49 +110,14 @@
 @section('scripts')
     @vite(['resources/js/graphviz.js'])
     <script>
-        let dotSrc = `
-digraph  {
-    @foreach($macroProcessuses as $macroProcess)
-        MP{{ $macroProcess->id }} [label="{{ $macroProcess->name }}" shape=none labelloc="b"  width=1 height=1.1 image="/images/macroprocess.png"]
-    @endforeach
-        @foreach($processes as $process)
-        P{{ $process->id }} [label="{{ $process->name }}" shape=none labelloc="b"  width=1 height=1.1 image="/images/process.png"]
-        @if($process->macroprocess_id !== null && $macroProcessuses->contains('id', $process->macroprocess_id))
-        MP{{ $process->macroprocess_id }} -> P{{ $process->id }}
-        @endif
-        @foreach($process->dataProcesses as $dp)
-            @if($dataProcessings->contains('id', $dp->id))
-        P{{ $process->id }} -> DP{{ $dp->id}}
-            @endif
-        @endforeach
-
-        @endforeach
-        @foreach($dataProcessings as $dp)
-        DP{{ $dp->id }} [label="{{ $dp->name }}" shape=none labelloc="b"  width=1 height=1.1 image="/images/dataprocessing.png"  href="#DATAPROC_{{ $dp->id }}"]
-        @foreach($dp->applications as $app)
-            @if($applications->contains('id', $app->id))
-        DP{{ $dp->id }} -> APP{{ $app->id }}
-            @endif
-        @endforeach
-        @endforeach
-        @foreach($applications as $app)
-        APP{{ $app->id }} [label="{{ $app->name }}" shape=none labelloc="b"  width=1 height=1.1 image="/images/application.png"]
-    @endforeach
-        }`;
+        let dotSrc = `{!! $dotSrc !!}`;
 
         document.addEventListener('graphvizReady', () => {
             document.getElementById("graph").innerHTML = window.graphviz.layout(
                 dotSrc,
                 "svg",
                 "{{ $engine }}",
-                {
-                    images: [
-                        { path: "/images/macroprocess.png",   width: "64px", height: "64px" },
-                        { path: "/images/process.png",        width: "64px", height: "64px" },
-                        { path: "/images/dataprocessing.png", width: "64px", height: "64px" },
-                        { path: "/images/application.png",    width: "64px", height: "64px" },
-                    ]
-                }
+                { images: @json($imageManifest) }
             );
         });
     </script>

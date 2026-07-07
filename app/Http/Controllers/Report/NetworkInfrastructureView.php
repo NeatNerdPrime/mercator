@@ -19,6 +19,7 @@ use App\Models\Site;
 use App\Models\StorageDevice;
 use App\Models\WifiTerminal;
 use App\Models\Workstation;
+use App\Services\Graph\PhysicalInfrastructureGraphBuilder;
 use Symfony\Component\HttpFoundation\Response;
 
 class NetworkInfrastructureView extends Controller
@@ -637,6 +638,26 @@ class NetworkInfrastructureView extends Controller
             $physicalLinks = Cartographer::scopedQuery(PhysicalLink::query())->get();
         }
 
+        $graphBuilder = new PhysicalInfrastructureGraphBuilder;
+        $showPorts = (bool) $request->session()->get('show_ports');
+        $dotSrc = $graphBuilder->buildConnectivityDot(
+            $sites,
+            $buildings,
+            $bays,
+            $physicalServers,
+            $workstations,
+            $storageDevices,
+            $peripherals,
+            $phones,
+            $physicalSwitches,
+            $physicalRouters,
+            $wifiTerminals,
+            $physicalSecurityDevices,
+            $physicalLinks,
+            $showPorts
+        );
+        $imageManifest = $graphBuilder->connectivityImageManifest($physicalServers, $workstations, $peripherals, $physicalSwitches, $physicalSecurityDevices);
+
         return view('admin/reports/network_infrastructure')
             ->with('all_sites', $all_sites)
             ->with('sites', $sites)
@@ -652,6 +673,8 @@ class NetworkInfrastructureView extends Controller
             ->with('physicalRouters', $physicalRouters)
             ->with('wifiTerminals', $wifiTerminals)
             ->with('physicalSecurityDevices', $physicalSecurityDevices)
-            ->with('physicalLinks', $physicalLinks);
+            ->with('physicalLinks', $physicalLinks)
+            ->with('dotSrc', $dotSrc)
+            ->with('imageManifest', $imageManifest);
     }
 }

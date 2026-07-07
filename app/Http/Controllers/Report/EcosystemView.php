@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Models\Cartographer;
 use App\Models\Entity;
 use App\Models\Relation;
+use App\Services\Graph\EcosystemGraphBuilder;
 use Gate;
 use Illuminate\Http\Request;
 use Symfony\Component\HttpFoundation\Response;
@@ -73,9 +74,13 @@ class EcosystemView extends Controller
         $request->session()->put('perimeter', $perimeter);
         $request->session()->put('entity_type', $typeFilter);
 
+        $graphBuilder = new EcosystemGraphBuilder;
+
         return view('admin/reports/ecosystem')
             ->with('entityTypes', $entityTypes)
             ->with('entities', $entities)
-            ->with('relations', $relations);
+            ->with('relations', $relations)
+            ->with('dotSrc', $graphBuilder->buildDot($entities, $relations))
+            ->with('imageManifest', $graphBuilder->imageManifest($entities));
     }
 }

@@ -4,6 +4,7 @@ namespace App\Models;
 
 use App\Contracts\HasIconContract;
 use App\Contracts\HasPrefix;
+use App\Contracts\HasUniqueIdentifierContract;
 use App\Factories\AnnuaireFactory;
 use App\Traits\Auditable;
 use App\Traits\HasIcon;
@@ -19,7 +20,7 @@ use App\Traits\HasCartographers;
 /**
  * App\Annuaire *
  */
-class Annuaire extends Model implements HasPrefix, HasIconContract
+class Annuaire extends Model implements HasPrefix, HasIconContract, HasUniqueIdentifierContract
 {
     use HasIcon, Auditable, HasUniqueIdentifier, HasFactory, SoftDeletes;
     use HasCartographers;

@@ -16,6 +16,7 @@ use App\Models\Site;
 use App\Services\IconUploadService;
 use Gate;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 use Symfony\Component\HttpFoundation\Response;
 
 class PeripheralController extends Controller
@@ -30,7 +31,7 @@ class PeripheralController extends Controller
             abort(Response::HTTP_FORBIDDEN, '403 Forbidden');
         }
 
-        $peripherals = Peripheral::with(['site', 'building', 'bay', 'provider'])
+        $peripherals = Peripheral::with(['site', 'building', 'bay', 'provider', 'domain'])
             ->when(request('search'), function ($q, $search) {
                 $q->where(function ($q) use ($search) {
                     foreach (Peripheral::$searchable as $field) {
@@ -60,7 +61,7 @@ class PeripheralController extends Controller
 
         // lists
         $type_list = Peripheral::select('type')->where('type', '<>', null)->distinct()->orderBy('type')->pluck('type');
-        $domain_list = Peripheral::select('domain')->where('domain', '<>', null)->distinct()->orderBy('domain')->pluck('domain');
+        $domains = DB::table('domains')->select('id', 'name')->orderBy('name')->pluck('name', 'id')->prepend(trans('global.pleaseSelect'), '');
         $responsible_list = Peripheral::select('responsible')->where('responsible', '<>', null)->distinct()->orderBy('responsible')->pluck('responsible');
 
         return view(
@@ -75,7 +76,7 @@ class PeripheralController extends Controller
                 'applications',
                 'icons',
                 'type_list',
-                'domain_list',
+                'domains',
                 'responsible_list'
             )
         );
@@ -96,7 +97,7 @@ class PeripheralController extends Controller
 
         // lists
         $type_list = Peripheral::query()->select('type')->where('type', '<>', null)->distinct()->orderBy('type')->pluck('type');
-        $domain_list = Peripheral::query()->select('domain')->where('domain', '<>', null)->distinct()->orderBy('domain')->pluck('domain');
+        $domains = DB::table('domains')->select('id', 'name')->orderBy('name')->pluck('name', 'id')->prepend(trans('global.pleaseSelect'), '');
         $responsible_list = Peripheral::query()->select('responsible')->where('responsible', '<>', null)->distinct()->orderBy('responsible')->pluck('responsible');
 
         // Get Peripheral
@@ -121,7 +122,7 @@ class PeripheralController extends Controller
                 'applications',
                 'icons',
                 'type_list',
-                'domain_list',
+                'domains',
                 'responsible_list'
             )
         );
@@ -160,10 +161,10 @@ class PeripheralController extends Controller
 
         // lists
         $type_list = Peripheral::select('type')->where('type', '<>', null)->distinct()->orderBy('type')->pluck('type');
-        $domain_list = Peripheral::select('domain')->where('domain', '<>', null)->distinct()->orderBy('domain')->pluck('domain');
+        $domains = DB::table('domains')->select('id', 'name')->orderBy('name')->pluck('name', 'id')->prepend(trans('global.pleaseSelect'), '');
         $responsible_list = Peripheral::select('responsible')->where('responsible', '<>', null)->distinct()->orderBy('responsible')->pluck('responsible');
 
-        $peripheral->load('site', 'building', 'bay');
+        $peripheral->load('site', 'building', 'bay', 'domain');
 
         return view(
             'admin.peripherals.edit',
@@ -178,7 +179,7 @@ class PeripheralController extends Controller
                 'icons',
                 'peripheral',
                 'type_list',
-                'domain_list',
+                'domains',
                 'responsible_list'
             )
         );
@@ -204,7 +205,7 @@ class PeripheralController extends Controller
     {
         abort_if(Gate::denies('show-object', $peripheral), Response::HTTP_FORBIDDEN, '403 Forbidden');
 
-        $peripheral->load('site', 'building', 'bay');
+        $peripheral->load('site', 'building', 'bay', 'domain');
 
         return view('admin.peripherals.show', compact('peripheral'));
     }

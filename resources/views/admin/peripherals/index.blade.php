@@ -81,7 +81,7 @@
                                 <x-show-link :model="$peripheral" />
                             </td>
                             <td>
-                                {{ $peripheral->domain ?? '' }}
+                                {{ $peripheral->domain->name ?? '' }}
                             </td>
                             <td>
                                 {{ $peripheral->type ?? '' }}

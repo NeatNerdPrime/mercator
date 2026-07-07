@@ -150,7 +150,8 @@
                         {{ $application->type }}
                     </td>
                     <th width="10%">
-                    <td>{{ trans('cruds.application.fields.external') }}</td>
+                        {{ trans('cruds.application.fields.external') }}
+                    </th>
                     <td width="20%">
                         {{ $application->external }}
                     </td>
@@ -320,7 +321,7 @@
                                     <span class="highRisk">{{ trans('global.very_strong') }}</span>
                                 @endif
                             </td>
-                            @if (config('mercator-config.parameters.security_need_auth'))
+                            @if (config('mercator.parameters.security_need_auth'))
                                 <td align="right" valign="middle">
                                     {{ trans('global.authenticity') }}
                                 </td>

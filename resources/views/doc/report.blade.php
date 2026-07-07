@@ -18,31 +18,7 @@
                         @method('PUT')
                         @csrf
                         <div class="row">
-                            <div class="col-sm-4">
-                                <div class="form-group">
-                                    <label for="title">{{ trans("cruds.report.cartography.granularity") }}</label>
-                                    <select class="form-control select2 {{ $errors->has('granularity') ? 'is-invalid' : '' }}"
-                                            name="granularity" id="granularity">
-                                        <option value="1" {{ auth()->user()->granularity == 1 ? 'selected' : '' }}>{{ trans("cruds.user.fields.granularity_1") }}</option>
-                                        <option value="2" {{ auth()->user()->granularity == 2 ? 'selected' : '' }}>{{ trans("cruds.user.fields.granularity_2") }}</option>
-                                        <option value="3" {{ auth()->user()->granularity == 3 ? 'selected' : '' }}>{{ trans("cruds.user.fields.granularity_3") }}</option>
-                                    </select>
-                                    <span class="help-block">{{ trans("cruds.report.cartography.granularity_helper") }}</span>
-                                </div>
-                            </div>
-                            <div class="col-sm-3">
-                                <div class="form-group">
-                                    <label for="vues">&nbsp;</label>
-                                    <div class="form-check form-switch">
-                                        <input class="form-check-input" type="checkbox" id="graph" name="graph">
-                                        <label class="form-check-label"
-                                               for="graph">{{ trans("cruds.report.cartography.graph_helper") }}</label>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="row">
-                            <div class="col-sm-6">
+                            <div class="col-5">
                                 <div class="form-group">
                                     <label for="vues">{{ trans("cruds.report.cartography.views") }}</label>
                                     <div style="padding-bottom: 4px">
@@ -59,6 +35,7 @@
                                         <option value="4">{{ trans("cruds.report.cartography.administration") }}</option>
                                         <option value="5">{{ trans("cruds.report.cartography.logical_infrastructure") }}</option>
                                         <option value="6">{{ trans("cruds.report.cartography.physical_infrastructure") }}</option>
+                                        <option value="7">{{ trans("cruds.report.cartography.gdpr") }}</option>
                                     </select>
                                     @if($errors->has('processes'))
                                         <div class="invalid-feedback">
@@ -68,12 +45,25 @@
                                     <span class="help-block">{{ trans("cruds.report.cartography.views_helper") }}</span>
                                 </div>
                             </div>
+                            <div class="col-2">
+                                <div class="form-group">
+                                    <div class="form-check form-switch" style="padding-top: 50px;">
+                                        <input class="form-check-input" type="checkbox" id="graph" name="graph" checked>
+                                        <label class="form-check-label"
+                                               for="graph">{{ trans("cruds.report.cartography.graph_helper") }}</label>
+                                    </div>
+                                </div>
+                            </div>
                         </div>
 
-                        <div class="form-group">
-                            <button class="btn btn-danger" type="submit">
-                                {{ trans ("global.create") }}
-                            </button>
+                        <div class="row">
+                            <div class="col-sm-3">
+                                <div class="form-group">
+                                    <button class="btn btn-success" type="submit">
+                                        {{ trans ("global.create") }}
+                                    </button>
+                                </div>
+                            </div>
                         </div>
                     </form>
                 </div>
@@ -84,209 +74,77 @@
     <br>
 
     <div class="row">
-
-        <div class="col-lg-6">
-
-            <div class="card">
-                <div class="card-header">
-                    {{ trans("cruds.report.lists.title") }}
-                </div>
-                <div class="card-body">
-                    <ul>
-                        @can('entity_access')
-                        <li>
-                            <a href="{{ route('admin.report.entities') }}"
-                               target="_new">{{ trans("cruds.report.lists.entities") }}</a>
-                            <br>
-                            {{ trans("cruds.report.lists.entities_helper") }}
-                            <br>
-                            <br>
-                        </li>
-                        @endcan
-                        @can('application_access')
-                        <li>
-                            <a href="{{ route('admin.report.applicationsByBlocks') }}"
-                               target="_new">{{ trans("cruds.report.lists.applications") }}</a>
-                            <br>
-                            {{ trans("cruds.report.lists.applications_helper") }}
-                            <br><br>
-                        </li>
-                        @endcan
-                        <li>
-                            <a href="{{ route('admin.report.directory') }}"
-                               target="_new">{{ trans("cruds.report.lists.directory") }}</a>
-                            <br>
-                            {{ trans("cruds.report.lists.directory_helper") }}
-                            <br><br>
-                        </li>
-                        @can('logical_server_access')
-                        <li>
-                            <a href="{{ route('admin.report.logicalServers') }}"
-                               target="_new">{{ trans("cruds.report.lists.logical_servers") }}</a><br>
-                            {{ trans("cruds.report.lists.logical_servers_helper") }}
-                            <br><br>
-                        </li>
-                        @endcan
-                        <li>
-                            <a href="{{ route('admin.report.securityNeeds') }}"
-                               target="_new">{{ trans("cruds.report.lists.security_needs") }}</a>
-                            <br>
-                            {{ trans("cruds.report.lists.security_needs_helper") }}
-                            <br><br>
-                        </li>
-                        @can('vlan_access')
-                        <li>
-                            <a href="{{ route('admin.report.vlans') }}"
-                               target="_new">{{ trans("cruds.report.lists.vlans") }}</a>
-                            <br>
-                            {{ trans("cruds.report.lists.vlans_helper") }}
-                            <br><br>
-                        </li>
-                        @endcan
-                        @can('logical_server_access')
-                        <li>
-                            <a href="{{ route('admin.report.logicalServerConfigs') }}"
-                               target="_new">{{ trans("cruds.report.lists.logical_server_configurations") }}</a>
-                            <br>
-                            {{ trans("cruds.report.lists.logical_server_configurations_helper") }}
-                            <br><br>
-                        </li>
-                        @endcan
-                        @can('backup_access')
-                        <li>
-                            <a href="{{ route('admin.report.backups') }}"
-                               target="_new">{{ trans("cruds.report.lists.backup") }}</a>
-                            <br>
-                            {{ trans("cruds.report.lists.backup_helper") }}
-                            <br><br>
-                        </li>
-                        @endcan
-                        <li>
-                            <a href="{{ route('admin.report.externalAccess') }}"
-                               target="_new">{{ trans("cruds.report.lists.external_access") }}</a>
-                            <br>
-                            {{ trans("cruds.report.lists.external_access_helper") }}
-                            <br><br>
-                        </li>
-                        <li>
-                            <a href="{{ route('admin.report.physicalInventory') }}"
-                               target="_new">{{ trans("cruds.report.lists.physical_inventory") }}</a>
-                            <br>
-                            {{ trans("cruds.report.lists.physical_inventory_helper") }}
-                            <br><br>
-                        </li>
-                        @can('workstation_access')
-                        <li>
-                            <a href="{{ route('admin.report.workstations') }}"
-                               target="_new">{{ trans("cruds.report.lists.workstation_inventory") }}</a>
-                            <br>
-                            {{ trans("cruds.report.lists.workstation_inventory_helper") }}
-                            <br><br>
-                        </li>
-                        @endcan
-                    </ul>
-                </div>
-            </div>
-        </div>
-
-        <div class="col-lg-6">
-            @can('activity_show')
-                <div class="card">
-                    <div class="card-header">
-                        {{ trans('cruds.report.lists.bia') }}
-                    </div>
-                    <div class="card-body">
-                        <ul>
-                            <li>
-                                <a href="{{ route('admin.report.view.rto') }}"
-                                   target="_new">{{ trans('cruds.report.lists.continuity_needs') }}</a>
-                                <br>
-                                {{ trans('cruds.report.lists.continuity_needs_helper') }}
-                                <br><br>
-                            </li>
-                            <li>
-                                <a href="{{ route('admin.report.view.impacts') }}"
-                                   target="_new">{{ trans('cruds.report.lists.impacts') }}</a>
-                                <br>
-                                {{ trans('cruds.report.lists.impacts_helper') }}
-                            </li>
-                    </div>
-                </div>
-                <br>
-            @endcan
+        <div class="col-lg-12">
 
             <div class="card">
                 <div class="card-header">
-                    Common Vulnerabilities and Exposures
+                    {{ trans('report_template.title') }}
                 </div>
                 <div class="card-body">
-                    <ul>
-                        <li>
-                            <a href="/admin/report/cve" target="_new">{{ trans("cruds.report.lists.cve") }}</a>
-                            <br>
-                            {{ trans("cruds.report.lists.cve_helper") }}
-                            <br>
-                            <br>
-                        </li>
-                    </ul>
+                    <div class="row">
+                        <div class="col-9">
+
+                    @if (session('status'))
+                        <div class="alert alert-success">{{ session('status') }}</div>
+                    @endif
+
+                    <p>
+                        <a href="{{ route('admin.report.cartography.template.default') }}"
+                           target="_new">{{ trans('report_template.download_default') }}</a>
+                    </p>
+
+                    @if ($reportTemplate)
+                        <p>
+                            <strong>{{ trans('report_template.current_template') }}:</strong>
+                            <a href="{{ route('admin.report.cartography.template.current') }}"
+                               target="_new">{{ $reportTemplate['original_name'] }}</a>
+                            ({{ \Illuminate\Support\Carbon::parse($reportTemplate['uploaded_at'])->format('d/m/Y H:i') }})
+                        </p>
+                    @else
+                        <p>{{ trans('report_template.using_default') }}</p>
+                    @endif
+
+                    @can('configure')
+                        <form method="POST" action="{{ route('admin.report.cartography.template.upload') }}"
+                              enctype="multipart/form-data">
+                            @csrf
+                            <div class="form-group">
+                                <label for="template">{{ trans('report_template.upload') }}</label>
+                                <input type="file" name="template" id="template" accept=".docx"
+                                       class="form-control {{ $errors->has('template') ? 'is-invalid' : '' }}">
+                                @if ($errors->has('template'))
+                                    <div class="invalid-feedback">{{ $errors->first('template') }}</div>
+                                @endif
+                                <span class="help-block">{{ trans('report_template.tags_helper') }}</span>
+                            </div>
+                            <button class="btn btn-success" type="submit">
+                                {{ trans('report_template.upload') }}
+                            </button>
+                        </form>
+                    @endcan
                 </div>
+                    @can('configure')
+                        <div class="col-3">
+                            <br><br>
+                            <table class="table table-sm table-bordered table-hover" style="font-size: 14px; font-family: var(--font-mono);">
+                            <thead class="table-dark">
+                              <tr>
+                                <th style="width: 42%;">Variable</th>
+                                <th>Description</th>
+                              </tr>
+                            </thead>
+                            <tbody>
+                              <tr><td><code>:content:</code></td><td>Corps du rapport</td></tr>
+                              <tr><td><code>:timestamp:</code></td><td>Date et heure de génération</td></tr>
+                              <tr><td><code>:version:</code></td><td>version de Mercator</td></tr>
+                            </tbody>
+                            </table>
+                        </div>
+                    @endcan
             </div>
 
-            @can('gdpr_access')
-                <br>
-                <div class="card">
-                    <div class="card-header">
-                        {{ trans("cruds.report.lists.gdpr") }}
-                    </div>
-                    <div class="card-body">
-                        <ul>
-                            <li>
-                                <a href="/admin/report/activityReport"
-                                   target="_new">{{ trans("cruds.report.lists.register_report") }}</a>
-                                <br>
-                                {{ trans("cruds.report.lists.register_report") }}
-                                <br>
-                                <br>
-                            </li>
-                            <li>
-                                <a href="/admin/report/activityList"
-                                   target="_new">{{ trans("cruds.report.lists.register_list") }}</a>
-                                <br>
-                                {{ trans("cruds.report.lists.register_list_helper") }}
-                                <br>
-                                <br>
-                            </li>
-                        </ul>
-                    </div>
-                </div>
-            @endcan
-
-            <br>
-            <div class="card">
-                <div class="card-header">
-                    {{ trans("cruds.report.lists.audit") }}
-                </div>
-                <div class="card-body">
-                    <ul>
-                        <li>
-                            <a href="/admin/audit/maturity" target="_new">{{ trans("cruds.report.lists.maturity") }}</a>
-                            <br>
-                            {{ trans("cruds.report.lists.maturity_helper") }}
-                            <br>
-                            <br>
-                        </li>
-                        <li>
-                            <a href="/admin/audit/changes" target="_new">{{ trans("cruds.report.lists.changes") }}</a>
-                            <br>
-                            {{ trans("cruds.report.lists.changes_helper") }}
-                        </li>
-                    </ul>
-                </div>
-            </div>
         </div>
     </div>
-
-    <br><br><br>
 @endsection
 
 @section('scripts')

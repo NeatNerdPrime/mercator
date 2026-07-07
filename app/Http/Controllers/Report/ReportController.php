@@ -2,8 +2,8 @@
 
 namespace App\Http\Controllers\Report;
 
-use App\Http\Controllers\Admin\CartographyController;
 use App\Http\Controllers\Controller;
+use App\Services\Report\WordHelper;
 use Illuminate\Support\Facades\Log;
 use PhpOffice\PhpSpreadsheet\Worksheet\Worksheet;
 use PhpOffice\PhpWord\Element\Section;
@@ -46,8 +46,8 @@ class ReportController extends Controller
             $table->addCell(8000, ['gridSpan' => 2])
                 ->addText(
                     $title,
-                    CartographyController::FANCY_TABLE_TITLE_STYLE,
-                    CartographyController::NO_SPACE
+                    WordHelper::FANCY_TABLE_TITLE_STYLE,
+                    WordHelper::NO_SPACE
                 );
         }
 
@@ -57,14 +57,14 @@ class ReportController extends Controller
     protected static function addTextRow(Table $table, string $title, ?string $value = null): void
     {
         $table->addRow();
-        $table->addCell(2000, CartographyController::NO_SPACE)->addText($title, CartographyController::FANCY_LEFT_TABLE_CELL_STYLE, CartographyController::NO_SPACE);
-        $table->addCell(6000, CartographyController::NO_SPACE)->addText($value, CartographyController::FANCY_RIGHT_TABLE_CELL_STYLE, CartographyController::NO_SPACE);
+        $table->addCell(2000, WordHelper::NO_SPACE)->addText($title, WordHelper::FANCY_LEFT_TABLE_CELL_STYLE, WordHelper::NO_SPACE);
+        $table->addCell(6000, WordHelper::NO_SPACE)->addText($value, WordHelper::FANCY_RIGHT_TABLE_CELL_STYLE, WordHelper::NO_SPACE);
     }
 
     protected static function addHTMLRow(Table $table, string $title, ?string $value = null): void
     {
         $table->addRow();
-        $table->addCell(2000)->addText($title, CartographyController::FANCY_LEFT_TABLE_CELL_STYLE, CartographyController::NO_SPACE);
+        $table->addCell(2000)->addText($title, WordHelper::FANCY_LEFT_TABLE_CELL_STYLE, WordHelper::NO_SPACE);
         try {
             \PhpOffice\PhpWord\Shared\Html::addHtml($table->addCell(6000), str_replace('<br>', '<br/>', $value));
         } catch (\Exception $e) {

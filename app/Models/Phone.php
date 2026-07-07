@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use App\Contracts\HasPrefix;
+use App\Contracts\HasUniqueIdentifierContract;
 use App\Factories\PhoneFactory;
 use App\Traits\Auditable;
 use App\Traits\HasIcon;
@@ -18,7 +19,7 @@ use App\Traits\HasCartographers;
 /**
  * App\Phone
  */
-class Phone extends Model implements HasPrefix
+class Phone extends Model implements HasPrefix, HasUniqueIdentifierContract
 {
     use Auditable, HasFactory, HasUniqueIdentifier, HasIcon, SoftDeletes;
     use HasCartographers;

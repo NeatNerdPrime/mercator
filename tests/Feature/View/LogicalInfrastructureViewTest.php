@@ -1,5 +1,8 @@
 <?php
 
+use App\Models\LogicalServer;
+use App\Models\Network;
+use App\Models\Subnetwork;
 use App\Models\User;
 use Database\Seeders\PermissionRoleTableSeeder;
 use Database\Seeders\PermissionsTableSeeder;
@@ -55,6 +58,23 @@ describe('Logical Infrastructure View', function () {
             'containers',
             'vlans',
         ]);
+    });
+
+    test('can display filtered view for a selected network with show_ip enabled', function () {
+        $network = Network::factory()->create();
+        $subnetwork = Subnetwork::factory()->create(['network_id' => $network->id, 'address' => '10.0.0.0/24']);
+        LogicalServer::factory()->create(['address_ip' => '10.0.0.5']);
+
+        $response = $this->get(route('admin.report.view.logical-infrastructure', [
+            'network' => $network->id,
+            'show_ip' => 1,
+        ]));
+
+        $response->assertOk();
+        $response->assertViewIs('admin.reports.logical_infrastructure');
+        $response->assertViewHas('subnetworks', function ($subnetworks) use ($subnetwork) {
+            return $subnetworks->contains('id', $subnetwork->id);
+        });
     });
 
     test('denies access without permission', function () {

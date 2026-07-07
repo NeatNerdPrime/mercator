@@ -1,6 +1,11 @@
 <?php
 
+use App\Models\Bay;
+use App\Models\Building;
+use App\Models\PhysicalServer;
+use App\Models\Site;
 use App\Models\User;
+use App\Models\Workstation;
 use Database\Seeders\PermissionRoleTableSeeder;
 use Database\Seeders\PermissionsTableSeeder;
 use Database\Seeders\RolesTableSeeder;
@@ -47,6 +52,22 @@ describe('Physical Infrastructure View', function () {
             'wifiTerminals',
             'physicalSecurityDevices',
         ]);
+    });
+
+    test('can display filtered view for a selected site with bays, buildings and 5+ workstations', function () {
+        $site = Site::factory()->create();
+        $building = Building::factory()->create(['site_id' => $site->id]);
+        $bay = Bay::factory()->create(['building_id' => $building->id, 'site_id' => null]);
+        PhysicalServer::factory()->create(['bay_id' => $bay->id, 'building_id' => null, 'site_id' => null]);
+        Workstation::factory()->count(6)->create(['building_id' => $building->id, 'site_id' => null]);
+
+        $response = $this->get(route('admin.report.view.physical-infrastructure', ['site' => $site->id]));
+
+        $response->assertOk();
+        $response->assertViewIs('admin.reports.physical_infrastructure');
+        $response->assertViewHas('buildings', function ($buildings) use ($building) {
+            return $buildings->contains('id', $building->id);
+        });
     });
 
     test('denies access without permission', function () {

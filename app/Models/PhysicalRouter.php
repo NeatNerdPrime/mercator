@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use App\Contracts\HasPrefix;
+use App\Contracts\HasUniqueIdentifierContract;
 use App\Factories\PhysicalRouterFactory;
 use App\Traits\Auditable;
 use App\Traits\HasUniqueIdentifier;
@@ -18,7 +19,7 @@ use App\Traits\HasCartographers;
 /**
  * App\PhysicalRouter
  */
-class PhysicalRouter extends Model implements HasPrefix
+class PhysicalRouter extends Model implements HasPrefix, HasUniqueIdentifierContract
 {
     use Auditable, HasFactory, HasUniqueIdentifier, SoftDeletes;
     use HasCartographers;

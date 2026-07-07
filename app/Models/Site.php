@@ -4,24 +4,36 @@ namespace App\Models;
 
 use App\Contracts\HasIconContract;
 use App\Contracts\HasPrefix;
+use App\Contracts\HasUniqueIdentifierContract;
 use App\Factories\SiteFactory;
 use App\Traits\Auditable;
+use App\Traits\HasCartographers;
 use App\Traits\HasIcon;
 use App\Traits\HasUniqueIdentifier;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\Factory;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
-use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
-use App\Traits\HasCartographers;
+use Illuminate\Support\Carbon;
 
 /**
  * App\Site
+ *
+ * @property int $id
+ * @property string $name
+ * @property string|null $type
+ * @property string|null $attributes
+ * @property string|null $description
+ * @property int|null $icon_id
+ * @property Carbon|null $created_at
+ * @property Carbon|null $updated_at
+ * @property Carbon|null $deleted_at
  */
-class Site extends Model implements HasIconContract, HasPrefix
+class Site extends Model implements HasIconContract, HasPrefix, HasUniqueIdentifierContract
 {
-    use Auditable, HasIcon, HasUniqueIdentifier, HasFactory, SoftDeletes;
+    use Auditable, HasFactory, HasIcon, HasUniqueIdentifier, SoftDeletes;
     use HasCartographers;
 
     public $table = 'sites';
@@ -52,7 +64,6 @@ class Site extends Model implements HasIconContract, HasPrefix
         'updated_at',
         'deleted_at',
     ];
-
 
     protected static function newFactory(): Factory
     {

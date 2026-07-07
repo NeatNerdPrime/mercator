@@ -18,6 +18,7 @@ use App\Models\Site;
 use App\Models\StorageDevice;
 use App\Models\WifiTerminal;
 use App\Models\Workstation;
+use App\Services\Graph\PhysicalInfrastructureGraphBuilder;
 use Symfony\Component\HttpFoundation\Response;
 
 class PhysicalInfrastructureView extends Controller
@@ -302,6 +303,24 @@ class PhysicalInfrastructureView extends Controller
             $physicalSecurityDevices = Cartographer::scopedQuery(PhysicalSecurityDevice::query())->orderBy('name')->get();
         }
 
+        $graphBuilder = new PhysicalInfrastructureGraphBuilder;
+        $dotSrc = $graphBuilder->buildLocationDot(
+            $sites,
+            $buildings,
+            $bays,
+            $physicalServers,
+            $workstations,
+            $storageDevices,
+            $peripherals,
+            $phones,
+            $physicalSwitches,
+            $physicalRouters,
+            $wifiTerminals,
+            $physicalSecurityDevices,
+            $buildingId !== null
+        );
+        $imageManifest = $graphBuilder->locationImageManifest($sites, $buildings, $workstations, $peripherals, $physicalSwitches, $physicalSecurityDevices);
+
         return view('admin/reports/physical_infrastructure')
             ->with('all_sites', $all_sites)
             ->with('sites', $sites)
@@ -316,6 +335,8 @@ class PhysicalInfrastructureView extends Controller
             ->with('physicalSwitches', $physicalSwitches)
             ->with('physicalRouters', $physicalRouters)
             ->with('wifiTerminals', $wifiTerminals)
-            ->with('physicalSecurityDevices', $physicalSecurityDevices);
+            ->with('physicalSecurityDevices', $physicalSecurityDevices)
+            ->with('dotSrc', $dotSrc)
+            ->with('imageManifest', $imageManifest);
     }
 }

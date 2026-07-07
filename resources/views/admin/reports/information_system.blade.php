@@ -260,88 +260,14 @@
 @section('scripts')
     @vite(['resources/js/graphviz.js'])
     <script>
-        let dotSrc = `
-digraph  {
-@foreach($macroProcessuses as $macroProcess)
-    MP{{ $macroProcess->id }} [label="{{ $macroProcess->name }}" shape=none labelloc="b"  width=1 height=1.1 image="/images/macroprocess.png"  href="#{{ $macroProcess->getUID() }}"]
-@endforeach
-@foreach($processes as $process)
-    P{{ $process->id }} [label="{{ $process->name }}" shape=none labelloc="b"  width=1 height=1.1 image="/images/process.png"  href="#{{ $process->getUID() }}"]
-    @foreach($process->activities as $activity)
-        @if($activities->contains('id', $activity->id))
-        P{{$process->id}} -> A{{$activity->id}}
-        @endif
-    @endforeach
-    @canAccess(App\Models\Information::class)
-        @foreach($process->information as $information)
-            @if($informations->contains('id', $information->id))
-            P{{ $process->id }} -> I{{ $information->id }}
-            @endif
-        @endforeach
-    @endcan
-    @if ($process->macroprocess_id!=null && $macroProcessuses->contains('id', $process->macroprocess_id))
-        MP{{ $process->macroprocess_id }} -> P{{$process->id}}
-    @endif
-    @foreach($process->operations as $operation)
-        @if($operations->contains('id', $operation->id))
-        P{{ $process->id }} -> O{{ $operation->id }}
-        @endif
-    @endforeach
-@endforeach
-
-@foreach($activities as $activity)
-    A{{ $activity->id }} [label="{{ $activity->name }}" shape=none labelloc="b"  width=1 height=1.1 image="/images/activity.png"  href="#{{ $activity->getUID() }}"]
-    @foreach($activity->operations as $operation)
-        @if($operations->contains('id', $operation->id))
-        A{{ $activity->id }} -> O{{ $operation->id }}
-        @endif
-    @endforeach
-@endforeach
-@foreach($operations as $operation)
-    O{{ $operation->id }} [label="{{ $operation->name }}" shape=none labelloc="b"  width=1 height=1.1 image="/images/operation.png"  href="#{{ $operation->getUID() }}"]
-    @foreach($operation->tasks as $task)
-        @if($tasks->contains('id', $task->id))
-        O{{ $operation->id }} -> T{{ $task->id }}
-        @endif
-    @endforeach
-    @foreach($operation->actors as $actor)
-        @if($actors->contains('id', $actor->id))
-        O{{ $operation->id }} -> ACT{{ $actor->id }}
-        @endif
-    @endforeach
-@endforeach
-@foreach($tasks as $task)
-    T{{ $task->id }} [label="{{ $task->name }}" shape=none labelloc="b"  width=1 height=1.1 image="/images/task.png"  href="#{{ $task->getUID() }}"]
-@endforeach
-@foreach($actors as $actor)
-    ACT{{ $actor->id }} [label="{{ $actor->name }}" shape=none labelloc="b"  width=1 height=1.1 image="/images/actor.png"  href="#{{ $actor->getUID() }}"]
-@endforeach
-@foreach($informations as $information)
-    I{{ $information->id }} [label="{{ $information->name }}" shape=none labelloc="b"  width=1 height=1.1 image="/images/information.png"  href="#{{ $information->getUID() }}"]
-    @foreach($information->children as $child)
-        @if($informations->contains('id', $child->id))
-        I{{ $information->id }} -> I{{ $child->id }}
-        @endif
-    @endforeach
-@endforeach
-}`;
+        let dotSrc = `{!! $dotSrc !!}`;
 
         document.addEventListener('graphvizReady', () => {
             document.getElementById("graph").innerHTML = window.graphviz.layout(
                 dotSrc,
                 "svg",
                 "{{ $engine }}",
-                {
-                    images: [
-                        { path: "/images/macroprocess.png", width: "64px", height: "64px" },
-                        { path: "/images/process.png",      width: "64px", height: "64px" },
-                        { path: "/images/activity.png",     width: "64px", height: "64px" },
-                        { path: "/images/operation.png",    width: "64px", height: "64px" },
-                        { path: "/images/task.png",         width: "64px", height: "64px" },
-                        { path: "/images/actor.png",        width: "64px", height: "64px" },
-                        { path: "/images/information.png",  width: "64px", height: "64px" },
-                    ]
-                }
+                { images: @json($imageManifest) }
             );
         });
     </script>

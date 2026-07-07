@@ -4,25 +4,47 @@ namespace App\Models;
 
 use App\Contracts\HasIconContract;
 use App\Contracts\HasPrefix;
+use App\Contracts\HasUniqueIdentifierContract;
 use App\Factories\SubnetworkFactory;
 use App\Traits\Auditable;
+use App\Traits\HasCartographers;
 use App\Traits\HasIcon;
 use App\Traits\HasUniqueIdentifier;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\Factory;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
-use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
-use App\Traits\HasCartographers;
+use Illuminate\Support\Carbon;
 
 /**
  * App\Subnetwork
+ *
+ * @property int $id
+ * @property string $name
+ * @property string|null $type
+ * @property string|null $attributes
+ * @property string|null $description
+ * @property string|null $address
+ * @property string|null $default_gateway
+ * @property string|null $ip_allocation_type
+ * @property int|null $vlan_id
+ * @property string|null $zone
+ * @property string|null $dmz
+ * @property string|null $wifi
+ * @property string|null $responsible_exp
+ * @property int|null $gateway_id
+ * @property int|null $network_id
+ * @property int|null $subnetwork_id
+ * @property Carbon|null $created_at
+ * @property Carbon|null $updated_at
+ * @property Carbon|null $deleted_at
  */
-class Subnetwork extends Model implements HasIconContract, HasPrefix
+class Subnetwork extends Model implements HasIconContract, HasPrefix, HasUniqueIdentifierContract
 {
-    use Auditable, HasIcon, HasUniqueIdentifier, HasFactory, SoftDeletes;
+    use Auditable, HasFactory, HasIcon, HasUniqueIdentifier, SoftDeletes;
     use HasCartographers;
 
     public $table = 'subnetworks';

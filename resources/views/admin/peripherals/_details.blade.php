@@ -24,7 +24,15 @@
                 {{ trans('cruds.peripheral.fields.domain') }}
             </th>
             <td width="10%">
-                {{ $peripheral->domain }}
+                @if($peripheral->domain!=null)
+                    @canShow($peripheral->domain)
+                        <a href="{{ route('admin.domains.show', $peripheral->domain->id) }}">
+                            {{ $peripheral->domain->name }}
+                        </a>
+                    @elsecanShow
+                        {{ $peripheral->domain->name }}
+                    @endcanShow
+                @endif
             </td>
             <th width="10%">
                 {{ trans('cruds.peripheral.fields.type') }}

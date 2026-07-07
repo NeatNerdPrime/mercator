@@ -19,7 +19,7 @@ services:
       - mercator_db_data:/var/lib/mysql
 
   mercator-app:
-    image: ghcr.io/dbarzin/mercator:latest
+    image: ghcr.io/sourcentis/mercator:latest
     restart: unless-stopped
     container_name: mercator-app
     volumes:

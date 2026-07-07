@@ -618,78 +618,14 @@
 @section('scripts')
     @vite(['resources/js/graphviz.js'])
     <script>
-        let dotSrc = `
-digraph  {
-    @canAccess(App\Models\Application::class)
-        @foreach($applications as $application)
-        A{{ $application->id }} [label="{{ $application->name }}" shape=none labelloc="b"  width=1 height=1.1 image="{{ $application->icon_id === null ? '/images/application.png' : route('admin.documents.show', $application->icon_id) }}" href="#APPLICATION{{$application->id}}"]
-    @endforEach
-        @endcan
-        @canAccess(App\Models\ApplicationService::class)
-        @foreach($applicationServices as $service)
-        S{{ $service->id }} [label="{{ $service->name }}" shape=none labelloc="b"  width=1 height=1.1 image="/images/applicationservice.png" href="#SERVICE{{$service->id}}"]
-    @endforeach
-        @endcan
-        @canAccess(App\Models\ApplicationModule::class)
-        @foreach($applicationModules as $module)
-        M{{ $module->id }} [label="{{ $module->name }}" shape=none labelloc="b"  width=1 height=1.1 image="/images/applicationmodule.png" href="#MODULE{{$module->id}}"]
-    @endforeach
-        @endcan
-        @canAccess(App\Models\Database::class)
-        @foreach($databases as $database)
-        DB{{ $database->id }} [label="{{ $database->name }}" shape=none labelloc="b"  width=1 height=1.1 image="/images/database.png" href="#DATABASE{{$database->id}}"]
-    @endforeach
-        @endcan
-        @canAccess(App\Models\ApplicationFlow::class)
-        @foreach($flows as $flow)
-        @if ((($flow->database_source_id!=null)||($flow->module_source_id!=null)||($flow->service_source_id!=null)||($flow->application_source_id!=null))&&(($flow->database_dest_id!=null)||($flow->module_dest_id!=null)||($flow->service_dest_id!=null)||($flow->application_dest_id!=null)))
-        @if ($flow->database_source_id!=null)
-        DB{{ $flow->database_source_id }}
-        @elseif ($flow->module_source_id!=null)
-        M{{ $flow->module_source_id }}
-        @elseif ($flow->service_source_id!=null)
-        S{{ $flow->service_source_id }}
-        @elseif ($flow->application_source_id!=null)
-        A{{ $flow->application_source_id }}
-        @endif
-        ->
-        @if ($flow->database_dest_id!=null)
-        DB{{ $flow->database_dest_id }}
-        @elseif ($flow->module_dest_id!=null)
-        M{{ $flow->module_dest_id }}
-        @elseif ($flow->service_dest_id!=null)
-        S{{ $flow->service_dest_id }}
-        @elseif ($flow->application_dest_id!=null)
-        A{{ $flow->application_dest_id }}
-        @endif
-        [ label="{{ $flow->nature }}"
-        @if ($flow->bidirectional)
-        dir="both"
-        @endif
-        href="#FLOW{{$flow->id}}"]
-        @endif
-        @endforEach
-        @endcan
-        }`;
+        let dotSrc = `{!! $dotSrc !!}`;
 
         document.addEventListener('graphvizReady', () => {
             document.getElementById("graph").innerHTML = window.graphviz.layout(
                 dotSrc,
                 "svg",
                 "{{ $engine }}",
-                {
-                    images: [
-                        { path: "/images/application.png",      width: "64px", height: "64px" },
-                        @foreach($applications as $application)
-                        @if ($application->icon_id !== null)
-                        { path: "{{ route('admin.documents.show', $application->icon_id) }}", width: "64px", height: "64px" },
-                        @endif
-                        @endforeach
-                        { path: "/images/applicationservice.png", width: "64px", height: "64px" },
-                        { path: "/images/applicationmodule.png",  width: "64px", height: "64px" },
-                        { path: "/images/database.png",           width: "64px", height: "64px" },
-                    ]
-                }
+                { images: @json($imageManifest) }
             );
         });
     </script>
