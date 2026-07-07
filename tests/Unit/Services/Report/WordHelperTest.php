@@ -113,6 +113,18 @@ describe('WordHelper::insertGraph end-to-end (real dot rasterization)', function
         expect($mediaSizes)->toHaveCount(0);
     });
 
+    test('adds space above and below the graph, since PhpWord\'s Image/Frame style has no spacing of its own', function () {
+        $dot = "digraph  {\nA [label=\"A\" shape=box]\nB [label=\"B\" shape=box]\nA -> B\n}";
+
+        [$xml, $mediaSizes] = renderGraphIntoDocx($dot);
+
+        expect($mediaSizes)->toHaveCount(1);
+        // The graph is wrapped in its own paragraph (a TextRun) carrying the spacing — confirm the
+        // <w:pict> sits inside a <w:spacing before="120" after="120"> paragraph, not a bare one.
+        preg_match('/<w:pPr>(.*?)<\/w:pPr>.*?<w:pict/s', $xml, $matches);
+        expect($matches[1] ?? '')->toContain('<w:spacing w:before="120" w:after="120"/>');
+    });
+
     test('caps a wide multi-node graph at exactly 450pt while preserving aspect ratio', function () {
         // A long left-to-right chain forces Graphviz to lay the nodes out horizontally, producing
         // an image reliably wider than the 450pt cap.

@@ -97,6 +97,13 @@ class WordHelper
     private const TITLE_SPACE_AFTER = 120;
 
     /**
+     * Twips of space added above and below every graph inserted via insertGraph() (across all 7
+     * vues — a single shared method, not specific to any one report section), so a graph isn't
+     * flush against its title or the content that follows it. 120 twips = 6pt.
+     */
+    private const GRAPH_SPACE_TWIPS = 120;
+
+    /**
      * DPI used to rasterize DOT graphs with Graphviz (must match the `-Gdpi=` flag passed to
      * `dot` in generateGraphImage()) — needed to convert the resulting PNG's pixel dimensions
      * back to points for Word insertion.
@@ -557,10 +564,19 @@ class WordHelper
         $imagePath = $this->generateGraphImage($this->applyGraphDefaults($dot));
 
         if (is_file($imagePath) && filesize($imagePath) > 0) {
-            $section->addImage($imagePath, [
+            // PhpWord's Image/Frame style has no spaceBefore/spaceAfter of its own — wrapping it in
+            // a TextRun gives it a real surrounding paragraph, whose own spacing applies above and
+            // below the graph. The image's own 'alignment' key would be silently ignored here (an
+            // image nested in a TextRun skips its own <w:p> wrapper entirely, deferring to the
+            // TextRun's), so centering is set on the TextRun's paragraph style instead.
+            $run = $section->addTextRun([
+                'spaceBefore' => self::GRAPH_SPACE_TWIPS,
+                'spaceAfter' => self::GRAPH_SPACE_TWIPS,
+                'alignment' => Jc::CENTER,
+            ]);
+            $run->addImage($imagePath, [
                 'width' => $this->graphDisplayWidth($imagePath),
                 'wrappingStyle' => 'inline',
-                'alignment' => Jc::CENTER,
             ]);
             $this->tempImagePaths[] = $imagePath;
         } else {
