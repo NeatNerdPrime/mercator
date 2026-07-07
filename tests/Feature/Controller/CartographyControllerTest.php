@@ -8,12 +8,14 @@ use App\Models\Network;
 use App\Models\Site;
 use App\Models\User;
 use App\Models\ZoneAdmin;
+use App\Support\ReportTemplateSettings;
 use Database\Seeders\PermissionRoleTableSeeder;
 use Database\Seeders\PermissionsTableSeeder;
 use Database\Seeders\RolesTableSeeder;
 use Database\Seeders\RoleUserTableSeeder;
 use Database\Seeders\UsersTableSeeder;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Http\UploadedFile;
 use Symfony\Component\HttpFoundation\BinaryFileResponse;
 
 uses(RefreshDatabase::class);
@@ -268,6 +270,26 @@ describe('cartography report generation', function () {
             ->toContain($dataProcessing->getUID());
     });
 
+    test('merges the report body into the default template: cover title present, :content: tag gone', function () {
+        $this->actingAs($this->admin);
+        $entity = Entity::factory()->create(['name' => 'Template Merge Entity']);
+
+        $response = $this->put(route('admin.report.cartography'), ['vues' => ['1']]);
+
+        assertDocxDownload($response);
+
+        $path = $response->baseResponse->getFile()->getPathname();
+        $zip = new ZipArchive;
+        $zip->open($path);
+        $xml = $zip->getFromName('word/document.xml');
+        $zip->close();
+
+        expect($xml)
+            ->toContain('Information System Mapping Report')
+            ->toContain('Template Merge Entity')
+            ->not->toContain(':content:');
+    });
+
     test('denies access without permission', function () {
         $user = User::factory()->create();
         $this->actingAs($user);
@@ -275,5 +297,102 @@ describe('cartography report generation', function () {
         $response = $this->put(route('admin.report.cartography'), []);
 
         $response->assertForbidden();
+    });
+});
+
+function uploadableTemplateFixture(string $name): UploadedFile
+{
+    // UploadedFile::move() in test mode does a real rename() of its source path (Symfony's
+    // File::move(), not a copy) -- pointing it directly at a committed fixture would silently
+    // delete that fixture the first time a test actually reaches the controller's move() call.
+    // Uploading a disposable copy keeps the fixture under tests/fixtures/templates/ intact.
+    $copyPath = tempnam(sys_get_temp_dir(), 'mercator-upload-').'.docx';
+    copy(base_path('tests/fixtures/templates/'.$name), $copyPath);
+
+    return new UploadedFile(
+        $copyPath,
+        $name,
+        'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+        null,
+        true
+    );
+}
+
+describe('cartography report template', function () {
+    afterEach(function () {
+        @unlink(ReportTemplateSettings::storagePath());
+    });
+
+    test('downloads the default template for any user allowed to generate the report', function () {
+        $this->actingAs($this->admin);
+
+        $response = $this->get(route('admin.report.cartography.template.default'));
+
+        assertDocxDownload($response);
+    });
+
+    test('denies downloading the default template without the reports_access permission', function () {
+        $user = User::factory()->create();
+        $this->actingAs($user);
+
+        $response = $this->get(route('admin.report.cartography.template.default'));
+
+        $response->assertForbidden();
+    });
+
+    test('denies uploading a template without the configure permission', function () {
+        $user = User::factory()->create();
+        $this->actingAs($user);
+
+        $response = $this->post(route('admin.report.cartography.template.upload'), [
+            'template' => uploadableTemplateFixture('valid-template.docx'),
+        ]);
+
+        $response->assertForbidden();
+    });
+
+    test('accepts a valid template upload, records it, and uses it for the next report generation', function () {
+        $this->actingAs($this->admin);
+
+        $response = $this->post(route('admin.report.cartography.template.upload'), [
+            'template' => uploadableTemplateFixture('valid-template.docx'),
+        ]);
+
+        $response->assertRedirect();
+        $response->assertSessionHasNoErrors();
+        $response->assertSessionHas('status');
+
+        expect(is_file(ReportTemplateSettings::storagePath()))->toBeTrue();
+        $stored = ReportTemplateSettings::load();
+        expect($stored)->not->toBeNull();
+        expect($stored['original_name'])->toBe('valid-template.docx');
+
+        // The uploaded template ("Custom Title Page") is now used instead of the default one.
+        $reportResponse = $this->put(route('admin.report.cartography'), ['vues' => ['1']]);
+        assertDocxDownload($reportResponse);
+
+        $path = $reportResponse->baseResponse->getFile()->getPathname();
+        $zip = new ZipArchive;
+        $zip->open($path);
+        $xml = $zip->getFromName('word/document.xml');
+        $zip->close();
+
+        expect($xml)
+            ->toContain('Custom Title Page')
+            ->not->toContain('Information System Mapping Report');
+    });
+
+    test('rejects a template upload missing the :content: tag and keeps the previous template active', function () {
+        $this->actingAs($this->admin);
+
+        $response = $this->post(route('admin.report.cartography.template.upload'), [
+            'template' => uploadableTemplateFixture('missing-tag.docx'),
+        ]);
+
+        $response->assertRedirect();
+        $response->assertSessionHasErrors('template');
+
+        expect(is_file(ReportTemplateSettings::storagePath()))->toBeFalse();
+        expect(ReportTemplateSettings::load())->toBeNull();
     });
 });

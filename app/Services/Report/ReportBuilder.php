@@ -2,6 +2,7 @@
 
 namespace App\Services\Report;
 
+use App\Support\ReportTemplateSettings;
 use Carbon\Carbon;
 use PhpOffice\PhpWord\IOFactory;
 
@@ -27,7 +28,10 @@ class ReportBuilder
         7 => GdprSection::class,
     ];
 
-    public function __construct(private readonly WordHelper $wordHelper = new WordHelper) {}
+    public function __construct(
+        private readonly WordHelper $wordHelper = new WordHelper,
+        private readonly TemplateMergerService $templateMerger = new TemplateMergerService
+    ) {}
 
     /**
      * @param  array<int, string>  $selectedVues
@@ -38,12 +42,7 @@ class ReportBuilder
         $this->wordHelper->setIncludeGraphs($withGraphs);
 
         $phpWord = $this->wordHelper->newDocument();
-
-        $title = trans('cruds.report.cartography.title');
-        $generatedOn = trans('cruds.report.cartography.generated_on').' : '.Carbon::now()->format('d/m/Y H:i');
-        $mercatorVersion = trans('cruds.report.cartography.version').' : '.app('mercator.version');
-
-        $section = $this->wordHelper->addCoverPageAndToc($phpWord, $title, $generatedOn, $mercatorVersion);
+        $section = $phpWord->addSection();
 
         foreach (self::VUE_ORDER as $vueId) {
             if (! in_array($vueId, $vues, true)) {
@@ -56,13 +55,21 @@ class ReportBuilder
             $section->addPageBreak();
         }
 
-        $filepath = storage_path('app/reports/cartographie-'.Carbon::today()->format('Ymd').'-'.uniqid().'.docx');
+        $bodyPath = storage_path('app/reports/body-'.uniqid().'.docx');
 
         $objWriter = IOFactory::createWriter($phpWord, 'Word2007');
         try {
-            $objWriter->save($filepath);
+            $objWriter->save($bodyPath);
         } finally {
             $this->wordHelper->cleanupTempFiles();
+        }
+
+        $filepath = storage_path('app/reports/cartographie-'.Carbon::today()->format('Ymd').'-'.uniqid().'.docx');
+
+        try {
+            $this->templateMerger->merge(ReportTemplateSettings::currentTemplatePath(), $bodyPath, $filepath);
+        } finally {
+            @unlink($bodyPath);
         }
 
         return $filepath;

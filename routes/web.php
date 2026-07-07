@@ -372,6 +372,8 @@ Route::group(['prefix' => 'admin', 'as' => 'admin.', 'middleware' => ['web.prote
 
     // Reporting
     Route::put('report/cartography', [Admin\CartographyController::class, 'cartography'])->name('report.cartography');
+    Route::get('report/cartography/template/default', [Admin\CartographyController::class, 'downloadDefaultTemplate'])->name('report.cartography.template.default');
+    Route::post('report/cartography/template', [Admin\CartographyController::class, 'uploadTemplate'])->name('report.cartography.template.upload');
     Route::get('report/entities', [Report\EntityList::class, 'generateExcel'])->name('report.entities');
     Route::get('report/applicationsByBlocks', [Report\ApplicationList::class, 'generate'])->name('report.applicationsByBlocks');
     Route::get('report/directory', [Report\Directory::class, 'generateDocx'])->name('report.directory');
@@ -423,7 +425,9 @@ Route::group(['prefix' => 'admin', 'as' => 'admin.', 'middleware' => ['web.prote
 
     // Reporting
     Route::get('doc/report', function () {
-        return view('doc/report');
+        return view('doc/report', [
+            'reportTemplate' => App\Support\ReportTemplateSettings::load(),
+        ]);
     })->name('doc.report');
 
     // Doc

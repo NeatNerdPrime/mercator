@@ -74,6 +74,57 @@
     <br>
 
     <div class="row">
+        <div class="col-lg-12">
+
+            <div class="card">
+                <div class="card-header">
+                    {{ trans('report_template.title') }}
+                </div>
+                <div class="card-body">
+                    @if (session('status'))
+                        <div class="alert alert-success">{{ session('status') }}</div>
+                    @endif
+
+                    <p>
+                        <a href="{{ route('admin.report.cartography.template.default') }}"
+                           target="_new">{{ trans('report_template.download_default') }}</a>
+                    </p>
+
+                    @if ($reportTemplate)
+                        <p>
+                            <strong>{{ trans('report_template.current_template') }}:</strong>
+                            {{ $reportTemplate['original_name'] }}
+                            ({{ \Illuminate\Support\Carbon::parse($reportTemplate['uploaded_at'])->format('d/m/Y H:i') }})
+                        </p>
+                    @else
+                        <p>{{ trans('report_template.using_default') }}</p>
+                    @endif
+
+                    @can('configure')
+                        <form method="POST" action="{{ route('admin.report.cartography.template.upload') }}"
+                              enctype="multipart/form-data">
+                            @csrf
+                            <div class="form-group">
+                                <label for="template">{{ trans('report_template.upload') }}</label>
+                                <input type="file" name="template" id="template" accept=".docx"
+                                       class="form-control {{ $errors->has('template') ? 'is-invalid' : '' }}">
+                                @if ($errors->has('template'))
+                                    <div class="invalid-feedback">{{ $errors->first('template') }}</div>
+                                @endif
+                            </div>
+                            <button class="btn btn-success" type="submit">
+                                {{ trans('report_template.upload') }}
+                            </button>
+                        </form>
+                    @endcan
+                </div>
+            </div>
+
+        </div>
+    </div>
+    <br>
+
+    <div class="row">
 
         <div class="col-lg-6">
 

@@ -267,34 +267,6 @@ class WordHelper
         return $phpWord;
     }
 
-    public function addCoverPageAndToc(PhpWord $phpWord, string $title, string $generatedOn, string $mercatorVersion): Section
-    {
-        $section = $phpWord->addSection();
-
-        $header = $section->addHeader();
-        $header->addText($title, ['size' => 9, 'italic' => true], ['alignment' => Jc::CENTER]);
-        // Do not put generated on on all headers, it's too long and takes up too much space'
-        // $header->addText($generatedOn, ['size' => 9, 'italic' => true], ['alignment' => Jc::CENTER]);
-
-        $footer = $section->addFooter();
-        $footer->addPreserveText('{PAGE} / {NUMPAGES}', ['size' => 8], ['alignment' => Jc::CENTER]);
-
-        $section->addTitle($title, 0);
-        $section->addTextBreak(1);
-        $section->addText($generatedOn, ['size' => 10], ['alignment' => Jc::CENTER]);
-        $section->addText($mercatorVersion, ['size' => 10], ['alignment' => Jc::CENTER]);
-        $section->addTextBreak(2);
-
-        $toc = $section->addTOC(['spaceAfter' => 50, 'size' => 10]);
-        $toc->setMinDepth(1);
-        $toc->setMaxDepth(2);
-        $section->addTextBreak(1);
-
-        $section->addPageBreak();
-
-        return $section;
-    }
-
     public function addBookmarkedTitle(Section $section, string $uid, string $title, int $depth): void
     {
         $section->addBookmark($uid);
