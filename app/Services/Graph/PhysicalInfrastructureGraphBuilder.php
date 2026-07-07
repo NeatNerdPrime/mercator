@@ -361,6 +361,16 @@ class PhysicalInfrastructureGraphBuilder
             $lines[] = '}';
         }
 
+        // Node ids actually written above: buildBuildingCluster() draws a building/bay's own
+        // devices straight from the model's relations (e.g. $building->physicalServers), not from
+        // the $physicalServers collection passed into this method — so a device can be present in
+        // that collection (and therefore "resolve" as a valid link endpoint below) without a
+        // corresponding node ever having been declared here, e.g. when its site/building falls
+        // outside the $sites/$buildings passed in. Checking against the collections alone isn't
+        // enough to guarantee the edge points at a real node; checking what was actually declared
+        // is.
+        $declaredNodeIds = $this->extractDeclaredNodeIds($lines);
+
         foreach ($physicalLinks as $link) {
             $srcNode = $this->resolveLinkEndpoint($link, 'src', $peripherals, $physicalRouters, $phones, $physicalSecurityDevices, $physicalServers, $physicalSwitches, $storageDevices, $wifiTerminals, $workstations);
             $destNode = $this->resolveLinkEndpoint($link, 'dest', $peripherals, $physicalRouters, $phones, $physicalSecurityDevices, $physicalServers, $physicalSwitches, $storageDevices, $wifiTerminals, $workstations);
@@ -372,7 +382,8 @@ class PhysicalInfrastructureGraphBuilder
                 && $link->network_switch_src_id === null
                 && $link->network_switch_dest_id === null;
 
-            if ($isPhysicalLink && $srcNode !== null && $destNode !== null) {
+            if ($isPhysicalLink && $srcNode !== null && $destNode !== null
+                && isset($declaredNodeIds[$srcNode]) && isset($declaredNodeIds[$destNode])) {
                 $edge = $srcNode.' -> '.$destNode.' [color="'.($link->color ?? 'grey').'", penwidth=2, arrowhead=none,';
                 if ($showPorts) {
                     $edge .= ' taillabel="'.addslashes($link->src_port).'" headlabel="'.addslashes($link->dest_port).'",';
@@ -571,5 +582,35 @@ class PhysicalInfrastructureGraphBuilder
     private function nextColor(): string
     {
         return self::TABLEAU20[$this->idColor++ % 20];
+    }
+
+    /**
+     * Scans already-built DOT lines for node declarations ("ID [attrs]"), excluding edges (which
+     * always contain "->" in this builder) and subgraph/cluster statements (which use "{", not
+     * "["). Mirrors WordHelper::countGraphNodes()'s line-shape check, but keeps the ids themselves
+     * rather than just a count.
+     *
+     * $lines entries aren't necessarily one DOT line each: buildBuildingCluster() returns a whole
+     * multi-line subgraph (nested bays included) as a single string, pushed as one array element —
+     * flattening through implode+explode first ensures every actual line gets checked, not just
+     * the first line of each element.
+     *
+     * @param  array<int, string>  $lines
+     * @return array<string, true>
+     */
+    private function extractDeclaredNodeIds(array $lines): array
+    {
+        $ids = [];
+        foreach (explode("\n", implode("\n", $lines)) as $line) {
+            $line = trim($line);
+            if ($line === '' || str_contains($line, '->')) {
+                continue;
+            }
+            if (preg_match('/^([A-Za-z_][A-Za-z0-9_]*)\s*\[/', $line, $matches)) {
+                $ids[$matches[1]] = true;
+            }
+        }
+
+        return $ids;
     }
 }

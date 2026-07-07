@@ -123,6 +123,47 @@ test('buildConnectivityDot draws a physical link between a server and a peripher
         ->toContain('PSERVER'.$server->id.' -> PER'.$peripheral->id);
 });
 
+test('buildConnectivityDot skips a link whose endpoint device exists in the passed collection but was never actually declared as a node', function () {
+    // Site B is deliberately left out of the $sites collection passed to buildConnectivityDot
+    // (mirrors a per-site report split, or any scope narrower than "every site"): its server is
+    // still present in $physicalServers (the flat device collection used for endpoint lookup), but
+    // buildBuildingCluster() never visits Site B, so no PSERVER node is ever written for it.
+    $siteA = Site::factory()->create();
+    $buildingA = Building::factory()->create(['site_id' => $siteA->id]);
+    $serverA = PhysicalServer::factory()->create(['building_id' => $buildingA->id, 'bay_id' => null, 'site_id' => null]);
+
+    $siteB = Site::factory()->create();
+    $buildingB = Building::factory()->create(['site_id' => $siteB->id]);
+    $serverB = PhysicalServer::factory()->create(['building_id' => $buildingB->id, 'bay_id' => null, 'site_id' => null]);
+
+    $link = PhysicalLink::factory()->create([
+        'physical_server_src_id' => $serverA->id,
+        'physical_server_dest_id' => $serverB->id,
+    ]);
+
+    $builder = new PhysicalInfrastructureGraphBuilder;
+    $dot = $builder->buildConnectivityDot(
+        sites: Site::with('buildings')->whereKey($siteA->id)->get(),
+        buildings: Building::with('phones', 'workstations', 'wifiTerminals', 'physicalSwitches', 'physicalRouters', 'peripherals', 'physicalServers', 'storageDevices', 'bays')->get(),
+        bays: new Collection,
+        physicalServers: PhysicalServer::all(),
+        workstations: new Collection,
+        storageDevices: new Collection,
+        peripherals: new Collection,
+        phones: new Collection,
+        physicalSwitches: new Collection,
+        physicalRouters: new Collection,
+        wifiTerminals: new Collection,
+        physicalSecurityDevices: new Collection,
+        physicalLinks: PhysicalLink::all(),
+    );
+
+    expect($dot)
+        ->toContain('PSERVER'.$serverA->id.' [shape=none label=<')
+        ->not->toContain('PSERVER'.$serverB->id.' [shape=none label=<')
+        ->not->toContain('PSERVER'.$serverA->id.' -> PSERVER'.$serverB->id);
+});
+
 test('buildConnectivityDot draws a physical server and a storage device attached directly to a building without a bay', function () {
     $site = Site::factory()->create();
     $building = Building::factory()->create(['site_id' => $site->id]);

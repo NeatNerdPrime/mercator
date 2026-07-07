@@ -84,7 +84,12 @@ class LogicalInfrastructureGraphBuilder
                 if ($subnetwork->subnetwork_id !== null) {
                     if ($subnetworks->contains('id', $subnetwork->subnetwork_id)) {
                         $lines[] = 'SUBNET'.$subnetwork->subnetwork_id.' -> SUBNET'.$subnetwork->id;
-                    } else {
+                    } elseif ($subnetwork->network_id !== null && $networks->contains('id', $subnetwork->network_id)) {
+                        // Parent subnetwork isn't in scope: fall back to linking to its network
+                        // directly, but only if that network is actually drawn — this branch was
+                        // missing that check entirely, unlike the sibling elseif below, and could
+                        // emit a dangling "NET -> SUBNET" edge (even "NET -> SUBNET" with no id at
+                        // all when network_id was null) pointing at a node that was never declared.
                         $lines[] = 'NET'.$subnetwork->network_id.' -> SUBNET'.$subnetwork->id;
                     }
                 } elseif ($subnetwork->network_id !== null) {
