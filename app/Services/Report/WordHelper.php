@@ -273,7 +273,8 @@ class WordHelper
 
         $header = $section->addHeader();
         $header->addText($title, ['size' => 9, 'italic' => true], ['alignment' => Jc::CENTER]);
-        $header->addText($generatedOn, ['size' => 9, 'italic' => true], ['alignment' => Jc::CENTER]);
+        // Do not put generated on on all headers, it's too long and takes up too much space'
+        // $header->addText($generatedOn, ['size' => 9, 'italic' => true], ['alignment' => Jc::CENTER]);
 
         $footer = $section->addFooter();
         $footer->addPreserveText('{PAGE} / {NUMPAGES}', ['size' => 8], ['alignment' => Jc::CENTER]);
