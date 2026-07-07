@@ -37,6 +37,16 @@ class CartographyController extends Controller
         return response()->download(ReportTemplateSettings::defaultTemplatePath(), 'default-template.docx');
     }
 
+    public function downloadCurrentTemplate()
+    {
+        abort_if(Gate::denies('reports_access'), Response::HTTP_FORBIDDEN, '403 Forbidden');
+
+        $current = ReportTemplateSettings::load();
+        abort_if($current === null || ! is_file(ReportTemplateSettings::storagePath()), Response::HTTP_NOT_FOUND, '404 Not Found');
+
+        return response()->download(ReportTemplateSettings::storagePath(), $current['original_name']);
+    }
+
     public function uploadTemplate(Request $request)
     {
         abort_if(Gate::denies('configure'), Response::HTTP_FORBIDDEN, '403 Forbidden');

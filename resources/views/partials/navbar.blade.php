@@ -126,7 +126,10 @@
                             @endcan
                             @can('reports_access')
                                 <li><a class="dropdown-item" href="/admin/doc/report">
-                                        <i class="bi bi-file-earmark-fill"></i>{{ trans('panel.menu.reports') }}</a>
+                                        <i class="bi bi-file-earmark-richtext-fill"></i>{{ trans('panel.menu.reports') }}</a>
+                                </li>
+                                <li><a class="dropdown-item" href="/admin/doc/lists">
+                                        <i class="bi bi-file-earmark-spreadsheet-fill"></i>{{ trans('panel.menu.lists') }}</a>
                                 </li>
                             @endcan
                         </ul>

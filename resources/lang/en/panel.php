@@ -42,6 +42,7 @@ return [
         'physical_infrastructure' => 'Physical infrastructure',
         'preferences' => 'Preferences',
         'reports' => 'Reporting',
+        'lists' => 'Lists',
         'schema' => 'Data model',
         'tools' => 'Tools',
         'patching' => 'Patching',

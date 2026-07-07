@@ -32,6 +32,23 @@ beforeEach(function () {
     $this->admin = User::query()->where('login', 'admin@admin.com')->first();
 });
 
+function countPngMedia(string $docxPath): int
+{
+    $zip = new ZipArchive;
+    $zip->open($docxPath);
+
+    $count = 0;
+    for ($i = 0; $i < $zip->numFiles; $i++) {
+        $name = $zip->getNameIndex($i);
+        if (str_starts_with($name, 'word/media/') && str_ends_with($name, '.png')) {
+            $count++;
+        }
+    }
+    $zip->close();
+
+    return $count;
+}
+
 function assertDocxDownload($response): void
 {
     $response->assertOk();
@@ -127,13 +144,15 @@ describe('cartography report generation', function () {
         }
         $zip->close();
 
-        // Expect 3 embedded PNGs: both entities share the same default icon fallback path, deduped
-        // by PhpWord's Media registry into 1 entry, plus one family graph each for the parent and
-        // the child (from insertGraph) — asserting a count, not just "at least one", because the
-        // entity icon alone was enough to make a weaker assertion pass while the graph's own media
-        // was still silently missing.
+        // Expect the active default template's own baseline media (e.g. a cover image, if the
+        // active default-template.docx has one) plus 3 new PNGs: both entities share the same
+        // default icon fallback path, deduped by PhpWord's Media registry into 1 entry, plus one
+        // family graph each for the parent and the child (from insertGraph) — asserting a count,
+        // not just "at least one", because the entity icon alone was enough to make a weaker
+        // assertion pass while the graph's own media was still silently missing.
+        $baselineMediaCount = countPngMedia(ReportTemplateSettings::defaultTemplatePath());
         expect($xml)->toContain('<w:pict');
-        expect($mediaSizes)->toHaveCount(3);
+        expect($mediaSizes)->toHaveCount($baselineMediaCount + 3);
         expect(min($mediaSizes))->toBeGreaterThan(1000);
     });
 
@@ -270,7 +289,7 @@ describe('cartography report generation', function () {
             ->toContain($dataProcessing->getUID());
     });
 
-    test('merges the report body into the default template: cover title present, :content: tag gone', function () {
+    test('merges the report body into the default template: template sectPr survives, :content: tag gone', function () {
         $this->actingAs($this->admin);
         $entity = Entity::factory()->create(['name' => 'Template Merge Entity']);
 
@@ -284,8 +303,13 @@ describe('cartography report generation', function () {
         $xml = $zip->getFromName('word/document.xml');
         $zip->close();
 
+        // Not asserting on the default template's own cover-page text: that content is whatever
+        // the active default-template.docx contains, which is not this test's concern. What proves
+        // a real merge happened (not just the body standing alone) is that the template's own
+        // <w:sectPr> (header/footer references) governs the final document.
         expect($xml)
-            ->toContain('Information System Mapping Report')
+            ->toContain('<w:headerReference')
+            ->toContain('<w:footerReference')
             ->toContain('Template Merge Entity')
             ->not->toContain(':content:');
     });
@@ -319,8 +343,29 @@ function uploadableTemplateFixture(string $name): UploadedFile
 }
 
 describe('cartography report template', function () {
+    // ReportTemplateSettings::storagePath() is a real filesystem path, not test/env-isolated the
+    // way the database connection is -- a bare @unlink() here would delete a real admin-uploaded
+    // template if one happened to exist on disk when the suite runs. Snapshot whatever is really
+    // there before each test and put it back after, instead of assuming the slot is ours to clear.
+    // The real file (if any) is also removed for the duration of the test, not just backed up: the
+    // test DB is always freshly empty (RefreshDatabase), so every test's baseline assumption is "no
+    // template active" -- leaving a real file in place would falsify that on this one machine while
+    // every other environment sees a clean slate.
+    beforeEach(function () {
+        $this->realTemplateBackup = is_file(ReportTemplateSettings::storagePath())
+            ? file_get_contents(ReportTemplateSettings::storagePath())
+            : null;
+
+        @unlink(ReportTemplateSettings::storagePath());
+    });
+
     afterEach(function () {
         @unlink(ReportTemplateSettings::storagePath());
+
+        if ($this->realTemplateBackup !== null) {
+            ReportTemplateSettings::ensureStorageDirectoryExists();
+            file_put_contents(ReportTemplateSettings::storagePath(), $this->realTemplateBackup);
+        }
     });
 
     test('downloads the default template for any user allowed to generate the report', function () {
@@ -336,6 +381,42 @@ describe('cartography report template', function () {
         $this->actingAs($user);
 
         $response = $this->get(route('admin.report.cartography.template.default'));
+
+        $response->assertForbidden();
+    });
+
+    test('downloading the current template 404s when no custom template is active', function () {
+        $this->actingAs($this->admin);
+
+        $response = $this->get(route('admin.report.cartography.template.current'));
+
+        $response->assertNotFound();
+    });
+
+    test('downloads the active custom template under its original name', function () {
+        $this->actingAs($this->admin);
+
+        $this->post(route('admin.report.cartography.template.upload'), [
+            'template' => uploadableTemplateFixture('valid-template.docx'),
+        ]);
+
+        $response = $this->get(route('admin.report.cartography.template.current'));
+
+        assertDocxDownload($response);
+        expect($response->baseResponse->getFile()->getFilename())->not->toBeEmpty();
+        expect($response->headers->get('content-disposition'))->toContain('valid-template.docx');
+    });
+
+    test('denies downloading the current template without the reports_access permission', function () {
+        $this->actingAs($this->admin);
+        $this->post(route('admin.report.cartography.template.upload'), [
+            'template' => uploadableTemplateFixture('valid-template.docx'),
+        ]);
+
+        $user = User::factory()->create();
+        $this->actingAs($user);
+
+        $response = $this->get(route('admin.report.cartography.template.current'));
 
         $response->assertForbidden();
     });
