@@ -149,32 +149,121 @@ describe('PhysicalInfrastructureSection content', function () {
             ->toContain($storage->getUID());
     });
 
-    test('splits location/connectivity graphs per building-under-site while the security-zone graph stays a single global graph', function () {
+    test('orders sections global -> sites -> root buildings -> child buildings -> other objects, alphabetically within each group', function () {
+        $siteB = Site::factory()->create(['name' => 'Site B']);
         $siteA = Site::factory()->create(['name' => 'Site A']);
-        $buildingA1 = Building::factory()->create(['name' => 'Building A1', 'site_id' => $siteA->id]);
-        $buildingA2 = Building::factory()->create(['name' => 'Building A2', 'site_id' => $siteA->id]);
-        // Each building needs at least 2 of its own devices: WordHelper::insertGraph() now skips
-        // graphs with fewer than 2 nodes, and a building's own root-building connectivity subgraph
-        // draws only its devices (never the building itself as a node — only the location-hierarchy
-        // graph does that), so a bare building would otherwise be filtered out entirely.
-        Workstation::factory()->create(['name' => 'WKS-A1', 'site_id' => $siteA->id, 'building_id' => $buildingA1->id]);
-        PhysicalServer::factory()->create(['name' => 'SRV-A1', 'site_id' => $siteA->id, 'building_id' => $buildingA1->id]);
-        Workstation::factory()->create(['name' => 'WKS-A2', 'site_id' => $siteA->id, 'building_id' => $buildingA2->id]);
-        PhysicalServer::factory()->create(['name' => 'SRV-A2', 'site_id' => $siteA->id, 'building_id' => $buildingA2->id]);
-        Site::factory()->create(['name' => 'Site B (no buildings)']);
+        $rootZ = Building::factory()->create(['name' => 'Root Z', 'site_id' => $siteA->id]);
+        $rootA = Building::factory()->create(['name' => 'Root A', 'site_id' => $siteA->id]);
+        $childZ = Building::factory()->create(['name' => 'Child Z', 'site_id' => $siteA->id, 'building_id' => $rootA->id]);
+        $childA = Building::factory()->create(['name' => 'Child A', 'site_id' => $siteA->id, 'building_id' => $rootA->id]);
+        $bay = Bay::factory()->create(['name' => 'Some Bay', 'site_id' => $siteA->id, 'building_id' => $rootA->id]);
 
-        [, , $mediaSizes] = renderPhysicalInfrastructureSectionXml();
+        [$xml] = renderPhysicalInfrastructureSectionXml();
 
-        // Security-zone graph: always exactly 1 (2 building nodes, unconditionally drawn regardless
-        // of zones), unchanged.
-        // Location hierarchy: 1 graph per building of Site A (2, each with building+workstation+server
-        // = 3 nodes), none for Site B (no buildings).
-        // Connectivity: Site A gets 1 site-wide graph (4 device nodes) + 1 per root building (2, each
-        // with its own workstation+server = 2 nodes) = 3; Site B is skipped entirely (no buildings).
-        // Total graphs: 1 + 2 + 3 = 6.
-        // Icons: site/building/workstation/physicalServer each have no custom icon, so each type's
-        // fallback path dedupes to 1 entry: site.png + building.png + workstation.png + server.png = 4.
-        // Total media: 6 + 4 = 10.
-        expect($mediaSizes)->toHaveCount(10);
+        // A UID also shows up as a hyperlink *target* wherever another object links to it (e.g. a
+        // Site's "buildings" row links to every building under it) — searching for the bare UID
+        // string would find that earlier reference instead of the object's own bookmarked title.
+        // Bookmarks are the only place a UID appears as a `w:name` attribute (links use `w:anchor`),
+        // so anchor the search on that to find each object's actual section.
+        $bookmarkPos = fn (string $uid) => strpos($xml, 'name="'.$uid.'"');
+
+        $posSiteA = $bookmarkPos($siteA->getUID());
+        $posSiteB = $bookmarkPos($siteB->getUID());
+        $posRootA = $bookmarkPos($rootA->getUID());
+        $posRootZ = $bookmarkPos($rootZ->getUID());
+        $posChildA = $bookmarkPos($childA->getUID());
+        $posChildZ = $bookmarkPos($childZ->getUID());
+        $posBay = $bookmarkPos($bay->getUID());
+
+        expect([$posSiteA, $posSiteB, $posRootA, $posRootZ, $posChildA, $posChildZ, $posBay])->each->toBeInt();
+
+        // Sites alphabetical: A before B.
+        expect($posSiteA)->toBeLessThan($posSiteB);
+        // Both sites (any order within "sites") must precede the buildings section.
+        expect(max($posSiteA, $posSiteB))->toBeLessThan(min($posRootA, $posRootZ));
+        // Root buildings alphabetical: A before Z.
+        expect($posRootA)->toBeLessThan($posRootZ);
+        // Root buildings (as a group) precede child buildings (as a group).
+        expect(max($posRootA, $posRootZ))->toBeLessThan(min($posChildA, $posChildZ));
+        // Child buildings alphabetical: A before Z.
+        expect($posChildA)->toBeLessThan($posChildZ);
+        // Buildings section precedes the "other objects" section (Bay is first of the remaining types).
+        expect(max($posChildA, $posChildZ))->toBeLessThan($posBay);
+    });
+
+    test('root building without children or content gets no schema of its own, but the site/global skeleton still shows it', function () {
+        $site = Site::factory()->create(['name' => 'Empty Site']);
+        $building = Building::factory()->create(['name' => 'Empty Root', 'site_id' => $site->id]);
+
+        [$xml, , $mediaSizes] = renderPhysicalInfrastructureSectionXml();
+
+        expect($xml)->toContain('Empty Root')->toContain($building->getUID());
+        // The building itself gets no dedicated schema (no children, no bays/equipment). But the
+        // global and site-scoped physical-infrastructure schemas still draw the Site->Building
+        // containment edge (2 nodes each, not "empty"/isolated) — the matching network schemas stay
+        // empty (a bare building contributes no node to a connectivity graph) and are skipped.
+        // Graphs: global infra (1) + site infra (1) = 2.
+        // Icons: site.png + building.png = 2.
+        expect($mediaSizes)->toHaveCount(4);
+    });
+
+    test('root building with content gets 2 schemas (network + physical infrastructure), a child building gets only 1', function () {
+        $site = Site::factory()->create(['name' => 'Populated Site']);
+        $root = Building::factory()->create(['name' => 'Populated Root', 'site_id' => $site->id]);
+        $child = Building::factory()->create(['name' => 'Populated Child', 'site_id' => $site->id, 'building_id' => $root->id]);
+        Workstation::factory()->create(['name' => 'WKS-1', 'site_id' => $site->id, 'building_id' => $root->id]);
+        PhysicalServer::factory()->create(['name' => 'SRV-1', 'site_id' => $site->id, 'building_id' => $root->id, 'bay_id' => null]);
+        Workstation::factory()->create(['name' => 'WKS-2', 'site_id' => $site->id, 'building_id' => $child->id]);
+        PhysicalServer::factory()->create(['name' => 'SRV-2', 'site_id' => $site->id, 'building_id' => $child->id, 'bay_id' => null]);
+
+        [$xml, , $mediaSizes] = renderPhysicalInfrastructureSectionXml();
+
+        expect($xml)->toContain('Populated Root')->toContain('Populated Child');
+        // 2 global (network+infra) + 2 site-scoped (network+infra) + 2 root-building (network+infra,
+        // subtree includes the child) + 1 child-building (infra only, no network) = 7 graphs.
+        // Icons: site.png + building.png (root+child dedupe) + workstation.png + server.png = 4.
+        expect($mediaSizes)->toHaveCount(11);
+    });
+
+    test('an object type with no containment relation (PhysicalServer) never gets a schema', function () {
+        PhysicalServer::factory()->create(['name' => 'lone-server', 'site_id' => null, 'building_id' => null, 'bay_id' => null]);
+
+        [$xml, , $mediaSizes] = renderPhysicalInfrastructureSectionXml();
+
+        expect($xml)->toContain('lone-server');
+        // No site at all in this scenario, so the connectivity (network) graph draws nothing (it
+        // only ever iterates per-site); the location graph draws the server as a single unattached
+        // node, which insertGraph() then discards as an isolated node. Only the server.png
+        // description icon remains.
+        expect($mediaSizes)->toHaveCount(1);
+    });
+
+    test('a Bay with mounted equipment gets a physical-infrastructure schema; an empty Bay does not', function () {
+        $emptyBay = Bay::factory()->create(['name' => 'Empty Bay', 'site_id' => null, 'building_id' => null]);
+        $fullBay = Bay::factory()->create(['name' => 'Full Bay', 'site_id' => null, 'building_id' => null]);
+        PhysicalServer::factory()->create(['name' => 'in-bay-server', 'bay_id' => $fullBay->id, 'site_id' => null, 'building_id' => null]);
+        StorageDevice::factory()->create(['name' => 'in-bay-storage', 'bay_id' => $fullBay->id, 'site_id' => null, 'building_id' => null]);
+
+        [$xml, , $mediaSizes] = renderPhysicalInfrastructureSectionXml();
+
+        expect($xml)->toContain('Empty Bay')->toContain('Full Bay');
+        // No site exists, so the connectivity (network) graph draws nothing at all (site-scoped
+        // loop only). The global physical-infrastructure schema still draws both bays (containment
+        // is site/building-independent) plus the 2 mounted devices = 4 nodes (1 graph). Empty Bay
+        // gets no dedicated schema; Full Bay gets one (bay + server + storage = 3 nodes, 1 graph).
+        // Icons: server.png only (StorageDevice/Bay don't render a description icon).
+        expect($mediaSizes)->toHaveCount(3);
+    });
+
+    test('a Zone with child zones gets a security-zone schema scoped to it; a childless zone does not', function () {
+        $parentZone = Zone::factory()->create(['name' => 'Parent Zone']);
+        $childZone = Zone::factory()->create(['name' => 'Child Zone']);
+        $parentZone->childZones()->attach($childZone->id);
+        Zone::factory()->create(['name' => 'Lonely Zone']);
+
+        [$xml, , $mediaSizes] = renderPhysicalInfrastructureSectionXml();
+
+        expect($xml)->toContain('Parent Zone')->toContain('Child Zone')->toContain('Lonely Zone');
+        expect($mediaSizes)->toHaveCount(1);
     });
 });
