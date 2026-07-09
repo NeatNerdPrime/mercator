@@ -90,22 +90,19 @@ class PhysicalInfrastructureSection implements ReportSection
         $adminUsers = Cartographer::scopedQuery(AdminUser::query())->get();
 
         $iconResolver = fn (?int $iconId, string $fallback) => $helper->resolveIconPath($iconId, $fallback);
-
-        $securityZoneDot = (new SecurityZoneGraphBuilder)->buildDot($zones, $buildings, $adminUsers, [
-            'withHref' => false,
-            'iconResolver' => $iconResolver,
-        ]);
-        $helper->insertGraph($section, $securityZoneDot);
+        $graphBuilder = new PhysicalInfrastructureGraphBuilder;
+        $securityZoneGraphBuilder = new SecurityZoneGraphBuilder;
 
         $graphContext = new PhysicalInfrastructureGraphContext(
             $buildings, $bays, $physicalServers, $workstations, $storageDevices, $peripherals,
             $phones, $physicalSwitches, $physicalRouters, $wifiTerminals, $physicalSecurityDevices, $physicalLinks
         );
 
-        $this->addSites($section, $helper, $sites, $graphContext, $selectedVues);
-        $this->addBuildings($section, $helper, $buildings, $selectedVues);
-        $this->addBays($section, $helper, $bays, $selectedVues);
-        $this->addZones($section, $helper, $zones, $selectedVues);
+        $this->addGlobalGraphs($section, $helper, $graphBuilder, $iconResolver, $sites, $graphContext);
+        $this->addSites($section, $helper, $graphBuilder, $iconResolver, $sites, $graphContext, $selectedVues);
+        $this->addBuildingsSection($section, $helper, $graphBuilder, $iconResolver, $buildings, $graphContext, $selectedVues);
+        $this->addBays($section, $helper, $graphBuilder, $iconResolver, $bays, $selectedVues);
+        $this->addZones($section, $helper, $securityZoneGraphBuilder, $iconResolver, $zones, $selectedVues);
         $this->addPhysicalServers($section, $helper, $physicalServers, $selectedVues);
         $this->addWorkstations($section, $helper, $workstations, $selectedVues);
         $this->addStorageDevices($section, $helper, $storageDevices, $selectedVues);
@@ -122,10 +119,34 @@ class PhysicalInfrastructureSection implements ReportSection
     }
 
     /**
+     * Chapter-level schemas: the full network schema and the full physical-infrastructure schema,
+     * covering every site/building/bay/device in scope — no filtering, straight from the common
+     * graph service, mirroring the unfiltered interactive screens.
+     *
+     * @param  Collection<int, Site>  $sites
+     */
+    private function addGlobalGraphs(Section $section, WordHelper $helper, PhysicalInfrastructureGraphBuilder $graphBuilder, callable $iconResolver, Collection $sites, PhysicalInfrastructureGraphContext $ctx): void
+    {
+        $locationDot = $graphBuilder->buildLocationDot(
+            $sites, $ctx->buildings, $ctx->bays, $ctx->physicalServers, $ctx->workstations, $ctx->storageDevices,
+            $ctx->peripherals, $ctx->phones, $ctx->physicalSwitches, $ctx->physicalRouters, $ctx->wifiTerminals,
+            $ctx->physicalSecurityDevices, false, ['withHref' => false, 'iconResolver' => $iconResolver]
+        );
+        $helper->insertGraph($section, $locationDot);
+
+        $networkDot = $graphBuilder->buildConnectivityDot(
+            $sites, $ctx->buildings, $ctx->bays, $ctx->physicalServers, $ctx->workstations, $ctx->storageDevices,
+            $ctx->peripherals, $ctx->phones, $ctx->physicalSwitches, $ctx->physicalRouters, $ctx->wifiTerminals,
+            $ctx->physicalSecurityDevices, $ctx->physicalLinks, false, ['iconResolver' => $iconResolver]
+        );
+        $helper->insertGraph($section, $networkDot);
+    }
+
+    /**
      * @param  Collection<int, Site>  $sites
      * @param  array<int, string>  $selectedVues
      */
-    private function addSites(Section $section, WordHelper $helper, Collection $sites, PhysicalInfrastructureGraphContext $graphContext, array $selectedVues): void
+    private function addSites(Section $section, WordHelper $helper, PhysicalInfrastructureGraphBuilder $graphBuilder, callable $iconResolver, Collection $sites, PhysicalInfrastructureGraphContext $ctx, array $selectedVues): void
     {
         if ($sites->isEmpty()) {
             return;
@@ -133,13 +154,27 @@ class PhysicalInfrastructureSection implements ReportSection
 
         $section->addTitle(trans('cruds.site.title'), 2);
 
-        $graphBuilder = new PhysicalInfrastructureGraphBuilder;
-        $iconResolver = fn (?int $iconId, string $fallback) => $helper->resolveIconPath($iconId, $fallback);
-
         foreach ($sites as $site) {
             $helper->addBookmarkedTitle($section, $site->getUID(), (string) $site->name, 3);
-            $this->addSiteLocationGraphs($section, $helper, $graphBuilder, $iconResolver, $site, $graphContext);
-            $this->addSiteConnectivityGraphs($section, $helper, $graphBuilder, $iconResolver, $site, $graphContext);
+
+            $scoped = $this->siteScopedContext($site, $ctx);
+
+            $locationDot = $graphBuilder->buildLocationDot(
+                new Collection([$site]), $scoped['buildings'], $scoped['bays'], $scoped['physicalServers'],
+                $scoped['workstations'], $scoped['storageDevices'], $scoped['peripherals'], $scoped['phones'],
+                $scoped['physicalSwitches'], $scoped['physicalRouters'], $scoped['wifiTerminals'],
+                $scoped['physicalSecurityDevices'], false, ['withHref' => false, 'iconResolver' => $iconResolver]
+            );
+            $helper->insertGraph($section, $locationDot);
+
+            $networkDot = $graphBuilder->buildConnectivityDot(
+                new Collection([$site]), $scoped['buildings'], $scoped['bays'], $scoped['physicalServers'],
+                $scoped['workstations'], $scoped['storageDevices'], $scoped['peripherals'], $scoped['phones'],
+                $scoped['physicalSwitches'], $scoped['physicalRouters'], $scoped['wifiTerminals'],
+                $scoped['physicalSecurityDevices'], $ctx->physicalLinks, false, ['iconResolver' => $iconResolver]
+            );
+            $helper->insertGraph($section, $networkDot);
+
             $table = $helper->addTable($section, (string) $site->name);
 
             $helper->addTextRow($table, trans('cruds.site.fields.type'), $site->type);
@@ -153,60 +188,172 @@ class PhysicalInfrastructureSection implements ReportSection
     }
 
     /**
-     * One location-hierarchy subgraph per Building of this Site, placed below the SITE's own
-     * subtitle (not the building's) — each graph is isolated to that single building's own bays
-     * and directly-attached devices, mirroring how buildLocationDot() already scopes a node's
-     * edges to whatever is present in the passed collections.
+     * Filters a PhysicalInfrastructureGraphContext down to everything belonging to a single Site
+     * (buildings of any depth under it, their bays, and every device attached to the site itself,
+     * one of its buildings, or one of its bays).
+     *
+     * @return array{buildings: Collection<int, Building>, bays: Collection<int, Bay>, physicalServers: Collection<int, PhysicalServer>, workstations: Collection<int, Workstation>, storageDevices: Collection<int, StorageDevice>, peripherals: Collection<int, Peripheral>, phones: Collection<int, Phone>, physicalSwitches: Collection<int, PhysicalSwitch>, physicalRouters: Collection<int, PhysicalRouter>, wifiTerminals: Collection<int, WifiTerminal>, physicalSecurityDevices: Collection<int, PhysicalSecurityDevice>}
      */
-    private function addSiteLocationGraphs(Section $section, WordHelper $helper, PhysicalInfrastructureGraphBuilder $graphBuilder, callable $iconResolver, Site $site, PhysicalInfrastructureGraphContext $ctx): void
+    private function siteScopedContext(Site $site, PhysicalInfrastructureGraphContext $ctx): array
     {
-        foreach ($ctx->buildings->where('site_id', $site->id) as $building) {
-            $ownBays = $ctx->bays->where('building_id', $building->id);
-            $ownBayIds = $ownBays->pluck('id');
+        $buildings = $ctx->buildings->where('site_id', $site->id);
+        $buildingIds = $buildings->pluck('id');
 
-            $dot = $graphBuilder->buildLocationDot(
-                new Collection,
-                new Collection([$building]),
-                $ownBays,
-                $ctx->physicalServers->filter(fn (PhysicalServer $d) => $this->belongsToBuildingOrBay($d->building_id, $d->bay_id, $building->id, $ownBayIds)),
-                $ctx->workstations->where('building_id', $building->id),
-                $ctx->storageDevices->filter(fn (StorageDevice $d) => $this->belongsToBuildingOrBay($d->building_id, $d->bay_id, $building->id, $ownBayIds)),
-                $ctx->peripherals->filter(fn (Peripheral $d) => $this->belongsToBuildingOrBay($d->building_id, $d->bay_id, $building->id, $ownBayIds)),
-                $ctx->phones->where('building_id', $building->id),
-                $ctx->physicalSwitches->filter(fn (PhysicalSwitch $d) => $this->belongsToBuildingOrBay($d->building_id, $d->bay_id, $building->id, $ownBayIds)),
-                $ctx->physicalRouters->filter(fn (PhysicalRouter $d) => $this->belongsToBuildingOrBay($d->building_id, $d->bay_id, $building->id, $ownBayIds)),
-                $ctx->wifiTerminals->where('building_id', $building->id),
-                $ctx->physicalSecurityDevices->filter(fn (PhysicalSecurityDevice $d) => $this->belongsToBuildingOrBay($d->building_id, $d->bay_id, $building->id, $ownBayIds)),
-                true,
-                ['withHref' => false, 'iconResolver' => $iconResolver]
-            );
-            $helper->insertGraph($section, $dot);
-        }
-    }
+        $bays = $ctx->bays->filter(fn (Bay $bay) => $bay->building_id !== null
+            ? $buildingIds->contains($bay->building_id)
+            : $bay->site_id === $site->id);
+        $bayIds = $bays->pluck('id');
 
-    private function belongsToBuildingOrBay(?int $buildingId, ?int $bayId, int $targetBuildingId, \Illuminate\Support\Collection $bayIds): bool
-    {
-        return $buildingId === $targetBuildingId || ($bayId !== null && $bayIds->contains($bayId));
+        $matches = fn (?int $buildingId, ?int $bayId, ?int $siteId) => $buildingId !== null
+            ? $buildingIds->contains($buildingId)
+            : ($bayId !== null ? $bayIds->contains($bayId) : $siteId === $site->id);
+
+        return [
+            'buildings' => $buildings,
+            'bays' => $bays,
+            'physicalServers' => $ctx->physicalServers->filter(fn (PhysicalServer $d) => $matches($d->building_id, $d->bay_id, $d->site_id)),
+            'workstations' => $ctx->workstations->filter(fn (Workstation $d) => $matches($d->building_id, null, $d->site_id)),
+            'storageDevices' => $ctx->storageDevices->filter(fn (StorageDevice $d) => $matches($d->building_id, $d->bay_id, $d->site_id)),
+            'peripherals' => $ctx->peripherals->filter(fn (Peripheral $d) => $matches($d->building_id, $d->bay_id, $d->site_id)),
+            'phones' => $ctx->phones->filter(fn (Phone $d) => $matches($d->building_id, null, $d->site_id)),
+            'physicalSwitches' => $ctx->physicalSwitches->filter(fn (PhysicalSwitch $d) => $matches($d->building_id, $d->bay_id, $d->site_id)),
+            'physicalRouters' => $ctx->physicalRouters->filter(fn (PhysicalRouter $d) => $matches($d->building_id, $d->bay_id, $d->site_id)),
+            'wifiTerminals' => $ctx->wifiTerminals->filter(fn (WifiTerminal $d) => $matches($d->building_id, null, $d->site_id)),
+            'physicalSecurityDevices' => $ctx->physicalSecurityDevices->filter(fn (PhysicalSecurityDevice $d) => $matches($d->building_id, $d->bay_id, $d->site_id)),
+        ];
     }
 
     /**
-     * Network-connectivity subgraphs for this Site: first the whole site (every building/bay/
-     * device it contains), then one additional graph per root/main building (building_id === null)
-     * scoped to just that building's own subtree. buildConnectivityDot() self-filters PhysicalLink
-     * edges via ->contains() against the passed device collections, so passing the full $physicalLinks
-     * set unfiltered is safe — only edges whose endpoints are actually drawn in this particular graph
-     * will render.
+     * Root buildings (schemas gated on having children or content) then child buildings (schema
+     * always attempted, network schema never shown) — both groups alphabetical, under a single
+     * "Building" subtitle.
+     *
+     * @param  Collection<int, Building>  $buildings
+     * @param  array<int, string>  $selectedVues
      */
-    private function addSiteConnectivityGraphs(Section $section, WordHelper $helper, PhysicalInfrastructureGraphBuilder $graphBuilder, callable $iconResolver, Site $site, PhysicalInfrastructureGraphContext $ctx): void
+    private function addBuildingsSection(Section $section, WordHelper $helper, PhysicalInfrastructureGraphBuilder $graphBuilder, callable $iconResolver, Collection $buildings, PhysicalInfrastructureGraphContext $ctx, array $selectedVues): void
     {
-        $siteBuildings = $ctx->buildings->where('site_id', $site->id);
-
-        $this->addFilteredConnectivityGraph($section, $helper, $graphBuilder, $iconResolver, $site, $siteBuildings, $ctx, true);
-
-        foreach ($siteBuildings->whereNull('building_id') as $rootBuilding) {
-            $subtree = $this->buildingSubtree($rootBuilding, $siteBuildings);
-            $this->addFilteredConnectivityGraph($section, $helper, $graphBuilder, $iconResolver, $site, $subtree, $ctx, false);
+        if ($buildings->isEmpty()) {
+            return;
         }
+
+        $section->addTitle(trans('cruds.building.title'), 2);
+
+        $rootBuildings = $buildings->whereNull('building_id')
+            ->sortBy(fn (Building $item) => mb_strtolower((string) $item->name));
+        $childBuildings = $buildings->whereNotNull('building_id')
+            ->sortBy(fn (Building $item) => mb_strtolower((string) $item->name));
+
+        foreach ($rootBuildings as $building) {
+            $this->addBuildingEntry($section, $helper, $graphBuilder, $iconResolver, $building, $ctx, $selectedVues, includeNetworkGraph: true, onlyIfHasContent: true);
+        }
+
+        foreach ($childBuildings as $building) {
+            $this->addBuildingEntry($section, $helper, $graphBuilder, $iconResolver, $building, $ctx, $selectedVues, includeNetworkGraph: false, onlyIfHasContent: false);
+        }
+    }
+
+    /**
+     * @param  array<int, string>  $selectedVues
+     */
+    private function addBuildingEntry(Section $section, WordHelper $helper, PhysicalInfrastructureGraphBuilder $graphBuilder, callable $iconResolver, Building $building, PhysicalInfrastructureGraphContext $ctx, array $selectedVues, bool $includeNetworkGraph, bool $onlyIfHasContent): void
+    {
+        $helper->addBookmarkedTitle($section, $building->getUID(), (string) $building->name, 3);
+
+        $scoped = $this->buildingSubtreeContext($building, $ctx);
+        $hasContent = $scoped['buildings']->count() > 1
+            || $scoped['bays']->isNotEmpty()
+            || $scoped['physicalServers']->isNotEmpty()
+            || $scoped['workstations']->isNotEmpty()
+            || $scoped['storageDevices']->isNotEmpty()
+            || $scoped['peripherals']->isNotEmpty()
+            || $scoped['phones']->isNotEmpty()
+            || $scoped['physicalSwitches']->isNotEmpty()
+            || $scoped['physicalRouters']->isNotEmpty()
+            || $scoped['wifiTerminals']->isNotEmpty()
+            || $scoped['physicalSecurityDevices']->isNotEmpty();
+
+        if ($hasContent || ! $onlyIfHasContent) {
+
+            $locationDot = $graphBuilder->buildLocationDot(
+                new Collection, $scoped['buildings'], $scoped['bays'], $scoped['physicalServers'],
+                $scoped['workstations'], $scoped['storageDevices'], $scoped['peripherals'], $scoped['phones'],
+                $scoped['physicalSwitches'], $scoped['physicalRouters'], $scoped['wifiTerminals'],
+                $scoped['physicalSecurityDevices'], true, ['withHref' => false, 'iconResolver' => $iconResolver]
+            );
+            $helper->insertGraph($section, $locationDot);
+
+            if ($includeNetworkGraph && $building->site !== null) {
+                $networkDot = $graphBuilder->buildConnectivityDot(
+                    new Collection([$building->site]), $scoped['buildings'], $scoped['bays'], $scoped['physicalServers'],
+                    $scoped['workstations'], $scoped['storageDevices'], $scoped['peripherals'], $scoped['phones'],
+                    $scoped['physicalSwitches'], $scoped['physicalRouters'], $scoped['wifiTerminals'],
+                    $scoped['physicalSecurityDevices'], $ctx->physicalLinks, false, ['iconResolver' => $iconResolver]
+                );
+                $helper->insertGraph($section, $networkDot);
+            }
+
+        }
+
+        $table = $helper->addTable($section, (string) $building->name);
+
+        $helper->addTextRow($table, trans('cruds.building.fields.type'), $building->type);
+        $helper->addTextRow($table, trans('cruds.building.fields.attributes'), $this->formatAttributes($building->attributes));
+        $helper->addDescriptionCellWithIcon($table, trans('cruds.building.fields.description'), $building->description, $building, '/images/building.png');
+
+        if ($building->site !== null) {
+            $run = $helper->addTextRunRow($table, trans('cruds.building.fields.site'));
+            $helper->linkOrText($run, $building->site, $selectedVues);
+        }
+
+        if ($building->building !== null) {
+            $run = $helper->addTextRunRow($table, trans('cruds.building.fields.parent'));
+            $helper->linkOrText($run, $building->building, $selectedVues);
+        }
+
+        if ($building->buildings->isNotEmpty()) {
+            $helper->addLinkListRow($table, trans('cruds.building.fields.children'), $building->buildings, $selectedVues);
+        }
+
+        if ($building->bays->isNotEmpty()) {
+            $helper->addLinkListRow($table, trans('cruds.building.fields.bays'), $building->bays, $selectedVues);
+        }
+    }
+
+    /**
+     * Filters a PhysicalInfrastructureGraphContext down to a Building's own subtree: itself, every
+     * descendant building (recursively, within the same Site), their bays, and every device attached
+     * to one of those buildings or bays. Deliberately excludes bare site-attached items (a
+     * building's own schema shouldn't reach back up to its Site).
+     *
+     * @return array{buildings: Collection<int, Building>, bays: Collection<int, Bay>, physicalServers: Collection<int, PhysicalServer>, workstations: Collection<int, Workstation>, storageDevices: Collection<int, StorageDevice>, peripherals: Collection<int, Peripheral>, phones: Collection<int, Phone>, physicalSwitches: Collection<int, PhysicalSwitch>, physicalRouters: Collection<int, PhysicalRouter>, wifiTerminals: Collection<int, WifiTerminal>, physicalSecurityDevices: Collection<int, PhysicalSecurityDevice>}
+     */
+    private function buildingSubtreeContext(Building $building, PhysicalInfrastructureGraphContext $ctx): array
+    {
+        $siteBuildings = $ctx->buildings->where('site_id', $building->site_id);
+        $subtree = $this->buildingSubtree($building, $siteBuildings);
+        $subtreeIds = $subtree->pluck('id');
+
+        $bays = $ctx->bays->whereIn('building_id', $subtreeIds);
+        $bayIds = $bays->pluck('id');
+
+        $inSubtree = fn (?int $buildingId, ?int $bayId) => ($buildingId !== null && $subtreeIds->contains($buildingId))
+            || ($bayId !== null && $bayIds->contains($bayId));
+        $inSubtreeNoBay = fn (?int $buildingId) => $buildingId !== null && $subtreeIds->contains($buildingId);
+
+        return [
+            'buildings' => $subtree,
+            'bays' => $bays,
+            'physicalServers' => $ctx->physicalServers->filter(fn (PhysicalServer $d) => $inSubtree($d->building_id, $d->bay_id)),
+            'workstations' => $ctx->workstations->filter(fn (Workstation $d) => $inSubtreeNoBay($d->building_id)),
+            'storageDevices' => $ctx->storageDevices->filter(fn (StorageDevice $d) => $inSubtree($d->building_id, $d->bay_id)),
+            'peripherals' => $ctx->peripherals->filter(fn (Peripheral $d) => $inSubtree($d->building_id, $d->bay_id)),
+            'phones' => $ctx->phones->filter(fn (Phone $d) => $inSubtreeNoBay($d->building_id)),
+            'physicalSwitches' => $ctx->physicalSwitches->filter(fn (PhysicalSwitch $d) => $inSubtree($d->building_id, $d->bay_id)),
+            'physicalRouters' => $ctx->physicalRouters->filter(fn (PhysicalRouter $d) => $inSubtree($d->building_id, $d->bay_id)),
+            'wifiTerminals' => $ctx->wifiTerminals->filter(fn (WifiTerminal $d) => $inSubtreeNoBay($d->building_id)),
+            'physicalSecurityDevices' => $ctx->physicalSecurityDevices->filter(fn (PhysicalSecurityDevice $d) => $inSubtree($d->building_id, $d->bay_id)),
+        ];
     }
 
     /**
@@ -224,90 +371,10 @@ class PhysicalInfrastructureSection implements ReportSection
     }
 
     /**
-     * @param  Collection<int, Building>  $buildingsForGraph
-     */
-    private function addFilteredConnectivityGraph(Section $section, WordHelper $helper, PhysicalInfrastructureGraphBuilder $graphBuilder, callable $iconResolver, Site $site, Collection $buildingsForGraph, PhysicalInfrastructureGraphContext $ctx, bool $isSiteWide): void
-    {
-        if ($buildingsForGraph->isEmpty()) {
-            return;
-        }
-
-        $buildingIds = $buildingsForGraph->pluck('id');
-
-        $ownBays = $ctx->bays->filter(fn (Bay $bay) => $bay->building_id !== null
-            ? $buildingIds->contains($bay->building_id)
-            : ($isSiteWide && $bay->site_id === $site->id));
-        $bayIds = $ownBays->pluck('id');
-
-        $matches = fn (?int $buildingId, ?int $bayId, ?int $siteId) => $buildingId !== null
-            ? $buildingIds->contains($buildingId)
-            : ($bayId !== null ? $bayIds->contains($bayId) : ($isSiteWide && $siteId === $site->id));
-
-        $dot = $graphBuilder->buildConnectivityDot(
-            new Collection([$site]),
-            $buildingsForGraph,
-            $ownBays,
-            $ctx->physicalServers->filter(fn (PhysicalServer $d) => $matches($d->building_id, $d->bay_id, $d->site_id)),
-            $ctx->workstations->filter(fn (Workstation $d) => $matches($d->building_id, null, $d->site_id)),
-            $ctx->storageDevices->filter(fn (StorageDevice $d) => $matches($d->building_id, $d->bay_id, $d->site_id)),
-            $ctx->peripherals->filter(fn (Peripheral $d) => $matches($d->building_id, $d->bay_id, $d->site_id)),
-            $ctx->phones->filter(fn (Phone $d) => $matches($d->building_id, null, $d->site_id)),
-            $ctx->physicalSwitches->filter(fn (PhysicalSwitch $d) => $matches($d->building_id, $d->bay_id, $d->site_id)),
-            $ctx->physicalRouters->filter(fn (PhysicalRouter $d) => $matches($d->building_id, $d->bay_id, $d->site_id)),
-            $ctx->wifiTerminals->filter(fn (WifiTerminal $d) => $matches($d->building_id, null, $d->site_id)),
-            $ctx->physicalSecurityDevices->filter(fn (PhysicalSecurityDevice $d) => $matches($d->building_id, $d->bay_id, $d->site_id)),
-            $ctx->physicalLinks,
-            false,
-            ['iconResolver' => $iconResolver]
-        );
-        $helper->insertGraph($section, $dot);
-    }
-
-    /**
-     * @param  Collection<int, Building>  $buildings
-     * @param  array<int, string>  $selectedVues
-     */
-    private function addBuildings(Section $section, WordHelper $helper, Collection $buildings, array $selectedVues): void
-    {
-        if ($buildings->isEmpty()) {
-            return;
-        }
-
-        $section->addTitle(trans('cruds.building.title'), 2);
-
-        foreach ($buildings as $building) {
-            $helper->addBookmarkedTitle($section, $building->getUID(), (string) $building->name, 3);
-            $table = $helper->addTable($section, (string) $building->name);
-
-            $helper->addTextRow($table, trans('cruds.building.fields.type'), $building->type);
-            $helper->addTextRow($table, trans('cruds.building.fields.attributes'), $this->formatAttributes($building->attributes));
-            $helper->addDescriptionCellWithIcon($table, trans('cruds.building.fields.description'), $building->description, $building, '/images/building.png');
-
-            if ($building->site !== null) {
-                $run = $helper->addTextRunRow($table, trans('cruds.building.fields.site'));
-                $helper->linkOrText($run, $building->site, $selectedVues);
-            }
-
-            if ($building->building !== null) {
-                $run = $helper->addTextRunRow($table, trans('cruds.building.fields.parent'));
-                $helper->linkOrText($run, $building->building, $selectedVues);
-            }
-
-            if ($building->buildings->isNotEmpty()) {
-                $helper->addLinkListRow($table, trans('cruds.building.fields.children'), $building->buildings, $selectedVues);
-            }
-
-            if ($building->bays->isNotEmpty()) {
-                $helper->addLinkListRow($table, trans('cruds.building.fields.bays'), $building->bays, $selectedVues);
-            }
-        }
-    }
-
-    /**
      * @param  Collection<int, Bay>  $bays
      * @param  array<int, string>  $selectedVues
      */
-    private function addBays(Section $section, WordHelper $helper, Collection $bays, array $selectedVues): void
+    private function addBays(Section $section, WordHelper $helper, PhysicalInfrastructureGraphBuilder $graphBuilder, callable $iconResolver, Collection $bays, array $selectedVues): void
     {
         if ($bays->isEmpty()) {
             return;
@@ -317,6 +384,20 @@ class PhysicalInfrastructureSection implements ReportSection
 
         foreach ($bays as $bay) {
             $helper->addBookmarkedTitle($section, $bay->getUID(), (string) $bay->name, 3);
+
+            $hasEquipment = $bay->physicalServers->isNotEmpty() || $bay->storageDevices->isNotEmpty()
+                || $bay->peripherals->isNotEmpty() || $bay->physicalSwitches->isNotEmpty()
+                || $bay->physicalRouters->isNotEmpty() || $bay->physicalSecurityDevices->isNotEmpty();
+
+            if ($hasEquipment) {
+                $locationDot = $graphBuilder->buildLocationDot(
+                    new Collection, new Collection, new Collection([$bay]), $bay->physicalServers, new Collection,
+                    $bay->storageDevices, $bay->peripherals, new Collection, $bay->physicalSwitches, $bay->physicalRouters,
+                    new Collection, $bay->physicalSecurityDevices, true, ['withHref' => false, 'iconResolver' => $iconResolver]
+                );
+                $helper->insertGraph($section, $locationDot);
+            }
+
             $table = $helper->addTable($section, (string) $bay->name);
 
             $helper->addHTMLRow($table, trans('cruds.bay.fields.description'), $bay->description);
@@ -361,7 +442,7 @@ class PhysicalInfrastructureSection implements ReportSection
      * @param  Collection<int, Zone>  $zones
      * @param  array<int, string>  $selectedVues
      */
-    private function addZones(Section $section, WordHelper $helper, Collection $zones, array $selectedVues): void
+    private function addZones(Section $section, WordHelper $helper, SecurityZoneGraphBuilder $securityZoneGraphBuilder, callable $iconResolver, Collection $zones, array $selectedVues): void
     {
         if ($zones->isEmpty()) {
             return;
@@ -371,6 +452,19 @@ class PhysicalInfrastructureSection implements ReportSection
 
         foreach ($zones as $zone) {
             $helper->addBookmarkedTitle($section, $zone->getUID(), (string) $zone->name, 3);
+
+            if ($zone->childZones->isNotEmpty()) {
+                $scopedZones = (new Collection([$zone]))->concat($zone->childZones);
+                $scopedBuildings = $scopedZones->flatMap(fn (Zone $z) => $z->buildings)->unique('id')->values();
+                $scopedAdminUsers = $scopedZones->flatMap(fn (Zone $z) => $z->adminUsers)->unique('id')->values();
+
+                $zoneDot = $securityZoneGraphBuilder->buildDot($scopedZones, $scopedBuildings, $scopedAdminUsers, [
+                    'withHref' => false,
+                    'iconResolver' => $iconResolver,
+                ]);
+                $helper->insertGraph($section, $zoneDot);
+            }
+
             $table = $helper->addTable($section, (string) $zone->name);
 
             $helper->addTextRow($table, trans('cruds.zone.fields.type'), $zone->type);
