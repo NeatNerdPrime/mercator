@@ -55,6 +55,11 @@ class ReportBuilder
             $section->addPageBreak();
         }
 
+        $reportsDirectory = storage_path('app/reports');
+        if (! is_dir($reportsDirectory)) {
+            mkdir($reportsDirectory, 0755, true);
+        }
+
         $bodyPath = storage_path('app/reports/body-'.uniqid().'.docx');
 
         $objWriter = IOFactory::createWriter($phpWord, 'Word2007');

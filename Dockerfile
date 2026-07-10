@@ -67,6 +67,8 @@ RUN chmod -R g=u /var/www/mercator \
     && mkdir -p \
        storage/app/purifier \
        storage/app/public \
+       storage/app/reports \
+       storage/app/report-templates \
        storage/framework/cache/data \
        storage/framework/sessions \
        storage/framework/views \
