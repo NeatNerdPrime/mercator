@@ -15,6 +15,7 @@ use Illuminate\Support\Facades\URL;
 use Illuminate\Support\ServiceProvider;
 use Illuminate\Support\Str;
 use LdapRecord\Container;
+use PhpOffice\PhpWord\Settings as PhpWordSettings;
 
 class AppServiceProvider extends ServiceProvider
 {
@@ -46,6 +47,12 @@ class AppServiceProvider extends ServiceProvider
         } catch (\Throwable) {
             // DB / parameters table not available yet (e.g. before first migrate).
         }
+
+        // PHP's native ZipArchive::close() relies on fallocate(), which several Docker storage
+        // backends (overlay2 on some kernels, bind mounts to NFS/CIFS/virtiofs) don't support —
+        // it fails there with "Could not close zip file" even though open()/writes succeeded.
+        // PclZip is a pure-PHP zip implementation bundled with phpword, immune to that.
+        PhpWordSettings::setZipClass(PhpWordSettings::PCLZIP);
 
         // start Paginator
         Paginator::useBootstrap();
