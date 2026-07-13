@@ -2,11 +2,14 @@
 
 use App\Http\Controllers;
 use App\Http\Controllers\Admin;
-use App\Http\Controllers\Admin\ModuleController;
+use App\Http\Controllers\Auth\ForgotPasswordController;
+use App\Http\Controllers\Auth\SsoController;
 use App\Http\Controllers\BPMNController;
 use App\Http\Controllers\QueryController;
 use App\Http\Controllers\Report;
 use App\Http\Controllers\Report\AuditController;
+use App\Http\Middleware\VerifyCsrfToken;
+use App\Support\ReportTemplateSettings;
 
 Route::redirect('/', '/login');
 
@@ -32,23 +35,24 @@ Auth::routes([
 Route::get('/logout', fn () => redirect('/'));
 
 // Forget password
-Route::get('forget-password', [App\Http\Controllers\Auth\ForgotPasswordController::class, 'showForgetPasswordForm'])->name('forget.password.get');
-Route::post('forget-password', [App\Http\Controllers\Auth\ForgotPasswordController::class, 'submitForgetPasswordForm'])->name('forget.password.post');
-Route::get('reset-password/{token}', [App\Http\Controllers\Auth\ForgotPasswordController::class, 'showResetPasswordForm'])->name('reset.password.get');
-Route::post('reset-password', [App\Http\Controllers\Auth\ForgotPasswordController::class, 'submitResetPasswordForm'])->name('reset.password.post');
+Route::get('forget-password', [ForgotPasswordController::class, 'showForgetPasswordForm'])->name('forget.password.get');
+Route::post('forget-password', [ForgotPasswordController::class, 'submitForgetPasswordForm'])->name('forget.password.post');
+Route::get('reset-password/{token}', [ForgotPasswordController::class, 'showResetPasswordForm'])->name('reset.password.get');
+Route::post('reset-password', [ForgotPasswordController::class, 'submitResetPasswordForm'])->name('reset.password.post');
 
 // keycloak
-Route::get('login/keycloak', [App\Http\Controllers\Auth\SsoController::class, 'redirectToKeycloak'])->name('login.keycloak');
-Route::get('login/keycloak/callback', [App\Http\Controllers\Auth\SsoController::class, 'handleKeycloakCallback'])->name('keycloak.callback');
+Route::get('login/keycloak', [SsoController::class, 'redirectToKeycloak'])->name('login.keycloak');
+Route::get('login/keycloak/callback', [SsoController::class, 'handleKeycloakCallback'])->name('keycloak.callback');
 
 // CSP
 Route::post('/csp-report', function (Request $request) {
     Log::channel('security')->warning('CSP Violation', [
         'report' => $request->getContent(),
-        'ip'     => $request->ip(),
+        'ip' => $request->ip(),
     ]);
+
     return response()->noContent();
-})->withoutMiddleware([\App\Http\Middleware\VerifyCsrfToken::class]);
+})->withoutMiddleware([VerifyCsrfToken::class]);
 
 // Admin
 Route::group(['prefix' => 'admin', 'as' => 'admin.', 'middleware' => ['web.protected']], function (): void {
@@ -352,7 +356,7 @@ Route::group(['prefix' => 'admin', 'as' => 'admin.', 'middleware' => ['web.prote
     Route::get('graphs/clone/{id}', [Admin\GraphController::class, 'clone'])->name('graphs.clone');
     // Graphs test
     Route::view('graph/test', 'admin.graphs.test')->name('graphs.test');
-    
+
     // Explorer
     Route::get('report/explore', [Admin\ExplorerController::class, 'explore'])->name('report.explore');
 
@@ -423,11 +427,13 @@ Route::group(['prefix' => 'admin', 'as' => 'admin.', 'middleware' => ['web.prote
 
     // Monarc
     Route::get('monarc', [Admin\MonarcController::class, 'index'])->name('monarc');
+    Route::post('monarc/export', [Admin\MonarcController::class, 'export'])->name('monarc.export');
+    Route::post('monarc/test-connection', [Admin\MonarcController::class, 'testConnection'])->name('monarc.test-connection');
 
     // Reporting
     Route::get('doc/report', function () {
         return view('doc/report', [
-            'reportTemplate' => App\Support\ReportTemplateSettings::load(),
+            'reportTemplate' => ReportTemplateSettings::load(),
         ]);
     })->name('doc.report');
     Route::get('doc/lists', function () {
@@ -448,7 +454,7 @@ Route::group(['prefix' => 'admin', 'as' => 'admin.', 'middleware' => ['web.prote
     })->name('doc.about');
 
     Route::get('doc/info', function () {
-        $user  = auth()->user();
+        $user = auth()->user();
         $roles = $user->roles()->orderBy('title')->pluck('title')->toArray();
 
         $cartographerTypes = [];
@@ -461,36 +467,37 @@ Route::group(['prefix' => 'admin', 'as' => 'admin.', 'middleware' => ['web.prote
             sort($cartographerTypes);
         }
 
-        $memLimitRaw  = ini_get('memory_limit');
+        $memLimitRaw = ini_get('memory_limit');
         $memUsedBytes = memory_get_usage(true);
         $memLimitBytes = (function (string $val): int {
             $unit = strtoupper(substr(trim($val), -1));
-            $num  = (int) $val;
+            $num = (int) $val;
+
             return match ($unit) {
-                'G'     => $num * 1073741824,
-                'M'     => $num * 1048576,
-                'K'     => $num * 1024,
+                'G' => $num * 1073741824,
+                'M' => $num * 1048576,
+                'K' => $num * 1024,
                 default => $num,
             };
         })($memLimitRaw);
 
-        $memUsedMb  = round($memUsedBytes / 1048576, 1);
-        $memFreeMb  = $memLimitBytes > 0 ? round(($memLimitBytes - $memUsedBytes) / 1048576, 1) : null;
+        $memUsedMb = round($memUsedBytes / 1048576, 1);
+        $memFreeMb = $memLimitBytes > 0 ? round(($memLimitBytes - $memUsedBytes) / 1048576, 1) : null;
 
         return view('doc.info', [
-            'mercatorVersion'   => app('mercator.version'),
-            'appEnv'            => config('app.env'),
-            'appTimezone'       => config('app.timezone'),
-            'appLocale'         => config('app.locale'),
-            'dbDriver'          => config('database.default'),
-            'memLimit'          => $memLimitRaw,
-            'memUsedMb'         => $memUsedMb,
-            'memFreeMb'         => $memFreeMb,
-            'userName'          => $user->name,
-            'userEmail'         => $user->email,
-            'userLogin'         => $user->login,
-            'roles'             => $roles,
-            'isCartographer'    => session('is_cartographer', false),
+            'mercatorVersion' => app('mercator.version'),
+            'appEnv' => config('app.env'),
+            'appTimezone' => config('app.timezone'),
+            'appLocale' => config('app.locale'),
+            'dbDriver' => config('database.default'),
+            'memLimit' => $memLimitRaw,
+            'memUsedMb' => $memUsedMb,
+            'memFreeMb' => $memFreeMb,
+            'userName' => $user->name,
+            'userEmail' => $user->email,
+            'userLogin' => $user->login,
+            'roles' => $roles,
+            'isCartographer' => session('is_cartographer', false),
             'cartographerTypes' => $cartographerTypes,
         ]);
     })->name('doc.info');
@@ -519,10 +526,10 @@ Route::group(['prefix' => 'admin', 'as' => 'admin.', 'middleware' => ['web.prote
     Route::get('bpmn/{id}/data', [BPMNController::class, 'data'])->name('bpmn.data');
 
     // API
-    Route::get('bpmn/objects',[BPMNController::class, 'objects'])->name('bpmn.objects');
-    Route::get('bpmn/information',[BPMNController::class, 'information'])->name('bpmn.information');
-    Route::get('bpmn/actors',[BPMNController::class, 'actors'])->name('bpmn.actors');
-    Route::get('bpmn/process',[BPMNController::class, 'process'])->name('bpmn.process');
+    Route::get('bpmn/objects', [BPMNController::class, 'objects'])->name('bpmn.objects');
+    Route::get('bpmn/information', [BPMNController::class, 'information'])->name('bpmn.information');
+    Route::get('bpmn/actors', [BPMNController::class, 'actors'])->name('bpmn.actors');
+    Route::get('bpmn/process', [BPMNController::class, 'process'])->name('bpmn.process');
 
     // Show and update a graph
     Route::put('bpmn/{id}', [BPMNController::class, 'update'])->name('bpmn.update');
@@ -535,28 +542,28 @@ Route::group(['prefix' => 'admin', 'as' => 'admin.', 'middleware' => ['web.prote
     // Queries
     Route::post('/queries/{query}/duplicate', [QueryController::class, 'duplicate'])->name('queries.duplicate');
     Route::post('/queries/execute', [QueryController::class, 'execute'])->name('queries.execute');
-    Route::get('/queries/schema',   [QueryController::class, 'schema'])->name('queries.schema');
+    Route::get('/queries/schema', [QueryController::class, 'schema'])->name('queries.schema');
     Route::get('/queries/schema/{model}', [QueryController::class, 'schemaModel'])->name('queries.schema.model');
     Route::resource('/queries', QueryController::class);
     Route::delete('queries-modules-destroy', [QueryController::class, 'massDestroy'])->name('queries.massDestroy');
 
     // Cartographers
     Route::prefix('cartographers')->name('cartographers.')->group(function () {
-        Route::get('/associated-objects',  [Admin\CartographerController::class, 'associatedObjects'])->name('associated-objects');
-        Route::get('/',                    [Admin\CartographerController::class, 'index'])->name('index');
-        Route::get('/create',              [Admin\CartographerController::class, 'create'])->name('create');
-        Route::post('/',                   [Admin\CartographerController::class, 'store'])->name('store');
-        Route::get('/objects',             [Admin\CartographerController::class, 'getObjects'])->name('objects');
-        Route::delete('/{cartographer}',   [Admin\CartographerController::class, 'destroy'])->name('destroy');
+        Route::get('/associated-objects', [Admin\CartographerController::class, 'associatedObjects'])->name('associated-objects');
+        Route::get('/', [Admin\CartographerController::class, 'index'])->name('index');
+        Route::get('/create', [Admin\CartographerController::class, 'create'])->name('create');
+        Route::post('/', [Admin\CartographerController::class, 'store'])->name('store');
+        Route::get('/objects', [Admin\CartographerController::class, 'getObjects'])->name('objects');
+        Route::delete('/{cartographer}', [Admin\CartographerController::class, 'destroy'])->name('destroy');
     });
     Route::delete('cartographers-destroy', [Admin\CartographerController::class, 'massDestroy'])->name('cartographers.massDestroy');
-    Route::get('cartographer/list',        [Admin\CartographerController::class, 'list'])->name('cartographer.list');
+    Route::get('cartographer/list', [Admin\CartographerController::class, 'list'])->name('cartographer.list');
 
 });
 
 // Queries — signed CSV export (signature = autorisation, hors groupe admin)
 Route::middleware('signed')->group(function (): void {
-    Route::get('/queries/{query}/export.csv', [App\Http\Controllers\API\QueryController::class, 'exportSigned'])
+    Route::get('/queries/{query}/export.csv', [Controllers\API\QueryController::class, 'exportSigned'])
         ->name('queries.export.signed');
 });
 
