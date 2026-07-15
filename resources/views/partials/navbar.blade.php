@@ -131,6 +131,11 @@
                                 <li><a class="dropdown-item" href="/admin/doc/lists">
                                         <i class="bi bi-file-earmark-spreadsheet-fill"></i>{{ trans('panel.menu.lists') }}</a>
                                 </li>
+                                @if (\App\Support\MonarcSettings::enabled())
+                                    <li><a class="dropdown-item" href="/admin/monarc">
+                                            <img src="/images/monarc.png" alt="" width="18" height="18" class="me-3 align-middle">{{ trans('cruds.configuration.monarc.title_short') }}</a>
+                                    </li>
+                                @endif
                             @endcan
                         </ul>
                     </li>

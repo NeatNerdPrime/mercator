@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Models\Document;
 use App\Models\Parameter;
 use App\Support\MercatorSettings;
+use App\Support\MonarcSettings;
 use Gate;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
@@ -57,6 +58,11 @@ class ConfigurationController extends Controller
             'notif_modification_copy_to' => $cfg['cartography']['notifier_to'] ?? '',
             'notif_modification_subject' => $cfg['cartography']['notifier_subject'] ?? '[Mercator] Un objet a été mis à jour',
             'notif_modification_body' => $cfg['cartography']['notifier_body'] ?? '',
+            // Monarc
+            'monarc_enabled' => MonarcSettings::enabled(),
+            'monarc_url' => MonarcSettings::url() ?? '',
+            'monarc_uid' => MonarcSettings::uid() ?? '',
+            'monarc_has_password' => MonarcSettings::hasPassword(),
             // Documents
             'count' => Document::query()->count(),
             'sum' => Document::query()->sum('size'),
@@ -85,6 +91,7 @@ class ConfigurationController extends Controller
             'cve' => $this->handleCve($action, $request),
             'reminders' => $this->handleReminders($action, $request),
             'notifications' => $this->handleModification($action, $request),
+            'monarc' => $this->handleMonarc($request),
             default => $this->handleGeneral($request),
         };
 
@@ -240,6 +247,35 @@ class ConfigurationController extends Controller
         }
 
         $this->writeConfigFile($cfg);
+
+        return [trans('cruds.configuration.saved'), true];
+    }
+
+    private function handleMonarc(Request $request): array
+    {
+        $url = trim((string) $request->input('url'));
+
+        if ($url !== '') {
+            $validator = validator(['url' => $url], ['url' => 'url:http,https']);
+            if ($validator->fails()) {
+                return [$validator->errors()->first('url'), false];
+            }
+        }
+
+        $cfg = [
+            'enabled' => $request->boolean('enabled'),
+            'url' => $url,
+            'uid' => (string) $request->input('uid'),
+            // Keep the existing (possibly encrypted) password unless a new one is submitted.
+            'password' => (string) config('monarc.password'),
+        ];
+
+        $password = (string) $request->input('password');
+        if ($password !== '') {
+            $cfg['password'] = $password;
+        }
+
+        MonarcSettings::save($cfg);
 
         return [trans('cruds.configuration.saved'), true];
     }

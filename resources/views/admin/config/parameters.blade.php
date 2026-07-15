@@ -78,6 +78,14 @@
             {{ trans('cruds.configuration.documents.title') }}
         </button>
     </li>
+    <li class="nav-item" role="presentation">
+        <button class="nav-link fw-bold {{ $tab === 'monarc' ? 'active' : '' }}"
+                id="tab-monarc-btn" data-bs-toggle="tab" data-bs-target="#tab-monarc"
+                type="button" role="tab"
+                aria-controls="tab-monarc" aria-selected="{{ $tab === 'monarc' ? 'true' : 'false' }}">
+            {{ trans('cruds.configuration.monarc.title_short') }}
+        </button>
+    </li>
 </ul>
 
 <div class="tab-content" id="configTabsContent">
@@ -715,6 +723,77 @@
             </div>
         </div>
     </div>{{-- /tab-documents --}}
+
+    {{-- ================================================================== --}}
+    {{-- TAB 7 : Monarc                                                      --}}
+    {{-- ================================================================== --}}
+    <div class="tab-pane fade {{ $tab === 'monarc' ? 'show active' : '' }}"
+         id="tab-monarc" role="tabpanel" aria-labelledby="tab-monarc-btn">
+
+        <form method="POST" action="{{ route('admin.config.parameters') }}">
+            @method('PUT')
+            @csrf
+            <input type="hidden" name="active_tab" value="monarc">
+
+            <div class="card">
+                <div class="card-body">
+
+                    <div class="form-group mb-3">
+                        <label>{{ trans('cruds.configuration.monarc.help') }}</label>
+                    </div>
+
+                    <div class="form-group mb-3">
+                        <div class="form-check form-switch">
+                            <input name="enabled" id="monarc_enabled"
+                                   type="checkbox" class="form-check-input"
+                                   {{ $monarc_enabled ? 'checked' : '' }}>
+                            <label class="form-check-label" for="monarc_enabled">
+                                {{ trans('cruds.configuration.monarc.enabled') }}
+                            </label>
+                        </div>
+                    </div>
+
+                    <div class="form-group mb-3">
+                        <label for="monarc_url">{{ trans('cruds.configuration.monarc.url') }}</label>
+                        <input class="form-control" type="text"
+                               name="url" id="monarc_url"
+                               value="{{ $monarc_url }}"/>
+                    </div>
+
+                    <div class="form-group mb-3">
+                        <label for="monarc_uid">{{ trans('cruds.configuration.monarc.uid') }}</label>
+                        <input class="form-control" type="text"
+                               name="uid" id="monarc_uid"
+                               value="{{ $monarc_uid }}"/>
+                    </div>
+
+                    <div class="form-group mb-3">
+                        <label for="monarc_password">{{ trans('cruds.configuration.monarc.password') }}</label>
+                        <input class="form-control" type="password"
+                               name="password" id="monarc_password"
+                               placeholder="{{ $monarc_has_password ? trans('cruds.configuration.monarc.password_placeholder') : '' }}"
+                               autocomplete="new-password"/>
+                    </div>
+
+                </div>
+            </div>
+
+            <div class="form-group mt-3">
+                <button class="btn btn-success" type="submit" name="action" value="save">
+                    <i class="fas fa-save me-1"></i>{{ trans('global.save') }}
+                </button>
+            </div>
+
+        </form>
+
+        <form method="POST" action="{{ route('admin.monarc.test-connection') }}" class="mt-2">
+            @csrf
+            <button class="btn btn-secondary" type="submit">
+                <i class="fas fa-plug me-1"></i>{{ trans('cruds.configuration.monarc.test_connection') }}
+            </button>
+        </form>
+
+    </div>{{-- /tab-monarc --}}
 </div>{{-- /tab-content --}}
 
 {{-- ─── Persistance de l'onglet lors de la navigation manuelle ─────────── --}}
