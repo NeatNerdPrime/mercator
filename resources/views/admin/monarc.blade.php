@@ -62,23 +62,21 @@
                         </div>
                     </div>
                 </div>
-            </div>
-        </div>
-
-        <div class="card mb-3">
-            <div class="card-header">{{ trans('cruds.monarc.source') }}</div>
-            <div class="card-body">
-                <div class="form-group">
-                    <label for="mosp_referentials">{{ trans('cruds.monarc.mosp_referentials') }}</label>
-                    <select class="form-control" name="mosp_referentials[]" id="mosp_referentials" multiple style="min-height: 100px;">
-                        @foreach ($mospReferentials as $referential)
-                            <option value="{{ $referential['id'] }}" {{ in_array($referential['id'], $selectedReferentialIds, true) ? 'selected' : '' }}
-                                data-organization="{{ $referential['organization'] }}">
-                                {{ $referential['name'] }}
-                            </option>
-                        @endforeach
-                    </select>
-                    <span class="help-block">{{ trans('cruds.monarc.mosp_referentials_helper') }}</span>
+                <div class="row">
+                    <div class="col-md-12">
+                        <div class="form-group">
+                            <label for="mosp_referentials">{{ trans('cruds.monarc.mosp_referentials') }}</label>
+                            <select class="form-control select2" name="mosp_referentials[]" id="mosp_referentials" multiple style="min-height: 100px;">
+                                @foreach ($mospReferentials as $referential)
+                                    <option value="{{ $referential['id'] }}" {{ in_array($referential['id'], $selectedReferentialIds, true) ? 'selected' : '' }}
+                                        data-organization="{{ $referential['organization'] }}">
+                                        {{ $referential['name'] }}
+                                    </option>
+                                @endforeach
+                            </select>
+                            <span class="help-block">{{ trans('cruds.monarc.mosp_referentials_helper') }}</span>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
