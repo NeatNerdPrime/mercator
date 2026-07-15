@@ -142,18 +142,18 @@
         </div>
 
         <div class="form-group">
-            <button class="btn btn-success" type="submit">
-                <i class="fas fa-file-export me-1"></i>{{ trans('cruds.monarc.export_button') }}
-            </button>
-            <button class="btn btn-secondary" type="submit" formaction="{{ route('admin.monarc.save') }}" formnovalidate>
-                {{ trans('global.save') }}
-            </button>
-            <button class="btn btn-outline-secondary" type="button" id="monarc-clear-btn">
-                {{ trans('cruds.monarc.clear_button') }}
-            </button>
-            <a class="btn btn-outline-secondary" href="{{ route('admin.home') }}">
+            <a id="btn-cancel" class="btn btn-default" href="{{ route('admin.home') }}">
                 {{ trans('global.cancel') }}
             </a>
+            <button class="btn btn-success" type="submit" formaction="{{ route('admin.monarc.save') }}" formnovalidate>
+                {{ trans('global.save') }}
+            </button>
+            <button class="btn btn-primary" type="submit">
+                <i class="fas fa-file-export me-1"></i>{{ trans('cruds.monarc.export_button') }}
+            </button>
+            <button class="btn btn-warning" type="button" id="monarc-clear-btn">
+                {{ trans('cruds.monarc.clear_button') }}
+            </button>
         </div>
     </form>
 

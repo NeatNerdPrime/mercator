@@ -83,7 +83,6 @@
                 id="tab-monarc-btn" data-bs-toggle="tab" data-bs-target="#tab-monarc"
                 type="button" role="tab"
                 aria-controls="tab-monarc" aria-selected="{{ $tab === 'monarc' ? 'true' : 'false' }}">
-            <i class="bi bi-shield-check me-1"></i>
             {{ trans('cruds.configuration.monarc.title_short') }}
         </button>
     </li>
