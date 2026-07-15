@@ -161,15 +161,19 @@ test('analysis mode builds an instance tree mirroring the library composition', 
         monarcTestKnowledgeBase(), monarcTestScalesAndMethod(), $this->selection
     );
 
-    expect($export['instances'])->toHaveCount(1);
+    // Hybrid tree (option C): every selected primary (MacroProcessus AND Process)
+    // is its own root — Process is never nested under MacroProcessus.
+    expect($export['instances'])->toHaveCount(2);
 
-    $root = $export['instances'][0];
-    expect($root['confidentiality'])->toBe(-1);
-    expect($root['isConfidentialityInherited'])->toBe(0);
-    expect($root['instanceMetadata'])->toBe([]);
-    expect($root['instanceRisks'])->toBe([]); // asset-service has 0 AMVs
+    $byName = collect($export['instances'])->keyBy('name');
+    $macroProcessusInstance = $byName[$this->macroProcessus->name];
+    expect($macroProcessusInstance['confidentiality'])->toBe(-1);
+    expect($macroProcessusInstance['isConfidentialityInherited'])->toBe(0);
+    expect($macroProcessusInstance['instanceMetadata'])->toBe([]);
+    expect($macroProcessusInstance['instanceRisks'])->toBe([]); // asset-service has 0 AMVs
+    expect($macroProcessusInstance['children'])->toBe([]); // Process is not nested under it
 
-    $processInstance = $root['children'][0];
+    $processInstance = $byName[$this->process->name];
     $applicationInstance = $processInstance['children'][0];
     expect($applicationInstance['instanceRisks'])->toHaveCount(2);
     expect($applicationInstance['instanceRisks'][0])->toBe(['informationRisk' => ['uuid' => 'amv1'], 'recommendations' => []]);

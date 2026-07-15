@@ -133,7 +133,7 @@
                                 </li>
                                 @if (\App\Support\MonarcSettings::enabled())
                                     <li><a class="dropdown-item" href="/admin/monarc">
-                                            <i class="bi bi-shield-check"></i>{{ trans('cruds.configuration.monarc.title_short') }}</a>
+                                            <img src="/images/monarc.png" alt="" width="18" height="18" class="me-3 align-middle">{{ trans('cruds.configuration.monarc.title_short') }}</a>
                                     </li>
                                 @endif
                             @endcan

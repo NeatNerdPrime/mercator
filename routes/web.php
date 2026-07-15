@@ -428,6 +428,7 @@ Route::group(['prefix' => 'admin', 'as' => 'admin.', 'middleware' => ['web.prote
     // Monarc
     Route::get('monarc', [Admin\MonarcController::class, 'index'])->name('monarc');
     Route::post('monarc/export', [Admin\MonarcController::class, 'export'])->name('monarc.export');
+    Route::post('monarc/save', [Admin\MonarcController::class, 'saveSelection'])->name('monarc.save');
     Route::post('monarc/test-connection', [Admin\MonarcController::class, 'testConnection'])->name('monarc.test-connection');
 
     // Reporting

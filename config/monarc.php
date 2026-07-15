@@ -13,6 +13,12 @@ return [
     'cache_ttl' => 300,
     'timeout' => 15,
 
-    // Legacy MOSP fallback (kept out of the main export flow, see MospService).
+    // MOSP (MONARC Objects Sharing Platform) — the default knowledge-base
+    // source for the export screen. See MospService.
     'mosp_base' => 'https://objects.monarc.lu/api/v2/object',
+
+    // monarc_version embedded in a MOSP-sourced export (MOSP objects carry
+    // no version info of their own) — see config/monarc-defaults.php for the
+    // other MOSP-less defaults (scales, method, thresholds, soaScaleComments).
+    'target_monarc_version' => '2.13.3',
 ];
