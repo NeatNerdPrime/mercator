@@ -1326,7 +1326,7 @@ class ExplorerController extends Controller
     private function buildApplications(): void
     {
         $applications = Cartographer::scopedQuery(Application::query())
-            ->select('id', 'name', 'icon_id', 'application_block_id', 'attributes')
+            ->select('id', 'name', 'icon_id', 'application_block_id', 'attributes', 'entity_resp_id')
             ->get();
 
         foreach ($applications as $app) {
@@ -1345,7 +1345,16 @@ class ExplorerController extends Controller
                     $this->formatId(Application::$prefix, $app->id),
                     $this->formatId(ApplicationBlock::$prefix, $app->application_block_id)
                 );
+
             }
+            if ($app->entity_resp_id !== null) {
+                $this->addLinkEdge(
+                    $this->formatId(Application::$prefix, $app->id),
+                    $this->formatId(Entity::$prefix, $app->entity_resp_id)
+                );
+            }
+
+
         }
 
         $this->linkJoinTable('application_application_service',
@@ -1406,7 +1415,7 @@ class ExplorerController extends Controller
     private function buildDatabases(): void
     {
         $databases = Cartographer::scopedQuery(Database::query())
-            ->select('id', 'name', 'icon_id')
+            ->select('id', 'name', 'icon_id', 'entity_resp_id')
             ->get();
 
         foreach ($databases as $database) {
@@ -1417,6 +1426,14 @@ class ExplorerController extends Controller
                 $this->getIcon($database->icon_id, '/images/database.png'),
                 'databases', 340
             );
+
+            if ($database->entity_resp_id !== null) {
+                $this->addLinkEdge(
+                    $this->formatId(Database::$prefix, $database->id),
+                    $this->formatId(Entity::$prefix, $database->entity_resp_id)
+                );
+            }
+
         }
 
         $this->linkJoinTable('database_logical_server',
@@ -1428,8 +1445,6 @@ class ExplorerController extends Controller
         $this->linkJoinTable('database_entity',
             Database::$prefix, Entity::$prefix,
             'database_id', 'entity_id');
-        $this->linkResponsibleColumn('databases',
-            Entity::$prefix, Database::$prefix);
     }
 
     /**
@@ -1776,8 +1791,6 @@ class ExplorerController extends Controller
         $this->linkJoinTable('application_entity',
             Entity::$prefix, Application::$prefix,
             'entity_id', 'application_id');
-        $this->linkResponsibleColumn('applications',
-            Entity::$prefix, Application::$prefix);
     }
 
     private function buildRelations(): void
@@ -1908,27 +1921,6 @@ class ExplorerController extends Controller
             $this->addLinkEdge(
                 $this->formatId($fromPrefix, $join->{$fromColumn}),
                 $this->formatId($toPrefix, $join->{$toColumn})
-            );
-        }
-    }
-
-    /**
-     * Link entities to the records they are responsible for via an `entity_resp_id`
-     * foreign key (e.g. Application::respApplications() / Entity::databases()).
-     * Unlike linkJoinTable(), this is not a pivot table but a direct FK on $table.
-     */
-    private function linkResponsibleColumn(string $table, string $entityPrefix, string $recordPrefix): void
-    {
-        $records = DB::table($table)
-            ->select('id', 'entity_resp_id')
-            ->whereNotNull('entity_resp_id')
-            ->whereNull('deleted_at')
-            ->get();
-
-        foreach ($records as $record) {
-            $this->addLinkEdge(
-                $this->formatId($entityPrefix, $record->entity_resp_id),
-                $this->formatId($recordPrefix, $record->id)
             );
         }
     }
