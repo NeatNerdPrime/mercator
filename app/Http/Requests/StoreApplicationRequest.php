@@ -21,7 +21,7 @@ class StoreApplicationRequest extends BaseFormRequest
         return [
             'name' => [
                 'min:3',
-                'max:32',
+                'max:64',
                 'required',
                 Rule::unique('applications')->whereNull('deleted_at'),
             ],
