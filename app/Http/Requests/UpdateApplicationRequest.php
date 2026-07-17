@@ -17,7 +17,7 @@ class UpdateApplicationRequest extends BaseFormRequest
         return [
             'name' => [
                 'min:3',
-                'max:32',
+                'max:64',
                 'required',
                 Rule::unique('applications')
                     ->ignore($this->route('application')->id ?? $this->id)
