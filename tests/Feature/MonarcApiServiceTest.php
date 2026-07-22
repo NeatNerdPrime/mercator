@@ -85,21 +85,31 @@ test('testConnection reports failure', function () {
     expect($message)->toBe(trans('cruds.configuration.monarc.error_auth_failed'));
 });
 
-test('getAnrs returns the anrs list and is cached across calls', function () {
+test('getAnrs returns the anrs list', function () {
+    fakeMonarcAuth();
     Http::fake([
         'monarc.test/auth' => Http::response(['token' => 'tok', 'uid' => 1, 'language' => 1], 200),
         'monarc.test/api/client-anr' => Http::response(['count' => 1, 'anrs' => [['id' => 3, 'label' => 'HIS']]], 200),
     ]);
 
-    $service = new MonarcApiService;
-    $anrs = $service->getAnrs();
+    $anrs = (new MonarcApiService)->getAnrs();
     expect($anrs)->toBe([['id' => 3, 'label' => 'HIS']]);
+});
 
-    // Second call, even from a fresh service instance, hits the Laravel cache, not the API.
-    $second = (new MonarcApiService)->getAnrs();
-    expect($second)->toBe($anrs);
+test('getAnrs is never cached, so an ANR deleted in Monarc stops appearing on the very next call', function () {
+    fakeMonarcAuth();
+    Http::fake([
+        'monarc.test/auth' => Http::response(['token' => 'tok', 'uid' => 1, 'language' => 1], 200),
+        'monarc.test/api/client-anr' => Http::sequence()
+            ->push(['count' => 1, 'anrs' => [['id' => 3, 'label' => 'HIS']]], 200)
+            ->push(['count' => 0, 'anrs' => []], 200),
+    ]);
 
-    Http::assertSentCount(2); // 1 auth + 1 client-anr, not repeated for the second getAnrs() call
+    expect((new MonarcApiService)->getAnrs())->toBe([['id' => 3, 'label' => 'HIS']]);
+    // A fresh instance, right after the ANR was deleted in Monarc: no stale cache hides the deletion.
+    expect((new MonarcApiService)->getAnrs())->toBe([]);
+
+    Http::assertSentCount(4); // auth+client-anr, twice — never served from cache
 });
 
 test('fetchAnrExport-backed accessors map knowledgeBase sections correctly', function () {
@@ -195,4 +205,126 @@ test('a persistent API failure throws a translated exception', function () {
     $service = new MonarcApiService;
 
     expect(fn () => $service->getAnrs())->toThrow(MonarcApiException::class);
+});
+
+test('getModels returns the models list', function () {
+    fakeMonarcAuth();
+    Http::fake([
+        'monarc.test/auth' => Http::response(['token' => 'tok', 'uid' => 1, 'language' => 1], 200),
+        'monarc.test/api/models' => Http::response(['count' => 2, 'models' => [
+            ['id' => 31, 'label' => 'Modèle vierge'],
+            ['id' => 41, 'label' => 'Modélisation CASES'],
+        ]], 200),
+    ]);
+
+    $models = (new MonarcApiService)->getModels();
+
+    expect($models)->toBe([
+        ['id' => 31, 'label' => 'Modèle vierge'],
+        ['id' => 41, 'label' => 'Modélisation CASES'],
+    ]);
+});
+
+test('getModels resolves the multi-language label1/label2 slots for the requested language, never the raw id', function () {
+    fakeMonarcAuth();
+    Http::fake([
+        'monarc.test/auth' => Http::response(['token' => 'tok', 'uid' => 1, 'language' => 1], 200),
+        'monarc.test/api/models' => Http::response(['count' => 1, 'models' => [
+            ['id' => 31, 'label1' => 'Modèle vierge', 'label2' => 'Blank model', 'label3' => '', 'label4' => ''],
+        ]], 200),
+    ]);
+
+    expect((new MonarcApiService)->getModels('fr'))->toBe([['id' => 31, 'label' => 'Modèle vierge']]);
+    expect((new MonarcApiService)->getModels('en'))->toBe([['id' => 31, 'label' => 'Blank model']]);
+});
+
+test('getModels falls back to another populated label slot when the requested language is empty', function () {
+    fakeMonarcAuth();
+    Http::fake([
+        'monarc.test/auth' => Http::response(['token' => 'tok', 'uid' => 1, 'language' => 1], 200),
+        'monarc.test/api/models' => Http::response(['count' => 1, 'models' => [
+            ['id' => 41, 'label1' => '', 'label2' => 'CASES modelling', 'label3' => '', 'label4' => ''],
+        ]], 200),
+    ]);
+
+    expect((new MonarcApiService)->getModels('fr'))->toBe([['id' => 41, 'label' => 'CASES modelling']]);
+});
+
+test('createAnr posts model/language/label and returns the new id', function () {
+    fakeMonarcAuth();
+    Http::fake([
+        'monarc.test/auth' => Http::response(['token' => 'tok', 'uid' => 1, 'language' => 1], 200),
+        'monarc.test/api/client-anr' => Http::response(['status' => 'ok', 'id' => 18], 200),
+    ]);
+
+    $id = (new MonarcApiService)->createAnr(31, 'My analysis', 1);
+
+    expect($id)->toBe(18);
+    Http::assertSent(fn ($request) => str_ends_with($request->url(), '/api/client-anr')
+        && $request->method() === 'POST'
+        && $request['model'] === 31
+        && $request['language'] === 1
+        && $request['label'] === 'My analysis');
+});
+
+test('createAnr throws when the response carries no id', function () {
+    fakeMonarcAuth();
+    Http::fake([
+        'monarc.test/auth' => Http::response(['token' => 'tok', 'uid' => 1, 'language' => 1], 200),
+        'monarc.test/api/client-anr' => Http::response(['status' => 'ok'], 200),
+    ]);
+
+    expect(fn () => (new MonarcApiService)->createAnr(31, 'My analysis'))->toThrow(MonarcApiException::class);
+});
+
+test('anrExists is true when the anr id is present in the (uncached) anrs list', function () {
+    fakeMonarcAuth();
+    Http::fake([
+        'monarc.test/auth' => Http::response(['token' => 'tok', 'uid' => 1, 'language' => 1], 200),
+        'monarc.test/api/client-anr' => Http::response(['count' => 1, 'anrs' => [['id' => 18, 'label' => 'HIS']]], 200),
+    ]);
+
+    expect((new MonarcApiService)->anrExists(18))->toBeTrue();
+    expect((new MonarcApiService)->anrExists(99))->toBeFalse();
+});
+
+test('importInstances posts the export as a file[] multipart field', function () {
+    fakeMonarcAuth();
+    Http::fake([
+        'monarc.test/auth' => Http::response(['token' => 'tok', 'uid' => 1, 'language' => 1], 200),
+        'monarc.test/api/client-anr/18/instances/import' => Http::response(['id' => [1, 2], 'errors' => []], 200),
+    ]);
+
+    $result = (new MonarcApiService)->importInstances(18, '{"type":"anr"}');
+
+    expect($result)->toBe(['id' => [1, 2], 'errors' => []]);
+    Http::assertSent(function ($request) {
+        if (! str_ends_with($request->url(), '/instances/import')) {
+            return true;
+        }
+
+        return $request->isMultipart() && $request->hasFile('file[]');
+    });
+});
+
+test('importInstances throws on a failed import response', function () {
+    fakeMonarcAuth();
+    Http::fake([
+        'monarc.test/auth' => Http::response(['token' => 'tok', 'uid' => 1, 'language' => 1], 200),
+        'monarc.test/api/client-anr/18/instances/import' => Http::response(['errors' => ['boom']], 500),
+    ]);
+
+    expect(fn () => (new MonarcApiService)->importInstances(18, '{"type":"anr"}'))->toThrow(MonarcApiException::class);
+});
+
+test('deleteAnr issues a DELETE request', function () {
+    fakeMonarcAuth();
+    Http::fake([
+        'monarc.test/auth' => Http::response(['token' => 'tok', 'uid' => 1, 'language' => 1], 200),
+        'monarc.test/api/client-anr/18' => Http::response([], 200),
+    ]);
+
+    (new MonarcApiService)->deleteAnr(18);
+
+    Http::assertSent(fn ($request) => str_ends_with($request->url(), '/api/client-anr/18') && $request->method() === 'DELETE');
 });

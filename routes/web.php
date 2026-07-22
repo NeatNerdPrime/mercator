@@ -429,6 +429,9 @@ Route::group(['prefix' => 'admin', 'as' => 'admin.', 'middleware' => ['web.prote
     Route::get('monarc', [Admin\MonarcController::class, 'index'])->name('monarc');
     Route::post('monarc/export', [Admin\MonarcController::class, 'export'])->name('monarc.export');
     Route::post('monarc/save', [Admin\MonarcController::class, 'saveSelection'])->name('monarc.save');
+    Route::post('monarc/sync', [Admin\MonarcController::class, 'sync'])->name('monarc.sync');
+    Route::post('monarc/sync/reset', [Admin\MonarcController::class, 'resetSync'])->name('monarc.sync.reset');
+    Route::get('monarc/anr/{anrId}/rows', [Admin\MonarcController::class, 'anrRows'])->whereNumber('anrId')->name('monarc.anr-rows');
     Route::post('monarc/test-connection', [Admin\MonarcController::class, 'testConnection'])->name('monarc.test-connection');
 
     // Reporting

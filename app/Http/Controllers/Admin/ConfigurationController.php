@@ -4,9 +4,11 @@ namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
 use App\Models\Document;
+use App\Models\MonarcSyncItem;
 use App\Models\Parameter;
 use App\Support\MercatorSettings;
 use App\Support\MonarcSettings;
+use App\Support\MonarcSyncState;
 use Gate;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
@@ -63,6 +65,10 @@ class ConfigurationController extends Controller
             'monarc_url' => MonarcSettings::url() ?? '',
             'monarc_uid' => MonarcSettings::uid() ?? '',
             'monarc_has_password' => MonarcSettings::hasPassword(),
+            'monarc_sync_state' => $monarcSyncState = MonarcSyncState::load(),
+            'monarc_synced_items_count' => isset($monarcSyncState['anr_id'])
+                ? MonarcSyncItem::query()->where('anr_id', $monarcSyncState['anr_id'])->count()
+                : 0,
             // Documents
             'count' => Document::query()->count(),
             'sum' => Document::query()->sum('size'),

@@ -9,6 +9,7 @@ use Illuminate\Http\Client\PendingRequest;
 use Illuminate\Http\Client\Response;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Http;
+use Illuminate\Support\Facades\Log;
 
 /**
  * Client for the MONARC Front Office API.
@@ -49,8 +50,7 @@ use Illuminate\Support\Facades\Http;
  *                     response is simply ignored, since Mercator builds its own instance tree
  *                     from the cartography with withEval=false in ITS generated file.
  *
- * Import validation (not used by this class, documented here for MonarcExportService
- * / manual test-instance validation): the "Importer une analyse" flow is
+ * Import: the "Importer une analyse" flow is
  * POST /api/client-anr/{anrId}/instances/import, multipart with fields `mode`,
  * `idparent`, and the file as `file[]` (NOT `file` — the FO reads it as a list
  * of uploads; a plain `file` field is silently ignored: HTTP 200, empty
@@ -59,7 +59,17 @@ use Illuminate\Support\Facades\Http;
  * Validated end-to-end on a live 2.13.3 instance for both "library" (flat
  * objects/categories created) and "analysis" (full instance tree + risks,
  * risks-dashboard count matching MonarcExportService::countRisks() exactly)
- * modes produced by MonarcExportService.
+ * modes produced by MonarcExportService. The import always ADDS to the
+ * existing ANR tree — objects in the imported knowledgeBase/library are
+ * matched (and merged, never duplicated) by uuid, but instances are always
+ * appended: re-importing the same file twice duplicates every instance. This
+ * is exactly why MonarcSyncService only ever feeds this method the "new
+ * objects" diff, never a full re-export.
+ *
+ * ANR lifecycle, also verified live:
+ *   GET    /api/models                              -> {count, models:[{id,label,...}]}
+ *   POST   /api/client-anr        {model,language,label} -> {status:"ok", id}
+ *   DELETE /api/client-anr/{id}                      deletes the ANR (used by tests/manual cleanup)
  */
 class MonarcApiService
 {
@@ -132,20 +142,169 @@ class MonarcApiService
 
     /**
      * Lists the analyses (ANRs) available on the Monarc FO, for the
-     * "modèle d'analyse" select. Short-lived cache: this list rarely
-     * changes within the span of a single export session.
+     * "link to an existing ANR" combobox on the synchronization screen.
+     * Not cached — see the method body — the label is always resolved fresh
+     * for the requested language, same multi-language label1..label4
+     * convention as getModels().
      *
-     * @return array<int, array> each entry has at least id, uuid, label, description
+     * @return array<int, array{id: int, label: string}>
      *
      * @throws MonarcApiException
      */
-    public function getAnrs(): array
+    public function getAnrs(string $languageCode = 'fr'): array
     {
-        $ttl = (int) config('monarc.cache_ttl', 300);
+        // Deliberately NOT cached (unlike the rest of this class): this list
+        // feeds the "link to an existing ANR" combobox, so a deleted ANR
+        // must stop appearing the moment the admin reloads the sync screen,
+        // not up to config('monarc.cache_ttl') later. anrExists() already
+        // made this same choice for the same reason.
+        $raw = $this->getJson('/api/client-anr')['anrs'] ?? [];
 
-        return Cache::remember('monarc:anrs:'.$this->cacheIdentity(), $ttl, function () {
-            return $this->getJson('/api/client-anr')['anrs'] ?? [];
-        });
+        $languageIndex = $languageCode === 'en' ? 2 : 1;
+
+        return array_map(fn (array $anr) => [
+            'id' => (int) $anr['id'],
+            'label' => $this->resolveMultiLanguageLabel($anr, $languageIndex),
+        ], $raw);
+    }
+
+    /**
+     * Lists the models available for creating a new ANR, for the "analysis
+     * model" select on the synchronization screen. Each entry's label is
+     * resolved for the given language — Monarc models, like other Monarc
+     * records (see the class docblock's note on /assets), carry one label
+     * per instance language slot (label1..label4) rather than a single flat
+     * "label" field, so a naive read of "label" silently falls through to
+     * showing the raw numeric id instead of a name.
+     *
+     * @return array<int, array{id: int, label: string}>
+     *
+     * @throws MonarcApiException
+     */
+    public function getModels(string $languageCode = 'fr'): array
+    {
+        $body = $this->getJson('/api/models');
+
+        $raw = $body['models'] ?? $body['data'] ?? (array_is_list($body) ? $body : []);
+
+        if ($raw === [] && $body !== []) {
+            // The envelope shape ({models:[...]} vs a bare list vs something
+            // else entirely) was never confirmed against a live instance for
+            // this endpoint — log the raw keys so a mismatch is diagnosable
+            // instead of silently leaving the sync screen's model select empty.
+            Log::warning('Monarc getModels(): unrecognized response shape, no models extracted.', [
+                'keys' => array_is_list($body) ? 'list' : array_keys($body),
+            ]);
+
+            return [];
+        }
+
+        $languageIndex = $languageCode === 'en' ? 2 : 1;
+
+        return array_map(fn (array $item) => [
+            'id' => (int) $item['id'],
+            'label' => $this->resolveMultiLanguageLabel($item, $languageIndex),
+        ], $raw);
+    }
+
+    /**
+     * Picks the model's label for the given language slot, falling back
+     * through the other slots, then a flat "label"/"name", before ever
+     * resorting to the raw id — see getModels().
+     */
+    private function resolveMultiLanguageLabel(array $item, int $languageIndex): string
+    {
+        if (! empty($item['label'.$languageIndex])) {
+            return (string) $item['label'.$languageIndex];
+        }
+
+        foreach ([1, 2, 3, 4] as $index) {
+            if (! empty($item['label'.$index])) {
+                return (string) $item['label'.$index];
+            }
+        }
+
+        if (! empty($item['label'])) {
+            return (string) $item['label'];
+        }
+
+        if (! empty($item['name'])) {
+            return (string) $item['name'];
+        }
+
+        Log::warning('Monarc getModels(): no label field found for a model, falling back to its id.', [
+            'keys' => array_keys($item),
+        ]);
+
+        return 'Model #'.($item['id'] ?? '?');
+    }
+
+    /**
+     * Creates a new ANR (risk analysis) in Monarc from the given model, and
+     * returns its id.
+     *
+     * @throws MonarcApiException
+     */
+    public function createAnr(int $modelId, string $label, int $language = 1): int
+    {
+        $body = $this->postJson('/api/client-anr', [
+            'model' => $modelId,
+            'language' => $language,
+            'label' => $label,
+        ]);
+
+        $id = $body['id'] ?? null;
+
+        if ($id === null) {
+            throw new MonarcApiException(trans('cruds.configuration.monarc.error_api_unreachable'));
+        }
+
+        return (int) $id;
+    }
+
+    /**
+     * Whether the given ANR still exists on the Monarc instance — always a
+     * fresh, uncached lookup (never the getAnrs() cache), since this is used
+     * right before a sync to catch an ANR deleted directly in Monarc.
+     *
+     * @throws MonarcApiException
+     */
+    public function anrExists(int $anrId): bool
+    {
+        $anrs = $this->getJson('/api/client-anr')['anrs'] ?? [];
+
+        return collect($anrs)->contains(fn (array $anr) => (int) ($anr['id'] ?? 0) === $anrId);
+    }
+
+    /**
+     * Imports an export JSON (as produced by MonarcExportService) into the
+     * given ANR. The import always ADDS to the existing tree — see the class
+     * docblock — so callers must never re-send an object already imported.
+     *
+     * @return array the FO's response body (e.g. {id:[...], errors:[...]})
+     *
+     * @throws MonarcApiException
+     */
+    public function importInstances(int $anrId, string $exportJson, int $mode = 1, int $idParent = 0): array
+    {
+        return $this->withAuthRetry(fn (PendingRequest $request) => $request
+            ->attach('file[]', $exportJson, 'export.json')
+            ->post("/api/client-anr/{$anrId}/instances/import", [
+                'mode' => $mode,
+                'idparent' => $idParent,
+            ]));
+    }
+
+    /**
+     * Deletes an ANR. Not used by the synchronization workflow itself
+     * (a "reset link" only forgets the local link, it never deletes the
+     * remote ANR) — kept for tests and manual cleanup.
+     *
+     * @throws MonarcApiException
+     */
+    public function deleteAnr(int $anrId): void
+    {
+        $this->withAuthRetry(fn (PendingRequest $request) => $request->delete("/api/client-anr/{$anrId}"));
     }
 
     /**

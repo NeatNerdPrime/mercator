@@ -254,23 +254,6 @@ scales: {
     }
   });
 
-/*
-    // Affichage de la courbe
-    let step = 0;
-    const hilbertDataset = chart.data.datasets[0];
-
-    const interval = setInterval(() => {
-      if (step >= fullHilbertPath.length) {
-        clearInterval(interval);
-        return;
-      }
-
-      hilbertDataset.data.push(fullHilbertPath[step]);
-      chart.update('none'); // update sans animation interne
-      step++;
-    }, 0.01);
-*/
-
 
 
 });

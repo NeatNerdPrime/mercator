@@ -12,9 +12,10 @@ Changements prévus en 2026 et plus :
 - [x] Nouvel outil de dessin de la cartographie
 - [x] Utiliser un modèle de document pour le rapport de cartographie
 - [ ] Lien avec Monarc : générer un modèle d'analyse de risques pour Monarc
-- [ ] Améliorer/Terminer l'éditeur BPMN
+- [ ] Améliorer/Terminer l'éditeur BPMN et en faire un composant
 - [ ] Purge de la DB : https://github.com/dbarzin/mercator/discussions/1525
 - [ ] Identifier les chemins critiques
+- [ ] Créer des modules Mercator pour pouvoir dynamiquement étendre des fonctionnalités de Mercator
 - [ ] Utiliser des [Accessor pour les Model](https://laravel.com/docs/9.x/eloquent-mutators#defining-a-mutator)
 - [ ] Mettre en place une formation et un guide utilisateur
 - [ ] Configuration des labels, couleurs et niveaux DICT

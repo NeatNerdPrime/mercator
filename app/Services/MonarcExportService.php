@@ -31,7 +31,7 @@ use App\Models\Wan;
 use App\Models\WifiTerminal;
 use App\Models\Workstation;
 use App\Models\Zone;
-use Illuminate\Support\Str;
+use Ramsey\Uuid\Uuid;
 
 /**
  * Builds a MONARC v2.13 "anr" export file (tests/fixtures/templates/monarc.json
@@ -45,8 +45,8 @@ use Illuminate\Support\Str;
  * Analysis mode builds a "hybrid" instance tree (option C): primary assets
  * (MacroProcessus/Process/Information) are always roots; their selected
  * supports are composed underneath them following the cartography's own
- * relations, recursively; a support with NO selected parent is grouped under
- * a synthetic per-family container object (generic "CONT" asset, 0 AMV).
+ * relations, recursively; a support with NO selected parent is promoted to
+ * its own root instance, same as a primary (no synthetic wrapper object).
  * A support reachable from several selected parents gets one instance
  * PLACEMENT per parent (all referencing the SAME library object uuid) —
  * this is what makes local-scope objects countable "N times" while a
@@ -54,56 +54,6 @@ use Illuminate\Support\Str;
  */
 class MonarcExportService
 {
-    /** Mercator model short name -> MONARC library category label. */
-    private const CATEGORY_LABELS = [
-        'Entity' => 'Organisation',
-        'Relation' => 'Organisation',
-        'MacroProcessus' => 'Processus',
-        'Process' => 'Processus',
-        'Information' => 'Informations',
-        'Application' => 'Applications',
-        'ApplicationService' => 'Applications',
-        'ApplicationBlock' => 'Applications',
-        'ApplicationModule' => 'Applications',
-        'Database' => 'Applications',
-        'LogicalServer' => 'Serveurs',
-        'Container' => 'Serveurs',
-        'Cluster' => 'Serveurs',
-        'PhysicalServer' => 'Serveurs',
-        'Workstation' => 'Serveurs',
-        'Backup' => 'Serveurs',
-        'Network' => 'Réseaux',
-        'Lan' => 'Réseaux',
-        'Man' => 'Réseaux',
-        'Wan' => 'Réseaux',
-        'Subnetwork' => 'Réseaux',
-        'Vlan' => 'Réseaux',
-        'NetworkSwitch' => 'Réseaux',
-        'Router' => 'Réseaux',
-        'SecurityDevice' => 'Réseaux',
-        'DhcpServer' => 'Réseaux',
-        'Dnsserver' => 'Réseaux',
-        'Gateway' => 'Réseaux',
-        'Site' => 'Sites et bâtiments',
-        'Building' => 'Sites et bâtiments',
-        'Bay' => 'Sites et bâtiments',
-        'Zone' => 'Sites et bâtiments',
-        'PhysicalSwitch' => 'Matériel',
-        'PhysicalRouter' => 'Matériel',
-        'PhysicalSecurityDevice' => 'Matériel',
-        'WifiTerminal' => 'Matériel',
-        'StorageDevice' => 'Matériel',
-        'Peripheral' => 'Matériel',
-        'Phone' => 'Matériel',
-        'ExternalConnectedEntity' => 'Organisation',
-        'Domain' => 'Organisation',
-        'ForestAd' => 'Organisation',
-        'Annuaire' => 'Organisation',
-        'ZoneAdmin' => 'Organisation',
-        'AdminUser' => 'Personnel',
-        'Actor' => 'Personnel',
-    ];
-
     /**
      * Default Mercator model short name -> Monarc knowledgeBase asset code(s),
      * confirmed against the standard MONARC base library (base ANR knowledgeBase,
@@ -115,9 +65,8 @@ class MonarcExportService
      * decides which asset_uuid it exports with, never this map directly (see
      * MonarcController::flattenRowSelection()).
      * A handful of base codes have no Mercator equivalent and are
-     * intentionally left unmapped: CONT (reserved for the synthetic orphan
-     * containers built by this class, see CONTAINER_ASSET_UUID), MAT_MOB,
-     * OV_DEVELOPPEMENT, OV_INFOPHY, OV_MAINTENANCE, OV_MOBIL, PER_DEV —
+     * intentionally left unmapped: CONT, MAT_MOB, OV_DEVELOPPEMENT,
+     * OV_INFOPHY, OV_MAINTENANCE, OV_MOBIL, PER_DEV —
      * Mercator's cartography does not model paper documents, dev projects,
      * maintenance contracts, or a distinct portable-hardware form factor
      * (Workstation covers desktops and laptops alike) as discrete objects,
@@ -182,14 +131,129 @@ class MonarcExportService
     public const PRIMARY_FAMILIES = ['MacroProcessus', 'Process', 'Information'];
 
     /**
-     * Canonical MONARC base-library "Conteneur" asset (type=1 primaire, no AMV),
-     * confirmed present under this exact uuid on every stock MONARC instance —
-     * used for the synthetic per-family containers in the hybrid instance tree.
+     * Mercator "views" (resources/views/partials/sidebar.blade.php submenus),
+     * used to group Monarc library objects into matching top-level categories
+     * (see buildLibrary()) and to group the cartography-selection screen's
+     * rows (see MonarcController::rowsByView()) — the single source of truth
+     * for both, so the two never drift apart.
+     *
+     * @var array<string, array<int, string>>
      */
-    private const CONTAINER_ASSET_UUID = 'd2023c8f-44d1-11e9-a78c-0800277f0571';
+    public const FAMILY_VIEWS = [
+        'ecosystem' => ['Entity', 'Relation'],
+        'information_system' => ['MacroProcessus', 'Process', 'Actor', 'Information'],
+        'applications' => ['ApplicationBlock', 'Application', 'ApplicationService', 'ApplicationModule', 'Database'],
+        'administration' => ['Domain', 'ForestAd', 'Annuaire', 'ZoneAdmin', 'AdminUser'],
+        'logical_infrastructure' => ['Network', 'SubNetwork', 'LogicalServer', 'Cluster', 'Container', 'Backup', 'Network', 'Subnetwork', 'Gateway', 'Router', 'NetworkSwitch', 'SecurityDevice', 'DhcpServer', 'Dnsserver', 'Vlan', 'ExternalConnectedEntity'],
+        'physical_infrastructure' => ['Site', 'Building', 'Bay', 'Zone', 'PhysicalServer', 'PhysicalSwitch', 'PhysicalRouter', 'Workstation', 'StorageDevice', 'Peripheral', 'Phone', 'WifiTerminal', 'PhysicalSecurityDevice', 'Wan', 'Man', 'Lan'],
+    ];
+
+    /**
+     * Mercator model short name -> translation key for its family label (see
+     * MonarcController::loadMercatorFamilies(), which shares this mapping),
+     * used to name a view's per-family sub-category in buildLibrary() when
+     * more than one object of that family is selected. Kept as trans() KEYS
+     * (not resolved values) so this class constant never needs a request
+     * context to be defined.
+     *
+     * @var array<string, string>
+     */
+    private const FAMILY_LABEL_KEYS = [
+        'MacroProcessus' => 'cruds.macroProcessus.title',
+        'Process' => 'cruds.process.title',
+        'Information' => 'cruds.information.title',
+        'Actor' => 'cruds.actor.title',
+        'Application' => 'cruds.application.title',
+        'ApplicationService' => 'cruds.applicationService.title',
+        'ApplicationBlock' => 'cruds.applicationBlock.title',
+        'ApplicationModule' => 'cruds.applicationModule.title',
+        'Database' => 'cruds.database.title',
+        'LogicalServer' => 'cruds.logicalServer.title',
+        'Cluster' => 'cruds.cluster.title',
+        'Container' => 'cruds.container.title',
+        'Backup' => 'cruds.backup.title',
+        'Network' => 'cruds.network.title',
+        'Subnetwork' => 'cruds.subnetwork.title',
+        'Gateway' => 'cruds.gateway.title',
+        'Router' => 'cruds.router.title',
+        'NetworkSwitch' => 'cruds.networkSwitch.title',
+        'SecurityDevice' => 'cruds.securityDevice.title',
+        'DhcpServer' => 'cruds.dhcpServer.title',
+        'Dnsserver' => 'cruds.dnsserver.title',
+        'Vlan' => 'cruds.vlan.title',
+        'ExternalConnectedEntity' => 'cruds.externalConnectedEntity.title',
+        'Lan' => 'cruds.lan.title',
+        'Man' => 'cruds.man.title',
+        'Wan' => 'cruds.wan.title',
+        'PhysicalServer' => 'cruds.physicalServer.title',
+        'Workstation' => 'cruds.workstation.title',
+        'Site' => 'cruds.site.title',
+        'Building' => 'cruds.building.title',
+        'Bay' => 'cruds.bay.title',
+        'PhysicalSwitch' => 'cruds.physicalSwitch.title',
+        'PhysicalRouter' => 'cruds.physicalRouter.title',
+        'PhysicalSecurityDevice' => 'cruds.physicalSecurityDevice.title',
+        'StorageDevice' => 'cruds.storageDevice.title',
+        'Peripheral' => 'cruds.peripheral.title',
+        'Phone' => 'cruds.phone.title',
+        'WifiTerminal' => 'cruds.wifiTerminal.title',
+        'Zone' => 'cruds.zone.title',
+        'Entity' => 'cruds.entity.title',
+        'Relation' => 'cruds.relation.title',
+        'Domain' => 'cruds.domaine.title', // legacy FR translation key, not a typo
+        'ForestAd' => 'cruds.forestAd.title',
+        'Annuaire' => 'cruds.annuaire.title',
+        'ZoneAdmin' => 'cruds.zoneAdmin.title',
+        'AdminUser' => 'cruds.adminUser.title',
+    ];
+
+    /**
+     * The Mercator "view" a family belongs to (see FAMILY_VIEWS), or 'other'
+     * for a family mapped to none — shared by the selection screen
+     * (MonarcController::rowsFromAssets()) and the library grouping below.
+     */
+    public static function viewForFamily(string $model): string
+    {
+        foreach (self::FAMILY_VIEWS as $viewKey => $models) {
+            if (in_array($model, $models, true)) {
+                return $viewKey;
+            }
+        }
+
+        return 'other';
+    }
+
+    /** A family's translated display label (e.g. "Postes de travail" for Workstation). */
+    public static function familyLabel(string $model): string
+    {
+        $key = self::FAMILY_LABEL_KEYS[$model] ?? null;
+
+        return $key !== null ? trans($key) : $model;
+    }
+
+    /**
+     * Fixed namespace for the uuid v5 identities generated by objectUuid()
+     * below — NEVER change this value: it is the root of every deterministic
+     * uuid this class emits, and changing it would make every
+     * previously-synced Monarc library object look "new" again (see
+     * MonarcSyncService, which relies on these uuids staying stable across
+     * two exports of the same Mercator object to compute its diff).
+     */
+    private const NAMESPACE_UUID = 'c0e94327-c048-4529-9f9c-f9450ef3c96e';
 
     /** @var array<string, array<int, array<int, string>>>|null lazily computed, see relationsMap() */
     private ?array $relationsMapCache = null;
+
+    /**
+     * Deterministic (uuid v5) library-object uuid for a given Mercator
+     * object — stable across two exports of the same object, which is what
+     * lets MonarcSyncService diff a cartography against what was already
+     * imported into a Monarc ANR without ever producing a duplicate.
+     */
+    public static function objectUuid(string $model, int $id): string
+    {
+        return Uuid::uuid5(self::NAMESPACE_UUID, "{$model}:{$id}")->toString();
+    }
 
     /**
      * @param  string  $mode  'library' | 'analysis'
@@ -223,12 +287,7 @@ class MonarcExportService
         $instances = [];
 
         if ($mode === 'analysis') {
-            [$instances, $containerCategories] = $this->buildAnalysisTree($index, $assetsByUuid, $amvsByAssetUuid, $languageCode);
-            $categories = array_merge($categories, $containerCategories);
-
-            if ($containerCategories !== []) {
-                $assetsByUuid[self::CONTAINER_ASSET_UUID] ??= $this->containerAsset($languageCode);
-            }
+            $instances = $this->buildAnalysisTree($index, $assetsByUuid, $amvsByAssetUuid);
         }
 
         return [
@@ -313,8 +372,10 @@ class MonarcExportService
     }
 
     /**
-     * Indexes the selection by "Model:id" and assigns each item a fresh
-     * library-object uuid (shared by every instance placement of that item).
+     * Indexes the selection by "Model:id" and assigns each item a
+     * deterministic library-object uuid (shared by every instance placement
+     * of that item, and stable across two exports of the same object — see
+     * objectUuid()).
      *
      * @return array<string, array{model: string, id: int, name: string, asset_uuid: ?string, scope: int, uuid: string}>
      */
@@ -323,7 +384,7 @@ class MonarcExportService
         $index = [];
         foreach ($selection as $item) {
             $key = $item['model'].':'.$item['id'];
-            $index[$key] = $item + ['uuid' => (string) Str::uuid()];
+            $index[$key] = $item + ['uuid' => self::objectUuid($item['model'], (int) $item['id'])];
         }
 
         return $index;
@@ -332,8 +393,8 @@ class MonarcExportService
     /**
      * Number of instance placements each selected item will get in the
      * hybrid analysis tree: primaries are always exactly 1 (they're always
-     * roots); a support with no selected parent is 1 (grouped under its
-     * family container); a support reachable from N distinct selected
+     * roots); a support with no selected parent is also 1 (promoted to its
+     * own root, same as a primary); a support reachable from N distinct selected
      * parents is the SUM of each of those parents' own occurrence counts
      * (so a support two levels below a twice-placed ancestor is itself
      * placed twice per that branch).
@@ -413,42 +474,55 @@ class MonarcExportService
     }
 
     /**
-     * Library objects are always flat (verified against a live MONARC 2.13.3
-     * instance: a non-empty "children" on a library object crashes the real
-     * importer — ObjectCategoryImportProcessor::processObjectCategoryData()
-     * is invoked with a null category for nested objects). The reference
-     * fixture itself never populates object-level "children" either. The
-     * cartography's parent/child composition is only meaningful for the
-     * "instances" tree in analysis mode (see buildAnalysisTree()).
+     * Library OBJECTS (the leaf entries under a category's "objects" array)
+     * are always flat — verified against a live MONARC 2.13.3 instance: a
+     * non-empty "children" on a library OBJECT crashes the real importer
+     * (ObjectCategoryImportProcessor::processObjectCategoryData() is invoked
+     * with a null category for nested objects). The reference fixture itself
+     * never populates object-level "children" either. The cartography's
+     * parent/child composition is only meaningful for the "instances" tree
+     * in analysis mode (see buildAnalysisTree()) — objects built here (see
+     * libraryObject()) always have an empty "children".
+     *
+     * CATEGORIES (the folders objects sit in) are a different concept and
+     * DO nest here: each selected object's Mercator "view" (see
+     * FAMILY_VIEWS) becomes a top-level category, and — unlike the object
+     * nesting above — a family with more than one selected object gets its
+     * own named sub-category underneath (e.g. "Infrastructure physique" ->
+     * "Postes de travail" -> Workstation1, Workstation2), while a family
+     * with just one object stays directly under its view. Category nesting
+     * itself was not independently re-verified live during this change
+     * (only the object-level constraint above was) — it mirrors Monarc's own
+     * long-standing object-library UI, which is inherently a category tree.
      *
      * @return array<int, array{label: string, children: array, objects: array, position: int, isRoot: int}>
      */
     private function buildLibrary(array $index, array $assetsByUuid): array
     {
-        $byCategory = [];
+        $objectsByViewThenFamily = [];
         foreach ($index as $entry) {
-            $label = self::CATEGORY_LABELS[$entry['model']] ?? 'Autres';
-            $byCategory[$label][] = [
-                'uuid' => $entry['uuid'],
-                'name' => $entry['name'],
-                'label' => $entry['name'],
-                'mode' => 0,
-                'scope' => (int) $entry['scope'],
-                'asset' => $assetsByUuid[$entry['asset_uuid']] ?? null,
-                'rolfTag' => null,
-                'children' => [],
-            ];
+            $view = self::viewForFamily($entry['model']);
+            $objectsByViewThenFamily[$view][$entry['model']][] = $this->libraryObject($entry, $assetsByUuid);
         }
-
-        ksort($byCategory, SORT_STRING | SORT_FLAG_CASE);
 
         $categories = [];
         $position = 1;
-        foreach ($byCategory as $label => $objects) {
+
+        // View order mirrors the sidebar/selection-screen order (FAMILY_VIEWS
+        // declaration order), not alphabetical — consistent with the rest of
+        // this feature. A family mapped to no known view ('other') falls
+        // back to a single flat "Autres" category, same as before this change.
+        foreach ([...array_keys(self::FAMILY_VIEWS), 'other'] as $viewKey) {
+            if (! isset($objectsByViewThenFamily[$viewKey])) {
+                continue;
+            }
+
+            [$directObjects, $subCategories] = $this->splitByFamilyCount($objectsByViewThenFamily[$viewKey]);
+
             $categories[] = [
-                'label' => $label,
-                'children' => [],
-                'objects' => $objects,
+                'label' => $viewKey === 'other' ? 'Autres' : trans("panel.menu.{$viewKey}"),
+                'children' => $subCategories,
+                'objects' => $directObjects,
                 'position' => $position++,
                 'isRoot' => 1,
             ];
@@ -458,35 +532,91 @@ class MonarcExportService
     }
 
     /**
+     * A view's selected objects, grouped by Mercator family (model): a
+     * family with a single object stays a direct object of the view; a
+     * family with more than one gets its own named sub-category — see
+     * buildLibrary().
+     *
+     * @param  array<string, array<int, array>>  $objectsByFamily
+     * @return array{0: array<int, array>, 1: array<int, array>}
+     */
+    private function splitByFamilyCount(array $objectsByFamily): array
+    {
+        uksort($objectsByFamily, fn (string $a, string $b) => mb_strtolower(self::familyLabel($a)) <=> mb_strtolower(self::familyLabel($b)));
+
+        $directObjects = [];
+        $subCategories = [];
+        $subPosition = 1;
+
+        foreach ($objectsByFamily as $model => $objects) {
+            usort($objects, fn (array $a, array $b) => mb_strtolower($a['name']) <=> mb_strtolower($b['name']));
+
+            if (count($objects) > 1) {
+                $subCategories[] = [
+                    'label' => self::familyLabel($model),
+                    'children' => [],
+                    'objects' => $objects,
+                    'position' => $subPosition++,
+                    'isRoot' => 0,
+                ];
+            } else {
+                array_push($directObjects, ...$objects);
+            }
+        }
+
+        usort($directObjects, fn (array $a, array $b) => mb_strtolower($a['name']) <=> mb_strtolower($b['name']));
+
+        return [$directObjects, $subCategories];
+    }
+
+    /** @return array{uuid: string, name: string, label: string, mode: int, scope: int, asset: ?array, rolfTag: null, children: array} */
+    private function libraryObject(array $entry, array $assetsByUuid): array
+    {
+        return [
+            'uuid' => $entry['uuid'],
+            'name' => $entry['name'],
+            'label' => $entry['name'],
+            'mode' => 0,
+            'scope' => (int) $entry['scope'],
+            'asset' => $assetsByUuid[$entry['asset_uuid']] ?? null,
+            'rolfTag' => null,
+            'children' => [],
+        ];
+    }
+
+    /**
      * Builds the hybrid (option C) instance tree: selected primaries as
      * roots, their selected supports composed underneath following the
      * cartography's relations (a support reachable from several selected
      * parents gets one instance placement per parent, all pointing at the
-     * SAME library object uuid), and parentless supports grouped under a
-     * synthetic per-family container instance (also added to the library,
-     * hence the second return value).
+     * SAME library object uuid). A support with no selected parent (an
+     * "orphan") is promoted to its own root instance, exactly like a
+     * primary — Mercator used to wrap orphans in a synthetic per-family
+     * "X (conteneur)" library category/asset/instance, but that added a
+     * fake object to every export; orphans are now real instances in their
+     * own right, with no synthetic wrapper at all.
      *
      * Validated against a live Monarc 2.13.3 instance: importing a generated
      * "analysis" export reproduced the exact composition tree (levels,
      * scopes, asset codes) and the target ANR's own risks-dashboard reported
      * the same risk count as countRisks() computed beforehand.
-     *
-     * @return array{0: array, 1: array}
      */
-    private function buildAnalysisTree(array $index, array $assetsByUuid, array $amvsByAssetUuid, string $languageCode): array
+    private function buildAnalysisTree(array $index, array $assetsByUuid, array $amvsByAssetUuid): array
     {
         $childrenByParent = [];
-        $orphanKeys = [];
+        $rootKeys = [];
 
         foreach ($index as $key => $entry) {
             if (in_array($entry['model'], self::PRIMARY_FAMILIES, true)) {
+                $rootKeys[] = $key;
+
                 continue; // primaries are never placed as someone else's child
             }
 
             $parents = $this->resolveParentKeys($entry['model'], (int) $entry['id'], $index);
 
             if ($parents === []) {
-                $orphanKeys[] = $key;
+                $rootKeys[] = $key; // orphan: promoted to a root instance, same as a primary
 
                 continue;
             }
@@ -496,68 +626,10 @@ class MonarcExportService
             }
         }
 
-        $instances = [];
-        foreach ($index as $key => $entry) {
-            if (in_array($entry['model'], self::PRIMARY_FAMILIES, true)) {
-                $instances[] = $this->buildInstance($key, $index, $childrenByParent, $assetsByUuid, $amvsByAssetUuid, 1);
-            }
-        }
-
-        $orphansByFamily = [];
-        foreach ($orphanKeys as $key) {
-            $label = self::CATEGORY_LABELS[$index[$key]['model']] ?? 'Autres';
-            $orphansByFamily[$label][] = $key;
-        }
-
-        $containerCategories = [];
-        $containerAsset = $this->containerAsset($languageCode);
-        $position = 100; // after the real families built by buildLibrary()
-
-        foreach ($orphansByFamily as $label => $keys) {
-            $containerUuid = (string) Str::uuid();
-
-            $containerCategories[] = [
-                'label' => $label.' (conteneur)',
-                'children' => [],
-                'objects' => [[
-                    'uuid' => $containerUuid,
-                    'name' => $label,
-                    'label' => $label,
-                    'mode' => 0,
-                    'scope' => 2,
-                    'asset' => $containerAsset,
-                    'rolfTag' => null,
-                    'children' => [],
-                ]],
-                'position' => $position++,
-                'isRoot' => 1,
-            ];
-
-            $instances[] = [
-                'name' => $label,
-                'label' => $label,
-                'level' => 1,
-                'position' => 1,
-                'confidentiality' => -1,
-                'integrity' => -1,
-                'availability' => -1,
-                'isConfidentialityInherited' => 0,
-                'isIntegrityInherited' => 0,
-                'isAvailabilityInherited' => 0,
-                'asset' => $containerAsset,
-                'object' => ['uuid' => $containerUuid],
-                'instanceMetadata' => [],
-                'instanceRisks' => [],
-                'operationalInstanceRisks' => [],
-                'instancesConsequences' => [],
-                'children' => array_map(
-                    fn (string $childKey) => $this->buildInstance($childKey, $index, $childrenByParent, $assetsByUuid, $amvsByAssetUuid, 2),
-                    $keys
-                ),
-            ];
-        }
-
-        return [$instances, $containerCategories];
+        return array_map(
+            fn (string $key) => $this->buildInstance($key, $index, $childrenByParent, $assetsByUuid, $amvsByAssetUuid, 1),
+            $rootKeys
+        );
     }
 
     private function buildInstance(string $key, array $index, array $childrenByParent, array $assetsByUuid, array $amvsByAssetUuid, int $level): array
@@ -610,18 +682,6 @@ class MonarcExportService
             ],
             is_array($amvs) ? $amvs : $amvs->all()
         );
-    }
-
-    private function containerAsset(string $languageCode): array
-    {
-        return [
-            'uuid' => self::CONTAINER_ASSET_UUID,
-            'code' => 'CONT',
-            'label' => $languageCode === 'en' ? 'Container' : 'Conteneur',
-            'description' => $languageCode === 'en' ? 'Asset container' : "Conteneur d'actifs",
-            'type' => 1,
-            'status' => 1,
-        ];
     }
 
     /**
