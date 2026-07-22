@@ -233,26 +233,40 @@ class MonarcController extends Controller
         $monarcAnrs = [];
         $monarcAnrsError = null;
 
+        // Authenticated once upfront: getModels() and getAnrs() below each
+        // authenticate internally, and MonarcApiService only caches a
+        // *successful* token — never a failure — so a bad URL/login/password
+        // would otherwise make both calls fail independently and render the
+        // exact same auth error twice on this screen (one per alert box).
         try {
-            $monarcModels = $this->api->getModels(app()->getLocale());
-
-            if ($monarcModels === []) {
-                // Not necessarily a bug — an instance can legitimately have
-                // no models yet — but log it so an unexpected response shape
-                // (see MonarcApiService::getModels()) is diagnosable from
-                // the raw payload rather than silently leaving the select empty.
-                Log::warning('Monarc getModels() returned no models — check the raw response shape if models are expected.');
-            }
+            $this->api->authenticate();
         } catch (MonarcApiException $e) {
             $monarcModelsError = $e->getMessage();
-            Log::warning('Monarc getModels() failed: '.$e->getMessage());
+            Log::warning('Monarc authenticate() failed: '.$e->getMessage());
         }
 
-        try {
-            $monarcAnrs = $this->api->getAnrs(app()->getLocale());
-        } catch (MonarcApiException $e) {
-            $monarcAnrsError = $e->getMessage();
-            Log::warning('Monarc getAnrs() failed: '.$e->getMessage());
+        if ($monarcModelsError === null) {
+            try {
+                $monarcModels = $this->api->getModels(app()->getLocale());
+
+                if ($monarcModels === []) {
+                    // Not necessarily a bug — an instance can legitimately have
+                    // no models yet — but log it so an unexpected response shape
+                    // (see MonarcApiService::getModels()) is diagnosable from
+                    // the raw payload rather than silently leaving the select empty.
+                    Log::warning('Monarc getModels() returned no models — check the raw response shape if models are expected.');
+                }
+            } catch (MonarcApiException $e) {
+                $monarcModelsError = $e->getMessage();
+                Log::warning('Monarc getModels() failed: '.$e->getMessage());
+            }
+
+            try {
+                $monarcAnrs = $this->api->getAnrs(app()->getLocale());
+            } catch (MonarcApiException $e) {
+                $monarcAnrsError = $e->getMessage();
+                Log::warning('Monarc getAnrs() failed: '.$e->getMessage());
+            }
         }
 
         // Deliberately a dedicated anrExists() call rather than checking
