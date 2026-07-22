@@ -2,14 +2,14 @@
 
 return [
     'activity' => [
-        'description' => 'Étape nécessaire à la réalisation d’un processus. Elle correspond à un savoir-faire spéciﬁque et pas forcément à une structure organisationnelle de l’entreprise.',
+        'description' => 'Étape nécessaire à la réalisation d’un processus. Elle correspond à un savoir-faire spécifique et pas forcément à une structure organisationnelle de l’entreprise.',
         'fields' => [
             'name' => 'Nom',
             'name_helper' => "Nom de l'activité de traitement",
             'description' => 'Description',
             'description_helper' => "Description de l'activité de traitement",
             'operations' => 'Opérations',
-            'operations_helper' => 'List des opérations réalisées',
+            'operations_helper' => 'Liste des opérations réalisées',
             'processes' => 'Processus',
             'processes_helper' => 'Liste des processus parents',
             'applications' => 'Applications utilisées',
@@ -91,7 +91,7 @@ return [
             'domain_helper' => "Domain dans lequel l'utilisateur est défini",
         ],
         'title' => 'Utilisateurs',
-        'title_singular' => 'Utilisateurs',
+        'title_singular' => 'Utilisateur',
     ],
     'annuaire' => [
         'description' => 'Applicatif regroupant les données sur les utilisateurs ou équipements informatiques de l’entreprise et permettant leur administration.',
@@ -862,7 +862,7 @@ return [
             'name' => 'Nom',
             'name_helper' => 'Nom de la carte',
             'type' => 'Type',
-            'name_helper' => 'Type de carte',
+            'type_helper' => 'Type de carte',
         ],
         'title' => 'Cartes',
         'title_singular' => 'Carte',
@@ -980,7 +980,7 @@ return [
             'memory' => 'Mémoire',
             'memory_helper' => 'Quantité de mémoire allouée (GB)',
             'environment' => 'Environnement',
-            'environment_helper' => 'Ex: Prod, Préprod, Intégration, Test, Dev,  ...',
+            'environment_helper' => 'Ex: Prod, Préprod, Intégration, Test, Dev, ...',
             'name' => 'Nom',
             'name_helper' => 'Dénomination du serveur logique',
             'net_services' => 'Services réseau',
@@ -1250,7 +1250,7 @@ return [
         'title_singular' => 'Opération',
     ],
     'peripheral' => [
-        'description' => 'Composant physique connecté à un poste de travail aﬁn d’ajouter de nouvelles fonctionnalités (ex. : clavier, souris, imprimante, scanner, etc.).',
+        'description' => 'Composant physique connecté à un poste de travail afin d’ajouter de nouvelles fonctionnalités (ex. : clavier, souris, imprimante, scanner, etc.).',
         'fields' => [
             'address_ip' => 'Adresse IP',
             'address_ip_helper' => 'Filtre : (IPv4|IPv6),...',
@@ -1290,7 +1290,7 @@ return [
         'title_singular' => 'Permission',
     ],
     'phone' => [
-        'description' => 'Téléphone ﬁxe ou portable appartenant à l’organisation.',
+        'description' => 'Téléphone fixe ou portable appartenant à l’organisation.',
         'fields' => [
             'address_ip' => 'Adresse IP',
             'address_ip_helper' => 'Filtre : (IPv4|IPv6),...',
@@ -1365,7 +1365,7 @@ return [
             'address_ip_helper' => 'Filtre : (IPv4|IPv6),...',
             'bay' => 'Rack',
             'bay_helper' => 'Armoire technique dans laquelle se trouve le dispositif',
-            'building' => 'Bâtiment  / Salle',
+            'building' => 'Bâtiment / Salle',
             'building_helper' => 'Bâtiment / Salle dans lequel se trouve le dispositif',
             'description' => 'Description',
             'description_helper' => '',
@@ -1424,7 +1424,7 @@ return [
             'install_date' => "Date d'installation",
             'install_date_helper' => "Date d'installation du système d'exploitation",
             'update_date' => 'Date de mise à jour',
-            'update_date_helper' => "Date de dernière de dernière mise à jour du système d'exploitation",
+            'update_date_helper' => "Date de dernière mise à jour du système d'exploitation",
         ],
         'title' => 'Serveurs physiques',
         'title_short' => 'Serveurs',
@@ -1503,7 +1503,7 @@ return [
             'reference' => 'Référence',
             'reference_helper' => 'Numéro de référence de la relation',
             'responsible' => 'Responsable',
-            'reponsible_helper' => 'Personne resposable de la relation',
+            'responsible_helper' => 'Personne responsable de la relation',
             'order_number' => 'Numéro de commande',
             'order_number_helper' => '',
             'active' => 'Actif',
@@ -1765,7 +1765,7 @@ return [
             'responsible_exp' => "Responsable d'exploitation",
             'responsible_exp_helper' => '',
             'vlan' => 'VLAN',
-            'vlan_helper' => 'VLAN associé (defaut: VLAN_1)',
+            'vlan_helper' => 'VLAN associé (défaut: VLAN_1)',
             'wifi' => 'WiFi',
             'wifi_helper' => 'Accès au réseau Wifi (oui/non)',
             'zone' => 'Zone',
@@ -1949,7 +1949,7 @@ return [
             'building_helper' => 'Bâtiment / Salle dans lequel se trouve la station de travail',
 
             // Inventory
-            'last_inventory_date' => 'Date de dernière inventaire',
+            'last_inventory_date' => 'Date du dernier inventaire',
             'update_source' => 'Source de la mise à jour',
             'agent_version' => "Version de l'agent",
 
