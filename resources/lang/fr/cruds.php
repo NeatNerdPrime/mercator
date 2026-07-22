@@ -1083,7 +1083,7 @@ return [
         ],
         'sync' => [
             'title' => 'Synchronisation ANR Monarc',
-            'help' => "Crée l'ANR liée dans Monarc si elle n'existe pas encore, puis importe uniquement les objets Mercator (et leurs risques) qui ne lui ont pas déjà été envoyés. Les suppressions ou modifications faites dans Mercator ne sont jamais répercutées : seuls les ajouts sont synchronisés.",
+            'help' => "Crée l'analyse de risques liée dans Monarc si elle n'existe pas encore, puis importe uniquement les objets Mercator (et leurs risques) qui ne lui ont pas déjà été envoyés.",
             'anr_none' => 'Aucune ANR liée pour le moment.',
             'anr_linked' => 'ANR liée : #:id — :label',
             'anr_select_placeholder' => 'Sélectionnez une analyse existante ou saisissez un nouveau nom…',
