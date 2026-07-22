@@ -1394,7 +1394,7 @@ return [
             'building' => 'Bâtiment / Salle',
             'building_helper' => 'Bâtiment / Salle dans lequel se trouve le serveur',
             'clusters' => 'Clusters',
-            'cluster_helper' => 'Clusters dont fait partie ce serveur physique',
+            'clusters_helper' => 'Clusters dont fait partie ce serveur physique',
             'configuration' => 'Configuration',
             'configuration_helper' => 'Caractéristiques techniques : configuration, OS et version',
             'description' => 'Description',
