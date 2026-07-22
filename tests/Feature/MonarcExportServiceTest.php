@@ -5,6 +5,7 @@ use App\Models\LogicalServer;
 use App\Models\MacroProcessus;
 use App\Models\PhysicalServer;
 use App\Models\Process;
+use App\Models\Workstation;
 use App\Services\MonarcExportService;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
@@ -96,18 +97,24 @@ test('library mode produces the exact root shape of a real Monarc export', funct
     expect($export['languageIndex'])->toBe(1);
 });
 
-test('library objects are grouped into flat categories, never nested', function () {
+test('library objects are grouped into Mercator "view" categories, objects themselves always flat', function () {
     // Verified against a live Monarc 2.13.3 instance: a non-empty "children"
-    // on a library object crashes the real instances/import endpoint
+    // on a library OBJECT crashes the real instances/import endpoint
     // (ObjectCategoryImportProcessor::processObjectCategoryData() called
     // with a null category) — every object must be a flat category root.
+    // Categories (the folders) are a different matter — see the next test.
     $export = $this->service->buildExport(
         'library', 'Test export', 'description', 'fr',
         monarcTestKnowledgeBase(), monarcTestScalesAndMethod(), $this->selection
     );
 
     $categories = collect($export['library']['categories'])->keyBy('label');
-    expect($categories->keys()->all())->toBe(['Applications', 'Processus', 'Serveurs']);
+    expect($categories->keys()->all())->toEqualCanonicalizing([
+        trans('panel.menu.information_system'),
+        trans('panel.menu.applications'),
+        trans('panel.menu.logical_infrastructure'),
+        trans('panel.menu.physical_infrastructure'),
+    ]);
 
     foreach ($export['library']['categories'] as $category) {
         foreach ($category['objects'] as $object) {
@@ -115,14 +122,52 @@ test('library objects are grouped into flat categories, never nested', function 
         }
     }
 
-    $processusNames = collect($categories['Processus']['objects'])->pluck('name')->all();
-    expect($processusNames)->toEqualCanonicalizing([$this->macroProcessus->name, $this->process->name]);
+    // Only one selected object per family here, so every view category stays
+    // flat (no family sub-category is created) — see the next test for that.
+    $informationSystem = $categories[trans('panel.menu.information_system')];
+    expect($informationSystem['children'])->toBe([]);
+    $informationSystemNames = collect($informationSystem['objects'])->pluck('name')->all();
+    expect($informationSystemNames)->toEqualCanonicalizing([$this->macroProcessus->name, $this->process->name]);
 
-    $serveursNames = collect($categories['Serveurs']['objects'])->pluck('name')->all();
-    expect($serveursNames)->toEqualCanonicalizing([$this->logicalServer->name, $this->physicalServer->name]);
+    $logicalNames = collect($categories[trans('panel.menu.logical_infrastructure')]['objects'])->pluck('name')->all();
+    expect($logicalNames)->toBe([$this->logicalServer->name]);
 
-    $applicationsNames = collect($categories['Applications']['objects'])->pluck('name')->all();
+    $physicalNames = collect($categories[trans('panel.menu.physical_infrastructure')]['objects'])->pluck('name')->all();
+    expect($physicalNames)->toBe([$this->physicalServer->name]);
+
+    $applicationsNames = collect($categories[trans('panel.menu.applications')]['objects'])->pluck('name')->all();
     expect($applicationsNames)->toBe([$this->application->name]);
+});
+
+test('a view with several objects of the same family gets a named sub-category, a lone object stays direct', function () {
+    $workstationA = Workstation::factory()->create();
+    $workstationB = Workstation::factory()->create();
+
+    $selection = array_merge($this->selection, [
+        ['model' => 'Workstation', 'id' => $workstationA->id, 'name' => $workstationA->name, 'asset_uuid' => 'asset-srv', 'scope' => 1],
+        ['model' => 'Workstation', 'id' => $workstationB->id, 'name' => $workstationB->name, 'asset_uuid' => 'asset-srv', 'scope' => 1],
+    ]);
+
+    $export = $this->service->buildExport(
+        'library', 'Test export', 'description', 'fr',
+        monarcTestKnowledgeBase(), monarcTestScalesAndMethod(), $selection
+    );
+
+    $physical = collect($export['library']['categories'])->firstWhere('label', trans('panel.menu.physical_infrastructure'));
+
+    // PhysicalServer (1 object) stays directly under the view...
+    expect(collect($physical['objects'])->pluck('name')->all())->toBe([$this->physicalServer->name]);
+
+    // ...Workstation (2 objects) gets its own named sub-category instead.
+    expect($physical['children'])->toHaveCount(1);
+    $workstationCategory = $physical['children'][0];
+    expect($workstationCategory['label'])->toBe(trans('cruds.workstation.title'));
+    expect($workstationCategory['isRoot'])->toBe(0);
+    expect(collect($workstationCategory['objects'])->pluck('name')->all())
+        ->toEqualCanonicalizing([$workstationA->name, $workstationB->name]);
+    foreach ($workstationCategory['objects'] as $object) {
+        expect($object['children'])->toBe([]);
+    }
 });
 
 test('referential integrity: every asset uuid used exists in the knowledgeBase', function () {
@@ -180,4 +225,23 @@ test('analysis mode builds an instance tree mirroring the library composition', 
 
     $logicalServerInstance = $applicationInstance['children'][0];
     expect($logicalServerInstance['instanceRisks'])->toHaveCount(1);
+});
+
+test('object uuids are stable (uuid v5) across two independent export generations', function () {
+    // The cornerstone of MonarcSyncService's diff: the same Mercator object
+    // must always produce the same library-object uuid, or nothing could
+    // ever be deduplicated across two syncs.
+    $export1 = $this->service->buildExport('analysis', 'Export 1', '', 'fr', monarcTestKnowledgeBase(), monarcTestScalesAndMethod(), $this->selection);
+    $export2 = $this->service->buildExport('analysis', 'Export 2', '', 'fr', monarcTestKnowledgeBase(), monarcTestScalesAndMethod(), $this->selection);
+
+    $uuidsByName1 = collect($export1['library']['categories'])->flatMap(fn ($c) => collect($c['objects']))->pluck('uuid', 'name');
+    $uuidsByName2 = collect($export2['library']['categories'])->flatMap(fn ($c) => collect($c['objects']))->pluck('uuid', 'name');
+
+    expect($uuidsByName1->all())->toBe($uuidsByName2->all());
+
+    expect(MonarcExportService::objectUuid('Process', $this->process->id))
+        ->toBe(MonarcExportService::objectUuid('Process', $this->process->id));
+
+    expect(MonarcExportService::objectUuid('Process', $this->process->id))
+        ->not->toBe(MonarcExportService::objectUuid('Application', $this->process->id));
 });

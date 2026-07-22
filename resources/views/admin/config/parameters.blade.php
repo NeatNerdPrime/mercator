@@ -793,6 +793,62 @@
             </button>
         </form>
 
+        <div class="card mt-4">
+            <div class="card-body">
+                <h5 class="card-title">{{ trans('cruds.monarc.sync.reset_button') }}</h5>
+
+                <div class="row mb-3">
+                    <div class="col-md-4">
+                        @if (isset($monarc_sync_state['anr_id']))
+                            {{ trans('cruds.monarc.sync.anr_linked', ['id' => $monarc_sync_state['anr_id'], 'label' => $monarc_sync_state['anr_label'] ?? '']) }}
+                        @else
+                            {{ trans('cruds.monarc.sync.anr_none') }}
+                        @endif
+                    </div>
+                    <div class="col-md-4">
+                        @if (! empty($monarc_sync_state['last_synced_at']))
+                            {{ trans('cruds.monarc.sync.last_sync', ['date' => \Illuminate\Support\Carbon::parse($monarc_sync_state['last_synced_at'])->format('d/m/Y H:i')]) }}
+                        @else
+                            {{ trans('cruds.monarc.sync.last_sync_none') }}
+                        @endif
+                    </div>
+                    <div class="col-md-4">
+                        {{ trans('cruds.monarc.sync.synced_count', ['count' => $monarc_synced_items_count]) }}
+                    </div>
+                </div>
+
+                <div class="form-group mb-3">
+                    <label>{{ trans('cruds.configuration.monarc.link_reset_help') }}</label>
+                </div>
+
+                <button type="button" class="btn btn-outline-danger" data-bs-toggle="modal" data-bs-target="#monarcResetModal"
+                        @if (! isset($monarc_sync_state['anr_id'])) disabled @endif>
+                    {{ trans('cruds.monarc.sync.reset_button') }}
+                </button>
+            </div>
+        </div>
+
+        <div class="modal fade" id="monarcResetModal" tabindex="-1" aria-labelledby="monarcResetModalLabel" aria-hidden="true">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="monarcResetModalLabel">{{ trans('cruds.monarc.sync.reset_confirm_title') }}</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="{{ trans('global.cancel') }}"></button>
+                    </div>
+                    <div class="modal-body">
+                        {{ trans('cruds.monarc.sync.reset_confirm_body') }}
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">{{ trans('global.cancel') }}</button>
+                        <form method="POST" action="{{ route('admin.monarc.sync.reset') }}">
+                            @csrf
+                            <button type="submit" class="btn btn-danger">{{ trans('cruds.monarc.sync.reset_confirm_ok') }}</button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+
     </div>{{-- /tab-monarc --}}
 </div>{{-- /tab-content --}}
 

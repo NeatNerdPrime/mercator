@@ -81,6 +81,7 @@ plugins:
             -- API Filters: -- Filtres d'API
             -- Import: -- Import
             -- Vulnerabilities: -- Vulnérabilités
+            -- Monarc: -- Monarc
             OPERATIONS: OPÉRATIONS
             -- Administration: -- Administration
             -- Configuration: -- Configuration
@@ -117,6 +118,7 @@ nav:
       - -- API Filters: apifilters.md
       - -- Import: import.md
       - -- Vulnerabilities: vulnerabilities.md
+      - -- Monarc: monarc.md
   - OPERATIONS:
       - -- Administration: admin.md
       - -- Configuration: config.md
