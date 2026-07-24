@@ -1,12 +1,12 @@
 // src/bpmn-menu-handlers.ts
-import {Cell, CellStyle, ConnectionHandler, InternalEvent, UndoManager} from "@maxgraph/core";
-import type { VertexActionHandler, VertexActionId } from "./bpmn-menu";
-import { startPlaceVertexFollowMouse } from "./bpmn-menu-placement";
+import {InternalEvent} from "@maxgraph/core";
+import type {VertexActionHandler, VertexActionId} from "./bpmn-menu";
+import {startPlaceVertexFollowMouse} from "./bpmn-menu-placement";
 import {addBPMNAnnotation, addBPMNConnection, addBPMNGateway, addBPMNState, addBPMNTask} from "./bpmn-helpers";
 
 export function makeDefaultHandlers(): Record<VertexActionId, VertexActionHandler> {
     return {
-        "delete": ({ graph, cell }) => {
+        "delete": ({graph, cell}) => {
             graph.model.beginUpdate();
             try {
                 graph.removeCells([cell], true);
@@ -14,7 +14,7 @@ export function makeDefaultHandlers(): Record<VertexActionId, VertexActionHandle
                 graph.model.endUpdate();
             }
         },
-        "connect": ({ graph, cell, menuEl }) => {
+        "connect": ({graph, cell, menuEl}) => {
             menuEl.classList.add("hidden");
             graph.setConnectable(true);
 
@@ -44,7 +44,7 @@ export function makeDefaultHandlers(): Record<VertexActionId, VertexActionHandle
         },
 
 
-        "color": ({ graph, cell, menuEl }) => {
+        "color": ({graph, cell, menuEl}) => {
             const swatch = menuEl.closest<HTMLElement>("[data-color]");
             const color = swatch?.dataset.color;
             if (!color || !cell) return;
@@ -61,10 +61,10 @@ export function makeDefaultHandlers(): Record<VertexActionId, VertexActionHandle
                     graph.setCellStyles("endStrokeColor", color, [cell]);
                 } else {
                     // console.log("Colorize ",cell, color)
-                    if (cell.style.baseStyleNames?.includes("stateIcon")||
+                    if (cell.style.baseStyleNames?.includes("stateIcon") ||
                         cell.style.baseStyleNames?.includes("bpmnBadge")) {
                         // The icon is selected, not the vertex itself.
-                        if (cell.parent!=null)
+                        if (cell.parent != null)
                             cell = cell.parent;
                     }
                     graph.setCellStyles("fillColor", color, [cell]);
@@ -74,7 +74,8 @@ export function makeDefaultHandlers(): Record<VertexActionId, VertexActionHandle
             }
 
         },
-        "add-task": ({ graph, undoManager, parent, cell, menuEl, event }) => {
+        "add-task": ({graph, undoManager, parent, cell, menuEl, event}) => {
+
             if (!event) return;
 
             const model = graph.getDataModel ? graph.getDataModel() : graph.model;
@@ -89,7 +90,7 @@ export function makeDefaultHandlers(): Record<VertexActionId, VertexActionHandle
 
                 addBPMNConnection(graph, cell, vertex);
 
-                startPlaceVertexFollowMouse({ graph, undoManager, cell: vertex, container: graph.container });
+                startPlaceVertexFollowMouse({graph, undoManager, cell: vertex, container: graph.container});
 
                 menuEl.classList.add("hidden");
             } finally {
@@ -97,7 +98,7 @@ export function makeDefaultHandlers(): Record<VertexActionId, VertexActionHandle
             }
         },
 
-        "add-state": ({ graph, undoManager, parent, cell, menuEl, event }) => {
+        "add-state": ({graph, undoManager, parent, cell, menuEl, event}) => {
             if (!event) return;
 
             const model = graph.getDataModel ? graph.getDataModel() : graph.model;
@@ -113,14 +114,14 @@ export function makeDefaultHandlers(): Record<VertexActionId, VertexActionHandle
                 addBPMNConnection(graph, cell, vertex);
 
                 startPlaceVertexFollowMouse(
-                    { graph, undoManager, cell: vertex, container: graph.container });
+                    {graph, undoManager, cell: vertex, container: graph.container});
                 menuEl.classList.add("hidden");
             } finally {
                 model.endUpdate();
             }
         },
 
-        "add-gateway": ({ graph, undoManager, parent, cell, menuEl, event }) => {
+        "add-gateway": ({graph, undoManager, parent, cell, menuEl, event}) => {
             if (!event) return;
 
             const model = graph.getDataModel ? graph.getDataModel() : graph.model;
@@ -136,13 +137,13 @@ export function makeDefaultHandlers(): Record<VertexActionId, VertexActionHandle
                 addBPMNConnection(graph, cell, vertex);
 
                 startPlaceVertexFollowMouse(
-                    { graph, undoManager, cell: vertex, container: graph.container });
+                    {graph, undoManager, cell: vertex, container: graph.container});
                 menuEl.classList.add("hidden");
             } finally {
                 model.endUpdate();
             }
         },
-        "add-annotations": ({ graph, undoManager, parent, cell, menuEl, event }) => {
+        "add-annotations": ({graph, undoManager, parent, cell, menuEl, event}) => {
             if (!event) return;
 
             const model = graph.getDataModel ? graph.getDataModel() : graph.model;
@@ -159,14 +160,15 @@ export function makeDefaultHandlers(): Record<VertexActionId, VertexActionHandle
                 edge.style.baseStyleNames = ["bpmn-edge"];
 
                 startPlaceVertexFollowMouse(
-                    { graph, undoManager, cell: vertex, container: graph.container });
+                    {graph, undoManager, cell: vertex, container: graph.container});
                 menuEl.classList.add("hidden");
             } finally {
                 model.endUpdate();
             }
         },
-        "search": () => { /* noop — feature not implemented */ },
-        "rotate": ({ graph, cell, menuEl }) => {
+        "search": () => { /* noop — feature not implemented */
+        },
+        "rotate": ({graph, cell, menuEl}) => {
             graph.model.beginUpdate();
             try {
                 if (cell.style.horizontal)

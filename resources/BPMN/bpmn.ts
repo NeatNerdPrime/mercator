@@ -1,12 +1,12 @@
 // src/bpmn.ts
-import { initBpmnEditor, wireEditorUi, showStatus, enableArrowKeyMovement } from './bpmn-edit';
-import { bindBpmnFileInput } from './bpmn-import';
-import { bindSaveButton, exposeGraphHelpers } from './bpmn-save';
-import { initVertexMenuActions } from "./bpmn-menu-init";
-import { installEdgeRules } from "./bpmn-arrows";
-import { setupBpmnMenuSelect } from "./bpmn-menu-select";
+import {enableArrowKeyMovement, initBpmnEditor, showStatus, wireEditorUi} from './bpmn-edit';
+import {bindBpmnFileInput} from './bpmn-import';
+import {bindSaveButton, exposeGraphHelpers} from './bpmn-save';
+import {initVertexMenuActions} from "./bpmn-menu-init";
+import {installEdgeRules} from "./bpmn-arrows";
+import {setupBpmnMenuSelect} from "./bpmn-menu-select";
 
-import { installDropInActivitiesParent } from "./bpmn-parent";
+import {installDropInActivitiesParent} from "./bpmn-parent";
 import {initCopyPaste} from "./bpmn-copy-paste";
 import {initZOrder, setupBringToFrontKeyBinding} from "./bpmn-zorder";
 

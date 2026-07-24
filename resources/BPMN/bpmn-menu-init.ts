@@ -135,8 +135,6 @@ export function initVertexMenuActions(
         }
     }
 
-    const parent = graph.getDefaultParent();
-
     let currentCell: Cell | null = null;
 
     // 🔥 On accepte vertex OU edge
@@ -334,7 +332,7 @@ export function initVertexMenuActions(
                 graph,
                 undoManager,
                 cell: currentCell,
-                parent,
+                parent: graph.getDefaultParent(),
                 menuEl: target,
                 event: e,
             });
@@ -359,7 +357,7 @@ export function initVertexMenuActions(
             graph,
             undoManager,
             cell: currentCell,
-            parent,
+            parent: graph.getDefaultParent(),
             menuEl,
             event: e,
         });
