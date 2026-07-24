@@ -266,6 +266,14 @@ class ApplicationSection implements ReportSection
             $helper->addTextRow($table, trans('cruds.application.fields.technology'), $application->technology);
             $helper->addTextRow($table, trans('cruds.application.fields.type'), $application->type);
             $helper->addTextRow($table, trans('cruds.application.fields.external'), $application->external);
+
+            $helper->addTextRow($table, trans('cruds.application.fields.hosting'), $application->hosting);
+            $helper->addTextRow($table, trans('cruds.application.fields.urls'), $application->urls);
+
+            $helper->addTextRow($table, trans('cruds.application.fields.status'), $application->status);
+            if ($application->prod_date !== null) {
+                $helper->addTextRow($table, trans('cruds.application.fields.prod_date'), (string) $application->prod_date);
+            }
             if ($application->install_date !== null) {
                 $helper->addTextRow($table, trans('cruds.application.fields.install_date'), (string) $application->install_date);
             }

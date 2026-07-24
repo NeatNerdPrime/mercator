@@ -690,6 +690,7 @@ erDiagram
         string attributes
         text description
         int icon_id
+        string status
         string responsible
         string functional_referent
         string editor
@@ -697,9 +698,10 @@ erDiagram
         string technology
         string type
         string external
-        datetime install_date
-        datetime update_date
-        datetime next_update
+        date install_date
+        date prod_date
+        date update_date
+        date next_update
         string documentation
         int security_need_c
         int security_need_i
@@ -712,6 +714,8 @@ erDiagram
         string product
         string version
         int patching_frequency
+        string hosting
+        string urls
         list entities
         list processes
         list services
@@ -878,6 +882,10 @@ server per physical server.
 | product              | varchar(255) | Product name                        |
 | version              | varchar(255) | Version of the application          |
 | patching_frequency   | int          | Patching frequency                  |
+| status               | varchar(255) | Status of the application           |
+| date_prod            | date         | Production date                     |
+| hosting              | varchar(255) | Hosting                             |
+| urls                 | varchar(255) | Application's URLs                  |
 | entities             | List int [,] | IDs list of related entities        |
 | processes            | List int [,] | IDs list of related processes       |
 | services             | List int [,] | IDs list of related services        |

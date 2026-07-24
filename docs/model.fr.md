@@ -753,6 +753,10 @@ erDiagram
         string product
         string version
         int patching_frequency
+        string status
+        date date_prod
+        string hosting
+        string urls
         list entities
         list processes
         list services
@@ -896,6 +900,7 @@ a un serveur logique par serveur physique.
 | attributes           | varchar(255) | Attributs (tags) d'une application                                  |
 | description          | longtext     | Description de l'application                                        |
 | icon_id              | int unsigned | Référence vers une image spécifique                                 |
+| status               | varchar(255) | Statut de l'application                                             |
 | responsible          | varchar(255) | Responsable de l'application                                        | 
 | functional_referent  | varchar(255) | Référent fonctionnel / métier de l'application                      |
 | editor               | varchar(255) | Editeur de l'application                                            |
@@ -903,7 +908,10 @@ a un serveur logique par serveur physique.
 | technology           | varchar(255) | Technologie                                                         |
 | type                 | varchar(255) | Type d'application                                                  |
 | external             | varchar(255) | Externe                                                             |
+| hosting              | varchar(255) | Hébergement                                                         |
+| urls                 | varchar(255) | URLs de l'application                                               |
 | install_date         | datetime     | Date d'installation de l'application                                |
+| date_prod            | date         | Date de mise en production                                          |
 | update_date          | datetime     | Date de mise à jour de l'application                                |
 | next_update          | date         | Date de prochaine mise à jour                                       |
 | documentation        | varchar(255) | Lien vers la documentation                                          |

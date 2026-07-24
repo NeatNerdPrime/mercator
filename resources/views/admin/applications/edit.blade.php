@@ -224,7 +224,7 @@
                                    for="users">{{ trans('cruds.application.fields.users') }}</label>
                             <select class="form-control select2-free {{ $errors->has('users') ? 'is-invalid' : '' }}"
                                     name="users" id="users">
-                                @if (!$type_list->contains(old('users')))
+                                @if (!$users_list->contains(old('users')))
                                     <option> {{ old('users') }}</option>
                                 @endif
                                 @foreach($users_list as $t)
@@ -273,12 +273,9 @@
                             <label class="label-maturity-1"
                                    for="technology">{{ trans('cruds.application.fields.technology') }}</label>
                             <select class="form-control select2-free {{ $errors->has('technology') ? 'is-invalid' : '' }}"
-                                    name="technology" id="technology">
-                                @if (!$technology_list->contains(old('technology')))
-                                    <option> {{ old('technology') }}</option>
-                                @endif
+                                    name="technologies[]" id="technologies" multiple>
                                 @foreach($technology_list as $t)
-                                    <option {{ (old('technology') ? old('technology') : $application->technology) == $t ? 'selected' : '' }}>{{$t}}</option>
+                                    <option {{ str_contains($application->technology, $t) ? 'selected' : '' }}>{{$t}}</option>
                                 @endforeach
                             </select>
                             @if($errors->has('technology'))
@@ -293,12 +290,9 @@
                         <div class="form-group">
                             <label class="label-maturity-1" for="type">{{ trans('cruds.application.fields.type') }}</label>
                             <select class="form-control select2-free {{ $errors->has('type') ? 'is-invalid' : '' }}"
-                                    name="type" id="type">
-                                @if (!$type_list->contains(old('type')))
-                                    <option> {{ old('type') }}</option>
-                                @endif
+                                    name="types[]" id="types" multiple>
                                 @foreach($type_list as $t)
-                                    <option {{ (old('type') ? old('type') : $application->type) == $t ? 'selected' : '' }}>{{$t}}</option>
+                                    <option {{ str_contains($application->type, $t) ? 'selected' : '' }}>{{$t}}</option>
                                 @endforeach
                             </select>
                             @if($errors->has('type'))
@@ -313,12 +307,9 @@
                         <div class="form-group">
                             <label for="external">{{ trans('cruds.application.fields.external') }}</label>
                             <select class="form-control select2-free {{ $errors->has('external') ? 'is-invalid' : '' }}"
-                                    name="external" id="external">
-                                @if (!$type_list->contains(old('external')))
-                                    <option> {{ old('external') }}</option>
-                                @endif
+                                    name="externals[]" id="externals" multiple>
                                 @foreach($external_list as $t)
-                                    <option {{ (old('external') ? old('external') : $application->external) == $t ? 'selected' : '' }}>{{$t}}</option>
+                                    <option {{ str_contains($application->external, $t) ? 'selected' : '' }}>{{$t}}</option>
                                 @endforeach
                             </select>
                             @if($errors->has('external'))
@@ -331,7 +322,63 @@
                     </div>
                 </div>
                 <div class="row">
-                    <div class="col-4">
+                    <div class="col-3">
+                        <div class="form-group">
+                            <label for="hosting">{{ trans('cruds.application.fields.hosting') }}</label>
+                            <select class="form-control select2-free {{ $errors->has('hosting') ? 'is-invalid' : '' }}"
+                                    name="hosting" id="hosting">
+                                @if (!$hosting_list->contains(old('hosting')))
+                                    <option> {{ old('hosting') }}</option>
+                                @endif
+                                @foreach($hosting_list as $t)
+                                    <option {{ (old('hosting') ? old('hosting') : $application->hosting) == $t ? 'selected' : '' }}>{{$t}}</option>
+                                @endforeach
+                            </select>
+                            @if($errors->has('hosting'))
+                                <div class="invalid-feedback">
+                                    {{ $errors->first('hosting') }}
+                                </div>
+                            @endif
+                            <span class="help-block">{{ trans('cruds.application.fields.hosting_helper') }}</span>
+                        </div>
+                    </div>
+                    <div class="col-9">
+                        <div class="form-group">
+                            <label for="urls">{{ trans('cruds.application.fields.urls') }}</label>
+                            <input class="form-control {{ $errors->has('urls') ? 'is-invalid' : '' }}"
+                                   type="text" name="urls" id="urls"
+                                   value="{{ old('urls', $application->urls) }}">
+                            @if($errors->has('urls'))
+                                <div class="invalid-feedback">
+                                    {{ $errors->first('urls') }}
+                                </div>
+                            @endif
+                            <span class="help-block">{{ trans('cruds.application.fields.urls_helper') }}</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-3">
+                        <div class="form-group">
+                            <label for="status">{{ trans('cruds.application.fields.status') }}</label>
+                            <select class="form-control select2-free {{ $errors->has('status') ? 'is-invalid' : '' }}"
+                                    name="status" id="status">
+                                @if (!$status_list->contains(old('status')))
+                                    <option> {{ old('status') }}</option>
+                                @endif
+                                @foreach($status_list as $t)
+                                    <option {{ (old('status') ? old('status') : $application->status) == $t ? 'selected' : '' }}>{{$t}}</option>
+                                @endforeach
+                            </select>
+                            @if($errors->has('status'))
+                                <div class="invalid-feedback">
+                                    {{ $errors->first('status') }}
+                                </div>
+                            @endif
+                            <span class="help-block">{{ trans('cruds.application.fields.status_helper') }}</span>
+                        </div>
+                    </div>
+                    <div class="col-3">
                         <div class="form-group">
                             <label for="install_date">{{ trans('cruds.application.fields.install_date') }}</label>
                             <input class="form-control date" type="date" name="install_date" id="install_date"
@@ -339,7 +386,15 @@
                             <span class="help-block">{{ trans('cruds.application.fields.install_date_helper') }}</span>
                         </div>
                     </div>
-                    <div class="col-4">
+                    <div class="col-3">
+                        <div class="form-group">
+                            <label for="prod_date">{{ trans('cruds.application.fields.prod_date') }}</label>
+                            <input class="form-control date" type="date" name="prod_date" id="prod_date"
+                                   value="{{ old('prod_date', $application->prod_date) }}">
+                            <span class="help-block">{{ trans('cruds.application.fields.prod_date_helper') }}</span>
+                        </div>
+                    </div>
+                    <div class="col-3">
                         <div class="form-group">
                             <label for="update_date">{{ trans('cruds.application.fields.update_date') }}</label>
                             <input class="form-control date" type="date" id="update_date" name="update_date"

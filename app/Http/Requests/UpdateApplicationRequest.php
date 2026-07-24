@@ -2,6 +2,7 @@
 
 namespace App\Http\Requests;
 
+use App\Rules\UrlList;
 use Illuminate\Validation\Rule;
 
 class UpdateApplicationRequest extends BaseFormRequest
@@ -69,6 +70,10 @@ class UpdateApplicationRequest extends BaseFormRequest
                 'nullable',
                 // TODO : fixme
                 // 'after:install_date',
+            ],
+            'urls' => [
+                'nullable',
+                new UrlList,
             ],
         ];
     }

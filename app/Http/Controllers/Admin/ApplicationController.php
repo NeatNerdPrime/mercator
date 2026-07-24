@@ -123,13 +123,12 @@ class ApplicationController extends Controller
         $security_devices = SecurityDevice::all()->sortBy('name')->pluck('name', 'id');
         $applicationBlocks = ApplicationBlock::all()->sortBy('name')->pluck('name', 'id');
         $icons = Application::select('icon_id')->whereNotNull('icon_id')->orderBy('icon_id')->distinct()->pluck('icon_id');
-        $users = AdminUser::all()->sortBy('user_id')->pluck('user_id', 'id');
+        $users = AdminUser::all()->sortBy('user_id')->mapWithKeys(function ($user) {
+            return [$user->id => trim($user->firstname.' '.$user->lastname).' ['.$user->user_id.']'];
+        });
 
         // lists
-        $type_list = Application::select('type')->where('type', '<>', null)->distinct()->orderBy('type')->pluck('type');
-        $technology_list = Application::select('technology')->where('technology', '<>', null)->distinct()->orderBy('technology')->pluck('technology');
         $users_list = Application::select('users')->where('users', '<>', null)->distinct()->orderBy('users')->pluck('users');
-        $external_list = Application::select('external')->where('external', '<>', null)->distinct()->orderBy('external')->pluck('external');
 
         // Get Attributes
         $attributes_list = Application::select('attributes')
@@ -163,8 +162,58 @@ class ApplicationController extends Controller
         }
         $responsible_list = array_unique($res);
 
+        // Get Technologies
+        $technology_list = Application::select('technology')
+            ->whereNotNull('technology')
+            ->distinct()
+            ->orderBy('technology')
+            ->pluck('technology');
+        $res = [];
+        foreach ($technology_list as $i) {
+            foreach (explode(',', $i) as $j) {
+                if (strlen(trim($j)) > 0) {
+                    $res[] = trim($j);
+                }
+            }
+        }
+        $technology_list = array_unique($res);
+
+        // Get Externals
+        $external_list = Application::select('external')
+            ->whereNotNull('external')
+            ->distinct()
+            ->orderBy('external')
+            ->pluck('external');
+        $res = [];
+        foreach ($external_list as $i) {
+            foreach (explode(',', $i) as $j) {
+                if (strlen(trim($j)) > 0) {
+                    $res[] = trim($j);
+                }
+            }
+        }
+        $external_list = array_unique($res);
+
+        // Get Types
+        $type_list = Application::select('type')
+            ->whereNotNull('type')
+            ->distinct()
+            ->orderBy('type')
+            ->pluck('type');
+        $res = [];
+        foreach ($type_list as $i) {
+            foreach (explode(',', $i) as $j) {
+                if (strlen(trim($j)) > 0) {
+                    $res[] = trim($j);
+                }
+            }
+        }
+        $type_list = array_unique($res);
+
         $referent_list = Application::select('functional_referent')->where('functional_referent', '<>', null)->distinct()->orderBy('functional_referent')->pluck('functional_referent');
         $editor_list = Application::select('editor')->where('editor', '<>', null)->distinct()->orderBy('editor')->pluck('editor');
+        $hosting_list = Application::select('hosting')->where('hosting', '<>', null)->distinct()->orderBy('hosting')->pluck('hosting');
+        $status_list = Application::select('status')->where('status', '<>', null)->distinct()->orderBy('status')->pluck('status');
 
         return compact(
             'entities',
@@ -185,6 +234,8 @@ class ApplicationController extends Controller
             'responsible_list',
             'referent_list',
             'editor_list',
+            'hosting_list',
+            'status_list',
             'attributes_list'
         );
     }
@@ -192,6 +243,9 @@ class ApplicationController extends Controller
     public function store(StoreApplicationRequest $request)
     {
         $request->merge(['responsible' => implode(', ', $request->responsibles !== null ? $request->responsibles : [])]);
+        $request->merge(['technology' => implode(', ', $request->technologies !== null ? $request->technologies : [])]);
+        $request->merge(['external' => implode(', ', $request->externals !== null ? $request->externals : [])]);
+        $request->merge(['type' => implode(', ', $request->types !== null ? $request->types : [])]);
         $request['attributes'] = implode(' ', $request->get('attributes') !== null ? $request->get('attributes') : []);
 
         // Create application
@@ -238,7 +292,9 @@ class ApplicationController extends Controller
         $security_devices = SecurityDevice::all()->sortBy('name')->pluck('name', 'id');
         $applicationBlocks = ApplicationBlock::all()->sortBy('name')->pluck('name', 'id');
         $icons = Application::select('icon_id')->whereNotNull('icon_id')->orderBy('icon_id')->distinct()->pluck('icon_id');
-        $users = AdminUser::all()->sortBy('user_id')->pluck('user_id', 'id');
+        $users = AdminUser::all()->sortBy('user_id')->mapWithKeys(function ($user) {
+            return [$user->id => trim($user->firstname.' '.$user->lastname).' ['.$user->user_id.']'];
+        });
 
         // rto-rpo
         $application['rto_days'] = intdiv($application->rto, 60 * 24);
@@ -250,10 +306,7 @@ class ApplicationController extends Controller
         $application['rpo_minutes'] = $application->rpo % 60;
 
         // lists
-        $type_list = Application::select('type')->where('type', '<>', null)->distinct()->orderBy('type')->pluck('type');
-        $technology_list = Application::select('technology')->where('technology', '<>', null)->distinct()->orderBy('technology')->pluck('technology');
         $users_list = Application::select('users')->where('users', '<>', null)->distinct()->orderBy('users')->pluck('users');
-        $external_list = Application::select('external')->where('external', '<>', null)->distinct()->orderBy('external')->pluck('external');
 
         // Get Attributes
         $attributes_list = Application::select('attributes')
@@ -282,8 +335,43 @@ class ApplicationController extends Controller
         }
         $responsible_list = array_unique($res);
 
+        $technology_list = Application::select('technology')->where('technology', '<>', null)->distinct()->orderBy('technology')->pluck('technology');
+        $res = [];
+        foreach ($technology_list as $i) {
+            foreach (explode(',', $i) as $j) {
+                if (strlen(trim($j)) > 0) {
+                    $res[] = trim($j);
+                }
+            }
+        }
+        $technology_list = array_unique($res);
+
+        $external_list = Application::select('external')->where('external', '<>', null)->distinct()->orderBy('external')->pluck('external');
+        $res = [];
+        foreach ($external_list as $i) {
+            foreach (explode(',', $i) as $j) {
+                if (strlen(trim($j)) > 0) {
+                    $res[] = trim($j);
+                }
+            }
+        }
+        $external_list = array_unique($res);
+
+        $type_list = Application::select('type')->where('type', '<>', null)->distinct()->orderBy('type')->pluck('type');
+        $res = [];
+        foreach ($type_list as $i) {
+            foreach (explode(',', $i) as $j) {
+                if (strlen(trim($j)) > 0) {
+                    $res[] = trim($j);
+                }
+            }
+        }
+        $type_list = array_unique($res);
+
         $referent_list = Application::select('functional_referent')->where('functional_referent', '<>', null)->distinct()->orderBy('functional_referent')->pluck('functional_referent');
         $editor_list = Application::select('editor')->where('editor', '<>', null)->distinct()->orderBy('editor')->pluck('editor');
+        $hosting_list = Application::select('hosting')->where('hosting', '<>', null)->distinct()->orderBy('hosting')->pluck('hosting');
+        $status_list = Application::select('status')->where('status', '<>', null)->distinct()->orderBy('status')->pluck('status');
 
         $application->load('entities', 'entityResp', 'processes', 'services', 'databases', 'logicalServers', 'applicationBlock');
 
@@ -315,6 +403,8 @@ class ApplicationController extends Controller
                 'responsible_list',
                 'referent_list',
                 'editor_list',
+                'hosting_list',
+                'status_list',
                 'attributes_list'
             )
         );
@@ -325,6 +415,9 @@ class ApplicationController extends Controller
         abort_if(Gate::denies('edit-object', $application), Response::HTTP_FORBIDDEN, '403 Forbidden');
 
         $application->responsible = implode(', ', $request->responsibles !== null ? $request->responsibles : []);
+        $application->technology = implode(', ', $request->technologies !== null ? $request->technologies : []);
+        $application->external = implode(', ', $request->externals !== null ? $request->externals : []);
+        $application->type = implode(', ', $request->types !== null ? $request->types : []);
         $request['attributes'] = implode(' ', $request->get('attributes') !== null ? $request->get('attributes') : []);
 
         // RTO-RPO

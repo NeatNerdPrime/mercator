@@ -134,39 +134,67 @@
         </div>
         <!------------------------------------------------------------------------------------------------------------->
         <div class="card-body">
-            <table class="table table-bordered table-striped table-report">
+            <table class="table table-bordered table-striped table-report" id="application_table">
                 <tbody>
                 <tr>
                     <th width="10%">
                         {{ trans('cruds.application.fields.technology') }}
                     </th>
-                    <td width="20%">
+                    <td colspan="2">
                         {{ $application->technology }}
                     </td>
-                    <th width="10%">
+                    <th>
                         {{ trans('cruds.application.fields.type') }}
                     </th>
-                    <td width="20%">
+                    <td colspan="2">
                         {{ $application->type }}
                     </td>
-                    <th width="10%">
+                    <th>
                         {{ trans('cruds.application.fields.external') }}
                     </th>
-                    <td width="20%">
+                    <td colspan="2">
                         {{ $application->external }}
                     </td>
                 </tr>
                 <tr>
-                    <th>
+                    <th width="10%">
+                        {{ trans('cruds.application.fields.hosting') }}
+                    </th>
+                    <td width="20%">
+                        {{ $application->hosting }}
+                    </td>
+                    <th width="10%">
+                        {{ trans('cruds.application.fields.urls') }}
+                    </th>
+                    <td colspan="5">
+                        @foreach(array_filter(array_map('trim', explode(',', $application->urls ?? ''))) as $url)
+                            <a href="{{ $url }}" target="_blank" rel="noopener noreferrer">{{ $url }}</a>@if(!$loop->last), @endif
+                        @endforeach
+                    </td>
+                </tr>
+                <tr>
+                    <th width="10%">
+                        {{ trans('cruds.application.fields.status') }}
+                    </th>
+                    <td width="15%">
+                        {{ $application->status }}
+                    </td>
+                    <th width="10%">
                         {{ trans('cruds.application.fields.install_date') }}
                     </th>
-                    <td>
+                    <td width="15%">
                         {{ $application->install_date }}
                     </td>
-                    <th>
+                    <th width="10%">
+                        {{ trans('cruds.application.fields.prod_date') }}
+                    </th>
+                    <td width="15%">
+                        {{ $application->prod_date }}
+                    </td>
+                    <th width="10%">
                         {{ trans('cruds.application.fields.update_date') }}
                     </th>
-                    <td>
+                    <td width="15%">
                         {{ $application->update_date }}
                     </td>
                 </tr>
@@ -179,8 +207,6 @@
                             {{ trans('cruds.application.fields.events_list_button') }}
                         </button>
                     </td>
-                </tr>
-                <tr>
                     <th>
                         {{ trans('cruds.application.fields.documentation') }}
                     </th>
@@ -196,7 +222,7 @@
                     <th>
                         {{ trans('cruds.application.fields.databases') }}
                     </th>
-                    <td colspan="2">
+                    <td colspan="3">
                         @foreach($application->databases as $database)
                             @canShow($database)<a href="{{ route('admin.databases.show', $database->id) }}">{{ $database->name }}</a>@elsecanShow{{ $database->name }}@endcanShow
                             @if(!$loop->last)
@@ -207,7 +233,7 @@
                     <th>
                         {{ trans('cruds.application.fields.services') }}
                     </th>
-                    <td colspan="2">
+                    <td colspan="3">
                         @foreach($application->services as $service)
                             @canShow($service)<a href="{{ route('admin.application-services.show', $service->id) }}">{{ $service->name }}</a>@elsecanShow{{ $service->name }}@endcanShow
                             @if(!$loop->last)
