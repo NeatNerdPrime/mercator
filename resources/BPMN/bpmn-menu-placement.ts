@@ -1,5 +1,5 @@
 // src/bpmn-menu-placement.ts
-import {Graph, InternalEvent, Point, UndoManager} from "@maxgraph/core";
+import {InternalEvent, Point, UndoManager} from "@maxgraph/core";
 import {findGroupUnderMouse} from "./bpmn-parent";
 
 type AnyGraph = any;
@@ -15,7 +15,7 @@ export function startPlaceVertexFollowMouse(opts: {
     /** hauteur d’en-tête de lane (px/unités graph). 0 = pas de clamp */
     laneHeaderHeight?: number;
 }) {
-    const { graph, cell, undoManager } = opts;
+    const {graph, cell, undoManager} = opts;
 
     const wasEnabled = graph.isEnabled?.() ?? true;
     graph.setEnabled?.(false);
@@ -101,7 +101,7 @@ export function startPlaceVertexFollowMouse(opts: {
             const geo = cell.getGeometry ? cell.getGeometry() : model.getGeometry?.(cell);
             if (!geo) return;
 
-            const g2 = geo.clone ? geo.clone() : { ...geo };
+            const g2 = geo.clone ? geo.clone() : {...geo};
             const w = g2.width ?? 40;
             const h = g2.height ?? 40;
 

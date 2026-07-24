@@ -1,20 +1,26 @@
 // src/ts/bpmn-menu-select.ts
-import { BPMN_ICONS } from "./bpmn-icons";
+import {BPMN_ICONS} from "./bpmn-icons";
 import {fetchActorObjects, fetchGraphObjects, fetchInformationObjects, fetchProcessObjects} from "./bpmn-api";
 import {
-    removeBottomCenterBadge, setAdHocMarker, setCompensationMarker,
+    removeBottomCenterBadge,
+    setAdHocMarker,
+    setCompensationMarker,
     setLoopMarker,
     setParallelMarker,
     setSequentialMarker,
     setSubProcessMarker
 } from "./bpmn-badge";
 import {Cell, Graph} from "@maxgraph/core";
-import {setConditionalFlow, setDefaultFlow, setMessageFlow, setSequenceFlow, setEventFlow} from "./bpmn-arrows";
+import {setConditionalFlow, setDefaultFlow, setEventFlow, setMessageFlow, setSequenceFlow} from "./bpmn-arrows";
 import {hideMenu} from "./bpmn-edit";
 import {
-    isActivitiesVertex, isConversationVertex, isDataVertex,
-    isGatewayVertex, isLaneVertex,
-    isProcessVertex, isStateVertex,
+    isActivitiesVertex,
+    isConversationVertex,
+    isDataVertex,
+    isGatewayVertex,
+    isLaneVertex,
+    isProcessVertex,
+    isStateVertex,
     setDatabaseVertex,
     setDataVertex,
     setIconCellValue,
@@ -45,115 +51,167 @@ export type BpmnMenuSelectOptions = {
 };
 
 const PROCESS_ELEMENTS: BpmnElementDef[] = [
-    { id: "task", name: "Task", glyph: BPMN_ICONS.TASK },
-    { id: "user-task", name: "User task", glyph: BPMN_ICONS.USER_TASK },
-    { id: "send-task", name: "Send task", glyph: BPMN_ICONS.SEND_TASK },
-    { id: "receive-task", name: "Receive task", glyph: BPMN_ICONS.RECEIVE_TASK },
-    { id: "manual-task", name: "Manual task", glyph: BPMN_ICONS.MANUAL_TASK },
-    { id: "service-task", name: "Service task", glyph: BPMN_ICONS.SERVICE_TASK },
-    { id: "business-task", name: "Business task", glyph: BPMN_ICONS.BUSINESS_TASK },
-    { id: "script-task", name: "Script task", glyph: BPMN_ICONS.SCRIPT_TASK },
+    {id: "task", name: "Task", glyph: BPMN_ICONS.TASK},
+    {id: "user-task", name: "User task", glyph: BPMN_ICONS.USER_TASK},
+    {id: "send-task", name: "Send task", glyph: BPMN_ICONS.SEND_TASK},
+    {id: "receive-task", name: "Receive task", glyph: BPMN_ICONS.RECEIVE_TASK},
+    {id: "manual-task", name: "Manual task", glyph: BPMN_ICONS.MANUAL_TASK},
+    {id: "service-task", name: "Service task", glyph: BPMN_ICONS.SERVICE_TASK},
+    {id: "business-task", name: "Business task", glyph: BPMN_ICONS.BUSINESS_TASK},
+    {id: "script-task", name: "Script task", glyph: BPMN_ICONS.SCRIPT_TASK},
     // Markers
-    { id: "loop-marker", name: "Loop", glyph: BPMN_ICONS.LOOP_MARKER },
-    { id: "parallel-marker", name: "Parallel", glyph: BPMN_ICONS.PARALLEL_MARKER },
-    { id: "sequential-marker", name: "Sequential", glyph: BPMN_ICONS.SEQUENTIAL_MARKER },
-    { id: "ad-hoc-marker", name: "Ad Hoc", glyph: BPMN_ICONS.AD_HOC_MARKER },
-    { id: "compensation-marker", name: "Compensation", glyph: BPMN_ICONS.COMPENSATION_MARKER },
+    {id: "loop-marker", name: "Loop", glyph: BPMN_ICONS.LOOP_MARKER},
+    {id: "parallel-marker", name: "Parallel", glyph: BPMN_ICONS.PARALLEL_MARKER},
+    {id: "sequential-marker", name: "Sequential", glyph: BPMN_ICONS.SEQUENTIAL_MARKER},
+    {id: "ad-hoc-marker", name: "Ad Hoc", glyph: BPMN_ICONS.AD_HOC_MARKER},
+    {id: "compensation-marker", name: "Compensation", glyph: BPMN_ICONS.COMPENSATION_MARKER},
 ];
 
 const STATE_ELEMENTS: BpmnElementDef[] = [
-    { id: "start-event", name: "Start event", glyph: BPMN_ICONS.START_EVENT },
-    { id: "inter-event", name: "Intermediate event", glyph: BPMN_ICONS.INTER_EVENT },
-    { id: "end-event", name: "End event", glyph: BPMN_ICONS.END_EVENT },
+    {id: "start-event", name: "Start event", glyph: BPMN_ICONS.START_EVENT},
+    {id: "inter-event", name: "Intermediate event", glyph: BPMN_ICONS.INTER_EVENT},
+    {id: "end-event", name: "End event", glyph: BPMN_ICONS.END_EVENT},
 
-    { id: "message-start-event", name: "Message start event", glyph: BPMN_ICONS.MESSAGE_START_EVENT },
-    { id: "message-sub-event", name: "Message sub-process start event", glyph: BPMN_ICONS.MESSAGE_SUB_START_EVENT },
-    { id: "message-catch-event", name: "Message catch event", glyph: BPMN_ICONS.MESSAGE_CATCH_EVENT },
-    { id: "message-bound-non-interruptible-event", name: "Message bound non-interruptible event", glyph: BPMN_ICONS.MESSAGE_BOUND_NON_INTERRUPT_EVENT },
-    { id: "message-throw-event", name: "Message throw event", glyph: BPMN_ICONS.MESSAGE_THROW_EVENT },
-    { id: "message-end-event", name: "Message end event", glyph: BPMN_ICONS.MESSAGE_END_EVENT },
+    {id: "message-start-event", name: "Message start event", glyph: BPMN_ICONS.MESSAGE_START_EVENT},
+    {id: "message-sub-event", name: "Message sub-process start event", glyph: BPMN_ICONS.MESSAGE_SUB_START_EVENT},
+    {id: "message-catch-event", name: "Message catch event", glyph: BPMN_ICONS.MESSAGE_CATCH_EVENT},
+    {
+        id: "message-bound-non-interruptible-event",
+        name: "Message bound non-interruptible event",
+        glyph: BPMN_ICONS.MESSAGE_BOUND_NON_INTERRUPT_EVENT
+    },
+    {id: "message-throw-event", name: "Message throw event", glyph: BPMN_ICONS.MESSAGE_THROW_EVENT},
+    {id: "message-end-event", name: "Message end event", glyph: BPMN_ICONS.MESSAGE_END_EVENT},
 
-    { id: "timer-start-event", name: "Timer start event", glyph: BPMN_ICONS.TIMER_START_EVENT },
-    { id: "timer-catch-event", name: "Timer catch event", glyph: BPMN_ICONS.TIMER_CATCH_EVENT },
-    { id: "timer-bound-non-interrupt-event", name: "Timer bound non-interruptible event", glyph: BPMN_ICONS.TIMER_BOUND_NON_INTERRUPT_EVENT },
-    { id: "timer-sub-event", name: "Timer catch event", glyph: BPMN_ICONS.TIMER_SUB_EVENT },
+    {id: "timer-start-event", name: "Timer start event", glyph: BPMN_ICONS.TIMER_START_EVENT},
+    {id: "timer-catch-event", name: "Timer catch event", glyph: BPMN_ICONS.TIMER_CATCH_EVENT},
+    {
+        id: "timer-bound-non-interrupt-event",
+        name: "Timer bound non-interruptible event",
+        glyph: BPMN_ICONS.TIMER_BOUND_NON_INTERRUPT_EVENT
+    },
+    {id: "timer-sub-event", name: "Timer catch event", glyph: BPMN_ICONS.TIMER_SUB_EVENT},
 
-    { id: "conditional-start-event", name: "Conditional start event", glyph: BPMN_ICONS.CONDITIONAL_START_EVENT },
-    { id: "conditional-non-interrupt-start-event", name: "Conditional non-interruptible start event", glyph: BPMN_ICONS.CONDITIONAL_NON_INTERRUPT_START_EVENT },
-    { id: "conditional-catch-event", name: "Conditional catch event", glyph: BPMN_ICONS.CONDITIONAL_CATCH_EVENT },
+    {id: "conditional-start-event", name: "Conditional start event", glyph: BPMN_ICONS.CONDITIONAL_START_EVENT},
+    {
+        id: "conditional-non-interrupt-start-event",
+        name: "Conditional non-interruptible start event",
+        glyph: BPMN_ICONS.CONDITIONAL_NON_INTERRUPT_START_EVENT
+    },
+    {id: "conditional-catch-event", name: "Conditional catch event", glyph: BPMN_ICONS.CONDITIONAL_CATCH_EVENT},
 
-    { id: "link-catch-event", name: "Link catch event", glyph: BPMN_ICONS.LINK_CATCH_EVENT },
-    { id: "link-end-event", name: "Link end event", glyph: BPMN_ICONS.LINK_END_EVENT },
+    {id: "link-catch-event", name: "Link catch event", glyph: BPMN_ICONS.LINK_CATCH_EVENT},
+    {id: "link-end-event", name: "Link end event", glyph: BPMN_ICONS.LINK_END_EVENT},
 
-    { id: "signal-start-event", name: "Signal start event", glyph: BPMN_ICONS.SIGNAL_START_EVENT },
-    { id: "signal-non-interrupt-start-event", name: "Signal non-interruptible start event", glyph: BPMN_ICONS.SIGNAL_NON_INTERRUPT_START_EVENT },
-    { id: "signal-catch-event", name: "Signal catch event", glyph: BPMN_ICONS.SIGNAL_CATCH_EVENT },
-    { id: "signal-bound-non-interrupt-event", name: "Signal bound non-interruptible event", glyph: BPMN_ICONS.SIGNAL_BOUND_NON_INTERRUPT_EVENT },
-    { id: "signal-throw-event", name: "Signal throw event", glyph: BPMN_ICONS.SIGNAL_THROW_EVENT },
-    { id: "signal-end-event", name: "Signal end event", glyph: BPMN_ICONS.SIGNAL_END_EVENT },
+    {id: "signal-start-event", name: "Signal start event", glyph: BPMN_ICONS.SIGNAL_START_EVENT},
+    {
+        id: "signal-non-interrupt-start-event",
+        name: "Signal non-interruptible start event",
+        glyph: BPMN_ICONS.SIGNAL_NON_INTERRUPT_START_EVENT
+    },
+    {id: "signal-catch-event", name: "Signal catch event", glyph: BPMN_ICONS.SIGNAL_CATCH_EVENT},
+    {
+        id: "signal-bound-non-interrupt-event",
+        name: "Signal bound non-interruptible event",
+        glyph: BPMN_ICONS.SIGNAL_BOUND_NON_INTERRUPT_EVENT
+    },
+    {id: "signal-throw-event", name: "Signal throw event", glyph: BPMN_ICONS.SIGNAL_THROW_EVENT},
+    {id: "signal-end-event", name: "Signal end event", glyph: BPMN_ICONS.SIGNAL_END_EVENT},
 
-    { id: "error-sub-process-start-event", name: "Error sub-process start event", glyph: BPMN_ICONS.ERROR_SUB_PROCESS_START_EVENT },
-    { id: "error-end-event", name: "Error end event", glyph: BPMN_ICONS.ERROR_END_EVENT },
+    {
+        id: "error-sub-process-start-event",
+        name: "Error sub-process start event",
+        glyph: BPMN_ICONS.ERROR_SUB_PROCESS_START_EVENT
+    },
+    {id: "error-end-event", name: "Error end event", glyph: BPMN_ICONS.ERROR_END_EVENT},
 
-    { id: "escalation-start-event", name: "Escalation start event", glyph: BPMN_ICONS.ESCALATION_START_EVENT },
-    { id: "escalation-bound-event", name: "Escalation bound event", glyph: BPMN_ICONS.ESCALATION_BOUND_EVENT },
-    { id: "escalation-bound-non-interrupt-event", name: "Escalation bound non-interrupt event", glyph: BPMN_ICONS.ESCALATION_BOUND_NON_INTERRUPT_EVENT },
-    { id: "escalation-end-event", name: "Escalation end event", glyph: BPMN_ICONS.ESCALATION_END_EVENT },
+    {id: "escalation-start-event", name: "Escalation start event", glyph: BPMN_ICONS.ESCALATION_START_EVENT},
+    {id: "escalation-bound-event", name: "Escalation bound event", glyph: BPMN_ICONS.ESCALATION_BOUND_EVENT},
+    {
+        id: "escalation-bound-non-interrupt-event",
+        name: "Escalation bound non-interrupt event",
+        glyph: BPMN_ICONS.ESCALATION_BOUND_NON_INTERRUPT_EVENT
+    },
+    {id: "escalation-end-event", name: "Escalation end event", glyph: BPMN_ICONS.ESCALATION_END_EVENT},
 
-    { id: "cancel-bound-event", name: "Cancel boundary event", glyph: BPMN_ICONS.CANCEL_BOUND_EVENT },
-    { id: "cancel-end-event", name: "Cancel end event", glyph: BPMN_ICONS.CANCEL_END_EVENT },
+    {id: "cancel-bound-event", name: "Cancel boundary event", glyph: BPMN_ICONS.CANCEL_BOUND_EVENT},
+    {id: "cancel-end-event", name: "Cancel end event", glyph: BPMN_ICONS.CANCEL_END_EVENT},
 
-    { id: "termination-event", name: "Termination event", glyph: BPMN_ICONS.TERMINATION_EVENT },
+    {id: "termination-event", name: "Termination event", glyph: BPMN_ICONS.TERMINATION_EVENT},
 
-    { id: "compensation-sub-process-start-event", name: "Compensation start sub-process event", glyph: BPMN_ICONS.COMPENSATION_SUB_PROCESS_START_EVENT },
-    { id: "compensation-throw-event", name: "Compensation throw event", glyph: BPMN_ICONS.COMPENSATION_THROW_EVENT },
+    {
+        id: "compensation-sub-process-start-event",
+        name: "Compensation start sub-process event",
+        glyph: BPMN_ICONS.COMPENSATION_SUB_PROCESS_START_EVENT
+    },
+    {id: "compensation-throw-event", name: "Compensation throw event", glyph: BPMN_ICONS.COMPENSATION_THROW_EVENT},
 
-    { id: "multiple-sub-process-start-event", name: "Multiple sub-process start event", glyph: BPMN_ICONS.MULTIPLE_SUB_PROCESS_START_EVENT },
-    { id: "multiple-bound-non-interrupt-event", name: "Multiple boundary non-interrupting event", glyph: BPMN_ICONS.MULTIPLE_BOUND_NON_INTERRUPT_EVENT },
+    {
+        id: "multiple-sub-process-start-event",
+        name: "Multiple sub-process start event",
+        glyph: BPMN_ICONS.MULTIPLE_SUB_PROCESS_START_EVENT
+    },
+    {
+        id: "multiple-bound-non-interrupt-event",
+        name: "Multiple boundary non-interrupting event",
+        glyph: BPMN_ICONS.MULTIPLE_BOUND_NON_INTERRUPT_EVENT
+    },
 
-    { id: "multiple-parallel-start-event", name: "Multiple parallel start event", glyph: BPMN_ICONS.MULTIPLE_PARALLEL_START_EVENT },
+    {
+        id: "multiple-parallel-start-event",
+        name: "Multiple parallel start event",
+        glyph: BPMN_ICONS.MULTIPLE_PARALLEL_START_EVENT
+    },
 
     // TODO : ajouter les autres types d'event
 ];
 
 const GATEWAY_ELEMENTS: BpmnElementDef[] = [
-    { id: "gateway", name: "Gateway", glyph: BPMN_ICONS.GATEWAY },
-    { id: "exclusive-gateway", name: "Exclusive gateway", glyph: BPMN_ICONS.EXCLUSIVE_GATEWAY },
-    { id: "inclusive-gateway", name: "Inclusive gateway", glyph: BPMN_ICONS.INCLUSIVE_GATEWAY },
-    { id: "parallel-gateway", name: "Parallel gateway", glyph: BPMN_ICONS.PARALLEL_GATEWAY },
-    { id: "complex-gateway", name: "Complex gateway", glyph: BPMN_ICONS.COMPLEX_GATEWAY },
-    { id: "event-gateway", name: "Event gateway", glyph: BPMN_ICONS.EVENT_GATEWAY },
+    {id: "gateway", name: "Gateway", glyph: BPMN_ICONS.GATEWAY},
+    {id: "exclusive-gateway", name: "Exclusive gateway", glyph: BPMN_ICONS.EXCLUSIVE_GATEWAY},
+    {id: "inclusive-gateway", name: "Inclusive gateway", glyph: BPMN_ICONS.INCLUSIVE_GATEWAY},
+    {id: "parallel-gateway", name: "Parallel gateway", glyph: BPMN_ICONS.PARALLEL_GATEWAY},
+    {id: "complex-gateway", name: "Complex gateway", glyph: BPMN_ICONS.COMPLEX_GATEWAY},
+    {id: "event-gateway", name: "Event gateway", glyph: BPMN_ICONS.EVENT_GATEWAY},
 ];
 
 const ACTIVITIES_ELEMENTS: BpmnElementDef[] = [
-    { id: "task", name: "Task", glyph: BPMN_ICONS.TASK },
-    { id: "transaction", name: "Transaction", glyph: BPMN_ICONS.TASK },
-    { id: "sub-process", name: "Sub process", glyph: BPMN_ICONS.TASK },
-    { id: "call-activity", name: "Call activity", glyph: BPMN_ICONS.TASK },
+    {id: "task", name: "Task", glyph: BPMN_ICONS.TASK},
+    {id: "transaction", name: "Transaction", glyph: BPMN_ICONS.TASK},
+    {id: "sub-process", name: "Sub process", glyph: BPMN_ICONS.TASK},
+    {id: "call-activity", name: "Call activity", glyph: BPMN_ICONS.TASK},
 ];
 
 const DATA_ELEMENTS: BpmnElementDef[] = [
-    { id: "data", name: "Data", glyph: BPMN_ICONS.DATA },
-    { id: "data-input", name: "Data input", glyph: BPMN_ICONS.DATA_INPUT },
-    { id: "data-output", name: "Data output", glyph: BPMN_ICONS.DATA_OUTPUT },
-    { id: "database", name: "Datastore", glyph: BPMN_ICONS.DATABASE },
+    {id: "data", name: "Data", glyph: BPMN_ICONS.DATA},
+    {id: "data-input", name: "Data input", glyph: BPMN_ICONS.DATA_INPUT},
+    {id: "data-output", name: "Data output", glyph: BPMN_ICONS.DATA_OUTPUT},
+    {id: "database", name: "Datastore", glyph: BPMN_ICONS.DATABASE},
 ];
 
 const EDGE_ELEMENTS: BpmnElementDef[] = [
-    { id: "sequence-flow", name: "Sequence flow", glyph: BPMN_ICONS.SEQUENCE_FLOW },
-    { id: "message-flow", name: "Message flow", glyph: BPMN_ICONS.CONDITIONAL_FLOW },
-    { id: "conditional-flow", name: "Conditional flow", glyph: BPMN_ICONS.CONDITIONAL_FLOW },
-    { id: "default-flow", name: "Default flow", glyph: BPMN_ICONS.DEFAULT_FLOW },
-    { id: "message-boundary-event", name: "Message Boundary Event", glyph: BPMN_ICONS.MESSAGE_CATCH_EVENT },
-    { id: "timer-boundary-event", name: "Timer Boundary Event", glyph: BPMN_ICONS.TIMER_CATCH_EVENT },
-    { id: "conditional-boundary-event", name: "Conditional Boundary Event", glyph: BPMN_ICONS.CONDITIONAL_CATCH_EVENT },
-    { id: "signal-boundary-event", name: "Signal Boundary Event", glyph: BPMN_ICONS.SIGNAL_CATCH_EVENT },
-    { id: "error-boundary-event", name: "Error Boundary Event", glyph: BPMN_ICONS.ERROR_CATCH_EVENT },
-    { id: "escalation-boundary-event", name: "Escalation Boundary Event", glyph: BPMN_ICONS.ESCALATION_BOUND_EVENT },
-    { id: "compensation-boundary-event", name: "Compensation Boundary Event", glyph: BPMN_ICONS.COMPENSATION_BOUND_EVENT },
-    { id: "cancel-boundary-event", name: "Cancel Boundary Event", glyph: BPMN_ICONS.CANCEL_BOUND_EVENT },
-    { id: "multiple-boundary-event", name: "Multiple Boundary Event", glyph: BPMN_ICONS.MULTIPLE_BOUND_EVENT },
-    { id: "multiple-parallel-boundary-event", name: "Multiple Boundary Event", glyph: BPMN_ICONS.MULTIPLE_PARALLEL_BOUND_EVENT },
+    {id: "sequence-flow", name: "Sequence flow", glyph: BPMN_ICONS.SEQUENCE_FLOW},
+    {id: "message-flow", name: "Message flow", glyph: BPMN_ICONS.CONDITIONAL_FLOW},
+    {id: "conditional-flow", name: "Conditional flow", glyph: BPMN_ICONS.CONDITIONAL_FLOW},
+    {id: "default-flow", name: "Default flow", glyph: BPMN_ICONS.DEFAULT_FLOW},
+    {id: "message-boundary-event", name: "Message Boundary Event", glyph: BPMN_ICONS.MESSAGE_CATCH_EVENT},
+    {id: "timer-boundary-event", name: "Timer Boundary Event", glyph: BPMN_ICONS.TIMER_CATCH_EVENT},
+    {id: "conditional-boundary-event", name: "Conditional Boundary Event", glyph: BPMN_ICONS.CONDITIONAL_CATCH_EVENT},
+    {id: "signal-boundary-event", name: "Signal Boundary Event", glyph: BPMN_ICONS.SIGNAL_CATCH_EVENT},
+    {id: "error-boundary-event", name: "Error Boundary Event", glyph: BPMN_ICONS.ERROR_CATCH_EVENT},
+    {id: "escalation-boundary-event", name: "Escalation Boundary Event", glyph: BPMN_ICONS.ESCALATION_BOUND_EVENT},
+    {
+        id: "compensation-boundary-event",
+        name: "Compensation Boundary Event",
+        glyph: BPMN_ICONS.COMPENSATION_BOUND_EVENT
+    },
+    {id: "cancel-boundary-event", name: "Cancel Boundary Event", glyph: BPMN_ICONS.CANCEL_BOUND_EVENT},
+    {id: "multiple-boundary-event", name: "Multiple Boundary Event", glyph: BPMN_ICONS.MULTIPLE_BOUND_EVENT},
+    {
+        id: "multiple-parallel-boundary-event",
+        name: "Multiple Boundary Event",
+        glyph: BPMN_ICONS.MULTIPLE_PARALLEL_BOUND_EVENT
+    },
 ];
 
 export function setIconValue(graph: AnyGraph, iconCell: Cell, value: any) {
@@ -257,13 +315,13 @@ function getSelectedVertex(graph: AnyGraph): AnyCell | null {
         null;
     if (!sel) return null;
     return (
-        isProcessVertex(graph, sel)||
-        isStateVertex(graph, sel)||
-        isGatewayVertex(graph,sel)||
-        isActivitiesVertex(graph,sel)||
-        isDataVertex(graph,sel)||
-        isLaneVertex(graph,sel)||
-        isConversationVertex(graph,sel)) ? sel : null;
+        isProcessVertex(graph, sel) ||
+        isStateVertex(graph, sel) ||
+        isGatewayVertex(graph, sel) ||
+        isActivitiesVertex(graph, sel) ||
+        isDataVertex(graph, sel) ||
+        isLaneVertex(graph, sel) ||
+        isConversationVertex(graph, sel)) ? sel : null;
 }
 
 
@@ -309,7 +367,7 @@ export function setupBpmnMenuSelect(graph: AnyGraph) {
     const wrenchSelector = 'button[data-action="config"]';
     const searchSelector = 'button[data-action="search"]';
     const glyphFontFamily = "BPMN";
-    const sideOffset =  8;
+    const sideOffset = 8;
 
     let objectSelect: boolean = false;
 
@@ -368,7 +426,7 @@ export function setupBpmnMenuSelect(graph: AnyGraph) {
     };
 
     // Open the Menu
-    const openMenu = (objects: BpmnElementDef[]| null): void => {
+    const openMenu = (objects: BpmnElementDef[] | null): void => {
 
         const vertex = getSelectedVertex(graph);
         const edge = getSingleSelectedEdge(graph);
@@ -382,13 +440,13 @@ export function setupBpmnMenuSelect(graph: AnyGraph) {
         // Fill the menu with objects
         if (objects) {
             objects.push({
-                    id: "",
-                    name: "",
-                    url: "",
-                    glyph: BPMN_ICONS.TRASH });
+                id: "",
+                name: "",
+                url: "",
+                glyph: BPMN_ICONS.TRASH
+            });
             elements = objects;
-        }
-        else if (edge) {
+        } else if (edge) {
             elements = EDGE_ELEMENTS;
         }
         // Fill object in the Menu depending on the vertex type
@@ -426,6 +484,7 @@ export function setupBpmnMenuSelect(graph: AnyGraph) {
 
     // Apply the selected item on vertex or edge
     const applySelection = (el: BpmnElementDef) => {
+
         const processVertex = getSelectedVertex(graph);
         const edge = getSingleSelectedEdge(graph);
         if (!processVertex && !edge) return;
@@ -446,8 +505,7 @@ export function setupBpmnMenuSelect(graph: AnyGraph) {
                     hideMenu();
                 }
             });
-        }
-        else if (edge) {
+        } else if (edge) {
             switch (el.id) {
                 case "sequence-flow":
                     // point de départ normal et ligne pleine
@@ -474,8 +532,7 @@ export function setupBpmnMenuSelect(graph: AnyGraph) {
             // Unselect the edge
             graph.clearSelection();
 
-        }
-        else if (isActivitiesVertex(graph, processVertex)) {
+        } else if (isActivitiesVertex(graph, processVertex)) {
             // it is an activity
             switch (el.id) {
                 case "task":
@@ -527,20 +584,15 @@ export function setupBpmnMenuSelect(graph: AnyGraph) {
                 setOutputDataVertex(graph, processVertex);
             else if (el.glyph == BPMN_ICONS.LOOP_MARKER) {
                 setLoopMarker(graph, processVertex);
-            }
-            else if (el.glyph == BPMN_ICONS.PARALLEL_MARKER) {
+            } else if (el.glyph == BPMN_ICONS.PARALLEL_MARKER) {
                 setParallelMarker(graph, processVertex);
-            }
-            else if (el.glyph == BPMN_ICONS.SEQUENTIAL_MARKER) {
+            } else if (el.glyph == BPMN_ICONS.SEQUENTIAL_MARKER) {
                 setSequentialMarker(graph, processVertex);
-            }
-            else if (el.glyph == BPMN_ICONS.AD_HOC_MARKER) {
+            } else if (el.glyph == BPMN_ICONS.AD_HOC_MARKER) {
                 setAdHocMarker(graph, processVertex);
-            }
-            else if (el.glyph == BPMN_ICONS.COMPENSATION_MARKER) {
+            } else if (el.glyph == BPMN_ICONS.COMPENSATION_MARKER) {
                 setCompensationMarker(graph, processVertex);
-            }
-            else
+            } else
                 setIconCellValue(graph, processVertex, el.glyph);
 
             // Unselect the vertex
@@ -556,7 +608,7 @@ export function setupBpmnMenuSelect(graph: AnyGraph) {
             it.setAttribute("aria-selected", i === selectedIndex ? "true" : "false");
         });
         const selected = items[selectedIndex];
-        if (selected) selected.scrollIntoView({ block: "nearest" });
+        if (selected) selected.scrollIntoView({block: "nearest"});
     };
 
     const renderList = () => {
@@ -701,8 +753,7 @@ export function setupBpmnMenuSelect(graph: AnyGraph) {
                 .catch((error) =>
                     console.error("[bpmn-menu-select] Impossible de charger les objets du graph", error)
                 );
-        }
-        else if (isProcessVertex(graph, vertex)) {
+        } else if (isProcessVertex(graph, vertex)) {
             // Fetch the objects
             fetchGraphObjects()
                 .then((objects) =>
@@ -710,8 +761,7 @@ export function setupBpmnMenuSelect(graph: AnyGraph) {
                 .catch((error) =>
                     console.error("[bpmn-menu-select] Impossible de charger les objets du graph", error)
                 );
-            }
-        else if (isLaneVertex(graph, vertex)) {
+        } else if (isLaneVertex(graph, vertex)) {
             // Fetch the objects
             fetchActorObjects()
                 .then((objects) =>
@@ -719,8 +769,7 @@ export function setupBpmnMenuSelect(graph: AnyGraph) {
                 .catch((error) =>
                     console.error("[bpmn-menu-select] Impossible de charger les objets du graph", error)
                 );
-        }
-        else if (isConversationVertex(graph, vertex)) {
+        } else if (isConversationVertex(graph, vertex)) {
             // Fetch the objects
             fetchProcessObjects()
                 .then((objects) =>
