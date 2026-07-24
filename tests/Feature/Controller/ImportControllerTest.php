@@ -1,17 +1,18 @@
 
 <?php
 
+use App\Models\PhysicalLink;
+use App\Models\User;
 use Database\Seeders\PermissionRoleTableSeeder;
 use Database\Seeders\PermissionsTableSeeder;
 use Database\Seeders\RolesTableSeeder;
 use Database\Seeders\RoleUserTableSeeder;
 use Database\Seeders\UsersTableSeeder;
 use Illuminate\Foundation\Testing\RefreshDatabase;
-use App\Models\User;
+use Illuminate\Http\UploadedFile;
 use Symfony\Component\HttpFoundation\BinaryFileResponse;
 
 uses(RefreshDatabase::class);
-
 
 beforeEach(function () {
 
@@ -23,7 +24,7 @@ beforeEach(function () {
         RoleUserTableSeeder::class,
     ]);
 
-    $this->user = User::query()->where('login','admin@admin.com')->first();
+    $this->user = User::query()->where('login', 'admin@admin.com')->first();
     $this->actingAs($this->user);
 
 });
@@ -42,7 +43,7 @@ describe('import', function () {
 
         $response = $this->post(
             route('admin.config.export'),
-            ['object'=>'Entity']);
+            ['object' => 'Entity']);
 
         $response->assertOk();
         $response->assertHeader('Content-Disposition');
@@ -64,6 +65,32 @@ describe('import', function () {
 
         // DOCX/XLSX sont des ZIP → début "PK"
         expect(substr($content, 0, 2))->toBe('PK');
+    });
+
+    test('can reimport physical links exported with attributes', function () {
+
+        $link = PhysicalLink::factory()->create([
+            'type' => 'Ethernet',
+            'attributes' => 'tag1 tag2',
+        ]);
+
+        $exportResponse = $this->post(
+            route('admin.config.export'),
+            ['object' => 'PhysicalLink']);
+
+        $exportResponse->assertOk();
+
+        $path = $exportResponse->baseResponse->getFile()->getPathname();
+        $uploadedFile = new UploadedFile($path, 'PhysicalLink.xlsx', null, null, true);
+
+        $importResponse = $this->post(
+            route('admin.config.import'),
+            ['object' => 'PhysicalLink', 'file' => $uploadedFile]);
+
+        $importResponse->assertSessionDoesntHaveErrors();
+
+        $link->refresh();
+        expect($link->attributes)->toBe('tag1 tag2');
     });
 
 });

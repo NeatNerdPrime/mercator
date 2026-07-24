@@ -7,6 +7,7 @@ use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\Facades\Validator;
@@ -178,7 +179,9 @@ class ImportController extends Controller
                         }
                     } elseif (! $id) {
                         // Create
-                        $validator = Validator::make($attributes->toArray(), $storeRules);
+                        $validationAttributes = clone $attributes;
+                        $this->normalizeArrayFields($validationAttributes, $storeRules);
+                        $validator = Validator::make($validationAttributes->toArray(), $storeRules);
                         if ($validator->fails()) {
                             throw new \Exception(implode(', ', $validator->errors()->all()));
                         }
@@ -195,7 +198,9 @@ class ImportController extends Controller
                         if ($record) {
                             $updateRequestInstance->id = $id;
                             $updateRules = $updateRequestInstance->rules();
-                            $validator = Validator::make($attributes->toArray(), $updateRules);
+                            $validationAttributes = clone $attributes;
+                            $this->normalizeArrayFields($validationAttributes, $updateRules);
+                            $validator = Validator::make($validationAttributes->toArray(), $updateRules);
                             if ($validator->fails()) {
                                 throw new \Exception(implode(', ', $validator->errors()->all()));
                             }
@@ -232,6 +237,33 @@ class ImportController extends Controller
             DB::rollBack();
 
             return back()->withInput()->withErrors(['msg' => $e->getMessage()]);
+        }
+    }
+
+    /**
+     * Certains champs (ex: attributes) sont validés comme tableau côté formulaire web
+     * mais exportés/stockés sous forme de chaîne (valeurs séparées par des espaces).
+     * On les reconvertit en tableau avant validation lors d'un import.
+     */
+    private function normalizeArrayFields(Collection $attributes, array $rules): void
+    {
+        foreach ($rules as $field => $rule) {
+            if (! $attributes->has($field)) {
+                continue;
+            }
+
+            $ruleParts = is_array($rule) ? $rule : explode('|', (string) $rule);
+            if (! in_array('array', $ruleParts, true)) {
+                continue;
+            }
+
+            $value = $attributes->get($field);
+            if (is_array($value)) {
+                continue;
+            }
+
+            $value = trim((string) $value);
+            $attributes->put($field, $value === '' ? [] : array_values(array_filter(explode(' ', $value), fn ($v) => $v !== '')));
         }
     }
 
