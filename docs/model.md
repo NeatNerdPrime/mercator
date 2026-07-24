@@ -1,13 +1,20 @@
 ## Data model
 
+This is a simplified data model of the data model of the Mercator.
+
 [<img src="/mercator/images/model.png" width="700">](images/model.png)
 
-## GDPR view
+
+## GDPR
 
 The GDPR view contains all the data required to maintain the data processing register, and provides a link with the
 processes, applications, and information used by the information system.
 
 This view is used to fulfill the obligations set out in article 30 of the GDPR.
+
+There is no direct relation between `data_processing` and `security_controls` within this view: both tables are
+linked to processes and applications, which belong to other views (see [Business view](#business) and
+[Applications view](#applications)).
 
 ### Register
 
@@ -81,15 +88,65 @@ By default, this table is populated with the security measures of ISO 27001:2022
 | updated_at  | timestamp    | Date of update      |
 | deleted_at  | timestamp    | Date of deletion    |
 
-## Ecosystem view
+## Ecosystem
 
 The ecosystem view describes all the entities or systems that revolve around the information system considered in the
 mapping.
 
-[![ecosystem.png](images/ecosystem.png)](images/ecosystem.png)
-
 This view not only delimits the scope of the mapping, but also provides an overall view of the ecosystem without being
 limited to the individual study of each entity.
+
+```mermaid
+erDiagram
+    entities {
+        int id PK
+        string ext_refs
+        string name
+        int icon_id
+        string entity_type
+        string attributes
+        text description
+        string reference
+        int parent_entity_id FK
+        boolean is_external
+        text security_level
+        text contact_point
+        string external_ref_id
+        timestamp created_at
+        timestamp updated_at
+        timestamp deleted_at
+    }
+    relations {
+        int id PK
+        string ext_refs
+        string name
+        string type
+        string attributes
+        text description
+        int source_id FK
+        int destination_id FK
+        string reference
+        string responsible
+        string order_number
+        boolean active
+        date start_date
+        date end_date
+        text comments
+        int importance
+        int security_need_c
+        int security_need_i
+        int security_need_a
+        int security_need_t
+        int security_need_auth
+        timestamp created_at
+        timestamp updated_at
+        timestamp deleted_at
+    }
+
+    entities ||--o{ entities : "parent_entity_id"
+    entities ||--o{ relations : "source_id"
+    entities ||--o{ relations : "destination_id"
+```
 
 ### Entities
 
@@ -178,15 +235,151 @@ The financial values of a contract can be indicated in dedicated fields.
 
 ---
 
-## Business view of the information system
+## Business
 
 The business view of the information system describes all the organization's business processes and the players
 involved, independently of the technological choices made by the organization and the resources made available to it.
 
-[![information_system.png](images/information_system.png)](images/information_system.png)
-
 The business view is essential, as it allows you to reposition technical elements in their business environment, and
 thus understand their context of use.
+
+```mermaid
+erDiagram
+    "macro-processuses" {
+        int id PK
+        string ext_refs
+        string name
+        text description
+        text io_elements
+        int security_need_c
+        int security_need_i
+        int security_need_a
+        int security_need_t
+        int security_need_auth
+        string owner
+        timestamp created_at
+        timestamp updated_at
+        timestamp deleted_at
+    }
+    processes {
+        int id PK
+        string ext_refs
+        string name
+        text description
+        int icon_id
+        string owner
+        text in_out
+        int security_need_c
+        int security_need_i
+        int security_need_a
+        int security_need_t
+        int security_need_auth
+        int macroprocess_id FK
+        list activities
+        list entities
+        list informations
+        list applications
+        list operations
+        timestamp created_at
+        timestamp updated_at
+        timestamp deleted_at
+    }
+    activities {
+        int id PK
+        string ext_refs
+        string name
+        text description
+        int recovery_time_objective
+        int maximum_tolerable_downtime
+        int recovery_point_objective
+        int maximum_tolerable_data_loss
+        text drp
+        string drp_link
+        timestamp created_at
+        timestamp updated_at
+        timestamp deleted_at
+    }
+    activity_impact {
+        bigint id PK
+        int activity_id FK
+        string impact_type
+        int severity
+        timestamp created_at
+        timestamp updated_at
+    }
+    operations {
+        int id PK
+        string ext_refs
+        string name
+        text description
+        int process_id FK
+        list actors
+        list tasks
+        list activities
+        timestamp created_at
+        timestamp updated_at
+        timestamp deleted_at
+    }
+    tasks {
+        int id PK
+        string ext_refs
+        string name
+        text description
+        timestamp created_at
+        timestamp updated_at
+        timestamp deleted_at
+    }
+    actors {
+        int id PK
+        string ext_refs
+        string name
+        string nature
+        string type
+        string contact
+        list operations
+        timestamp created_at
+        timestamp updated_at
+        timestamp deleted_at
+    }
+    information {
+        int id PK
+        string ext_refs
+        string name
+        string type
+        string attributes
+        text description
+        string owner
+        string administrator
+        string sensitivity
+        string storage
+        int security_need_c
+        int security_need_i
+        int security_need_a
+        int security_need_t
+        int security_need_auth
+        text constraints
+        string retention
+        list parents
+        list children
+        list processes
+        timestamp created_at
+        timestamp updated_at
+        timestamp deleted_at
+    }
+
+    "macro-processuses" ||--o{ processes : "macroprocess_id"
+    processes }o--o{ activities : "activities"
+    processes }o--o{ information : "informations"
+    operations }o--|| processes : "process_id"
+    operations }o--o{ actors : "actors"
+    operations }o--o{ tasks : "tasks"
+    operations }o--o{ activities : "activities"
+    activities ||--o{ activity_impact : "activity_id"
+    information }o--o{ information : "parents / children"
+```
+
+*Note: entities, applications and databases referenced by processes/activities/information belong to other views
+(Ecosystem, Applications) and are therefore not represented in this diagram.*
 
 ### Macro-processes
 
@@ -471,13 +664,150 @@ field **informations***
 
 ---
 
-## Applications view
+## Applications
 
 The application view is used to describe part of what is classically referred to as the "computer system".
 
-[![applications.png](images/applications.png)](images/applications.png)
-
 This view describes the technological solutions that support business processes, mainly applications.
+
+```mermaid
+erDiagram
+    "application-blocks" {
+        int id PK
+        string ext_refs
+        string name
+        text description
+        string responsible
+        timestamp created_at
+        timestamp updated_at
+        timestamp deleted_at
+    }
+    applications {
+        int id PK
+        string ext_refs
+        string name
+        int application_block_id FK
+        string attributes
+        text description
+        int icon_id
+        string responsible
+        string functional_referent
+        string editor
+        string users
+        string technology
+        string type
+        string external
+        datetime install_date
+        datetime update_date
+        datetime next_update
+        string documentation
+        int security_need_c
+        int security_need_i
+        int security_need_a
+        int security_need_t
+        int security_need_auth
+        int rto
+        int rpo
+        string vendor
+        string product
+        string version
+        int patching_frequency
+        list entities
+        list processes
+        list services
+        list databases
+        list logical_servers
+        list activities
+        list containers
+        timestamp created_at
+        timestamp updated_at
+        timestamp deleted_at
+    }
+    application_events {
+        int id PK
+        string ext_refs
+        int user_id FK
+        int application_id FK
+        text message
+        timestamp created_at
+        timestamp updated_at
+    }
+    application_services {
+        int id PK
+        string ext_refs
+        string name
+        text description
+        string exposition
+        list modules
+        list applications
+        timestamp created_at
+        timestamp updated_at
+        timestamp deleted_at
+    }
+    application_modules {
+        int id PK
+        string ext_refs
+        string name
+        text description
+        list entities
+        list application_services
+        timestamp created_at
+        timestamp updated_at
+        timestamp deleted_at
+    }
+    databases {
+        int id PK
+        string ext_refs
+        string name
+        text description
+        string type
+        int entity_resp_id FK
+        string responsible
+        int icon_id
+        int security_need_c
+        int security_need_i
+        int security_need_a
+        int security_need_t
+        int security_need_auth
+        string external
+        timestamp created_at
+        timestamp updated_at
+        timestamp deleted_at
+    }
+    application_flows {
+        int id PK
+        string ext_refs
+        string name
+        string attributes
+        text description
+        int application_source_id FK
+        int service_source_id FK
+        int module_source_id FK
+        int database_source_id FK
+        int application_dest_id FK
+        int service_dest_id FK
+        int module_dest_id FK
+        int database_dest_id FK
+        boolean crypted
+        boolean bidirectional
+        timestamp created_at
+        timestamp updated_at
+        timestamp deleted_at
+    }
+
+    "application-blocks" ||--o{ applications : "application_block_id"
+    applications ||--o{ application_events : "application_id"
+    applications }o--o{ application_services : "services"
+    applications }o--o{ databases : "databases"
+    application_services }o--o{ application_modules : "modules"
+    application_flows }o--|| applications : "source / destination"
+    application_flows }o--|| application_services : "source / destination"
+    application_flows }o--|| application_modules : "source / destination"
+    application_flows }o--|| databases : "source / destination"
+```
+
+*Note: entities, processes, activities, logical_servers and containers referenced by applications belong to other
+views and are therefore not represented in this diagram.*
 
 ### Applications blocks
 
@@ -766,14 +1096,85 @@ The  ***device***_ for source_id or dest_id can be: :
 
 In the app, an information can be linked with an application flow from an application flow object.
 
-## Administration areas
+## Administration
+
+The administration view lists the management of resources, directories, and user privilege levels within the information system.
+
+Having directories and centralized user access rights is strongly recommended for operators of vital importance (OIVs).
 
 *Nota*: OVI is coming from the French military programme law. The closest equivalents in EU regulations are OES
 (Operators of Essential Services, EU 2016/1148, NIS) and EE (Essential Entities, EU 2022/2555, NIS 2).
 
-[<img src="/mercator/images/administration.png" width="400">](images/administration.png)
+```mermaid
+erDiagram
+    zone_admins {
+        int id PK
+        string ext_refs
+        string name
+        text description
+        timestamp created_at
+        timestamp updated_at
+        timestamp deleted_at
+    }
+    annuaires {
+        int id PK
+        string ext_refs
+        string name
+        text description
+        string solution
+        int zone_admin_id FK
+        timestamp created_at
+        timestamp updated_at
+        timestamp deleted_at
+    }
+    forest_ads {
+        int id PK
+        string ext_refs
+        string name
+        text description
+        int zone_admin_id FK
+        list domains
+        timestamp created_at
+        timestamp updated_at
+        timestamp deleted_at
+    }
+    domains {
+        int id PK
+        string ext_refs
+        string name
+        text description
+        int domain_ctrl_cnt
+        int user_count
+        int machine_count
+        string relation_inter_domain
+        timestamp created_at
+        timestamp updated_at
+        timestamp deleted_at
+    }
+    admin_users {
+        int id PK
+        string ext_refs
+        string user_id
+        string firstname
+        string lastname
+        string type
+        string attributes
+        int icon_id
+        text description
+        int domain_id FK
+        timestamp created_at
+        timestamp updated_at
+        timestamp deleted_at
+    }
 
-### Administration area
+    zone_admins ||--o{ annuaires : "zone_admin_id"
+    zone_admins ||--o{ forest_ads : "zone_admin_id"
+    forest_ads }o--o{ domains : "domains"
+    domains ||--o{ admin_users : "domain_id"
+```
+
+
+### Administration zone
 
 An administration zone is a set of resources (people, data, equipment) under the responsibility of one (or more)
 administrator(s).
@@ -899,10 +1300,286 @@ In the app, an user can be defined as administrator of an application from an ap
 
 The logical infrastructure view corresponds to the logical distribution of the network.
 
-[<img src="/mercator/images/logical.png" width="400">](images/logical.png)
-
 It illustrates the partitioning of networks and the logical links between them. It also lists the network equipment that
 handles the traffic.
+
+```mermaid
+erDiagram
+    networks {
+        int id PK
+        string ext_refs
+        string name
+        string type
+        string attributes
+        text description
+        string protocol_type
+        string responsible
+        string responsible_sec
+        int security_need_c
+        int security_need_i
+        int security_need_a
+        int security_need_t
+        int security_need_auth
+        timestamp created_at
+        timestamp updated_at
+        timestamp deleted_at
+    }
+    subnetworks {
+        int id PK
+        string ext_refs
+        string name
+        string type
+        string attributes
+        text description
+        int network_id FK
+        int subnetwork_id FK
+        int connected_subnets_id
+        string address
+        string default_gateway
+        int gateway_id FK
+        int vlan_id FK
+        string ip_allocation_type
+        string zone
+        string dmz
+        string wifi
+        string responsible_exp
+        timestamp created_at
+        timestamp updated_at
+        timestamp deleted_at
+    }
+    gateways {
+        int id PK
+        string ext_refs
+        string name
+        text description
+        string ip
+        string authentification
+        timestamp created_at
+        timestamp updated_at
+        timestamp deleted_at
+    }
+    external_connected_entities {
+        int id PK
+        string ext_refs
+        string name
+        string type
+        text description
+        int entity_id FK
+        int network_id FK
+        list subnetworks
+        string contacts
+        string src
+        string src_desc
+        string dest
+        string dest_desc
+        text security
+        timestamp created_at
+        timestamp updated_at
+        timestamp deleted_at
+    }
+    network_switches {
+        int id PK
+        string ext_refs
+        string name
+        text description
+        string ip
+        timestamp created_at
+        timestamp updated_at
+        timestamp deleted_at
+    }
+    routers {
+        int id PK
+        string ext_refs
+        string name
+        string type
+        text ip_addresses
+        text description
+        text rules
+        timestamp created_at
+        timestamp updated_at
+        timestamp deleted_at
+    }
+    security_devices {
+        int id PK
+        string ext_refs
+        string name
+        string type
+        string attributes
+        int icon_id
+        text description
+        string address_ip
+        string vendor
+        string product
+        string version
+        timestamp created_at
+        timestamp updated_at
+        timestamp deleted_at
+    }
+    dhcp_servers {
+        int id PK
+        string ext_refs
+        string name
+        text description
+        string address_ip
+        timestamp created_at
+        timestamp updated_at
+        timestamp deleted_at
+    }
+    dnsservers {
+        int id PK
+        string ext_refs
+        string name
+        text description
+        string address_ip
+        timestamp created_at
+        timestamp updated_at
+        timestamp deleted_at
+    }
+    clusters {
+        int id PK
+        string ext_refs
+        string name
+        string type
+        int icon_id
+        text description
+        string attributes
+        string address_ip
+        timestamp created_at
+        timestamp updated_at
+        timestamp deleted_at
+    }
+    logical_servers {
+        int id PK
+        string ext_refs
+        string name
+        int icon_id
+        string type
+        boolean active
+        string attributes
+        text description
+        string operating_system
+        datetime install_date
+        datetime update_date
+        int patching_frequency
+        date next_update
+        string net_services
+        string environment
+        string address_ip
+        int domain_id FK
+        string cpu
+        string memory
+        int disk
+        int disk_used
+        text configuration
+        list databases
+        list cluster_id
+        list physical_servers
+        list applications
+        list containers
+        timestamp created_at
+        timestamp updated_at
+        timestamp deleted_at
+    }
+    backups {
+        int id PK
+        string ext_refs
+        string name
+        string type
+        string attributes
+        list logical_server_ids
+        list storage_device_ids
+        int backup_frequency
+        int backup_cycle
+        int backup_retention
+        timestamp created_at
+        timestamp updated_at
+        timestamp deleted_at
+    }
+    containers {
+        int id PK
+        string ext_refs
+        string name
+        text description
+        string type
+        int icon_id
+        list applications
+        list databases
+        list logical_servers
+        timestamp created_at
+        timestamp updated_at
+        timestamp deleted_at
+    }
+    logical_flows {
+        int id PK
+        string ext_refs
+        string name
+        string type
+        string attributes
+        text description
+        string chain
+        string interface
+        int router_id FK
+        int priority
+        string action
+        string protocol
+        string source_ip_range
+        string dest_ip_range
+        string source_port
+        string dest_port
+        int device_source_id FK
+        int device_dest_id FK
+        string users
+        string schedule
+        timestamp created_at
+        timestamp updated_at
+        timestamp deleted_at
+    }
+    certificates {
+        int id PK
+        string ext_refs
+        string name
+        text description
+        string type
+        date start_validity
+        date end_validity
+        int status
+        list logical_servers
+        list applications
+        datetime last_notification
+        timestamp created_at
+        timestamp updated_at
+        timestamp deleted_at
+    }
+    vlans {
+        int id PK
+        string ext_refs
+        string name
+        text description
+        int vlan_id
+        timestamp created_at
+        timestamp updated_at
+        timestamp deleted_at
+    }
+
+    networks ||--o{ subnetworks : "network_id"
+    subnetworks ||--o{ subnetworks : "subnetwork_id"
+    subnetworks }o--|| gateways : "gateway_id"
+    subnetworks }o--|| vlans : "vlan_id"
+    networks ||--o{ external_connected_entities : "network_id"
+    external_connected_entities }o--o{ subnetworks : "subnetworks"
+    routers ||--o{ logical_flows : "router_id"
+    clusters }o--o{ logical_servers : "cluster_id"
+    logical_servers }o--o{ containers : "containers"
+    backups }o--o{ logical_servers : "logical_server_ids"
+    logical_flows }o--|| security_devices : "device (poly)"
+    logical_flows }o--|| logical_servers : "device (poly)"
+    logical_flows }o--|| clusters : "device (poly)"
+    logical_flows }o--|| subnetworks : "device (poly)"
+    certificates }o--o{ logical_servers : "logical_servers"
+```
+
+*Note: entities, administration domains, applications, databases and physical-infrastructure devices referenced
+here belong to other views and are therefore not represented in this diagram.*
 
 ### Networks
 
@@ -1457,9 +2134,325 @@ In the app, a VLAN can be linked to a logic switch from these two objects.
 
 The physical infrastructure view describes the physical equipment that makes up or is used by the information system.
 
-[<img src="/mercator/images/physical.png" width="700">](images/physical.png)
-
 This view corresponds to the geographical distribution of network equipment within the various sites.
+
+```mermaid
+erDiagram
+    sites {
+        int id PK
+        string ext_refs
+        string name
+        string type
+        string attributes
+        int icon_id
+        text description
+        timestamp created_at
+        timestamp updated_at
+        timestamp deleted_at
+    }
+    buildings {
+        int id PK
+        string ext_refs
+        string name
+        int icon_id
+        string type
+        string attributes
+        text description
+        int site_id FK
+        int building_id FK
+        timestamp created_at
+        timestamp updated_at
+        timestamp deleted_at
+    }
+    bays {
+        int id PK
+        string ext_refs
+        string name
+        text description
+        int building_id FK
+        int site_id FK
+        timestamp created_at
+        timestamp updated_at
+        timestamp deleted_at
+    }
+    zones {
+        int id PK
+        string ext_refs
+        string name
+        text description
+        string type
+        string attributes
+        timestamp created_at
+        timestamp updated_at
+        timestamp deleted_at
+    }
+    physical_servers {
+        int id PK
+        string ext_refs
+        string name
+        int icon_id
+        text description
+        string type
+        string cpu
+        string memory
+        int disk
+        int disk_used
+        text configuration
+        string operating_system
+        string address_ip
+        datetime install_date
+        datetime update_date
+        string responsible
+        int site_id FK
+        int building_id FK
+        int bay_id FK
+        list clusters
+        list logical_servers
+        timestamp created_at
+        timestamp updated_at
+        timestamp deleted_at
+    }
+    workstations {
+        int id PK
+        string ext_refs
+        string name
+        int icon_id
+        text description
+        string status
+        string type
+        int entity_id FK
+        int domain_id FK
+        int user_id FK
+        int other_user
+        string manufacturer
+        string model
+        string serial_number
+        string cpu
+        string memory
+        int disk
+        string operating_system
+        int network_id FK
+        string address_ip
+        string mac_address
+        string network_port_type
+        int site_id FK
+        int building_id FK
+        list applications
+        timestamp created_at
+        timestamp updated_at
+        timestamp deleted_at
+    }
+    storage_devices {
+        int id PK
+        string ext_refs
+        string name
+        string type
+        text description
+        int site_id FK
+        int building_id FK
+        int bay_id FK
+        string address_ip
+        string vendor
+        string product
+        string version
+        timestamp created_at
+        timestamp updated_at
+        timestamp deleted_at
+    }
+    peripherals {
+        int id PK
+        string ext_refs
+        string name
+        text description
+        string type
+        int icon_id
+        int site_id FK
+        int building_id FK
+        int bay_id FK
+        string responsible
+        string address_ip
+        string domain
+        string vendor
+        string product
+        string version
+        int provider_id FK
+        timestamp created_at
+        timestamp updated_at
+        timestamp deleted_at
+    }
+    phones {
+        int id PK
+        string ext_refs
+        string name
+        text description
+        string type
+        string vendor
+        string product
+        string version
+        int site_id FK
+        int building_id FK
+        int physical_switch_id FK
+        string address_ip
+        timestamp created_at
+        timestamp updated_at
+        timestamp deleted_at
+    }
+    physical_switches {
+        int id PK
+        string ext_refs
+        string name
+        text description
+        string type
+        int site_id FK
+        int building_id FK
+        int bay_id FK
+        string vendor
+        string product
+        string version
+        timestamp created_at
+        timestamp updated_at
+        timestamp deleted_at
+    }
+    physical_routers {
+        int id PK
+        string ext_refs
+        string name
+        text description
+        string type
+        int site_id FK
+        int building_id FK
+        int bay_id FK
+        list vlans
+        list routers
+        string vendor
+        string product
+        string version
+        timestamp created_at
+        timestamp updated_at
+        timestamp deleted_at
+    }
+    wifi_terminals {
+        int id PK
+        string ext_refs
+        string name
+        text description
+        string type
+        int site_id FK
+        int building_id FK
+        string address_ip
+        string vendor
+        string product
+        string version
+        timestamp created_at
+        timestamp updated_at
+        timestamp deleted_at
+    }
+    physical_security_devices {
+        int id PK
+        string ext_refs
+        string name
+        int icon_id
+        text description
+        string type
+        int site_id FK
+        int building_id FK
+        int bay_id FK
+        list security_devices
+        string address_ip
+        timestamp created_at
+        timestamp updated_at
+        timestamp deleted_at
+    }
+    physical_links {
+        int id PK
+        string ext_refs
+        string type
+        string color
+        string attributes
+        text description
+        int device_src_id FK
+        string src_id
+        int device_dst_id FK
+        string dst_port
+        timestamp created_at
+        timestamp updated_at
+        timestamp deleted_at
+    }
+    wans {
+        int id PK
+        string ext_refs
+        string name
+        list lans
+        list mans
+        timestamp created_at
+        timestamp updated_at
+        timestamp deleted_at
+    }
+    mans {
+        int id PK
+        string ext_refs
+        string name
+        int parent_man_id FK
+        timestamp created_at
+        timestamp updated_at
+        timestamp deleted_at
+    }
+    lans {
+        int id PK
+        string ext_refs
+        string name
+        text description
+        list mans
+        list wans
+        timestamp created_at
+        timestamp updated_at
+        timestamp deleted_at
+    }
+
+    sites ||--o{ buildings : "site_id"
+    buildings ||--o{ buildings : "building_id"
+    buildings ||--o{ bays : "building_id"
+    sites ||--o{ bays : "site_id"
+    sites ||--o{ physical_servers : "site_id"
+    buildings ||--o{ physical_servers : "building_id"
+    bays ||--o{ physical_servers : "bay_id"
+    sites ||--o{ workstations : "site_id"
+    buildings ||--o{ workstations : "building_id"
+    sites ||--o{ storage_devices : "site_id"
+    buildings ||--o{ storage_devices : "building_id"
+    bays ||--o{ storage_devices : "bay_id"
+    sites ||--o{ peripherals : "site_id"
+    buildings ||--o{ peripherals : "building_id"
+    bays ||--o{ peripherals : "bay_id"
+    sites ||--o{ phones : "site_id"
+    buildings ||--o{ phones : "building_id"
+    sites ||--o{ physical_switches : "site_id"
+    buildings ||--o{ physical_switches : "building_id"
+    bays ||--o{ physical_switches : "bay_id"
+    sites ||--o{ physical_routers : "site_id"
+    buildings ||--o{ physical_routers : "building_id"
+    bays ||--o{ physical_routers : "bay_id"
+    sites ||--o{ wifi_terminals : "site_id"
+    buildings ||--o{ wifi_terminals : "building_id"
+    sites ||--o{ physical_security_devices : "site_id"
+    buildings ||--o{ physical_security_devices : "building_id"
+    bays ||--o{ physical_security_devices : "bay_id"
+    physical_links }o--|| peripherals : "device (poly)"
+    physical_links }o--|| phones : "device (poly)"
+    physical_links }o--|| physical_routers : "device (poly)"
+    physical_links }o--|| physical_security_devices : "device (poly)"
+    physical_links }o--|| physical_servers : "device (poly)"
+    physical_links }o--|| physical_switches : "device (poly)"
+    physical_links }o--|| storage_devices : "device (poly)"
+    physical_links }o--|| wifi_terminals : "device (poly)"
+    physical_links }o--|| workstations : "device (poly)"
+    wans }o--o{ lans : "lans"
+    wans }o--o{ mans : "mans"
+    mans ||--o{ mans : "parent_man_id"
+```
+
+*Note: entities, administration domains, networks, applications, clusters and logical servers referenced here
+belong to other views and are therefore not represented in this diagram.*
 
 ### Sites
 
@@ -2017,6 +3010,68 @@ A WAN can be linked to a LAN from a WAN object.
 ## Configuration
 
 The "documents" section can be found in the configuration menu.
+
+```mermaid
+erDiagram
+    documents {
+        int id PK
+        string ext_refs
+        string filename
+        string mimetype
+        int size
+        text hash
+        timestamp created_at
+        timestamp updated_at
+        timestamp deleted_at
+    }
+    users {
+        int id PK
+        string login
+        string name
+        string email
+        datetime email_verified_at
+        string password
+        string remember_token
+        int granularity
+        list roles
+        string language
+        timestamp created_at
+        timestamp updated_at
+        timestamp deleted_at
+    }
+    roles {
+        int id PK
+        string title
+        timestamp created_at
+        timestamp updated_at
+        timestamp deleted_at
+    }
+    cartographers {
+        int id PK
+        string cartographiable_type
+        int cartographiable_id
+        int user_id FK
+        int role_id FK
+        timestamp created_at
+        timestamp updated_at
+        timestamp deleted_at
+    }
+    permissions {
+        int id PK
+        string ext_refs
+        string title
+        string module
+        timestamp created_at
+        timestamp updated_at
+    }
+
+    users }o--o{ roles : "roles"
+    cartographers }o--|| users : "user_id"
+    cartographers }o--|| roles : "role_id"
+```
+
+*Note: `documents` is referenced from most of the other views through `icon_id` fields, and `cartographiable_id`
+is a polymorphic reference resolved by `cartographiable_type` — these cross-view links are not represented here.*
 
 ### documents
 
