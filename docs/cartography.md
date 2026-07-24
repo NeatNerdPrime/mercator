@@ -19,6 +19,9 @@ The business view of the information system represents the IS through its macro-
 operations, actors, and the information they handle. These elements constitute the business values in the sense of the
 EBIOS Risk Manager risk assessment method.
 
+[<img src="/mercator/images/information_system.png" width="700">](images/information_system.png)
+
+
 ## Application View
 
 The application view describes the software components of the information system: applications grouped into application
@@ -27,10 +30,14 @@ blocks, databases, services and modules, along with their links to the business 
 The application flow view describes the information exchanges between the various applications, services, modules, and
 databases.
 
+[<img src="/mercator/images/applications.png" width="700">](images/applications.png)
+
 ## Administration View
 
 The administration view lists the scopes and privilege levels of users and administrators, as well as the directories
 that reference them.
+
+[<img src="/mercator/images/administration.png" width="500">](images/administration.png)
 
 ## Logical View
 
@@ -38,12 +45,14 @@ The logical infrastructure view illustrates the logical segmentation of networks
 and routing functions. It notably makes it possible to compare what the system is *capable* of doing with what it was
 *authorized* to do.
 
-## Infrastructure View
+[<img src="/mercator/images/logical.png" width="500">](images/logical.png)
+
+## Physical Infrastructure View
 
 The physical infrastructure view describes the physical equipment that makes up the information system: servers, racks,
 server rooms, buildings, and sites.
 
----
+[<img src="/mercator/images/physical.png" width="700">](images/physical.png)
 
 ## Exploring Views and Rendering Engines
 
@@ -53,6 +62,8 @@ it—physically or logically—and all incoming and outgoing flows.
 
 Hierarchical views are also available. From a macro-process, you can visualize all the processes, activities, and
 operations that depend on it, or take a site and display all the rooms and equipment it contains.
+
+[<img src="/mercator/images/explore.png" width="700">](images/explore.png)
 
 You can select the graphic rendering engine directly from each view. **Dot, Neato, FDP, Sfdp, Twopi, Circo** — each
 Graphviz engine produces a different rendering depending on the nature and density of the graph. This flexibility allows
