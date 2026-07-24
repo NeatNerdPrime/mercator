@@ -19,6 +19,7 @@ Changements prévus en 2026 et plus :
 - [ ] Utiliser des [Accessor pour les Model](https://laravel.com/docs/9.x/eloquent-mutators#defining-a-mutator)
 - [ ] Mettre en place une formation et un guide utilisateur
 - [ ] Configuration des labels, couleurs et niveaux DICT
+- [ ] Verrouiller les valeurs possibles des champs libres par l'administrateur
 
 ## Evolutions mineurs
 

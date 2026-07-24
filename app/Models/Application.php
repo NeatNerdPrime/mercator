@@ -21,7 +21,7 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 
 class Application extends Model implements HasIconContract, HasPrefix, HasUniqueIdentifierContract
 {
-    use Auditable, HasIcon, HasUniqueIdentifier, HasFactory, SoftDeletes;
+    use Auditable, HasFactory, HasIcon, HasUniqueIdentifier, SoftDeletes;
     use HasCartographers;
 
     public $table = 'applications';
@@ -39,6 +39,9 @@ class Application extends Model implements HasIconContract, HasPrefix, HasUnique
         'responsible',
         'editor',
         'functional_referent',
+        'status',
+        'hosting',
+        'urls',
     ];
 
     protected array $dates = [
@@ -48,6 +51,7 @@ class Application extends Model implements HasIconContract, HasPrefix, HasUnique
         'install_date',
         'update_date',
         'next_update',
+        'date_prod',
     ];
 
     protected $fillable = [
@@ -78,14 +82,19 @@ class Application extends Model implements HasIconContract, HasPrefix, HasUnique
         'external',
         'patching_frequency',
         'install_date',
+        'date_prod',
         'update_date',
         'next_update',
+        'status',
+        'hosting',
+        'urls',
     ];
 
     protected $casts = [
         'patching_frequency' => 'integer',
-        'update_date'        => 'date',
-        'next_update'        => 'date',
+        'update_date' => 'date',
+        'next_update' => 'date',
+        'date_prod' => 'date',
     ];
 
     protected static function newFactory(): Factory

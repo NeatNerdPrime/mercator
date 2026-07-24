@@ -2,6 +2,7 @@
 
 namespace App\Http\Requests;
 
+use App\Rules\UrlList;
 use Gate;
 use Illuminate\Validation\Rule;
 use Symfony\Component\HttpFoundation\Response;
@@ -69,6 +70,10 @@ class StoreApplicationRequest extends BaseFormRequest
                 'nullable',
                 // TODO : fixme
                 // 'after:install_date',
+            ],
+            'urls' => [
+                'nullable',
+                new UrlList,
             ],
         ];
     }
