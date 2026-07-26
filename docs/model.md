@@ -854,7 +854,7 @@ server per physical server.
 | Field                | Type         | Description                         |
 |:---------------------|:-------------|:------------------------------------|
 | id                   | int unsigned | auto_increment                      |
-| ext_refs | varchar(255) | External reference(s) to objects in other systems. Format: {ID_SOURCE}ID_OBJECT, multiple values separated by "\|" |
+| ext_refs             | varchar(255) | External reference(s) to objects in other systems. Format: {ID_SOURCE}ID_OBJECT, multiple values separated by "\|" |
 | name                 | varchar(255) | Name of the application             |
 | application_block_id | int unsigned | Group of application                |
 | attributes           | varchar(255) | Attributes of the application       |
@@ -867,6 +867,8 @@ server per physical server.
 | technology           | varchar(255) | Technology                          |
 | type                 | varchar(255) | Type of application                 |
 | external             | varchar(255) | External                            |
+| status               | varchar(255) | Status of the application           |
+| prod_date            | date         | Production date                     |
 | install_date         | datetime     | Date of installation                |
 | update_date          | datetime     | Date of upgrade                     |
 | next_update          | datetime     | Date of next planned upgrade        |
@@ -882,8 +884,6 @@ server per physical server.
 | product              | varchar(255) | Product name                        |
 | version              | varchar(255) | Version of the application          |
 | patching_frequency   | int          | Patching frequency                  |
-| status               | varchar(255) | Status of the application           |
-| date_prod            | date         | Production date                     |
 | hosting              | varchar(255) | Hosting                             |
 | urls                 | varchar(255) | Application's URLs                  |
 | entities             | List int [,] | IDs list of related entities        |
