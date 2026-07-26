@@ -738,9 +738,11 @@ erDiagram
         string technology
         string type
         string external
-        datetime install_date
-        datetime update_date
-        datetime next_update
+        string status
+        date prod_date
+        date install_date
+        date update_date
+        date next_update
         string documentation
         int security_need_c
         int security_need_i
@@ -753,8 +755,6 @@ erDiagram
         string product
         string version
         int patching_frequency
-        string status
-        date date_prod
         string hosting
         string urls
         list entities
@@ -894,7 +894,7 @@ a un serveur logique par serveur physique.
 | Champ                | Type         | Description                                                         |
 |:---------------------|:-------------|:--------------------------------------------------------------------|
 | id                   | int unsigned | auto_increment                                                      |
-| ext_refs | varchar(255) | Référence(s) externe(s) vers des objets d'autres systèmes. Format : {ID_SOURCE}ID_OBJET, valeurs multiples séparées par « \| » |
+| ext_refs             | varchar(255) | Référence(s) externe(s) vers des objets d'autres systèmes. Format : {ID_SOURCE}ID_OBJET, valeurs multiples séparées par « \| » |
 | name                 | varchar(255) | Nom de l'application                                                |
 | application_block_id | int unsigned | Lien vers la bloc applicatif                                        |
 | attributes           | varchar(255) | Attributs (tags) d'une application                                  |
@@ -911,7 +911,7 @@ a un serveur logique par serveur physique.
 | hosting              | varchar(255) | Hébergement                                                         |
 | urls                 | varchar(255) | URLs de l'application                                               |
 | install_date         | datetime     | Date d'installation de l'application                                |
-| date_prod            | date         | Date de mise en production                                          |
+| prod_date            | date         | Date de mise en production                                          |
 | update_date          | datetime     | Date de mise à jour de l'application                                |
 | next_update          | date         | Date de prochaine mise à jour                                       |
 | documentation        | varchar(255) | Lien vers la documentation                                          |
