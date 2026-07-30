@@ -1,7 +1,7 @@
 @extends('layouts.admin')
 
 @section('title')
-    {{ trans('cruds.flux.title_singular') }} {{ trans('global.list') }}
+    {{ trans('cruds.applicationFlow.title_singular') }} {{ trans('global.list') }}
 @endsection
 
 @section('content')
@@ -9,14 +9,14 @@
         <div style="margin-bottom: 10px;" class="row">
             <div class="col-lg-12">
                 <a id="btn-new" class="btn btn-success" href="{{ route('admin.application-flows.create') }}">
-                    {{ trans('global.add') }} {{ trans('cruds.flux.title_singular') }}
+                    {{ trans('global.add') }} {{ trans('cruds.applicationFlow.title_singular') }}
                 </a>
             </div>
         </div>
     @endcan
     <div class="card">
         <div class="card-header">
-            {{ trans('cruds.flux.title_singular') }} {{ trans('global.list') }}
+            {{ trans('cruds.applicationFlow.title_singular') }} {{ trans('global.list') }}
         </div>
 
         <div class="card-body">
@@ -28,25 +28,25 @@
 
                         </th>
                         <th>
-                            {{ trans('cruds.flux.fields.name') }}
+                            {{ trans('cruds.applicationFlow.fields.name') }}
                         </th>
                         <th>
-                            {{ trans('cruds.flux.fields.nature_short') }}
+                            {{ trans('cruds.applicationFlow.fields.nature_short') }}
                         </th>
                         <th>
-                            {{ trans('cruds.flux.fields.attributes') }}
+                            {{ trans('cruds.applicationFlow.fields.attributes') }}
                         </th>
                         <th>
-                            {{ trans('cruds.flux.fields.description') }}
+                            {{ trans('cruds.applicationFlow.fields.description') }}
                         </th>
                         <th>
-                            {{ trans('cruds.flux.fields.source') }}
+                            {{ trans('cruds.applicationFlow.fields.source') }}
                         </th>
                         <th>
-                            {{ trans('cruds.flux.fields.destination') }}
+                            {{ trans('cruds.applicationFlow.fields.destination') }}
                         </th>
                         <th>
-                            {{ trans('cruds.flux.fields.crypted') }}
+                            {{ trans('cruds.applicationFlow.fields.crypted') }}
                         </th>
                         <th>
                             &nbsp;
@@ -175,7 +175,7 @@
     <script>
         @include('partials.datatable', array(
             'id' => '#dataTable',
-            'title' => trans("cruds.flux.title_singular"),
+            'title' => trans("cruds.applicationFlow.title_singular"),
             'URL' => route('admin.application-flows.massDestroy'),
             'canDelete' => auth()->user()->can('application_flow_delete') ? true : false,
     'serverSidePagination' => true

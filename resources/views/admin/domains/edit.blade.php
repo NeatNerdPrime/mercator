@@ -11,12 +11,12 @@
         @csrf
         <div class="card">
             <div class="card-header">
-                {{ trans('global.edit') }} {{ trans('cruds.domaine.title_singular') }}
+                {{ trans('global.edit') }} {{ trans('cruds.domain.title_singular') }}
             </div>
 
             <div class="card-body">
                 <div class="form-group">
-                    <label class="label-required" for="name">{{ trans('cruds.domaine.fields.name') }}</label>
+                    <label class="label-required" for="name">{{ trans('cruds.domain.fields.name') }}</label>
                     <input class="form-control {{ $errors->has('name') ? 'is-invalid' : '' }}" type="text" name="name"
                            id="name" value="{{ old('name', $domain->name) }}" required autofocus/>
                     @if($errors->has('name'))
@@ -24,11 +24,11 @@
                             {{ $errors->first('name') }}
                         </div>
                     @endif
-                    <span class="help-block">{{ trans('cruds.domaine.fields.name_helper') }}</span>
+                    <span class="help-block">{{ trans('cruds.domain.fields.name_helper') }}</span>
                 </div>
                 <div class="form-group">
                     <label class="label-maturity-1"
-                           for="description">{{ trans('cruds.domaine.fields.description') }}</label>
+                           for="description">{{ trans('cruds.domain.fields.description') }}</label>
                     <textarea class="form-control ckeditor {{ $errors->has('description') ? 'is-invalid' : '' }}"
                               name="description"
                               id="description">{!! old('description', $domain->description) !!}</textarea>
@@ -37,11 +37,11 @@
                             {{ $errors->first('description') }}
                         </div>
                     @endif
-                    <span class="help-block">{{ trans('cruds.domaine.fields.description_helper') }}</span>
+                    <span class="help-block">{{ trans('cruds.domain.fields.description_helper') }}</span>
                 </div>
                 <div class="form-group">
                     <label class="label-maturity-1"
-                           for="domain_ctrl_cnt">{{ trans('cruds.domaine.fields.domain_ctrl_cnt') }}</label>
+                           for="domain_ctrl_cnt">{{ trans('cruds.domain.fields.domain_ctrl_cnt') }}</label>
                     <input class="form-control {{ $errors->has('domain_ctrl_cnt') ? 'is-invalid' : '' }}" type="number"
                            name="domain_ctrl_cnt" id="domain_ctrl_cnt"
                            value="{{ old('domain_ctrl_cnt', $domain->domain_ctrl_cnt) }}" step="1">
@@ -50,11 +50,11 @@
                             {{ $errors->first('domain_ctrl_cnt') }}
                         </div>
                     @endif
-                    <span class="help-block">{{ trans('cruds.domaine.fields.domain_ctrl_cnt_helper') }}</span>
+                    <span class="help-block">{{ trans('cruds.domain.fields.domain_ctrl_cnt_helper') }}</span>
                 </div>
                 <div class="form-group">
                     <label class="label-maturity-1"
-                           for="user_count">{{ trans('cruds.domaine.fields.user_count') }}</label>
+                           for="user_count">{{ trans('cruds.domain.fields.user_count') }}</label>
                     <input class="form-control {{ $errors->has('user_count') ? 'is-invalid' : '' }}" type="number"
                            name="user_count" id="user_count" value="{{ old('user_count', $domain->user_count) }}"
                            step="1">
@@ -63,11 +63,11 @@
                             {{ $errors->first('user_count') }}
                         </div>
                     @endif
-                    <span class="help-block">{{ trans('cruds.domaine.fields.user_count_helper') }}</span>
+                    <span class="help-block">{{ trans('cruds.domain.fields.user_count_helper') }}</span>
                 </div>
                 <div class="form-group">
                     <label class="label-maturity-1"
-                           for="machine_count">{{ trans('cruds.domaine.fields.machine_count') }}</label>
+                           for="machine_count">{{ trans('cruds.domain.fields.machine_count') }}</label>
                     <input class="form-control {{ $errors->has('machine_count') ? 'is-invalid' : '' }}" type="number"
                            name="machine_count" id="machine_count"
                            value="{{ old('machine_count', $domain->machine_count) }}" step="1">
@@ -76,11 +76,11 @@
                             {{ $errors->first('machine_count') }}
                         </div>
                     @endif
-                    <span class="help-block">{{ trans('cruds.domaine.fields.machine_count_helper') }}</span>
+                    <span class="help-block">{{ trans('cruds.domain.fields.machine_count_helper') }}</span>
                 </div>
                 <div class="form-group">
                     <label class="label-maturity-1"
-                           for="relation_inter_domaine">{{ trans('cruds.domaine.fields.relation_inter_domaine') }}</label>
+                           for="relation_inter_domaine">{{ trans('cruds.domain.fields.relation_inter_domaine') }}</label>
                     <input class="form-control {{ $errors->has('relation_inter_domaine') ? 'is-invalid' : '' }}"
                            type="text" name="relation_inter_domaine" id="relation_inter_domaine"
                            value="{{ old('relation_inter_domaine', $domain->relation_inter_domaine) }}">
@@ -89,7 +89,7 @@
                             {{ $errors->first('relation_inter_domaine') }}
                         </div>
                     @endif
-                    <span class="help-block">{{ trans('cruds.domaine.fields.relation_inter_domaine_helper') }}</span>
+                    <span class="help-block">{{ trans('cruds.domain.fields.relation_inter_domaine_helper') }}</span>
                 </div>
 
                 <div class="form-group">
@@ -121,7 +121,7 @@
                 <div class="row">
                     <div class="col-md-12">
                         <div class="form-group">
-                            <label for="logicalServers">{{ trans('cruds.domaine.fields.logical_servers') }}</label>
+                            <label for="logicalServers">{{ trans('cruds.domain.fields.logical_servers') }}</label>
                             <div style="padding-bottom: 4px">
                                 <span class="btn btn-info btn-xs select-all"
                                       style="border-radius: 0">{{ trans('global.select_all') }}</span>

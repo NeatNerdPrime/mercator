@@ -6,7 +6,7 @@
     <tbody>
         <tr>
             <th width="10%">
-                {{ trans('cruds.domaine.fields.name') }}
+                {{ trans('cruds.domain.fields.name') }}
             </th>
             <td>
             @if ($withLink)
@@ -22,7 +22,7 @@
         </tr>
         <tr>
             <th>
-                {{ trans('cruds.domaine.fields.description') }}
+                {{ trans('cruds.domain.fields.description') }}
             </th>
             <td>
                 {!! $domain->description !!}
@@ -30,7 +30,7 @@
         </tr>
         <tr>
             <th>
-                {{ trans('cruds.domaine.fields.domain_ctrl_cnt') }}
+                {{ trans('cruds.domain.fields.domain_ctrl_cnt') }}
             </th>
             <td>
                 {{ $domain->domain_ctrl_cnt }}
@@ -38,7 +38,7 @@
         </tr>
         <tr>
             <th>
-                {{ trans('cruds.domaine.fields.user_count') }}
+                {{ trans('cruds.domain.fields.user_count') }}
             </th>
             <td>
                 {{ $domain->user_count }}
@@ -46,7 +46,7 @@
         </tr>
         <tr>
             <th>
-                {{ trans('cruds.domaine.fields.machine_count') }}
+                {{ trans('cruds.domain.fields.machine_count') }}
             </th>
             <td>
                 {{ $domain->machine_count }}
@@ -54,7 +54,7 @@
         </tr>
         <tr>
             <th>
-                {{ trans('cruds.domaine.fields.relation_inter_domaine') }}
+                {{ trans('cruds.domain.fields.relation_inter_domaine') }}
             </th>
             <td>
                 {{ $domain->relation_inter_domaine }}
@@ -63,7 +63,7 @@
         @canAccess(App\Models\ForestAd::class)
         <tr>
             <th>
-                {{ trans('cruds.domaine.fields.forestAds') }}
+                {{ trans('cruds.domain.fields.forestAds') }}
             </th>
             <td>
                 @foreach($domain->forestAds as $forestAd)
@@ -84,7 +84,7 @@
         @canAccess(App\Models\LogicalServer::class)
         <tr>
             <th>
-                {{ trans('cruds.domaine.fields.logical_servers') }}
+                {{ trans('cruds.domain.fields.logical_servers') }}
             </th>
             <td>
                 @foreach($domain->logicalServers as $logicalServer)

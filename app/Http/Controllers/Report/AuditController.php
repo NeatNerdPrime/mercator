@@ -313,7 +313,7 @@ class AuditController extends HomeController
         $row++;
 
         // flux
-        $sheet->setCellValue("A{$row}", trans('cruds.flux.title'));
+        $sheet->setCellValue("A{$row}", trans('cruds.applicationFlow.title'));
         $sheet->setCellValue("B{$row}", $levels['flows_lvl1']);
         $sheet->setCellValue("C{$row}", $levels['flows']);
         $sheet->setCellValue("D{$row}", "=B{$row}/C{$row}");
@@ -388,7 +388,7 @@ class AuditController extends HomeController
         $row++;
 
         // Domaines
-        $sheet->setCellValue("A{$row}", trans('cruds.domaine.title'));
+        $sheet->setCellValue("A{$row}", trans('cruds.domain.title'));
         $sheet->setCellValue("B{$row}", $levels['domaines_lvl1']);
         $sheet->setCellValue("C{$row}", $levels['domains']);
         $sheet->setCellValue("D{$row}", "=B{$row}/C{$row}");
@@ -853,13 +853,13 @@ class AuditController extends HomeController
             'App\\Models\\ApplicationService' => ['index' => 45, 'title' => trans('cruds.applicationService.title')],
             'App\\Models\\ApplicationModule' => ['index' => 48, 'title' => trans('cruds.applicationModule.title')],
             'App\\Models\\Database' => ['index' => 51, 'title' => trans('cruds.database.title')],
-            'App\\Models\\ApplicationFlow' => ['index' => 54, 'title' => trans('cruds.flux.title')],
+            'App\\Models\\ApplicationFlow' => ['index' => 54, 'title' => trans('cruds.applicationFlow.title')],
 
             'Administration' => ['index' => 57, 'title' => trans('cruds.menu.administration.title_short')],
             'App\\Models\\ZoneAdmin' => ['index' => 58, 'title' => trans('cruds.zoneAdmin.title')],
             'App\\Models\\Annuaire' => ['index' => 61, 'title' => trans('cruds.annuaire.title')],
             'App\\Models\\ForestAd' => ['index' => 64, 'title' => trans('cruds.forestAd.title')],
-            'App\\Models\\Domain' => ['index' => 67, 'title' => trans('cruds.domaine.title')],
+            'App\\Models\\Domain' => ['index' => 67, 'title' => trans('cruds.domain.title')],
 
             'LogicalInfrastructure' => ['index' => 70, 'title' => trans('cruds.menu.logical_infrastructure.title_short')],
             'App\\Models\\Network' => ['index' => 71, 'title' => trans('cruds.network.title')],

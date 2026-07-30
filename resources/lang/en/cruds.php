@@ -672,7 +672,7 @@ return [
         'title' => 'Dns servers',
         'title_singular' => 'DNS server',
     ],
-    'domaine' => [
+    'domain' => [
         'description' => 'Set of elements (members, resources) governed by the same security policy.',
         'fields' => [
             'description' => 'Description',
@@ -774,7 +774,7 @@ return [
         'title_source' => 'Source (external entity)',
         'title_dest' => 'Destination',
     ],
-    'flux' => [
+    'applicationFlow' => [
         'description' => 'Exchange of information between a sender or a receiver (application service, application or actor).',
         'fields' => [
             'application_dest' => 'Recipient application',

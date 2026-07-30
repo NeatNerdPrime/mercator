@@ -113,11 +113,11 @@
         @if($flows->count()>0)
             <div class="card">
                 <div class="card-header">
-                    {{ trans('cruds.flux.title') }}
+                    {{ trans('cruds.applicationFlow.title') }}
                 </div>
 
                 <div class="card-body">
-                    <p>{{ trans('cruds.flux.description') }}</p>
+                    <p>{{ trans('cruds.applicationFlow.description') }}</p>
                     @foreach($flows as $flow)
                         <div class="row">
                             <div class="col-sm-6">
@@ -129,12 +129,12 @@
                                     </thead>
                                     <tbody>
                                     <tr>
-                                        <th width="30%">{{ trans('cruds.flux.fields.description') }}</th>
+                                        <th width="30%">{{ trans('cruds.applicationFlow.fields.description') }}</th>
                                         <td>{!! $flow->description !!}</td>
                                     </tr>
                                     @if ($flow->applicationSource!=null)
                                         <tr>
-                                            <th>{{ trans('cruds.flux.fields.application_source') }}</th>
+                                            <th>{{ trans('cruds.applicationFlow.fields.application_source') }}</th>
                                             <td>
                                                 <a href="#APPLICATION{{$flow->applicationSource->id}}">{{$flow->applicationSource->name}}</a>
                                             </td>
@@ -143,7 +143,7 @@
 
                                     @if ($flow->serviceSource!=null)
                                         <tr>
-                                            <th>{{ trans('cruds.flux.fields.service_source') }}</th>
+                                            <th>{{ trans('cruds.applicationFlow.fields.service_source') }}</th>
                                             <td>
                                                 <a href="#SERVICE{{$flow->serviceSource->id}}">{{$flow->serviceSource->name}}</a>
                                             </td>
@@ -152,7 +152,7 @@
 
                                     @if ($flow->moduleSource!=null)
                                         <tr>
-                                            <th>{{ trans('cruds.flux.fields.module_source') }}</th>
+                                            <th>{{ trans('cruds.applicationFlow.fields.module_source') }}</th>
                                             <td>
                                                 <a href="#MODULE{{$flow->moduleSource->id}}">{{$flow->moduleSource->name}}</a>
                                             </td>
@@ -161,7 +161,7 @@
 
                                     @if ($flow->databaseSource!=null)
                                         <tr>
-                                            <th>{{ trans('cruds.flux.fields.database_source') }}</th>
+                                            <th>{{ trans('cruds.applicationFlow.fields.database_source') }}</th>
                                             <td>
                                                 <a href="#DATABASE{{$flow->databaseSource->id}}">{{$flow->databaseSource->name}}</a>
                                             </td>
@@ -170,7 +170,7 @@
 
                                     @if ($flow->applicationDest!=null)
                                         <tr>
-                                            <th>{{ trans('cruds.flux.fields.application_dest') }}</th>
+                                            <th>{{ trans('cruds.applicationFlow.fields.application_dest') }}</th>
                                             <td>
                                                 <a href="#APPLICATION{{$flow->applicationDest->id}}">{{$flow->applicationDest->name}}</a>
                                             </td>
@@ -179,7 +179,7 @@
 
                                     @if ($flow->serviceDest!=null)
                                         <tr>
-                                            <th>{{ trans('cruds.flux.fields.service_dest') }}</th>
+                                            <th>{{ trans('cruds.applicationFlow.fields.service_dest') }}</th>
                                             <td>
                                                 <a href="#SERVICE{{$flow->serviceDest->id}}">{{$flow->serviceDest->name}}</a>
                                             </td>
@@ -188,7 +188,7 @@
 
                                     @if ($flow->moduleDest!=null)
                                         <tr>
-                                            <th>{{ trans('cruds.flux.fields.module_dest') }}</th>
+                                            <th>{{ trans('cruds.applicationFlow.fields.module_dest') }}</th>
                                             <td>
                                                 <a href="#MODULE{{$flow->moduleDest->id}}">{{$flow->moduleDest->name}}</a>
                                             </td>
@@ -197,7 +197,7 @@
 
                                     @if ($flow->databaseDest!=null)
                                         <tr>
-                                            <th>{{ trans('cruds.flux.fields.database_dest') }}</th>
+                                            <th>{{ trans('cruds.applicationFlow.fields.database_dest') }}</th>
                                             <td>
                                                 <a href="#DATABASE{{$flow->databaseDest->id}}">{{$flow->databaseDest->name}}</a>
                                             </td>
@@ -208,10 +208,10 @@
                                         <tr>
                                             <td colspan="2">
                                                 @if ($flow->crypted)
-                                                    {{ trans('cruds.flux.fields.crypted_helper') }}
+                                                    {{ trans('cruds.applicationFlow.fields.crypted_helper') }}
                                                 @endif
                                                 @if ($flow->bidirectional)
-                                                    {{ trans('cruds.flux.fields.bidirectional_helper') }}
+                                                    {{ trans('cruds.applicationFlow.fields.bidirectional_helper') }}
                                                 @endif
                                             </td>
                                         </tr>
@@ -292,13 +292,13 @@
                                     <tr>
                                         <th>{{ trans('cruds.application.fields.flux') }}</th>
                                         <td>
-                                            {{ trans('cruds.flux.fields.source') }} :
+                                            {{ trans('cruds.applicationFlow.fields.source') }} :
                                             @foreach($application->applicationSourceFluxes as $flow)
                                                 <a href="#FLOW{{$flow->id}}">{{ $flow->name }}</a>
                                                 {{ $loop->last ? '' : ',' }}
                                             @endforeach
                                             <br>
-                                            {{ trans('cruds.flux.fields.destination') }} :
+                                            {{ trans('cruds.applicationFlow.fields.destination') }} :
                                             @foreach($application->applicationDestFluxes as $flow)
                                                 <a href="#FLOW{{$flow->id}}">{{ $flow->name }}</a>
                                                 {{ $loop->last ? '' : ',' }}
@@ -410,12 +410,12 @@
                                     <tr>
                                         <th>{{ trans('cruds.applicationService.fields.flux') }}</th>
                                         <td>
-                                            {{ trans('cruds.flux.fields.source') }} :
+                                            {{ trans('cruds.applicationFlow.fields.source') }} :
                                             @foreach($applicationService->serviceSourceFluxes as $flow)
                                                 <a href="#FLOW{{$flow->id}}">{{ $flow->name }}</a>
                                                 {{ $loop->last ? '' : ',' }}
                                             @endforeach
-                                            <br>{{ trans('cruds.flux.fields.destination') }} :
+                                            <br>{{ trans('cruds.applicationFlow.fields.destination') }} :
                                             @foreach($applicationService->serviceDestFluxes as $flow)
                                                 <a href="#FLOW{{$flow->id}}">{{ $flow->name }}</a>
                                                 {{ $loop->last ? '' : ',' }}
@@ -479,14 +479,14 @@
                                         </td>
                                     </tr>
                                     <tr>
-                                        <th>{{ trans('cruds.flux.title') }}</th>
+                                        <th>{{ trans('cruds.applicationFlow.title') }}</th>
                                         <td>
-                                            {{ trans('cruds.flux.fields.source') }} :
+                                            {{ trans('cruds.applicationFlow.fields.source') }} :
                                             @foreach($applicationModule->moduleSourceFluxes as $flow)
                                                 <a href="#FLOW{{$flow->id}}">{{ $flow->name }}</a>
                                                 {{ $loop->last ? '' : ',' }}
                                             @endforeach
-                                            <br>{{ trans('cruds.flux.fields.destination') }} :
+                                            <br>{{ trans('cruds.applicationFlow.fields.destination') }} :
                                             @foreach($applicationModule->moduleSourceFluxes as $flow)
                                                 <a href="#FLOW{{$flow->id}}">{{ $flow->name }}</a>
                                                 {{ $loop->last ? '' : ',' }}
@@ -554,14 +554,14 @@
                                         <td>{{ $database->type }}</td>
                                     </tr>
                                     <tr>
-                                        <th>{{ trans('cruds.flux.title') }}</th>
+                                        <th>{{ trans('cruds.applicationFlow.title') }}</th>
                                         <td>
-                                            {{ trans('cruds.flux.fields.source') }} :
+                                            {{ trans('cruds.applicationFlow.fields.source') }} :
                                             @foreach($database->databaseSourceFluxes as $flow)
                                                 <a href="#FLOW{{$flow->id}}">{{ $flow->name }}</a>
                                                 {{ $loop->last ? '' : ',' }}
                                             @endforeach
-                                            <br>{{ trans('cruds.flux.fields.destination') }} :
+                                            <br>{{ trans('cruds.applicationFlow.fields.destination') }} :
                                             @foreach($database->databaseDestFluxes as $flow)
                                                 <a href="#FLOW{{$flow->id}}">{{ $flow->name }}</a>
                                                 {{ $loop->last ? '' : ',' }}

@@ -133,10 +133,10 @@
         @if ($domains->count()>0)
             <div class="card">
                 <div class="card-header">
-                    {{ trans('cruds.domaine.title') }}
+                    {{ trans('cruds.domain.title') }}
                 </div>
                 <div class="card-body">
-                    <p>{{ trans('cruds.domaine.description') }}</p>
+                    <p>{{ trans('cruds.domain.description') }}</p>
                         @foreach($domains as $domain)
                             <div class="row">
                                 <div class="col">

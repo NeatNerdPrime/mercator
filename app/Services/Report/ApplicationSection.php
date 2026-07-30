@@ -473,34 +473,34 @@ class ApplicationSection implements ReportSection
             return;
         }
 
-        $section->addTitle(trans('cruds.flux.title'), 2);
+        $section->addTitle(trans('cruds.applicationFlow.title'), 2);
 
         foreach ($applicationFlows as $flow) {
             $helper->addBookmarkedTitle($section, $flow->getUID(), (string) $flow->name, 3);
             $table = $helper->addTable($section, (string) $flow->name);
 
-            $helper->addTextRow($table, trans('cruds.flux.fields.nature'), $flow->nature);
-            $helper->addTextRow($table, trans('cruds.flux.fields.attributes'), $this->formatAttributes($flow->attributes));
-            $helper->addHTMLRow($table, trans('cruds.flux.fields.description'), $flow->description);
+            $helper->addTextRow($table, trans('cruds.applicationFlow.fields.nature'), $flow->nature);
+            $helper->addTextRow($table, trans('cruds.applicationFlow.fields.attributes'), $this->formatAttributes($flow->attributes));
+            $helper->addHTMLRow($table, trans('cruds.applicationFlow.fields.description'), $flow->description);
 
-            $sourceRun = $helper->addTextRunRow($table, trans('cruds.flux.fields.source'));
+            $sourceRun = $helper->addTextRunRow($table, trans('cruds.applicationFlow.fields.source'));
             $this->addTaggedEndpoint($sourceRun, $helper, $flow->applicationSource, '[Application]', $selectedVues);
             $this->addTaggedEndpoint($sourceRun, $helper, $flow->serviceSource, '[Service]', $selectedVues);
             $this->addTaggedEndpoint($sourceRun, $helper, $flow->moduleSource, '[Module]', $selectedVues);
             $this->addTaggedEndpoint($sourceRun, $helper, $flow->databaseSource, '[Database]', $selectedVues);
 
-            $destRun = $helper->addTextRunRow($table, trans('cruds.flux.fields.destination'));
+            $destRun = $helper->addTextRunRow($table, trans('cruds.applicationFlow.fields.destination'));
             $this->addTaggedEndpoint($destRun, $helper, $flow->applicationDest, '[Application]', $selectedVues);
             $this->addTaggedEndpoint($destRun, $helper, $flow->serviceDest, '[Service]', $selectedVues);
             $this->addTaggedEndpoint($destRun, $helper, $flow->moduleDest, '[Module]', $selectedVues);
             $this->addTaggedEndpoint($destRun, $helper, $flow->databaseDest, '[Database]', $selectedVues);
 
             if ($flow->informations->isNotEmpty()) {
-                $helper->addLinkListRow($table, trans('cruds.flux.fields.information'), $flow->informations, $selectedVues);
+                $helper->addLinkListRow($table, trans('cruds.applicationFlow.fields.information'), $flow->informations, $selectedVues);
             }
 
-            $helper->addTextRow($table, trans('cruds.flux.fields.crypted'), $flow->crypted ? trans('global.yes') : trans('global.no'));
-            $helper->addTextRow($table, trans('cruds.flux.fields.bidirectional'), $flow->bidirectional ? trans('global.yes') : trans('global.no'));
+            $helper->addTextRow($table, trans('cruds.applicationFlow.fields.crypted'), $flow->crypted ? trans('global.yes') : trans('global.no'));
+            $helper->addTextRow($table, trans('cruds.applicationFlow.fields.bidirectional'), $flow->bidirectional ? trans('global.yes') : trans('global.no'));
         }
     }
 
@@ -539,17 +539,17 @@ class ApplicationSection implements ReportSection
         }
 
         $table->addRow();
-        $table->addCell(2000, WordHelper::NO_SPACE)->addText(trans('cruds.flux.title'), WordHelper::FANCY_LEFT_TABLE_CELL_STYLE, WordHelper::NO_SPACE);
+        $table->addCell(2000, WordHelper::NO_SPACE)->addText(trans('cruds.applicationFlow.title'), WordHelper::FANCY_LEFT_TABLE_CELL_STYLE, WordHelper::NO_SPACE);
         $nested = $table->addCell(6000)->addTable(['borderSize' => 1, 'borderColor' => '999999', 'cellMargin' => 50]);
 
         $nested->addRow();
         foreach ([
-            trans('cruds.flux.fields.name'),
-            trans('cruds.flux.fields.nature'),
-            trans('cruds.flux.fields.attributes'),
-            trans('cruds.flux.fields.module_source'),
-            trans('cruds.flux.fields.module_dest'),
-            trans('cruds.flux.fields.information'),
+            trans('cruds.applicationFlow.fields.name'),
+            trans('cruds.applicationFlow.fields.nature'),
+            trans('cruds.applicationFlow.fields.attributes'),
+            trans('cruds.applicationFlow.fields.module_source'),
+            trans('cruds.applicationFlow.fields.module_dest'),
+            trans('cruds.applicationFlow.fields.information'),
         ] as $header) {
             $nested->addCell(1500)->addText($header, WordHelper::FANCY_LEFT_TABLE_CELL_STYLE, WordHelper::NO_SPACE);
         }

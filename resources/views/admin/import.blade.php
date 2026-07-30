@@ -116,13 +116,13 @@
                 ['id' => 'ApplicationService', 'label' => trans('cruds.applicationService.title')],
                 ['id' => 'ApplicationModule',  'label' => trans('cruds.applicationModule.title')],
                 ['id' => 'Database',           'label' => trans('cruds.database.title')],
-                ['id' => 'Flux',               'label' => trans('cruds.flux.title')],
+                ['id' => 'Flux',               'label' => trans('cruds.applicationFlow.title')],
             ],
             4 => [ // Administration
                 ['id' => 'ZoneAdmin',  'label' => trans('cruds.zoneAdmin.title')],
                 ['id' => 'Annuaire',   'label' => trans('cruds.annuaire.title')],
                 ['id' => 'ForestAd',   'label' => trans('cruds.forestAd.title')],
-                ['id' => 'Domain',  'label' => trans('cruds.domaine.title')],
+                ['id' => 'Domain',  'label' => trans('cruds.domain.title')],
                 ['id' => 'AdminUser',  'label' => trans('cruds.adminUser.title')],
             ],
             5 => [ // Infrastructure Logique

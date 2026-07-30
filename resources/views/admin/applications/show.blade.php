@@ -506,7 +506,7 @@
         </div>
         <!------------------------------------------------------------------------------------------------------------->
         <div class="card-header">
-            {{ trans('cruds.flux.title') }}
+            {{ trans('cruds.applicationFlow.title') }}
         </div>
         <!------------------------------------------------------------------------------------------------------------->
         <div class="card-body">
@@ -514,22 +514,22 @@
                 <tbody>
                 <tr>
                     <th width="20%">
-                        {{ trans('cruds.flux.fields.name') }}
+                        {{ trans('cruds.applicationFlow.fields.name') }}
                     </th>
                     <th width="10%">
-                        {{ trans('cruds.flux.fields.nature') }}
+                        {{ trans('cruds.applicationFlow.fields.nature') }}
                     </th>
                     <th width="10%">
-                        {{ trans('cruds.flux.fields.attributes') }}
+                        {{ trans('cruds.applicationFlow.fields.attributes') }}
                     </th>
                     <th width="20%">
-                        {{ trans('cruds.flux.fields.module_source') }}
+                        {{ trans('cruds.applicationFlow.fields.module_source') }}
                     </th>
                     <th width="20%">
-                        {{ trans('cruds.flux.fields.module_dest') }}
+                        {{ trans('cruds.applicationFlow.fields.module_dest') }}
                     </th>
                     <th width="20%">
-                        {{ trans('cruds.flux.fields.information') }}
+                        {{ trans('cruds.applicationFlow.fields.information') }}
                     </th>
                 </tr>
                 @foreach($application->applicationSourceFluxes->union($application->applicationDestFluxes) as $flow)

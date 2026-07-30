@@ -684,7 +684,7 @@ return [
         'title' => 'Serveurs DNS',
         'title_singular' => 'Serveur DNS',
     ],
-    'domaine' => [
+    'domain' => [
         'description' => 'Ensemble d’éléments (membres, ressources) régis par une même politique de sécurité.',
         'fields' => [
             'description' => 'Description',
@@ -786,7 +786,7 @@ return [
         'title_source' => 'Source (entité externe)',
         'title_dest' => 'Destination',
     ],
-    'flux' => [
+    'applicationFlow' => [
         'description' => 'Echange d’informations entre un émetteur ou un récepteur (service applicatif, application ou acteur).',
         'fields' => [
             'destination' => 'Destination',

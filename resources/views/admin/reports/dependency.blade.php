@@ -40,7 +40,7 @@
                                 <option value="5"  @selected(in_array('5',  request('vue', [])))>{{ trans("cruds.report.cartography.logical_infrastructure") }}</option>
                                 @endcanAccessAny
                                 @canAccessAny(\App\Models\ApplicationFlow::class, \App\Models\LogicalFlow::class)
-                                <option value="9"  @selected(in_array('9',  request('vue', [])))>{{ trans("cruds.flux.title") }}</option>
+                                <option value="9"  @selected(in_array('9',  request('vue', [])))>{{ trans("cruds.applicationFlow.title") }}</option>
                                 @endcanAccessAny
                                 @canAccessAny(\App\Models\Site::class, \App\Models\Building::class, \App\Models\Bay::class, \App\Models\Zone::class, \App\Models\PhysicalServer::class, \App\Models\Workstation::class, \App\Models\Phone::class, \App\Models\Peripheral::class, \App\Models\StorageDevice::class, \App\Models\PhysicalSwitch::class, \App\Models\PhysicalRouter::class, \App\Models\WifiTerminal::class, \App\Models\PhysicalSecurityDevice::class, \App\Models\Wan::class, \App\Models\Man::class, \App\Models\Lan::class)
                                 <option value="6"  @selected(in_array('6',  request('vue', [])))>{{ trans("cruds.report.cartography.physical_infrastructure") }}</option>

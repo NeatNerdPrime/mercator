@@ -149,24 +149,24 @@ class AdministrationSection implements ReportSection
             return;
         }
 
-        $section->addTitle(trans('cruds.domaine.title'), 2);
+        $section->addTitle(trans('cruds.domain.title'), 2);
 
         foreach ($domains as $domain) {
             $helper->addBookmarkedTitle($section, $domain->getUID(), (string) $domain->name, 3);
             $table = $helper->addTable($section, (string) $domain->name);
 
-            $helper->addHTMLRow($table, trans('cruds.domaine.fields.description'), $domain->description);
-            $helper->addTextRow($table, trans('cruds.domaine.fields.domain_ctrl_cnt'), (string) $domain->domain_ctrl_cnt);
-            $helper->addTextRow($table, trans('cruds.domaine.fields.user_count'), (string) $domain->user_count);
-            $helper->addTextRow($table, trans('cruds.domaine.fields.machine_count'), (string) $domain->machine_count);
-            $helper->addTextRow($table, trans('cruds.domaine.fields.relation_inter_domaine'), $domain->relation_inter_domaine);
+            $helper->addHTMLRow($table, trans('cruds.domain.fields.description'), $domain->description);
+            $helper->addTextRow($table, trans('cruds.domain.fields.domain_ctrl_cnt'), (string) $domain->domain_ctrl_cnt);
+            $helper->addTextRow($table, trans('cruds.domain.fields.user_count'), (string) $domain->user_count);
+            $helper->addTextRow($table, trans('cruds.domain.fields.machine_count'), (string) $domain->machine_count);
+            $helper->addTextRow($table, trans('cruds.domain.fields.relation_inter_domaine'), $domain->relation_inter_domaine);
 
             if ($domain->forestAds->isNotEmpty()) {
-                $helper->addLinkListRow($table, trans('cruds.domaine.fields.forestAds'), $domain->forestAds, $selectedVues);
+                $helper->addLinkListRow($table, trans('cruds.domain.fields.forestAds'), $domain->forestAds, $selectedVues);
             }
 
             if ($domain->logicalServers->isNotEmpty()) {
-                $helper->addLinkListRow($table, trans('cruds.domaine.fields.logical_servers'), $domain->logicalServers, $selectedVues);
+                $helper->addLinkListRow($table, trans('cruds.domain.fields.logical_servers'), $domain->logicalServers, $selectedVues);
             }
         }
     }
