@@ -35,19 +35,26 @@ trait Auditable
      * so if the serialized model doesn't fit, properties is stored as null instead of being
      * truncated, which would otherwise corrupt the JSON.
      *
+     * AuditLog casts `properties` as `collection`, which JSON-encodes the value on save. Passing
+     * an already-JSON-encoded string here would get encoded a second time (escaping every quote
+     * and backslash), roughly doubling its size and defeating the length check below — so the
+     * array form is passed instead and measured via a single json_encode(), matching what
+     * Eloquent will actually store.
+     *
      * @param  string  $description  A short description of the action to record (e.g., "created", "updated", "deleted").
      * @param  Model  $model  The Eloquent model instance being audited.
      */
     protected static function audit(string $description, Model $model): void
     {
-        $properties = (string) $model;
+        $properties = $model->toArray();
+        $encoded = json_encode($properties);
 
         AuditLog::query()->create([
             'description' => $description,
             'subject_id' => $model->id ?? null,
             'subject_type' => $model::class,
             'user_id' => Auth::id(),
-            'properties' => strlen($properties) <= 65534 ? $properties : null,
+            'properties' => ($encoded !== false && strlen($encoded) <= 65534) ? $properties : null,
             'host' => request()->ip() ?? null,
         ]);
     }
