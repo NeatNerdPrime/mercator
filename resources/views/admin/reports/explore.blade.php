@@ -114,6 +114,10 @@
                                         <option value="3" selected>3</option>
                                         <option value="4">4</option>
                                         <option value="5">5</option>
+                                        <option value="5">6</option>
+                                        <option value="5">7</option>
+                                        <option value="5">8</option>
+                                        <option value="5">9</option>
                                     </select>
                                     </div>
 <button type="button" class="btn btn-info" onclick="deployAll()">
@@ -244,6 +248,10 @@
 
                 loadingIndicator.style.display = 'none';
                 controls.style.display         = 'block';
+
+                // La carte de contrôles vient de s'afficher : la position du graphe a
+                // changé, on ajuste la hauteur pour remplir l'espace disponible.
+                requestAnimationFrame(() => adjustNetworkHeight(true));
 
                 // Populate attr-filter from the attributes already embedded in the response
                 (data.attributes ?? []).forEach(attr => {
@@ -720,6 +728,44 @@
         }
 
         // ─────────────────────────────────────────────
+        // Hauteur dynamique de la zone réseau
+        // ─────────────────────────────────────────────
+
+        // Passe à true dès que l'utilisateur redimensionne manuellement la zone :
+        // on cesse alors tout ajustement automatique pour respecter son choix.
+        let userResizedNetwork = false;
+
+        /**
+         * Agrandit #mynetwork pour que le bas de la carte graphe (poignée + footer)
+         * atteigne le bas du viewport. Ne fait rien si l'utilisateur a déjà
+         * redimensionné manuellement.
+         *
+         * @param {boolean} refit  true pour recadrer le graphe (network.fit) après ajustement.
+         */
+        function adjustNetworkHeight(refit = false) {
+            if (userResizedNetwork) return;
+
+            const networkEl = document.getElementById('mynetwork');
+            if (!networkEl) return;
+
+            const handleEl = document.getElementById('network-resize-handle');
+            const footerEl = networkEl.closest('.card')?.querySelector('.card-footer');
+
+            const top          = networkEl.getBoundingClientRect().top;   // position haute stable
+            const handleH      = handleEl ? handleEl.offsetHeight : 0;
+            const footerH      = footerEl ? footerEl.offsetHeight : 0;
+            const bottomMargin = 16;                                       // respiration en bas de page
+
+            const available = window.innerHeight - top - handleH - footerH - bottomMargin;
+            networkEl.style.height = Math.max(300, Math.floor(available)) + 'px';
+
+            if (network) {
+                network.redraw();
+                if (refit) network.fit();
+            }
+        }
+
+        // ─────────────────────────────────────────────
         // DOMContentLoaded
         // ─────────────────────────────────────────────
 
@@ -816,8 +862,16 @@
 
             document.addEventListener('mousemove', e => {
                 if (!dragging) return;
+                userResizedNetwork = true;   // l'utilisateur reprend la main : plus d'auto-ajustement
                 networkEl.style.height = Math.max(200, startH + (e.clientY - startY)) + 'px';
                 if (network) network.redraw();
+            });
+
+            // ── Ajustement automatique au redimensionnement de la fenêtre ──────
+            let resizeTimer = null;
+            window.addEventListener('resize', () => {
+                clearTimeout(resizeTimer);
+                resizeTimer = setTimeout(() => adjustNetworkHeight(false), 100);
             });
 
             document.addEventListener('mouseup', () => {
