@@ -388,7 +388,7 @@ class PhysicalInfrastructureGraphBuilder
                 if ($showPorts) {
                     $edge .= ' taillabel="'.addslashes($link->src_port).'" headlabel="'.addslashes($link->dest_port).'",';
                 }
-                $edge .= ' href="'.route('admin.links.show', $link->id).'"];';
+                $edge .= ' href="'.route('admin.physical-links.show', $link->id).'"];';
                 $lines[] = $edge;
             }
         }

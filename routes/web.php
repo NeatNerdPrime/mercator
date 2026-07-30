@@ -284,9 +284,14 @@ Route::group(['prefix' => 'admin', 'as' => 'admin.', 'middleware' => ['web.prote
     Route::delete('physical-security-devices-destroy', [Admin\PhysicalSecurityDeviceController::class, 'massDestroy'])->name('physical-security-devices.massDestroy');
 
     // Physical Links
-    // TODO : check why it is not working with physical-links as resource name
-    Route::resource('links', Admin\PhysicalLinkController::class);
-    Route::delete('links-destroy', [Admin\PhysicalLinkController::class, 'massDestroy'])->name('links.massDestroy');
+    Route::resource('physical-links', Admin\PhysicalLinkController::class)
+        ->parameters(['physical-links' => 'link']);
+    Route::delete('physical-links-destroy', [Admin\PhysicalLinkController::class, 'massDestroy'])->name('physical-links.massDestroy');
+
+    // Rétro-compat : anciennes URL /admin/links* → /admin/physical-links* (301)
+    Route::permanentRedirect('links', 'admin/physical-links');
+    Route::get('links/{path}', fn (string $path) => redirect('admin/physical-links/'.$path, 301))
+        ->where('path', '.*');
 
     // WANs
     Route::resource('wans', Admin\WanController::class);

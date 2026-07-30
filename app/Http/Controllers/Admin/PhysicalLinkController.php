@@ -61,7 +61,7 @@ class PhysicalLinkController extends Controller
             ->orderBy('id')
             ->when($allowedIds !== null, fn ($q) => $q->whereIn('id', $allowedIds))->paginate(min(max((int) request('per_page', 50), 10), 500));
 
-        return view('admin.links.index',
+        return view('admin.physical-links.index',
             compact('physicalLinks'));
     }
 
@@ -128,7 +128,7 @@ class PhysicalLinkController extends Controller
             $devices->put(LogicalServer::$prefix.$key, $value);
         }
 
-        return view('admin.links.create', compact('devices', 'types', 'attributes_list'));
+        return view('admin.physical-links.create', compact('devices', 'types', 'attributes_list'));
     }
 
     public function store(StorePhysicalLinkRequest $request)
@@ -291,7 +291,7 @@ class PhysicalLinkController extends Controller
 
         $link->save();
 
-        return redirect()->route('admin.links.index');
+        return redirect()->route('admin.physical-links.index');
     }
 
     /**
@@ -362,7 +362,7 @@ class PhysicalLinkController extends Controller
             $devices->put(LogicalServer::$prefix.$key, $value);
         }
 
-        return view('admin.links.edit',
+        return view('admin.physical-links.edit',
             compact('devices', 'link', 'types', 'attributes_list'));
     }
 
@@ -628,14 +628,14 @@ class PhysicalLinkController extends Controller
         // Update
         $link->update();
 
-        return redirect()->route('admin.links.index');
+        return redirect()->route('admin.physical-links.index');
     }
 
     public function show(PhysicalLink $link)
     {
         abort_if(Gate::denies('show-object', $link), Response::HTTP_FORBIDDEN, '403 Forbidden');
 
-        return view('admin.links.show', compact('link'));
+        return view('admin.physical-links.show', compact('link'));
     }
 
     public function destroy(PhysicalLink $link)
@@ -644,7 +644,7 @@ class PhysicalLinkController extends Controller
 
         $link->delete();
 
-        return redirect()->route('admin.links.index');
+        return redirect()->route('admin.physical-links.index');
     }
 
     public function massDestroy(MassDestroyPhysicalLinkRequest $request)

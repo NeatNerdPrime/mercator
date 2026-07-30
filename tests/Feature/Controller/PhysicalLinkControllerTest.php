@@ -32,10 +32,10 @@ describe('index', function () {
     test('can display physical links index page', function () {
         PhysicalLink::factory()->count(3)->create();
 
-        $response = $this->get(route('admin.links.index'));
+        $response = $this->get(route('admin.physical-links.index'));
 
         $response->assertOk();
-        $response->assertViewIs('admin.links.index');
+        $response->assertViewIs('admin.physical-links.index');
         $response->assertViewHas('physicalLinks');
     });
 
@@ -43,7 +43,7 @@ describe('index', function () {
         $user = User::factory()->create();
         $this->actingAs($user);
 
-        $response = $this->get(route('admin.links.index'));
+        $response = $this->get(route('admin.physical-links.index'));
 
         $response->assertForbidden();
     });
@@ -52,17 +52,17 @@ describe('index', function () {
 
 describe('create', function () {
     test('can display create form', function () {
-        $response = $this->get(route('admin.links.create'));
+        $response = $this->get(route('admin.physical-links.create'));
 
         $response->assertOk();
-        $response->assertViewIs('admin.links.create');
+        $response->assertViewIs('admin.physical-links.create');
     });
 
     test('denies access without permission', function () {
         $user = User::factory()->create();
         $this->actingAs($user);
 
-        $response = $this->get(route('admin.links.create'));
+        $response = $this->get(route('admin.physical-links.create'));
 
         $response->assertForbidden();
     });
@@ -74,10 +74,10 @@ describe('show', function () {
     test('can display object', function () {
         $physicalLink = PhysicalLink::factory()->create();
 
-        $response = $this->get(route('admin.links.show', $physicalLink->id));
+        $response = $this->get(route('admin.physical-links.show', $physicalLink->id));
 
         $response->assertOk();
-        $response->assertViewIs('admin.links.show');
+        $response->assertViewIs('admin.physical-links.show');
         $response->assertViewHas(['link']);
         $response->assertSee($physicalLink->id);
     });
@@ -88,7 +88,7 @@ describe('show', function () {
 
         $physicalLink = PhysicalLink::factory()->create();
 
-        $response = $this->get(route('admin.links.show', $physicalLink->id));
+        $response = $this->get(route('admin.physical-links.show', $physicalLink->id));
 
         $response->assertForbidden();
     });
@@ -99,10 +99,10 @@ describe('edit', function () {
     test('can display edit form', function () {
         $physicalLink = PhysicalLink::factory()->create();
 
-        $response = $this->get(route('admin.links.edit', $physicalLink));
+        $response = $this->get(route('admin.physical-links.edit', $physicalLink));
 
         $response->assertOk();
-        $response->assertViewIs('admin.links.edit');
+        $response->assertViewIs('admin.physical-links.edit');
         $response->assertViewHas(['devices', 'link']);
         $response->assertSee($physicalLink->id);
     });
@@ -113,7 +113,7 @@ describe('edit', function () {
 
         $physicalLink = PhysicalLink::factory()->create();
 
-        $response = $this->get(route('admin.links.edit', $physicalLink));
+        $response = $this->get(route('admin.physical-links.edit', $physicalLink));
 
         $response->assertForbidden();
     });
@@ -137,9 +137,9 @@ describe('update', function () {
         ];
 
         $response = $this->put(
-            route('admin.links.update', $physicalLink),
+            route('admin.physical-links.update', $physicalLink),
             $data);
-        $response->assertRedirect(route('admin.links.index'));
+        $response->assertRedirect(route('admin.physical-links.index'));
 
         $this->assertDatabaseHas('physical_links',
             [
@@ -160,9 +160,9 @@ describe('update', function () {
         ];
 
         $response = $this->put(
-            route('admin.links.update', $physicalLink),
+            route('admin.physical-links.update', $physicalLink),
             $data);
-        $response->assertRedirect(route('admin.links.index'));
+        $response->assertRedirect(route('admin.physical-links.index'));
         $response->assertSessionDoesntHaveErrors('attributes');
 
         $this->assertDatabaseHas('physical_links',
@@ -177,8 +177,8 @@ describe('destroy', function () {
     test('can delete PhysicalLink', function () {
         $physicalLink = PhysicalLink::factory()->create();
 
-        $response = $this->delete(route('admin.links.destroy', $physicalLink->id));
-        $response->assertRedirect(route('admin.links.index'));
+        $response = $this->delete(route('admin.physical-links.destroy', $physicalLink->id));
+        $response->assertRedirect(route('admin.physical-links.index'));
 
         $this->assertSoftDeleted('physical_links', ['id' => $physicalLink->id]);
 
@@ -194,7 +194,7 @@ describe('destroy', function () {
 
         $physicalLink = PhysicalLink::factory()->create();
 
-        $response = $this->delete(route('admin.links.destroy', $physicalLink));
+        $response = $this->delete(route('admin.physical-links.destroy', $physicalLink));
 
         $response->assertForbidden();
     });
@@ -205,7 +205,7 @@ describe('massDestroy', function () {
         $phones = PhysicalLink::factory()->count(3)->create();
         $ids = $phones->pluck('id')->toArray();
 
-        $response = $this->delete(route('admin.links.massDestroy'), ['ids' => $ids]);
+        $response = $this->delete(route('admin.physical-links.massDestroy'), ['ids' => $ids]);
         $response->assertNoContent();
 
         foreach ($ids as $id) {
@@ -216,7 +216,7 @@ describe('massDestroy', function () {
     test('returns no content status', function () {
         $physicalLink = PhysicalLink::factory()->create();
 
-        $response = $this->delete(route('admin.links.massDestroy'), [
+        $response = $this->delete(route('admin.physical-links.massDestroy'), [
             'ids' => [$physicalLink->id],
         ]);
 
@@ -229,7 +229,7 @@ describe('massDestroy', function () {
 
         $physicalLink = PhysicalLink::factory()->create();
 
-        $response = $this->delete(route('admin.links.massDestroy'), [
+        $response = $this->delete(route('admin.physical-links.massDestroy'), [
             'ids' => [$physicalLink->id],
         ]);
 

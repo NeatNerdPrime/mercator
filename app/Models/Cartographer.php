@@ -110,7 +110,7 @@ class Cartographer extends Model
             \App\Models\Operation::class              => 'admin.operations.show',
             \App\Models\Peripheral::class             => 'admin.peripherals.show',
             \App\Models\Phone::class                  => 'admin.phones.show',
-            \App\Models\PhysicalLink::class           => 'admin.links.show',
+            \App\Models\PhysicalLink::class           => 'admin.physical-links.show',
             \App\Models\PhysicalRouter::class         => 'admin.physical-routers.show',
             \App\Models\PhysicalSecurityDevice::class => 'admin.physical-security-devices.show',
             \App\Models\PhysicalServer::class         => 'admin.physical-servers.show',

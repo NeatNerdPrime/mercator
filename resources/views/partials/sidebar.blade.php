@@ -382,7 +382,7 @@
             request()->is('admin/peripherals*')||
             request()->is('admin/phones*')||
             request()->is('admin/wifi-terminals*')||
-            request()->is('admin/links*')||
+            request()->is('admin/physical-links*')||
             request()->is('admin/wans*')||
             request()->is('admin/mans*')||
             request()->is('admin/lans*')
@@ -476,8 +476,8 @@
                     </a>
                 @endcanAccess
                 @canAccess(\App\Models\PhysicalLink::class)
-                    <a href="{{ route('admin.links.index') }}"
-                       class="ps-4 {{ request()->is('admin/links*') ? 'active' : '' }}">
+                    <a href="{{ route('admin.physical-links.index') }}"
+                       class="ps-4 {{ request()->is('admin/physical-links*') ? 'active' : '' }}">
                         <i class="bi bi-list-columns"></i><span
                                 class="menu-text">{{ trans('cruds.physicalLink.title') }}</span>
                     </a>
