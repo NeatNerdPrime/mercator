@@ -438,7 +438,6 @@
 
             for (const edge of node.edges) {
                 const targetNodeId = edge.attachedNodeId;
-                if (nodes.get(targetNodeId) !== null) continue;   // déjà affiché
 
                 const targetNode = _nodes.get(targetNodeId);
                 if (targetNode == null) continue;
@@ -461,11 +460,18 @@
                 if (direction === 1 && node.order <= targetNode.order) continue;
                 if (direction === 2 && node.order >= targetNode.order) continue;
 
-                // Ajouter le nœud cible
-                network.body.data.nodes.add(buildVisNode(targetNode));
+                const alreadyDisplayed = nodes.get(targetNodeId) !== null;
+
+                // Ajouter le nœud cible s'il n'est pas déjà affiché
+                if (!alreadyDisplayed) {
+                    network.body.data.nodes.add(buildVisNode(targetNode));
+                }
+
+                // Ajouter l'arête entre le nœud courant et la cible (idempotent, dédupliqué par addEdge/exists)
+                addEdge(nodeId, targetNodeId);
 
                 // Ajouter les arêtes vers les voisins déjà présents
-                for (const neighborEdge of _nodes.get(targetNodeId).edges) {
+                for (const neighborEdge of targetNode.edges) {
                     if (nodes.get(neighborEdge.attachedNodeId) === null) continue;
 
                     const neighborPassesFilter =
@@ -477,11 +483,13 @@
                         || (filter.includes("2") && neighborEdge.edgeType === 'FLUX');
 
                     if (neighborPassesFilter) {
-                        console.log("neighborEdge=", neighborEdge);
                         addEdge(targetNodeId, neighborEdge.attachedNodeId);
                     }
                 }
 
+                // Continuer la récursion même si le nœud était déjà affiché : il peut
+                // avoir des voisins non encore visités dans cette passe de déploiement.
+                // `visitedNodes` empêche toute boucle infinie.
                 setTimeout(function () {
                     deployFromNode(targetNodeId, depth - 1, visitedNodes, filter, direction);
                 }, 500);
