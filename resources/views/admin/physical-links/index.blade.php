@@ -8,7 +8,7 @@
 @can('physical_link_create')
     <div style="margin-bottom: 10px;" class="row">
         <div class="col-lg-12">
-            <a id="btn-new" class="btn btn-success" href="{{ route('admin.links.create') }}">
+            <a id="btn-new" class="btn btn-success" href="{{ route('admin.physical-links.create') }}">
                 {{ trans('global.add') }} {{ trans('cruds.physicalLink.title_singular') }}
             </a>
         </div>
@@ -66,7 +66,7 @@
                                 <x-show-link :model="$physicalLink" :label="$physicalLink->type ?? ''" />
                             </td>
                             <td>
-                                <a href="{{ route('admin.links.show', $physicalLink->id) }}">
+                                <a href="{{ route('admin.physical-links.show', $physicalLink->id) }}">
                                 <div style="width: 40px; height: 40px; background-color: {{ $physicalLink->color }}; border: 1px solid #ccc; border-radius: 4px;"></div>
                                 </a>
                             </td>
@@ -142,19 +142,19 @@
                             </td>
                             <td nowrap>
                                 @can('physical_link_show')
-                                    <a class="btn btn-xs btn-primary" href="{{ route('admin.links.show', $physicalLink->id) }}">
+                                    <a class="btn btn-xs btn-primary" href="{{ route('admin.physical-links.show', $physicalLink->id) }}">
                                         {{ trans('global.view') }}
                                     </a>
                                 @endcan
 
                                 @canEdit($physicalLink)
-                                    <a class="btn btn-xs btn-info" href="{{ route('admin.links.edit', $physicalLink->id) }}">
+                                    <a class="btn btn-xs btn-info" href="{{ route('admin.physical-links.edit', $physicalLink->id) }}">
                                         {{ trans('global.edit') }}
                                     </a>
                                 @endcanEdit
 
                                 @can('physical_link_delete')
-                                    <form action="{{ route('admin.links.destroy', $physicalLink->id) }}" method="POST" onsubmit="return confirm('{{ trans('global.areYouSure') }}');" style="display: inline-block;">
+                                    <form action="{{ route('admin.physical-links.destroy', $physicalLink->id) }}" method="POST" onsubmit="return confirm('{{ trans('global.areYouSure') }}');" style="display: inline-block;">
                                         <input type="hidden" name="_method" value="DELETE">
                                         <input type="hidden" name="_token" value="{{ csrf_token() }}">
                                         <input type="submit" class="btn btn-xs btn-danger" value="{{ trans('global.delete') }}">
@@ -178,7 +178,7 @@
 @include('partials.datatable', array(
     'id' => '#dataTable',
     'title' => trans("cruds.physicalLink.title_singular"),
-    'URL' => route('admin.links.massDestroy'),
+    'URL' => route('admin.physical-links.massDestroy'),
     'canDelete' => auth()->user()->can('physical_link_delete') ? true : false,
     'serverSidePagination' => true
 ));

@@ -396,7 +396,7 @@
                                 @foreach($physicalLinks as $physicalLink)
                                     <tr data-entry-id="{{ $physicalLink->id }}">
                                         <td>
-                                            <a href="/admin/links/{{ $physicalLink->id }}">&#9741;</a>
+                                            <a href="/admin/physical-links/{{ $physicalLink->id }}">&#9741;</a>
                                         </td>
                                         <td>
                                             @if ($physicalLink->peripheralSrc!=null)
