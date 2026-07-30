@@ -31,6 +31,7 @@ use App\Models\Wan;
 use App\Models\WifiTerminal;
 use App\Models\Workstation;
 use App\Models\Zone;
+use App\Support\ModelRegistry;
 use Ramsey\Uuid\Uuid;
 
 /**
@@ -128,7 +129,7 @@ class MonarcExportService
     ];
 
     /** Mercator families whose objects are "primary assets" — always instance roots. */
-    public const PRIMARY_FAMILIES = ['MacroProcessus', 'Process', 'Information'];
+    public const PRIMARY_FAMILIES = ModelRegistry::MONARC_PRIMARY_FAMILIES;
 
     /**
      * Mercator "views" (resources/views/partials/sidebar.blade.php submenus),
@@ -139,73 +140,7 @@ class MonarcExportService
      *
      * @var array<string, array<int, string>>
      */
-    public const FAMILY_VIEWS = [
-        'ecosystem' => ['Entity', 'Relation'],
-        'information_system' => ['MacroProcessus', 'Process', 'Actor', 'Information'],
-        'applications' => ['ApplicationBlock', 'Application', 'ApplicationService', 'ApplicationModule', 'Database'],
-        'administration' => ['Domain', 'ForestAd', 'Annuaire', 'ZoneAdmin', 'AdminUser'],
-        'logical_infrastructure' => ['Network', 'SubNetwork', 'LogicalServer', 'Cluster', 'Container', 'Backup', 'Network', 'Subnetwork', 'Gateway', 'Router', 'NetworkSwitch', 'SecurityDevice', 'DhcpServer', 'Dnsserver', 'Vlan', 'ExternalConnectedEntity'],
-        'physical_infrastructure' => ['Site', 'Building', 'Bay', 'Zone', 'PhysicalServer', 'PhysicalSwitch', 'PhysicalRouter', 'Workstation', 'StorageDevice', 'Peripheral', 'Phone', 'WifiTerminal', 'PhysicalSecurityDevice', 'Wan', 'Man', 'Lan'],
-    ];
-
-    /**
-     * Mercator model short name -> translation key for its family label (see
-     * MonarcController::loadMercatorFamilies(), which shares this mapping),
-     * used to name a view's per-family sub-category in buildLibrary() when
-     * more than one object of that family is selected. Kept as trans() KEYS
-     * (not resolved values) so this class constant never needs a request
-     * context to be defined.
-     *
-     * @var array<string, string>
-     */
-    private const FAMILY_LABEL_KEYS = [
-        'MacroProcessus' => 'cruds.macroProcessus.title',
-        'Process' => 'cruds.process.title',
-        'Information' => 'cruds.information.title',
-        'Actor' => 'cruds.actor.title',
-        'Application' => 'cruds.application.title',
-        'ApplicationService' => 'cruds.applicationService.title',
-        'ApplicationBlock' => 'cruds.applicationBlock.title',
-        'ApplicationModule' => 'cruds.applicationModule.title',
-        'Database' => 'cruds.database.title',
-        'LogicalServer' => 'cruds.logicalServer.title',
-        'Cluster' => 'cruds.cluster.title',
-        'Container' => 'cruds.container.title',
-        'Backup' => 'cruds.backup.title',
-        'Network' => 'cruds.network.title',
-        'Subnetwork' => 'cruds.subnetwork.title',
-        'Gateway' => 'cruds.gateway.title',
-        'Router' => 'cruds.router.title',
-        'NetworkSwitch' => 'cruds.networkSwitch.title',
-        'SecurityDevice' => 'cruds.securityDevice.title',
-        'DhcpServer' => 'cruds.dhcpServer.title',
-        'Dnsserver' => 'cruds.dnsserver.title',
-        'Vlan' => 'cruds.vlan.title',
-        'ExternalConnectedEntity' => 'cruds.externalConnectedEntity.title',
-        'Lan' => 'cruds.lan.title',
-        'Man' => 'cruds.man.title',
-        'Wan' => 'cruds.wan.title',
-        'PhysicalServer' => 'cruds.physicalServer.title',
-        'Workstation' => 'cruds.workstation.title',
-        'Site' => 'cruds.site.title',
-        'Building' => 'cruds.building.title',
-        'Bay' => 'cruds.bay.title',
-        'PhysicalSwitch' => 'cruds.physicalSwitch.title',
-        'PhysicalRouter' => 'cruds.physicalRouter.title',
-        'PhysicalSecurityDevice' => 'cruds.physicalSecurityDevice.title',
-        'StorageDevice' => 'cruds.storageDevice.title',
-        'Peripheral' => 'cruds.peripheral.title',
-        'Phone' => 'cruds.phone.title',
-        'WifiTerminal' => 'cruds.wifiTerminal.title',
-        'Zone' => 'cruds.zone.title',
-        'Entity' => 'cruds.entity.title',
-        'Relation' => 'cruds.relation.title',
-        'Domain' => 'cruds.domain.title',
-        'ForestAd' => 'cruds.forestAd.title',
-        'Annuaire' => 'cruds.annuaire.title',
-        'ZoneAdmin' => 'cruds.zoneAdmin.title',
-        'AdminUser' => 'cruds.adminUser.title',
-    ];
+    public const FAMILY_VIEWS = ModelRegistry::MONARC_FAMILY_VIEWS;
 
     /**
      * The Mercator "view" a family belongs to (see FAMILY_VIEWS), or 'other'
@@ -226,9 +161,7 @@ class MonarcExportService
     /** A family's translated display label (e.g. "Postes de travail" for Workstation). */
     public static function familyLabel(string $model): string
     {
-        $key = self::FAMILY_LABEL_KEYS[$model] ?? null;
-
-        return $key !== null ? trans($key) : $model;
+        return ModelRegistry::title('App\\Models\\'.$model);
     }
 
     /**

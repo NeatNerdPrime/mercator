@@ -3,8 +3,15 @@
 namespace App\Http\Controllers\Report;
 
 use App\Http\Controllers\Admin\HomeController;
+use App\Support\ModelRegistry;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\DB;
+use PhpOffice\PhpSpreadsheet\Spreadsheet;
+use PhpOffice\PhpSpreadsheet\Style\Alignment;
+use PhpOffice\PhpSpreadsheet\Style\Border;
+use PhpOffice\PhpSpreadsheet\Style\Fill;
+use PhpOffice\PhpSpreadsheet\Style\NumberFormat;
+use PhpOffice\PhpSpreadsheet\Writer\Xlsx;
 
 // PhpOffice
 // see : https://phpspreadsheet.readthedocs.io/en/latest/topics/recipes/
@@ -30,13 +37,13 @@ class AuditController extends HomeController
             'Maturity 3',
         ];
 
-        $spreadsheet = new \PhpOffice\PhpSpreadsheet\Spreadsheet;
+        $spreadsheet = new Spreadsheet;
         $sheet = $spreadsheet->getActiveSheet();
         $sheet->fromArray([$header], null, 'A1');
 
         // bold title
         $sheet->getStyle('A1:J1')->getFont()->setBold(true);
-        $sheet->getStyle('A1:J1')->getFill()->setFillType(\PhpOffice\PhpSpreadsheet\Style\Fill::FILL_SOLID)->getStartColor()->setARGB('FF1F77BE');
+        $sheet->getStyle('A1:J1')->getFill()->setFillType(Fill::FILL_SOLID)->getStartColor()->setARGB('FF1F77BE');
 
         // column size
         $sheet->getColumnDimension('A')->setAutoSize(true); // Objet
@@ -51,12 +58,12 @@ class AuditController extends HomeController
         $sheet->getColumnDimension('J')->setAutoSize(true); // % 3
 
         // center cells
-        $sheet->getStyle('B:J')->getAlignment()->setHorizontal(\PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER);
+        $sheet->getStyle('B:J')->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER);
 
         // percentage
-        $sheet->getStyle('D')->getNumberFormat()->setFormatCode(\PhpOffice\PhpSpreadsheet\Style\NumberFormat::FORMAT_PERCENTAGE_00);
-        $sheet->getStyle('G')->getNumberFormat()->setFormatCode(\PhpOffice\PhpSpreadsheet\Style\NumberFormat::FORMAT_PERCENTAGE_00);
-        $sheet->getStyle('J')->getNumberFormat()->setFormatCode(\PhpOffice\PhpSpreadsheet\Style\NumberFormat::FORMAT_PERCENTAGE_00);
+        $sheet->getStyle('D')->getNumberFormat()->setFormatCode(NumberFormat::FORMAT_PERCENTAGE_00);
+        $sheet->getStyle('G')->getNumberFormat()->setFormatCode(NumberFormat::FORMAT_PERCENTAGE_00);
+        $sheet->getStyle('J')->getNumberFormat()->setFormatCode(NumberFormat::FORMAT_PERCENTAGE_00);
 
         // Initialise row count
         $row = 2;
@@ -66,7 +73,7 @@ class AuditController extends HomeController
         // ============
         $sheet->setCellValue("A{$row}", trans('cruds.menu.ecosystem.title_short'));
         $sheet->getStyle("A{$row}:J{$row}")->getFont()->setBold(true);
-        $sheet->getStyle("A{$row}:J{$row}")->getFill()->setFillType(\PhpOffice\PhpSpreadsheet\Style\Fill::FILL_SOLID)->getStartColor()->setARGB('FFAEC7E8');
+        $sheet->getStyle("A{$row}:J{$row}")->getFill()->setFillType(Fill::FILL_SOLID)->getStartColor()->setARGB('FFAEC7E8');
 
         // L1
         $sheet->setCellValue("B{$row}", '=sum(B'.($row + 1).':B'.($row + 2).')');
@@ -115,7 +122,7 @@ class AuditController extends HomeController
         // ============
         $sheet->setCellValue("A{$row}", trans('cruds.menu.metier.title_short'));
         $sheet->getStyle("A{$row}:J{$row}")->getFont()->setBold(true);
-        $sheet->getStyle("A{$row}:J{$row}")->getFill()->setFillType(\PhpOffice\PhpSpreadsheet\Style\Fill::FILL_SOLID)->getStartColor()->setARGB('FFAEC7E8');
+        $sheet->getStyle("A{$row}:J{$row}")->getFill()->setFillType(Fill::FILL_SOLID)->getStartColor()->setARGB('FFAEC7E8');
 
         // L1
         $sheet->setCellValue("B{$row}", '=sum(B'.($row + 1).':B'.($row + 7).')');
@@ -229,7 +236,7 @@ class AuditController extends HomeController
         // ============
         $sheet->setCellValue("A{$row}", trans('cruds.menu.application.title_short'));
         $sheet->getStyle("A{$row}:J{$row}")->getFont()->setBold(true);
-        $sheet->getStyle("A{$row}:J{$row}")->getFill()->setFillType(\PhpOffice\PhpSpreadsheet\Style\Fill::FILL_SOLID)->getStartColor()->setARGB('FFAEC7E8');
+        $sheet->getStyle("A{$row}:J{$row}")->getFill()->setFillType(Fill::FILL_SOLID)->getStartColor()->setARGB('FFAEC7E8');
 
         // L1
         $sheet->setCellValue("B{$row}", '=sum(B'.($row + 1).':B'.($row + 6).')');
@@ -330,7 +337,7 @@ class AuditController extends HomeController
         // ===============
         $sheet->setCellValue("A{$row}", trans('cruds.menu.administration.title_short'));
         $sheet->getStyle("A{$row}:J{$row}")->getFont()->setBold(true);
-        $sheet->getStyle("A{$row}:J{$row}")->getFill()->setFillType(\PhpOffice\PhpSpreadsheet\Style\Fill::FILL_SOLID)->getStartColor()->setARGB('FFAEC7E8');
+        $sheet->getStyle("A{$row}:J{$row}")->getFill()->setFillType(Fill::FILL_SOLID)->getStartColor()->setARGB('FFAEC7E8');
 
         // L1
         $sheet->setCellValue("B{$row}", '=sum(B'.($row + 1).':B'.($row + 4).')');
@@ -405,7 +412,7 @@ class AuditController extends HomeController
         // ======================
         $sheet->setCellValue("A{$row}", trans('cruds.menu.logical_infrastructure.title_short'));
         $sheet->getStyle("A{$row}:J{$row}")->getFont()->setBold(true);
-        $sheet->getStyle("A{$row}:J{$row}")->getFill()->setFillType(\PhpOffice\PhpSpreadsheet\Style\Fill::FILL_SOLID)->getStartColor()->setARGB('FFAEC7E8');
+        $sheet->getStyle("A{$row}:J{$row}")->getFill()->setFillType(Fill::FILL_SOLID)->getStartColor()->setARGB('FFAEC7E8');
 
         // L1
         $sheet->setCellValue("B{$row}", '=sum(B'.($row + 1).':B'.($row + 11).')');
@@ -596,7 +603,7 @@ class AuditController extends HomeController
         // =========================
         $sheet->setCellValue("A{$row}", trans('cruds.menu.physical_infrastructure.title_short'));
         $sheet->getStyle("A{$row}:J{$row}")->getFont()->setBold(true);
-        $sheet->getStyle("A{$row}:J{$row}")->getFill()->setFillType(\PhpOffice\PhpSpreadsheet\Style\Fill::FILL_SOLID)->getStartColor()->setARGB('FFAEC7E8');
+        $sheet->getStyle("A{$row}:J{$row}")->getFill()->setFillType(Fill::FILL_SOLID)->getStartColor()->setARGB('FFAEC7E8');
 
         // L1
         $sheet->setCellValue("B{$row}", '=sum(B'.($row + 1).':B'.($row + 11).')');
@@ -759,7 +766,7 @@ class AuditController extends HomeController
 
         // =============================================================
         // Save sheet
-        $writer = new \PhpOffice\PhpSpreadsheet\Writer\Xlsx($spreadsheet);
+        $writer = new Xlsx($spreadsheet);
         $writer->save($path);
 
         // Return
@@ -801,7 +808,7 @@ class AuditController extends HomeController
             Carbon::now()->startOfMonth()->format('m/Y'),
         ];
 
-        $spreadsheet = new \PhpOffice\PhpSpreadsheet\Spreadsheet;
+        $spreadsheet = new Spreadsheet;
         $sheet = $spreadsheet->getActiveSheet();
         $sheet->fromArray([$header], null, 'A1');
         // freeze top rows
@@ -812,14 +819,14 @@ class AuditController extends HomeController
         // white font
         $sheet->getStyle('1')->getFont()->getColor()->setRGB('FFFFFF');
         // background color
-        $sheet->getStyle('A1:O1')->getFill()->setFillType(\PhpOffice\PhpSpreadsheet\Style\Fill::FILL_SOLID)->getStartColor()->setARGB('FF1F77BE');
+        $sheet->getStyle('A1:O1')->getFill()->setFillType(Fill::FILL_SOLID)->getStartColor()->setARGB('FF1F77BE');
 
         // column size and border
         for ($i = 0; $i <= 14; $i++) {
             $col = chr(ord('A') + $i);
             $sheet->getColumnDimension($col)->setAutoSize(true);
-            $sheet->getStyle("{$col}1")->getBorders()->getOutline()->setBorderStyle(\PhpOffice\PhpSpreadsheet\Style\Border::BORDER_THIN);
-            $sheet->getStyle("{$col}2")->getBorders()->getOutline()->setBorderStyle(\PhpOffice\PhpSpreadsheet\Style\Border::BORDER_THIN);
+            $sheet->getStyle("{$col}1")->getBorders()->getOutline()->setBorderStyle(Border::BORDER_THIN);
+            $sheet->getStyle("{$col}2")->getBorders()->getOutline()->setBorderStyle(Border::BORDER_THIN);
         }
 
         // Center
@@ -831,65 +838,65 @@ class AuditController extends HomeController
         // App\xxx -> index, title
         $rows = [
             'GDPR' => ['index' => 2, 'title' => trans('cruds.menu.gdpr.title_short')],
-            'App\\Models\\DataProcessing' => ['index' => 3, 'title' => trans('cruds.dataProcessing.title')],
-            'App\\Models\\SecurityControl' => ['index' => 6, 'title' => trans('cruds.securityControl.title')],
+            'App\\Models\\DataProcessing' => ['index' => 3, 'title' => ModelRegistry::title('App\\Models\\DataProcessing')],
+            'App\\Models\\SecurityControl' => ['index' => 6, 'title' => ModelRegistry::title('App\\Models\\SecurityControl')],
 
             'Ecosystem' => ['index' => 9, 'title' => trans('cruds.menu.ecosystem.title_short')],
-            'App\\Models\\Entity' => ['index' => 10, 'title' => trans('cruds.entity.title')],
-            'App\\Models\\Relation' => ['index' => 13, 'title' => trans('cruds.relation.title')],
+            'App\\Models\\Entity' => ['index' => 10, 'title' => ModelRegistry::title('App\\Models\\Entity')],
+            'App\\Models\\Relation' => ['index' => 13, 'title' => ModelRegistry::title('App\\Models\\Relation')],
 
             'Metier' => ['index' => 16, 'title' => trans('cruds.menu.metier.title_short')],
-            'App\\Models\\MacroProcessus' => ['index' => 17, 'title' => trans('cruds.macroProcessus.title')],
-            'App\\Models\\Process' => ['index' => 20, 'title' => trans('cruds.process.title')],
-            'App\\Models\\Activity' => ['index' => 23, 'title' => trans('cruds.activity.title')],
-            'App\\Models\\Operation' => ['index' => 26, 'title' => trans('cruds.operation.title')],
-            'App\\Models\\Task' => ['index' => 29, 'title' => trans('cruds.task.title')],
-            'App\\Models\\Actor' => ['index' => 32, 'title' => trans('cruds.actor.title')],
-            'App\\Models\\Information' => ['index' => 35, 'title' => trans('cruds.information.title')],
+            'App\\Models\\MacroProcessus' => ['index' => 17, 'title' => ModelRegistry::title('App\\Models\\MacroProcessus')],
+            'App\\Models\\Process' => ['index' => 20, 'title' => ModelRegistry::title('App\\Models\\Process')],
+            'App\\Models\\Activity' => ['index' => 23, 'title' => ModelRegistry::title('App\\Models\\Activity')],
+            'App\\Models\\Operation' => ['index' => 26, 'title' => ModelRegistry::title('App\\Models\\Operation')],
+            'App\\Models\\Task' => ['index' => 29, 'title' => ModelRegistry::title('App\\Models\\Task')],
+            'App\\Models\\Actor' => ['index' => 32, 'title' => ModelRegistry::title('App\\Models\\Actor')],
+            'App\\Models\\Information' => ['index' => 35, 'title' => ModelRegistry::title('App\\Models\\Information')],
 
             'Applications' => ['index' => 38, 'title' => trans('cruds.menu.application.title_short')],
-            'App\\Models\\ApplicationBlock' => ['index' => 39, 'title' => trans('cruds.applicationBlock.title')],
-            'App\\Models\\Application' => ['index' => 42, 'title' => trans('cruds.application.title')],
-            'App\\Models\\ApplicationService' => ['index' => 45, 'title' => trans('cruds.applicationService.title')],
-            'App\\Models\\ApplicationModule' => ['index' => 48, 'title' => trans('cruds.applicationModule.title')],
-            'App\\Models\\Database' => ['index' => 51, 'title' => trans('cruds.database.title')],
-            'App\\Models\\ApplicationFlow' => ['index' => 54, 'title' => trans('cruds.applicationFlow.title')],
+            'App\\Models\\ApplicationBlock' => ['index' => 39, 'title' => ModelRegistry::title('App\\Models\\ApplicationBlock')],
+            'App\\Models\\Application' => ['index' => 42, 'title' => ModelRegistry::title('App\\Models\\Application')],
+            'App\\Models\\ApplicationService' => ['index' => 45, 'title' => ModelRegistry::title('App\\Models\\ApplicationService')],
+            'App\\Models\\ApplicationModule' => ['index' => 48, 'title' => ModelRegistry::title('App\\Models\\ApplicationModule')],
+            'App\\Models\\Database' => ['index' => 51, 'title' => ModelRegistry::title('App\\Models\\Database')],
+            'App\\Models\\ApplicationFlow' => ['index' => 54, 'title' => ModelRegistry::title('App\\Models\\ApplicationFlow')],
 
             'Administration' => ['index' => 57, 'title' => trans('cruds.menu.administration.title_short')],
-            'App\\Models\\ZoneAdmin' => ['index' => 58, 'title' => trans('cruds.zoneAdmin.title')],
-            'App\\Models\\Annuaire' => ['index' => 61, 'title' => trans('cruds.annuaire.title')],
-            'App\\Models\\ForestAd' => ['index' => 64, 'title' => trans('cruds.forestAd.title')],
-            'App\\Models\\Domain' => ['index' => 67, 'title' => trans('cruds.domain.title')],
+            'App\\Models\\ZoneAdmin' => ['index' => 58, 'title' => ModelRegistry::title('App\\Models\\ZoneAdmin')],
+            'App\\Models\\Annuaire' => ['index' => 61, 'title' => ModelRegistry::title('App\\Models\\Annuaire')],
+            'App\\Models\\ForestAd' => ['index' => 64, 'title' => ModelRegistry::title('App\\Models\\ForestAd')],
+            'App\\Models\\Domain' => ['index' => 67, 'title' => ModelRegistry::title('App\\Models\\Domain')],
 
             'LogicalInfrastructure' => ['index' => 70, 'title' => trans('cruds.menu.logical_infrastructure.title_short')],
-            'App\\Models\\Network' => ['index' => 71, 'title' => trans('cruds.network.title')],
-            'App\\Models\\Subnetwork' => ['index' => 74, 'title' => trans('cruds.subnetwork.title')],
-            'App\\Models\\Gateway' => ['index' => 77, 'title' => trans('cruds.gateway.title')],
-            'App\\Models\\ExternalConnectedEntity' => ['index' => 80, 'title' => trans('cruds.externalConnectedEntity.title')],
-            'App\\Models\\NetworkSwitch' => ['index' => 83, 'title' => trans('cruds.networkSwitch.title')],
-            'App\\Models\\Router' => ['index' => 86, 'title' => trans('cruds.router.title')],
-            'App\\Models\\SecurityDevice' => ['index' => 89, 'title' => trans('cruds.securityDevice.title')],
-            'App\\Models\\DhcpServer' => ['index' => 92, 'title' => trans('cruds.dhcpServer.title')],
-            'App\\Models\\LogicalServer' => ['index' => 95, 'title' => trans('cruds.logicalServer.title')],
-            'App\\Models\\Certificate' => ['index' => 98, 'title' => trans('cruds.certificate.title')],
+            'App\\Models\\Network' => ['index' => 71, 'title' => ModelRegistry::title('App\\Models\\Network')],
+            'App\\Models\\Subnetwork' => ['index' => 74, 'title' => ModelRegistry::title('App\\Models\\Subnetwork')],
+            'App\\Models\\Gateway' => ['index' => 77, 'title' => ModelRegistry::title('App\\Models\\Gateway')],
+            'App\\Models\\ExternalConnectedEntity' => ['index' => 80, 'title' => ModelRegistry::title('App\\Models\\ExternalConnectedEntity')],
+            'App\\Models\\NetworkSwitch' => ['index' => 83, 'title' => ModelRegistry::title('App\\Models\\NetworkSwitch')],
+            'App\\Models\\Router' => ['index' => 86, 'title' => ModelRegistry::title('App\\Models\\Router')],
+            'App\\Models\\SecurityDevice' => ['index' => 89, 'title' => ModelRegistry::title('App\\Models\\SecurityDevice')],
+            'App\\Models\\DhcpServer' => ['index' => 92, 'title' => ModelRegistry::title('App\\Models\\DhcpServer')],
+            'App\\Models\\LogicalServer' => ['index' => 95, 'title' => ModelRegistry::title('App\\Models\\LogicalServer')],
+            'App\\Models\\Certificate' => ['index' => 98, 'title' => ModelRegistry::title('App\\Models\\Certificate')],
 
             'PhysicalInfrastructure' => ['index' => 101, 'title' => trans('cruds.menu.physical_infrastructure.title_short')],
-            'App\\Models\\Site' => ['index' => 102, 'title' => trans('cruds.site.title')],
-            'App\\Models\\Building' => ['index' => 105, 'title' => trans('cruds.building.title')],
-            'App\\Models\\Bay' => ['index' => 108, 'title' => trans('cruds.bay.title')],
-            'App\\Models\\PhysicalServer' => ['index' => 111, 'title' => trans('cruds.physicalServer.title')],
-            'App\\Models\\Workstation' => ['index' => 114, 'title' => trans('cruds.workstation.title')],
-            'App\\Models\\StorageDevice' => ['index' => 117, 'title' => trans('cruds.storageDevice.title')],
-            'App\\Models\\Peripheral' => ['index' => 120, 'title' => trans('cruds.peripheral.title')],
-            'App\\Models\\Phone' => ['index' => 123, 'title' => trans('cruds.phone.title')],
-            'App\\Models\\PhysicalRouter' => ['index' => 126, 'title' => trans('cruds.physicalRouter.title')],
-            'App\\Models\\PhysicalSwitch' => ['index' => 129, 'title' => trans('cruds.physicalSwitch.title')],
-            'App\\Models\\WifiTerminal' => ['index' => 132, 'title' => trans('cruds.wifiTerminal.title')],
-            'App\\Models\\PhysicalSecurityDevice' => ['index' => 135, 'title' => trans('cruds.physicalSecurityDevice.title')],
-            'App\\Models\\Wan' => ['index' => 138, 'title' => trans('cruds.wan.title')],
-            'App\\Models\\Man' => ['index' => 141, 'title' => trans('cruds.man.title')],
-            'App\\Models\\Lan' => ['index' => 144, 'title' => trans('cruds.lan.title')],
-            'App\\Models\\Vlan' => ['index' => 147, 'title' => trans('cruds.vlan.title')],
+            'App\\Models\\Site' => ['index' => 102, 'title' => ModelRegistry::title('App\\Models\\Site')],
+            'App\\Models\\Building' => ['index' => 105, 'title' => ModelRegistry::title('App\\Models\\Building')],
+            'App\\Models\\Bay' => ['index' => 108, 'title' => ModelRegistry::title('App\\Models\\Bay')],
+            'App\\Models\\PhysicalServer' => ['index' => 111, 'title' => ModelRegistry::title('App\\Models\\PhysicalServer')],
+            'App\\Models\\Workstation' => ['index' => 114, 'title' => ModelRegistry::title('App\\Models\\Workstation')],
+            'App\\Models\\StorageDevice' => ['index' => 117, 'title' => ModelRegistry::title('App\\Models\\StorageDevice')],
+            'App\\Models\\Peripheral' => ['index' => 120, 'title' => ModelRegistry::title('App\\Models\\Peripheral')],
+            'App\\Models\\Phone' => ['index' => 123, 'title' => ModelRegistry::title('App\\Models\\Phone')],
+            'App\\Models\\PhysicalRouter' => ['index' => 126, 'title' => ModelRegistry::title('App\\Models\\PhysicalRouter')],
+            'App\\Models\\PhysicalSwitch' => ['index' => 129, 'title' => ModelRegistry::title('App\\Models\\PhysicalSwitch')],
+            'App\\Models\\WifiTerminal' => ['index' => 132, 'title' => ModelRegistry::title('App\\Models\\WifiTerminal')],
+            'App\\Models\\PhysicalSecurityDevice' => ['index' => 135, 'title' => ModelRegistry::title('App\\Models\\PhysicalSecurityDevice')],
+            'App\\Models\\Wan' => ['index' => 138, 'title' => ModelRegistry::title('App\\Models\\Wan')],
+            'App\\Models\\Man' => ['index' => 141, 'title' => ModelRegistry::title('App\\Models\\Man')],
+            'App\\Models\\Lan' => ['index' => 144, 'title' => ModelRegistry::title('App\\Models\\Lan')],
+            'App\\Models\\Vlan' => ['index' => 147, 'title' => ModelRegistry::title('App\\Models\\Vlan')],
         ];
 
         // Fill sheet
@@ -899,27 +906,27 @@ class AuditController extends HomeController
             $sheet->setCellValue("A{$idx}", $row['title']);
             if (str_starts_with($key, 'App\\')) {
                 $sheet->setCellValue("B{$idx}", 'created');
-                $sheet->getStyle("B{$idx}")->getFill()->setFillType(\PhpOffice\PhpSpreadsheet\Style\Fill::FILL_SOLID)->getStartColor()->setARGB('FF59A14F');
-                $sheet->getStyle("A{$idx}")->getBorders()->getOutline()->setBorderStyle(\PhpOffice\PhpSpreadsheet\Style\Border::BORDER_THIN);
-                $sheet->getStyle("B{$idx}")->getBorders()->getOutline()->setBorderStyle(\PhpOffice\PhpSpreadsheet\Style\Border::BORDER_THIN);
-                $sheet->getStyle("A{$idx}")->getFill()->setFillType(\PhpOffice\PhpSpreadsheet\Style\Fill::FILL_SOLID)->getStartColor()->setARGB('FFAEC7E8');
+                $sheet->getStyle("B{$idx}")->getFill()->setFillType(Fill::FILL_SOLID)->getStartColor()->setARGB('FF59A14F');
+                $sheet->getStyle("A{$idx}")->getBorders()->getOutline()->setBorderStyle(Border::BORDER_THIN);
+                $sheet->getStyle("B{$idx}")->getBorders()->getOutline()->setBorderStyle(Border::BORDER_THIN);
+                $sheet->getStyle("A{$idx}")->getFill()->setFillType(Fill::FILL_SOLID)->getStartColor()->setARGB('FFAEC7E8');
                 $idx++;
                 $sheet->setCellValue("B{$idx}", 'updated');
-                $sheet->getStyle("B{$idx}")->getFill()->setFillType(\PhpOffice\PhpSpreadsheet\Style\Fill::FILL_SOLID)->getStartColor()->setARGB('FFF28E2B');
-                $sheet->getStyle("A{$idx}")->getBorders()->getOutline()->setBorderStyle(\PhpOffice\PhpSpreadsheet\Style\Border::BORDER_THIN);
-                $sheet->getStyle("B{$idx}")->getBorders()->getOutline()->setBorderStyle(\PhpOffice\PhpSpreadsheet\Style\Border::BORDER_THIN);
-                $sheet->getStyle("A{$idx}")->getFill()->setFillType(\PhpOffice\PhpSpreadsheet\Style\Fill::FILL_SOLID)->getStartColor()->setARGB('FFAEC7E8');
+                $sheet->getStyle("B{$idx}")->getFill()->setFillType(Fill::FILL_SOLID)->getStartColor()->setARGB('FFF28E2B');
+                $sheet->getStyle("A{$idx}")->getBorders()->getOutline()->setBorderStyle(Border::BORDER_THIN);
+                $sheet->getStyle("B{$idx}")->getBorders()->getOutline()->setBorderStyle(Border::BORDER_THIN);
+                $sheet->getStyle("A{$idx}")->getFill()->setFillType(Fill::FILL_SOLID)->getStartColor()->setARGB('FFAEC7E8');
                 $idx++;
                 $sheet->setCellValue("B{$idx}", 'deleted');
-                $sheet->getStyle("B{$idx}")->getFill()->setFillType(\PhpOffice\PhpSpreadsheet\Style\Fill::FILL_SOLID)->getStartColor()->setARGB('FFE15759');
-                $sheet->getStyle("A{$idx}")->getBorders()->getOutline()->setBorderStyle(\PhpOffice\PhpSpreadsheet\Style\Border::BORDER_THIN);
-                $sheet->getStyle("B{$idx}")->getBorders()->getOutline()->setBorderStyle(\PhpOffice\PhpSpreadsheet\Style\Border::BORDER_THIN);
-                $sheet->getStyle("A{$idx}")->getFill()->setFillType(\PhpOffice\PhpSpreadsheet\Style\Fill::FILL_SOLID)->getStartColor()->setARGB('FFAEC7E8');
+                $sheet->getStyle("B{$idx}")->getFill()->setFillType(Fill::FILL_SOLID)->getStartColor()->setARGB('FFE15759');
+                $sheet->getStyle("A{$idx}")->getBorders()->getOutline()->setBorderStyle(Border::BORDER_THIN);
+                $sheet->getStyle("B{$idx}")->getBorders()->getOutline()->setBorderStyle(Border::BORDER_THIN);
+                $sheet->getStyle("A{$idx}")->getFill()->setFillType(Fill::FILL_SOLID)->getStartColor()->setARGB('FFAEC7E8');
                 $idx++;
             } else {
                 $sheet->getStyle("A{$idx}")->getFont()->getColor()->setRGB('FFFFFF');
                 $sheet->getStyle("A{$idx}")->getFont()->setBold(true);
-                $sheet->getStyle("A{$idx}:O{$idx}")->getFill()->setFillType(\PhpOffice\PhpSpreadsheet\Style\Fill::FILL_SOLID)->getStartColor()->setARGB('FF1F77BE');
+                $sheet->getStyle("A{$idx}:O{$idx}")->getFill()->setFillType(Fill::FILL_SOLID)->getStartColor()->setARGB('FF1F77BE');
                 $idx++;
             }
         }
@@ -947,15 +954,15 @@ class AuditController extends HomeController
 
                 // Place value
                 $sheet->setCellValue("{$column}{$row}", $auditLog->count);
-                $sheet->getStyle("{$column}{$row}")->getBorders()->getOutline()->setBorderStyle(\PhpOffice\PhpSpreadsheet\Style\Border::BORDER_THIN);
+                $sheet->getStyle("{$column}{$row}")->getBorders()->getOutline()->setBorderStyle(Border::BORDER_THIN);
 
                 // set the color of the cell
                 if ($auditLog->description === 'updated') {
-                    $sheet->getStyle("{$column}{$row}")->getFill()->setFillType(\PhpOffice\PhpSpreadsheet\Style\Fill::FILL_SOLID)->getStartColor()->setARGB('FFF28E2B');
+                    $sheet->getStyle("{$column}{$row}")->getFill()->setFillType(Fill::FILL_SOLID)->getStartColor()->setARGB('FFF28E2B');
                 } elseif ($auditLog->description === 'deleted') {
-                    $sheet->getStyle("{$column}{$row}")->getFill()->setFillType(\PhpOffice\PhpSpreadsheet\Style\Fill::FILL_SOLID)->getStartColor()->setARGB('FFE15759');
+                    $sheet->getStyle("{$column}{$row}")->getFill()->setFillType(Fill::FILL_SOLID)->getStartColor()->setARGB('FFE15759');
                 } else {
-                    $sheet->getStyle("{$column}{$row}")->getFill()->setFillType(\PhpOffice\PhpSpreadsheet\Style\Fill::FILL_SOLID)->getStartColor()->setARGB('FF59A14F');
+                    $sheet->getStyle("{$column}{$row}")->getFill()->setFillType(Fill::FILL_SOLID)->getStartColor()->setARGB('FF59A14F');
                 }
 
                 // \Log::info("{$column}{$row} ->". $auditLog->subject_type. ', ' . $year . ', ' . $month . ', ' . $auditLog->count);
@@ -963,7 +970,7 @@ class AuditController extends HomeController
         }
 
         // Write speansheet
-        $writer = new \PhpOffice\PhpSpreadsheet\Writer\Xlsx($spreadsheet);
+        $writer = new Xlsx($spreadsheet);
         $writer->save($path);
 
         // Return
