@@ -32,6 +32,34 @@ function bringLabelsToFront(svg: SVGSVGElement): void {
     labelGroups.forEach((group) => group.parentNode?.appendChild(group));
 }
 
+// Enveloppe tous les groupes de dessin de la racine <svg> dans un <g> porteur
+// d'une transformation (translation + mise à l'échelle), afin de normaliser le
+// repère exporté (origine 0,0, unités modèle). <defs>/<style>/<title>/<metadata>
+// sont laissés à la racine : aucune géométrie à transformer, et les références
+// url(#id) doivent rester résolubles globalement.
+function normalizeExportContent(
+    svg: SVGSVGElement,
+    t: { tx: number; ty: number; k: number },
+): void {
+    const SVG_NS = 'http://www.w3.org/2000/svg';
+    const skip = new Set(['defs', 'style', 'title', 'metadata']);
+    const wrapper = svg.ownerDocument.createElementNS(SVG_NS, 'g');
+    wrapper.setAttribute('transform', `translate(${t.tx} ${t.ty}) scale(${t.k})`);
+
+    // Snapshot des enfants avant déplacement (childNodes est vivant).
+    Array.from(svg.childNodes).forEach((node) => {
+        if (
+            node.nodeType === globalThis.Node.ELEMENT_NODE &&
+            skip.has((node as Element).tagName.toLowerCase())
+        ) {
+            return;
+        }
+        wrapper.appendChild(node);
+    });
+
+    svg.appendChild(wrapper);
+}
+
 async function embedImagesInSVG(svg: SVGSVGElement): Promise<void> {
     const images = Array.from(svg.querySelectorAll('image'));
     await Promise.all(images.map(async (img) => {
@@ -77,17 +105,39 @@ export async function downloadGraphSVG(graph: Graph): Promise<void> {
     svgClone.setAttribute('xmlns:xlink', XLINK_NS);
 
     const margin = 20;
+    const scale = graph.getView().scale || 1;
     const bounds = graph.getGraphBounds();
-    const x = Math.floor(bounds.x) - margin;
-    const y = Math.floor(bounds.y) - margin;
-    const width = Math.ceil(bounds.width) + margin * 2;
-    const height = Math.ceil(bounds.height) + margin * 2;
-    svgClone.setAttribute('viewBox', `${x} ${y} ${width} ${height}`);
-    svgClone.setAttribute('width', String(width));
-    svgClone.setAttribute('height', String(height));
+
+    // getGraphBounds() renvoie des coordonnées « vue » (déjà multipliées par
+    // view.scale et décalées par view.translate). On les ramène en coordonnées
+    // « modèle » (division par l'échelle) pour obtenir des dimensions réelles,
+    // indépendantes du zoom courant, et on normalise l'origine du viewBox à
+    // (0,0) : un lecteur externe peut alors lire width/height et recalculer un
+    // cadre sans se soucier d'un décalage d'origine.
+    const modelWidth = bounds.width / scale;
+    const modelHeight = bounds.height / scale;
+    const vbWidth = Math.max(1, Math.ceil(modelWidth) + margin * 2);
+    const vbHeight = Math.max(1, Math.ceil(modelHeight) + margin * 2);
+
+    svgClone.setAttribute('viewBox', `0 0 ${vbWidth} ${vbHeight}`);
+    svgClone.setAttribute('width', String(vbWidth));
+    svgClone.setAttribute('height', String(vbHeight));
 
     bringLabelsToFront(svgClone);
     await embedImagesInSVG(svgClone);
+
+    // Le contenu dessiné par MaxGraph est en coordonnées « vue ». On l'enveloppe
+    // dans un groupe qui (a) le ramène à l'échelle 1 (scale 1/scale) et (b) le
+    // translate pour que le coin haut-gauche du graphe tombe sur (margin,margin)
+    // dans le repère normalisé. <defs>/<style> restent hors du groupe : ce sont
+    // des définitions globales (url(#id)) sans géométrie à transformer.
+    if (modelWidth > 0 && modelHeight > 0) {
+        normalizeExportContent(svgClone, {
+            tx: margin - bounds.x / scale,
+            ty: margin - bounds.y / scale,
+            k: 1 / scale,
+        });
+    }
 
     const serializer = new XMLSerializer();
     const svgString = serializer.serializeToString(svgClone);
