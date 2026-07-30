@@ -2,6 +2,7 @@
 
 namespace App\Services\QueryEngine;
 
+use App\Support\ModelRegistry;
 use Illuminate\Database\Eloquent\Relations\Relation;
 use Illuminate\Support\Str;
 use ReflectionClass;
@@ -25,7 +26,7 @@ class QueryEngineIntrospector
         }
 
         // Nom court PascalCase — usage interne depuis getRelations() (class_basename)
-        $fqcn = self::MODEL_NAMESPACE . $classOrShortName;
+        $fqcn = self::MODEL_NAMESPACE.$classOrShortName;
         if (class_exists($fqcn)) {
             return $fqcn;
         }
@@ -40,13 +41,13 @@ class QueryEngineIntrospector
      */
     public static function describe(string $modelName): array
     {
-        $class    = self::resolveModelClass($modelName);
+        $class = self::resolveModelClass($modelName);
         $instance = new $class;
 
         return [
-            'model'     => $modelName,
-            'table'     => $instance->getTable(),
-            'fields'    => self::getFillable($class),
+            'model' => $modelName,
+            'table' => $instance->getTable(),
+            'fields' => self::getFillable($class),
             'relations' => self::getRelations($class),
         ];
     }
@@ -57,7 +58,7 @@ class QueryEngineIntrospector
      */
     public static function getRelations(string $class): array
     {
-        $instance  = new $class;
+        $instance = new $class;
         $relations = [];
 
         foreach ((new ReflectionClass($instance))->getMethods(ReflectionMethod::IS_PUBLIC) as $method) {
@@ -82,9 +83,9 @@ class QueryEngineIntrospector
                     }
 
                     $relations[] = [
-                        'name'    => Str::snake($method->getName()),   // logical_servers
-                        'method'  => $method->getName(),               // logicalServers (usage interne)
-                        'type'    => class_basename($result),
+                        'name' => Str::snake($method->getName()),   // logical_servers
+                        'method' => $method->getName(),               // logicalServers (usage interne)
+                        'type' => class_basename($result),
                         'related' => $related,
                     ];
                 }
@@ -111,7 +112,7 @@ class QueryEngineIntrospector
             }
         }
 
-        abort(422, "Relation [{$relationName}] introuvable sur [" . class_basename($class) . "].");
+        abort(422, "Relation [{$relationName}] introuvable sur [".class_basename($class).'].');
     }
 
     /**
@@ -134,8 +135,8 @@ class QueryEngineIntrospector
     public static function validateField(string $class, string $field): void
     {
         $instance = new $class;
-        $table    = $instance->getTable();
-        $allowed  = self::getFillable($class);
+        $table = $instance->getTable();
+        $allowed = self::getFillable($class);
 
         abort_if(
             ! in_array($field, $allowed, true),
@@ -150,9 +151,7 @@ class QueryEngineIntrospector
      */
     public static function modelToApiName(string $modelName): string
     {
-        return $modelName === 'Application'
-            ? 'applications'
-            : Str::plural(Str::snake($modelName, '-'));
+        return ModelRegistry::slug($modelName);
     }
 
     /**
@@ -178,12 +177,14 @@ class QueryEngineIntrospector
         // FQCN interne uniquement (traversée récursive)
         if (str_contains($modelName, '\\')) {
             abort_if(! class_exists($modelName), 404, "Classe [{$modelName}] introuvable.");
+
             return $modelName;
         }
 
         // Slug API uniquement — le nom de classe court est interdit
         $short = self::apiNameToModelName($modelName); // abort 404 si inconnu
-        return self::MODEL_NAMESPACE . $short;
+
+        return self::MODEL_NAMESPACE.$short;
     }
 
     /**
@@ -191,28 +192,10 @@ class QueryEngineIntrospector
      */
     protected static function listModelClasses(): array
     {
-        $path    = base_path('app/Models');
-        $classes = [];
-
-        foreach (glob("{$path}/*.php") as $file) {
-            $modelName = basename($file, '.php');
-            $class     = self::MODEL_NAMESPACE . $modelName;
-
-            if (! class_exists($class)) {
-                continue;
-            }
-            if ((new ReflectionClass($class))->isAbstract()) {
-                continue;
-            }
-
-            if (in_array($modelName, self::EXCLUDED_MODELS)) {
-                continue;
-            }
-
-            $classes[] = $modelName;
-        }
-
-        return $classes;
+        return array_map(
+            fn (string $class) => class_basename($class),
+            ModelRegistry::allConcreteModels()
+        );
     }
 
     /**

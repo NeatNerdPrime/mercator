@@ -4,66 +4,31 @@ namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
 use App\Models\Cartographer;
+use App\Support\ModelRegistry;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
 
 class GlobalSearchController extends Controller
 {
-    private $models = [
-        'Entity' => 'cruds.entity.title',
-        'Relation' => 'cruds.relation.title',
-        'Process' => 'cruds.process.title',
-        'Operation' => 'cruds.operation.title',
-        'Actor' => 'cruds.actor.title',
-        'Activity' => 'cruds.activity.title',
-        'Task' => 'cruds.task.title',
-        'Information' => 'cruds.information.title',
-        'ApplicationBlock' => 'cruds.applicationBlock.title',
-        'Application' => 'cruds.application.title',
-        'ApplicationService' => 'cruds.applicationService.title',
-        'Database' => 'cruds.database.title',
-        'ApplicationFlow' => 'cruds.applicationFlow.title',
-        'ZoneAdmin' => 'cruds.zoneAdmin.title',
-        'Annuaire' => 'cruds.annuaire.title',
-        'ForestAd' => 'cruds.forestAd.title',
-        'Domain' => 'cruds.domain.title',
-        'Network' => 'cruds.network.title',
-        'Subnetwork' => 'cruds.subnetwork.title',
-        'Gateway' => 'cruds.gateway.title',
-        'ExternalConnectedEntity' => 'cruds.externalConnectedEntity.title',
-        'NetworkSwitch' => 'cruds.networkSwitch.title',
-        'Router' => 'cruds.router.title',
-        'SecurityDevice' => 'cruds.securityDevice.title',
-        'DhcpServer' => 'cruds.dhcpServer.title',
-        'Dnsserver' => 'cruds.dnsserver.title',
-        'LogicalServer' => 'cruds.logicalServer.title',
-        'Site' => 'cruds.site.title',
-        'Building' => 'cruds.building.title',
-        'Bay' => 'cruds.bay.title',
-        'PhysicalServer' => 'cruds.physicalServer.title',
-        'Workstation' => 'cruds.workstation.title',
-        'StorageDevice' => 'cruds.storageDevice.title',
-        'Peripheral' => 'cruds.peripheral.title',
-        'Phone' => 'cruds.phone.title',
-        'PhysicalSwitch' => 'cruds.physicalSwitch.title',
-        'PhysicalRouter' => 'cruds.physicalRouter.title',
-        'WifiTerminal' => 'cruds.wifiTerminal.title',
-        'PhysicalSecurityDevice' => 'cruds.physicalSecurityDevice.title',
-        'Wan' => 'cruds.wan.title',
-        'Man' => 'cruds.man.title',
-        'Lan' => 'cruds.lan.title',
-        'Vlan' => 'cruds.vlan.title',
-        'ApplicationModule' => 'cruds.applicationModule.title',
-        'MacroProcessus' => 'cruds.macroProcessus.title',
-        'Certificate' => 'cruds.certificate.title',
-        'DataProcessing' => 'cruds.dataProcessing.title',
-        'SecurityControl' => 'cruds.securityControl.title',
-        'LogicalFlow' => 'cruds.logicalFlow.title',
-        'Graph' => 'cruds.graph.title',
-        'Container' => 'cruds.container.title',
-        'Cluster' => 'cruds.cluster.title',
+    /** Whitelist of models offered by the global search — short name => registry-resolved title. */
+    private const MODEL_SHORT_NAMES = [
+        'Entity', 'Relation', 'Process', 'Operation', 'Actor', 'Activity', 'Task', 'Information',
+        'ApplicationBlock', 'Application', 'ApplicationService', 'Database', 'ApplicationFlow',
+        'ZoneAdmin', 'Annuaire', 'ForestAd', 'Domain', 'Network', 'Subnetwork', 'Gateway',
+        'ExternalConnectedEntity', 'NetworkSwitch', 'Router', 'SecurityDevice', 'DhcpServer',
+        'Dnsserver', 'LogicalServer', 'Site', 'Building', 'Bay', 'PhysicalServer', 'Workstation',
+        'StorageDevice', 'Peripheral', 'Phone', 'PhysicalSwitch', 'PhysicalRouter', 'WifiTerminal',
+        'PhysicalSecurityDevice', 'Wan', 'Man', 'Lan', 'Vlan', 'ApplicationModule', 'MacroProcessus',
+        'Certificate', 'DataProcessing', 'SecurityControl', 'LogicalFlow', 'Graph', 'Container', 'Cluster',
     ];
+
+    private array $models;
+
+    public function __construct()
+    {
+        $this->models = ModelRegistry::titlesMapByShortName(self::MODEL_SHORT_NAMES);
+    }
 
     public function search(Request $request)
     {
@@ -77,7 +42,7 @@ class GlobalSearchController extends Controller
 
         $driver = DB::connection()->getDriverName();
 
-        foreach ($this->models as $model => $translation) {
+        foreach ($this->models as $model => $title) {
             $modelClass = 'App\\Models\\'.$model;
 
             $fields = property_exists($modelClass, 'searchable') ? $modelClass::$searchable : [];
@@ -113,10 +78,10 @@ class GlobalSearchController extends Controller
                     'instance' => $result,
                     'data' => $result->only($fields),
                     'model' => $model,
-                    'name' => trans($translation),
+                    'name' => $title,
                     'fields' => $fields,
                     'fields_formated' => $formattedFields,
-                    'url' => '/admin/'.Str::plural(Str::snake($model, '-')).'/'.$result->getKey(),
+                    'url' => '/admin/'.ModelRegistry::slug($model).'/'.$result->getKey(),
                 ];
             }
         }
