@@ -200,7 +200,7 @@ class MonarcExportService
         'Zone' => 'cruds.zone.title',
         'Entity' => 'cruds.entity.title',
         'Relation' => 'cruds.relation.title',
-        'Domain' => 'cruds.domaine.title', // legacy FR translation key, not a typo
+        'Domain' => 'cruds.domain.title',
         'ForestAd' => 'cruds.forestAd.title',
         'Annuaire' => 'cruds.annuaire.title',
         'ZoneAdmin' => 'cruds.zoneAdmin.title',

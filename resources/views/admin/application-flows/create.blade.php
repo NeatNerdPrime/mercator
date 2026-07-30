@@ -1,7 +1,7 @@
 @extends('layouts.admin')
 
 @section('title')
-    {{ trans('global.create') }} {{ trans('cruds.flux.title_singular') }}
+    {{ trans('global.create') }} {{ trans('cruds.applicationFlow.title_singular') }}
 @endsection
 
 @section('content')
@@ -9,14 +9,14 @@
         @csrf
         <div class="card">
             <div class="card-header">
-                {{ trans('global.create') }} {{ trans('cruds.flux.title_singular') }}
+                {{ trans('global.create') }} {{ trans('cruds.applicationFlow.title_singular') }}
             </div>
 
             <div class="card-body">
                 <div class="row">
                     <div class="col-sm-3">
                         <div class="form-group">
-                            <label class="label-required" for="name">{{ trans('cruds.flux.fields.name') }}</label>
+                            <label class="label-required" for="name">{{ trans('cruds.applicationFlow.fields.name') }}</label>
                             <input class="form-control {{ $errors->has('name') ? 'is-invalid' : '' }}" type="text"
                                    name="name" id="name" value="{{ old('name', '') }}" required autofocus/>
                             @if($errors->has('name'))
@@ -24,13 +24,13 @@
                                     {{ $errors->first('name') }}
                                 </div>
                             @endif
-                            <span class="help-block">{{ trans('cruds.flux.fields.name_helper') }}</span>
+                            <span class="help-block">{{ trans('cruds.applicationFlow.fields.name_helper') }}</span>
                         </div>
                     </div>
                     <div class="col-sm-3">
 
                         <div class="form-group">
-                            <label for="name">{{ trans('cruds.flux.fields.nature') }}</label>
+                            <label for="name">{{ trans('cruds.applicationFlow.fields.nature') }}</label>
                             <select class="form-control select2-free {{ $errors->has('nature') ? 'is-invalid' : '' }}"
                                     name="nature" id="nature">
                                 @if (!$nature_list->contains(old('nature')))
@@ -45,13 +45,13 @@
                                     {{ $errors->first('nature') }}
                                 </div>
                             @endif
-                            <span class="help-block">{{ trans('cruds.flux.fields.nature_helper') }}</span>
+                            <span class="help-block">{{ trans('cruds.applicationFlow.fields.nature_helper') }}</span>
                         </div>
                     </div>
 
                     <div class="col-sm-6">
                         <div class="form-group">
-                            <label for="attributes">{{ trans('cruds.flux.fields.attributes') }}</label>
+                            <label for="attributes">{{ trans('cruds.applicationFlow.fields.attributes') }}</label>
                             <select class="form-control select2-free-tags {{ $errors->has('attributes') ? 'is-invalid' : '' }}"
                                     name="attributes[]" id="attributes" multiple>
                                 @foreach($attributes_list as $a)
@@ -63,7 +63,7 @@
                                     {{ $errors->first('attributes') }}
                                 </div>
                             @endif
-                            <span class="help-block">{{ trans('cruds.flux.fields.attributes_helper') }}</span>
+                            <span class="help-block">{{ trans('cruds.applicationFlow.fields.attributes_helper') }}</span>
                         </div>
                     </div>
                 </div>
@@ -72,7 +72,7 @@
                     <div class="col-sm">
                         <div class="form-group">
                             <label class="label-maturity-1"
-                                   for="description">{{ trans('cruds.flux.fields.description') }}</label>
+                                   for="description">{{ trans('cruds.applicationFlow.fields.description') }}</label>
                             <textarea
                                     class="form-control ckeditor {{ $errors->has('description') ? 'is-invalid' : '' }}"
                                     name="description" id="description">{{ old('description') }}</textarea>
@@ -81,7 +81,7 @@
                                     {{ $errors->first('description') }}
                                 </div>
                             @endif
-                            <!-- <span class="help-block">{{ trans('cruds.flux.fields.description_helper') }}</span> -->
+                            <!-- <span class="help-block">{{ trans('cruds.applicationFlow.fields.description_helper') }}</span> -->
                         </div>
                     </div>
                 </div>
@@ -89,7 +89,7 @@
                 <div class="row">
                     <div class="col-sm">
                         <div class="form-group">
-                            <label class="label-required" for="name">{{ trans('cruds.flux.fields.source') }}</label>
+                            <label class="label-required" for="name">{{ trans('cruds.applicationFlow.fields.source') }}</label>
                             <select class="form-control select2 {{ $errors->has('dest_id') ? 'is-invalid' : '' }}"
                                     name="src_id" id="src_id">
                                 <option></option>
@@ -102,12 +102,12 @@
                                     {{ $errors->first('src_id') }}
                                 </div>
                             @endif
-                            <span class="help-block">{{ trans('cruds.flux.fields.source_helper') }}</span>
+                            <span class="help-block">{{ trans('cruds.applicationFlow.fields.source_helper') }}</span>
                         </div>
                     </div>
                     <div class="col-sm">
                         <div class="form-group">
-                            <label class="label-required" for="name">{{ trans('cruds.flux.fields.destination') }}</label>
+                            <label class="label-required" for="name">{{ trans('cruds.applicationFlow.fields.destination') }}</label>
                             <select class="form-control select2 {{ $errors->has('dest_id') ? 'is-invalid' : '' }}"
                                     name="dest_id" id="dest_id">
                                 <option></option>
@@ -120,7 +120,7 @@
                                     {{ $errors->first('dest_id') }}
                                 </div>
                             @endif
-                            <span class="help-block">{{ trans('cruds.flux.fields.destination_helper') }}</span>
+                            <span class="help-block">{{ trans('cruds.applicationFlow.fields.destination_helper') }}</span>
                         </div>
                     </div>
                 </div>
@@ -148,23 +148,23 @@
                 <div class="row">
                     <div class="col-sm-2">
                         <div class="form-check">
-                            <label for="crypted">{{ trans('cruds.flux.fields.crypted') }}</label>
+                            <label for="crypted">{{ trans('cruds.applicationFlow.fields.crypted') }}</label>
                             <div class="form-switch">
                                 <input class="form-check-input" type="checkbox" id="crypted" name="crypted"
                                        value="1" {{ old('crypted') ? 'checked' : '' }}>
                                 <label class="form-check-label"
-                                       for="crypted">{{ trans('cruds.flux.fields.crypted_helper') }}</label>
+                                       for="crypted">{{ trans('cruds.applicationFlow.fields.crypted_helper') }}</label>
                             </div>
                         </div>
                     </div>
                     <div class="col-sm-2">
                         <div class="form-check">
-                            <label for="bidirectional">{{ trans('cruds.flux.fields.bidirectional') }}</label>
+                            <label for="bidirectional">{{ trans('cruds.applicationFlow.fields.bidirectional') }}</label>
                             <div class="form-switch">
                                 <input class="form-check-input" type="checkbox" id="bidirectional" name="bidirectional"
                                        value="1" {{ old('bidirectional') ? 'checked' : '' }}>
                                 <label class="form-check-label"
-                                       for="bidirectional">{{ trans('cruds.flux.fields.bidirectional_helper') }}</label>
+                                       for="bidirectional">{{ trans('cruds.applicationFlow.fields.bidirectional_helper') }}</label>
                             </div>
                         </div>
                     </div>

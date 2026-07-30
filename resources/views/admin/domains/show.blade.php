@@ -37,7 +37,7 @@
 
 <div class="card">
     <div class="card-header">
-        {{ trans('global.show') }} {{ trans('cruds.domaine.title') }}
+        {{ trans('global.show') }} {{ trans('cruds.domain.title') }}
     </div>
     <div class="card-body">
         @include('admin.domains._details', [

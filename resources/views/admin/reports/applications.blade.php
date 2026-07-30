@@ -214,11 +214,11 @@
         <br>
         <div class="card">
             <div class="card-header">
-                {{ trans("cruds.flux.title") }}
+                {{ trans("cruds.applicationFlow.title") }}
             </div>
 
             <div class="card-body">
-                <p>{{ trans("cruds.flux.description") }}</p>
+                <p>{{ trans("cruds.applicationFlow.description") }}</p>
                 @foreach($flows as $flow)
                     <div class="row">
                         <div class="col">

@@ -159,7 +159,7 @@ barChart: {
   @endcanAccess
   @canAccess(\App\Models\ApplicationFlow::class)
   @php $d = array_fill(0, $gi, 0); if ($appIdx >= 0) $d[$appIdx] = $flows; @endphp
-  { label: "{!! trans('cruds.flux.title') !!}", data: [{{ implode(', ', $d) }}], value: {!! $flows !!}, url: "/admin/application-flows" },
+  { label: "{!! trans('cruds.applicationFlow.title') !!}", data: [{{ implode(', ', $d) }}], value: {!! $flows !!}, url: "/admin/application-flows" },
   @endcanAccess
   @canAccess(\App\Models\ZoneAdmin::class)
   @php $d = array_fill(0, $gi, 0); if ($adminIdx >= 0) $d[$adminIdx] = $zones_ad; @endphp
@@ -175,7 +175,7 @@ barChart: {
   @endcanAccess
   @canAccess(\App\Models\Domain::class)
   @php $d = array_fill(0, $gi, 0); if ($adminIdx >= 0) $d[$adminIdx] = $domains; @endphp
-  { label: "{!! trans('cruds.domaine.title_short') !!}", data: [{{ implode(', ', $d) }}], value: {!!$domains!!}, url: "/admin/domains" },
+  { label: "{!! trans('cruds.domain.title_short') !!}", data: [{{ implode(', ', $d) }}], value: {!!$domains!!}, url: "/admin/domains" },
   @endcanAccess
   @canAccess(\App\Models\Network::class)
   @php $d = array_fill(0, $gi, 0); if ($infraIdx >= 0) $d[$infraIdx] = $networks; @endphp
@@ -350,7 +350,7 @@ var topTags = [
     {group:"{!! trans('cruds.menu.application.title') !!}", tag:"{!! trans('cruds.database.title') !!}" , num:{!! $databases !!}, url: "/admin/databases" },
     @endcanAccess
     @canAccess(\App\Models\ApplicationFlow::class)
-    {group:"{!! trans('cruds.menu.application.title') !!}", tag:"{!! trans('cruds.flux.title') !!}" , num:{!! $flows !!}, url: "/admin/application-flows" },
+    {group:"{!! trans('cruds.menu.application.title') !!}", tag:"{!! trans('cruds.applicationFlow.title') !!}" , num:{!! $flows !!}, url: "/admin/application-flows" },
     @endcanAccess
     @endcanAccessAny
     @canAccessAny(\App\Models\ZoneAdmin::class, \App\Models\Annuaire::class, \App\Models\ForestAd::class, \App\Models\Domain::class)
@@ -364,7 +364,7 @@ var topTags = [
     {group:"{!! trans('cruds.menu.administration.title_short') !!}", tag:"{!! trans('cruds.forestAd.title_short') !!}" , num:{!!$forests!!}, url: "/admin/forest-ads" },
     @endcanAccess
     @canAccess(\App\Models\Domain::class)
-    {group:"{!! trans('cruds.menu.administration.title_short') !!}", tag:"{!! trans('cruds.domaine.title_short') !!}" , num:{!!$domains!!}, url: "/admin/domains" },
+    {group:"{!! trans('cruds.menu.administration.title_short') !!}", tag:"{!! trans('cruds.domain.title_short') !!}" , num:{!!$domains!!}, url: "/admin/domains" },
     @endcanAccess
     @endcanAccessAny
     @canAccessAny(\App\Models\Network::class, \App\Models\Subnetwork::class, \App\Models\Gateway::class, \App\Models\ExternalConnectedEntity::class, \App\Models\NetworkSwitch::class, \App\Models\Router::class, \App\Models\SecurityDevice::class, \App\Models\Cluster::class, \App\Models\LogicalServer::class, \App\Models\Container::class, \App\Models\Vlan::class, \App\Models\Certificate::class)

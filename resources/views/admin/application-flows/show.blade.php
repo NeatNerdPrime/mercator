@@ -34,7 +34,7 @@
     </div>
     <div class="card">
         <div class="card-header">
-            {{ trans('global.show') }} {{ trans('cruds.flux.title') }}
+            {{ trans('global.show') }} {{ trans('cruds.applicationFlow.title') }}
         </div>
         <div class="card-body">
             @include('admin.application-flows._details', [

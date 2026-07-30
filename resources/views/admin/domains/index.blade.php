@@ -1,7 +1,7 @@
 @extends('layouts.admin')
 
 @section('title')
-    {{ trans('cruds.domaine.title_singular') }} {{ trans('global.list') }}
+    {{ trans('cruds.domain.title_singular') }} {{ trans('global.list') }}
 @endsection
 
 @section('content')
@@ -9,14 +9,14 @@
         <div style="margin-bottom: 10px;" class="row">
             <div class="col-lg-12">
                 <a id="btn-new" class="btn btn-success" href="{{ route("admin.domains.create") }}">
-                    {{ trans('global.add') }} {{ trans('cruds.domaine.title_singular') }}
+                    {{ trans('global.add') }} {{ trans('cruds.domain.title_singular') }}
                 </a>
             </div>
         </div>
     @endcan
     <div class="card">
         <div class="card-header">
-            {{ trans('cruds.domaine.title_singular') }} {{ trans('global.list') }}
+            {{ trans('cruds.domain.title_singular') }} {{ trans('global.list') }}
         </div>
 
         <div class="card-body">
@@ -28,25 +28,25 @@
 
                         </th>
                         <th>
-                            {{ trans('cruds.domaine.fields.name') }}
+                            {{ trans('cruds.domain.fields.name') }}
                         </th>
                         <th>
-                            {{ trans('cruds.domaine.title') }}
+                            {{ trans('cruds.domain.title') }}
                         </th>
                         <th>
-                            {{ trans('cruds.domaine.fields.domain_ctrl_cnt') }}
+                            {{ trans('cruds.domain.fields.domain_ctrl_cnt') }}
                         </th>
                         <th>
-                            {{ trans('cruds.domaine.fields.user_count') }}
+                            {{ trans('cruds.domain.fields.user_count') }}
                         </th>
                         <th>
-                            {{ trans('cruds.domaine.fields.machine_count') }}
+                            {{ trans('cruds.domain.fields.machine_count') }}
                         </th>
                         <th>
-                            {{ trans('cruds.domaine.fields.relation_inter_domaine') }}
+                            {{ trans('cruds.domain.fields.relation_inter_domaine') }}
                         </th>
                         <th data-column="description">
-                            {{ trans('cruds.domaine.fields.description') }}
+                            {{ trans('cruds.domain.fields.description') }}
                         </th>
                         <th>
                             &nbsp;
@@ -133,7 +133,7 @@
     <script>
         @include('partials.datatable', array(
             'id' => '#dataTable',
-            'title' => trans("cruds.domaine.title_singular"),
+            'title' => trans("cruds.domain.title_singular"),
             'URL' => route('admin.domains.massDestroy'),
             'canDelete' => auth()->user()->can('domain_delete') ? true : false,
     'serverSidePagination' => true,

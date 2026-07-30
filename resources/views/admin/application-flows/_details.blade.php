@@ -6,7 +6,7 @@
     <tbody>
     <tr>
         <th width="10%">
-            {{ trans('cruds.flux.fields.name') }}
+            {{ trans('cruds.applicationFlow.fields.name') }}
         </th>
         <td width="30%">
         @if ($withLink)
@@ -20,13 +20,13 @@
         @endif
         </td>
         <th width="10%">
-            {{ trans('cruds.flux.fields.nature') }}
+            {{ trans('cruds.applicationFlow.fields.nature') }}
         </th>
         <td width="20%">
             {{ $flow->nature }}
         </td>
         <th width="10%">
-            {{ trans('cruds.flux.fields.attributes') }}
+            {{ trans('cruds.applicationFlow.fields.attributes') }}
         </th>
         <td width="20%">
             @foreach(explode(" ",$flow->attributes) as $attribute)
@@ -36,7 +36,7 @@
     </tr>
     <tr>
         <th>
-            {{ trans('cruds.flux.fields.description') }}
+            {{ trans('cruds.applicationFlow.fields.description') }}
         </th>
         <td colspan="5">
             {!! $flow->description !!}
@@ -46,7 +46,7 @@
     @canAccessAny(App\Models\Application::class, App\Models\ApplicationService::class, App\Models\ApplicationModule::class, App\Models\Database::class)
     <tr>
         <th>
-            {{ trans('cruds.flux.fields.source') }}
+            {{ trans('cruds.applicationFlow.fields.source') }}
         </th>
         <td colspan="1">
             @if ($flow->applicationSource!=null)
@@ -84,7 +84,7 @@
         </td>
 
         <th>
-            {{ trans('cruds.flux.fields.destination') }}
+            {{ trans('cruds.applicationFlow.fields.destination') }}
         </th>
         <td colspan="3">
             @if ($flow->applicationDest!=null)
@@ -125,7 +125,7 @@
     @canAccess(App\Models\Information::class)
     <tr>
         <th>
-            {{ trans('cruds.flux.fields.information') }}
+            {{ trans('cruds.applicationFlow.fields.information') }}
         </th>
         <td colspan="5">
             @foreach($flow->informations as $info)
@@ -141,7 +141,7 @@
     @endcanAccess
     <tr>
         <th>
-            {{ trans('cruds.flux.fields.crypted') }}
+            {{ trans('cruds.applicationFlow.fields.crypted') }}
         </th>
         <td>
             @if ($flow->crypted==0)
@@ -151,7 +151,7 @@
             @endif
         </td>
         <th>
-            {{ trans('cruds.flux.fields.bidirectional') }}
+            {{ trans('cruds.applicationFlow.fields.bidirectional') }}
         </th>
         <td colspan="3">
             @if ($flow->bidirectional==0)

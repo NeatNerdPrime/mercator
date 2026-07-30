@@ -177,7 +177,7 @@
                 @endcanAccess
                 @canAccess(\App\Models\ApplicationFlow::class)
                 <tr>
-                    <td><a href="/admin/fluxes">{{ trans("cruds.flux.title") }}</a></td>
+                    <td><a href="/admin/fluxes">{{ trans("cruds.applicationFlow.title") }}</a></td>
                     <td><center>{{ $flows }}</center></td>
                     <td><center>{{ $flows_lvl1 }}</center></td>
                     <td><center>{{ $flows>0 ? number_format($flows_lvl1*100/$flows,0):0 }}%</center></td>
@@ -225,7 +225,7 @@
                 @endcanAccess
                 @canAccess(\App\Models\Domain::class)
                 <tr>
-                    <td><a href="/admin/domains">{{ trans("cruds.domaine.title") }}</a></td>
+                    <td><a href="/admin/domains">{{ trans("cruds.domain.title") }}</a></td>
                     <td><center>{{ $domains }}</center></td>
                     <td><center>{{ $domaines_lvl1 }}</center></td>
                     <td><center>{{ $domains>0 ? number_format($domaines_lvl1*100/$domains,0):0 }}%</center></td>

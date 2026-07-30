@@ -78,7 +78,7 @@
         @include('admin.roles.partials._group', ['permission' => $permissions_sorted['application_service'], 'label' => trans('cruds.applicationService.title')])
         @include('admin.roles.partials._group', ['permission' => $permissions_sorted['application_module'],  'label' => trans('cruds.applicationModule.title')])
         @include('admin.roles.partials._group', ['permission' => $permissions_sorted['database'],            'label' => trans('cruds.database.title')])
-        @include('admin.roles.partials._group', ['permission' => $permissions_sorted['application_flow'],                'label' => trans('cruds.flux.title')])
+        @include('admin.roles.partials._group', ['permission' => $permissions_sorted['application_flow'],                'label' => trans('cruds.applicationFlow.title')])
     </div></div>
 
     {{-- Administration --}}
@@ -87,7 +87,7 @@
         @include('admin.roles.partials._group', ['permission' => $permissions_sorted['zone_admin'],  'label' => trans('cruds.zoneAdmin.title')])
         @include('admin.roles.partials._group', ['permission' => $permissions_sorted['annuaire'],    'label' => trans('cruds.annuaire.title')])
         @include('admin.roles.partials._group', ['permission' => $permissions_sorted['forest_ad'],   'label' => trans('cruds.forestAd.title')])
-        @include('admin.roles.partials._group', ['permission' => $permissions_sorted['domain'],  'label' => trans('cruds.domaine.title')])
+        @include('admin.roles.partials._group', ['permission' => $permissions_sorted['domain'],  'label' => trans('cruds.domain.title')])
         @include('admin.roles.partials._group', ['permission' => $permissions_sorted['admin_user'],  'label' => trans('cruds.adminUser.title')])
     </div></div>
 

@@ -174,7 +174,7 @@
                 @canAccess(\App\Models\ApplicationFlow::class)
                     <a href="{{ route('admin.application-flows.index') }}"
                        class="ps-4 {{ request()->is('admin/fluxes*') ? 'active' : '' }}">
-                        <i class="bi bi-list-columns"></i><span class="menu-text">{{ trans('cruds.flux.title') }}</span>
+                        <i class="bi bi-list-columns"></i><span class="menu-text">{{ trans('cruds.applicationFlow.title') }}</span>
                     </a>
                 @endcanAccess
             </div>
@@ -216,7 +216,7 @@
                     <a href="{{ route('admin.domains.index') }}"
                        class="ps-4 {{ request()->is('admin/domains*') ? 'active' : '' }}">
                         <i class="bi bi-list-columns"></i><span
-                                class="menu-text">{{ trans('cruds.domaine.title') }}</span>
+                                class="menu-text">{{ trans('cruds.domain.title') }}</span>
                     </a>
                 @endcanAccess
                 @canAccess(\App\Models\AdminUser::class)
