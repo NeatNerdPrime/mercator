@@ -507,7 +507,7 @@
 
         const container = document.getElementById('graph-container');
         const top        = container.getBoundingClientRect().top;
-        const maxBottom  = window.innerHeight * 0.75;
+        const maxBottom  = window.innerHeight * 0.9;
         container.style.height = Math.max(200, Math.floor(maxBottom - top)) + 'px';
     }
 
