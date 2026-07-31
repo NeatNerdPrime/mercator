@@ -489,11 +489,58 @@
                 images: uniqueImages.map(img => ({ path: img, width: '64px', height: '64px' }))
             }
         );
+        resetZoom();
 
         show('graph-container');
         show('graph-footer');
         document.getElementById('graph-resize-handle').style.setProperty('display', 'block');
+        requestAnimationFrame(() => adjustGraphHeight());
     }
+
+    // ─── Hauteur dynamique du conteneur de graphe ─────────────────────────────
+    // Passe à true dès que l'utilisateur redimensionne manuellement via la poignée :
+    // on cesse alors tout ajustement automatique pour respecter son choix.
+    let userResizedGraph = false;
+
+    function adjustGraphHeight() {
+        if (userResizedGraph) return;
+
+        const container = document.getElementById('graph-container');
+        const handle     = document.getElementById('graph-resize-handle');
+        const footer     = document.getElementById('graph-footer');
+
+        const top          = container.getBoundingClientRect().top;
+        const handleH      = handle.offsetHeight;
+        const footerH      = footer.offsetHeight;
+        const bottomMargin = 16;
+
+        const available = window.innerHeight - top - handleH - footerH - bottomMargin;
+        container.style.height = Math.max(200, Math.floor(available)) + 'px';
+    }
+
+    // ─── Zoom (Ctrl + molette) ─────────────────────────────────────────────────
+    // NB : on scale le <div id="graph"> via transform, pas le <svg>, car
+    // .graphviz svg a des règles width/max-height !important (custom.css)
+    // qui neutraliseraient tout changement de width/height direct.
+    let zoomLevel = 1;
+    const ZOOM_MIN = 0.2, ZOOM_MAX = 5, ZOOM_STEP = 1.1;
+
+    function resetZoom() {
+        zoomLevel = 1;
+        const graph = document.getElementById('graph');
+        graph.style.transformOrigin = '0 0';
+        graph.style.transform = 'scale(1)';
+    }
+
+    document.getElementById('graph-container').addEventListener('wheel', (e) => {
+        if (!e.ctrlKey) return; // molette seule = scroll normal
+        e.preventDefault();
+        zoomLevel = Math.min(ZOOM_MAX, Math.max(ZOOM_MIN,
+            zoomLevel * (e.deltaY < 0 ? ZOOM_STEP : 1 / ZOOM_STEP)));
+        const graph = document.getElementById('graph');
+        graph.style.transformOrigin = '0 0';
+        graph.style.transform = `scale(${zoomLevel})`;
+    }, { passive: false });
 
     // ─── Téléchargement SVG ───────────────────────────────────────────────────
     // ─── Initialisation ───────────────────────────────────────────────────────
@@ -531,6 +578,7 @@
         });
         document.addEventListener('mousemove', e => {
             if (!dragging) return;
+            userResizedGraph = true; // l'utilisateur reprend la main : plus d'auto-ajustement
             container.style.height = Math.max(200, startH + (e.clientY - startY)) + 'px';
         });
         document.addEventListener('mouseup', () => {
@@ -538,6 +586,12 @@
             dragging = false;
             document.body.style.cursor = '';
             document.body.style.userSelect = '';
+        });
+
+        let resizeTimer = null;
+        window.addEventListener('resize', () => {
+            clearTimeout(resizeTimer);
+            resizeTimer = setTimeout(() => adjustGraphHeight(), 100);
         });
     });
 </script>
