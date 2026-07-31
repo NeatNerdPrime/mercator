@@ -506,17 +506,25 @@ document.addEventListener("DOMContentLoaded", function () {
     /*******************/
     const container = document.getElementById('graph-container');
 
-    if (container) {
-        const handle = document.querySelector('.graph-resize-handle');
-        let isDragging = false;
+    // Le rapport "dependency" a sa propre poignée (id="graph-resize-handle") et son
+    // propre script de zoom/redimensionnement : on ne touche qu'aux pages qui utilisent
+    // la poignée générique par classe, pour ne pas dupliquer/entrer en conflit avec lui.
+    const handle = document.querySelector('.graph-resize-handle');
 
-        handle?.addEventListener('mousedown', function (e) {
+    if (container && handle) {
+        let isDragging       = false;
+        let userResizedGraph = false;
+
+        container.style.overflow = 'auto'; // permet de scroller/panner le graphe zoomé
+
+        handle.addEventListener('mousedown', function (e) {
             isDragging = true;
             document.body.style.cursor = 'ns-resize';
         });
 
         document.addEventListener('mousemove', function (e) {
             if (!isDragging) return;
+            userResizedGraph = true; // l'utilisateur reprend la main : plus d'auto-ajustement
 
             const newHeight = e.clientY - container.getBoundingClientRect().top;
 
@@ -530,6 +538,41 @@ document.addEventListener("DOMContentLoaded", function () {
             isDragging = false;
             document.body.style.cursor = 'default';
         });
+
+        // ─── Hauteur initiale ajustée au viewport ───────────────────────────────
+        // Le bas du conteneur s'arrête aux 3/4 de la hauteur d'écran, en tenant
+        // compte de l'espace déjà pris au-dessus (filtres, entête, ...), pour
+        // laisser de la place visible sous la poignée/footer.
+        function adjustGraphContainerHeight() {
+            if (userResizedGraph) return;
+            const top       = container.getBoundingClientRect().top;
+            const maxBottom = window.innerHeight * 0.75;
+            container.style.height = Math.max(200, Math.floor(maxBottom - top)) + 'px';
+        }
+        requestAnimationFrame(adjustGraphContainerHeight);
+
+        let graphResizeTimer = null;
+        window.addEventListener('resize', () => {
+            clearTimeout(graphResizeTimer);
+            graphResizeTimer = setTimeout(adjustGraphContainerHeight, 100);
+        });
+
+        // ─── Zoom (Ctrl + molette) ───────────────────────────────────────────────
+        // Le zoom scale le <div id="graph"> via transform, pas le <svg>, car
+        // .graphviz svg a des règles width/max-height !important (custom.css)
+        // qui neutraliseraient tout changement de width/height direct.
+        const graph = document.getElementById('graph');
+        let zoomLevel = 1;
+        const ZOOM_MIN = 0.2, ZOOM_MAX = 5, ZOOM_STEP = 1.1;
+
+        container.addEventListener('wheel', function (e) {
+            if (!e.ctrlKey || !graph) return; // molette seule = scroll normal
+            e.preventDefault();
+            zoomLevel = Math.min(ZOOM_MAX, Math.max(ZOOM_MIN,
+                zoomLevel * (e.deltaY < 0 ? ZOOM_STEP : 1 / ZOOM_STEP)));
+            graph.style.transformOrigin = '0 0';
+            graph.style.transform = `scale(${zoomLevel})`;
+        }, { passive: false });
     }
 
 });

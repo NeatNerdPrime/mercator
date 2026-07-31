@@ -744,8 +744,9 @@
         let userResizedNetwork = false;
 
         /**
-         * Agrandit #mynetwork pour que le bas de la carte graphe (poignée + footer)
-         * atteigne le bas du viewport. Ne fait rien si l'utilisateur a déjà
+         * Ajuste #mynetwork pour que son bas s'arrête aux 3/4 de la hauteur d'écran
+         * (en tenant compte de l'espace déjà pris au-dessus), afin de laisser de la
+         * place visible sous la poignée/footer. Ne fait rien si l'utilisateur a déjà
          * redimensionné manuellement.
          *
          * @param {boolean} refit  true pour recadrer le graphe (network.fit) après ajustement.
@@ -756,16 +757,10 @@
             const networkEl = document.getElementById('mynetwork');
             if (!networkEl) return;
 
-            const handleEl = document.getElementById('network-resize-handle');
-            const footerEl = networkEl.closest('.card')?.querySelector('.card-footer');
+            const top       = networkEl.getBoundingClientRect().top; // position haute stable
+            const maxBottom = window.innerHeight * 0.75;
 
-            const top          = networkEl.getBoundingClientRect().top;   // position haute stable
-            const handleH      = handleEl ? handleEl.offsetHeight : 0;
-            const footerH      = footerEl ? footerEl.offsetHeight : 0;
-            const bottomMargin = 16;                                       // respiration en bas de page
-
-            const available = window.innerHeight - top - handleH - footerH - bottomMargin;
-            networkEl.style.height = Math.max(300, Math.floor(available)) + 'px';
+            networkEl.style.height = Math.max(300, Math.floor(maxBottom - top)) + 'px';
 
             if (network) {
                 network.redraw();

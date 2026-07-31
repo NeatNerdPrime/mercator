@@ -506,16 +506,9 @@
         if (userResizedGraph) return;
 
         const container = document.getElementById('graph-container');
-        const handle     = document.getElementById('graph-resize-handle');
-        const footer     = document.getElementById('graph-footer');
-
-        const top          = container.getBoundingClientRect().top;
-        const handleH      = handle.offsetHeight;
-        const footerH      = footer.offsetHeight;
-        const bottomMargin = 16;
-
-        const available = window.innerHeight - top - handleH - footerH - bottomMargin;
-        container.style.height = Math.max(200, Math.floor(available)) + 'px';
+        const top        = container.getBoundingClientRect().top;
+        const maxBottom  = window.innerHeight * 0.75;
+        container.style.height = Math.max(200, Math.floor(maxBottom - top)) + 'px';
     }
 
     // ─── Zoom (Ctrl + molette) ─────────────────────────────────────────────────
