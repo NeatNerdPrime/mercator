@@ -546,10 +546,21 @@ document.addEventListener("DOMContentLoaded", function () {
         function adjustGraphContainerHeight() {
             if (userResizedGraph) return;
             const top       = container.getBoundingClientRect().top;
-            const maxBottom = window.innerHeight * 0.75;
+            const maxBottom = window.innerHeight * 0.5;
             container.style.height = Math.max(200, Math.floor(maxBottom - top)) + 'px';
         }
         requestAnimationFrame(adjustGraphContainerHeight);
+
+        // Le SVG est injecté de façon asynchrone (événement graphvizReady, une fois le
+        // WASM chargé) après ce point : on réajuste une fois le graphe effectivement
+        // rendu, sinon le calcul initial peut se baser sur une mise en page pas encore
+        // stabilisée.
+        document.addEventListener('graphvizReady', () => {
+            requestAnimationFrame(adjustGraphContainerHeight);
+        });
+        if (window.graphviz) {
+            requestAnimationFrame(adjustGraphContainerHeight);
+        }
 
         let graphResizeTimer = null;
         window.addEventListener('resize', () => {

@@ -758,7 +758,7 @@
             if (!networkEl) return;
 
             const top       = networkEl.getBoundingClientRect().top; // position haute stable
-            const maxBottom = window.innerHeight * 0.75;
+            const maxBottom = window.innerHeight * 0.5;
 
             networkEl.style.height = Math.max(300, Math.floor(maxBottom - top)) + 'px';
 
