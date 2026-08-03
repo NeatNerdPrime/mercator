@@ -35,7 +35,7 @@ class PhysicalServerFactory extends Factory
             'install_date' => Carbon::now(),
             'update_date' => Carbon::now(),
             'patching_group' => $this->faker->word(),
-            'paching_frequency' => $this->faker->randomNumber(),
+            'patching_frequency' => $this->faker->randomNumber(),
             'next_update' => Carbon::now(),
             'created_at' => Carbon::now(),
             'updated_at' => Carbon::now(),
