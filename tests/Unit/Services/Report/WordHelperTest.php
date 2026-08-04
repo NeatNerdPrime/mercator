@@ -1,9 +1,26 @@
 <?php
 
+use App\Models\DataProcessing;
 use App\Models\Entity;
+use App\Models\Man;
+use App\Models\PhysicalLink;
+use App\Models\Relation;
+use App\Models\SecurityControl;
 use App\Services\Report\WordHelper;
 use PhpOffice\PhpWord\IOFactory;
 use PhpOffice\PhpWord\Settings;
+
+it('MODEL_VUE_MAP preserves every model -> vue id mapping unchanged', function () {
+    $map = WordHelper::MODEL_VUE_MAP;
+
+    expect($map)->toHaveCount(55);
+    expect($map[Entity::class])->toBe('1');
+    expect($map[Relation::class])->toBe('1');
+    expect($map[DataProcessing::class])->toBe('7');
+    expect($map[SecurityControl::class])->toBe('7');
+    expect($map[Man::class])->toBe('6');
+    expect($map[PhysicalLink::class])->toBe('6');
+});
 
 /**
  * @return mixed

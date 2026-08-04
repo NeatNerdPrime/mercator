@@ -82,6 +82,7 @@ The calculation of conformity levels for each mapping object is based on the pre
 | **Administration**          |       |                                                                              |
 | Zones                       | 1     | Description                                                                  |
 | Directories                 | 1     | Description, solution, administration area                                   |
+| Directories                 | 2     | Application                                                                  |
 | Forest                      | 1     | Description, administration area                                             |
 | Domains                     | 1     | Description, domain controller, number of users, number of machines, inter-domain relationship |
 | **Logical**                 |       |                                                                              |

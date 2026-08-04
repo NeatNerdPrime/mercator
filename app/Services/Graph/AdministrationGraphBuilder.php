@@ -4,6 +4,7 @@ namespace App\Services\Graph;
 
 use App\Models\AdminUser;
 use App\Models\Annuaire;
+use App\Models\Application;
 use App\Models\Cartographer;
 use App\Models\Domain;
 use App\Models\ForestAd;
@@ -53,6 +54,20 @@ class AdministrationGraphBuilder
             $lines[] = DotNode::withImage('A'.$annuaire->id, $iconPath('/images/annuaire.png'), [e($annuaire->name)], $this->href($annuaire, $withHref));
         }
 
+        if (Cartographer::canAccess(Application::class)) {
+            $applications = $annuaires->pluck('application')->filter()->unique('id');
+
+            foreach ($applications as $application) {
+                $lines[] = DotNode::withImage('AP'.$application->id, $iconPath('/images/application.png'), [e($application->name)], $this->href($application, $withHref));
+            }
+
+            foreach ($annuaires as $annuaire) {
+                if ($annuaire->application !== null) {
+                    $lines[] = 'AP'.$annuaire->application->id.' -> A'.$annuaire->id;
+                }
+            }
+        }
+
         foreach ($forests as $forest) {
             $lines[] = DotNode::withImage('F'.$forest->id, $iconPath('/images/ldap.png'), [e($forest->name)], $this->href($forest, $withHref));
 
@@ -89,13 +104,14 @@ class AdministrationGraphBuilder
         return [
             ['path' => '/images/zoneadmin.png', 'width' => '64px', 'height' => '64px'],
             ['path' => '/images/annuaire.png', 'width' => '64px', 'height' => '64px'],
+            ['path' => '/images/application.png', 'width' => '64px', 'height' => '64px'],
             ['path' => '/images/ldap.png', 'width' => '64px', 'height' => '64px'],
             ['path' => '/images/domain.png', 'width' => '64px', 'height' => '64px'],
             ['path' => '/images/user.png', 'width' => '64px', 'height' => '64px'],
         ];
     }
 
-    private function href(ZoneAdmin|Annuaire|ForestAd|Domain|AdminUser $model, bool $withHref): string
+    private function href(ZoneAdmin|Annuaire|Application|ForestAd|Domain|AdminUser $model, bool $withHref): string
     {
         return $withHref ? ' href="#'.$model->getUID().'"' : '';
     }

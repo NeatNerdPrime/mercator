@@ -7,22 +7,22 @@ use App\Contracts\HasPrefix;
 use App\Contracts\HasUniqueIdentifierContract;
 use App\Factories\AnnuaireFactory;
 use App\Traits\Auditable;
+use App\Traits\HasCartographers;
 use App\Traits\HasIcon;
 use App\Traits\HasUniqueIdentifier;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\Factory;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
-use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\SoftDeletes;
-use App\Traits\HasCartographers;
 
 /**
  * App\Annuaire *
  */
-class Annuaire extends Model implements HasPrefix, HasIconContract, HasUniqueIdentifierContract
+class Annuaire extends Model implements HasIconContract, HasPrefix, HasUniqueIdentifierContract
 {
-    use HasIcon, Auditable, HasUniqueIdentifier, HasFactory, SoftDeletes;
+    use Auditable, HasFactory, HasIcon, HasUniqueIdentifier, SoftDeletes;
     use HasCartographers;
 
     public $table = 'annuaires';
@@ -49,11 +49,11 @@ class Annuaire extends Model implements HasPrefix, HasIconContract, HasUniqueIde
         'description',
         'solution',
         'zone_admin_id',
+        'application_id',
         'created_at',
         'updated_at',
         'deleted_at',
     ];
-
 
     protected static function newFactory(): Factory
     {
@@ -66,6 +66,12 @@ class Annuaire extends Model implements HasPrefix, HasIconContract, HasUniqueIde
         return $this->belongsTo(ZoneAdmin::class, 'zone_admin_id');
     }
 
+    /** @return BelongsTo<Application, $this> */
+    public function application(): BelongsTo
+    {
+        return $this->belongsTo(Application::class, 'application_id');
+    }
+
     /** @param Builder<static> $query */
     public function scopeMaturityLevel1(Builder $query): Builder
     {
@@ -73,5 +79,12 @@ class Annuaire extends Model implements HasPrefix, HasIconContract, HasUniqueIde
             ->whereNotNull('description')
             ->whereNotNull('solution')
             ->whereNotNull('zone_admin_id');
+    }
+
+    /** @param Builder<static> $query */
+    public function scopeMaturityLevel2(Builder $query): Builder
+    {
+        return $query->maturityLevel1()
+            ->whereNotNull('application_id');
     }
 }

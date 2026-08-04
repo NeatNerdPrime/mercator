@@ -129,7 +129,7 @@ class MonarcExportService
     ];
 
     /** Mercator families whose objects are "primary assets" — always instance roots. */
-    public const PRIMARY_FAMILIES = ModelRegistry::MONARC_PRIMARY_FAMILIES;
+    public const PRIMARY_FAMILIES = ['MacroProcessus', 'Process', 'Information'];
 
     /**
      * Mercator "views" (resources/views/partials/sidebar.blade.php submenus),
@@ -140,7 +140,14 @@ class MonarcExportService
      *
      * @var array<string, array<int, string>>
      */
-    public const FAMILY_VIEWS = ModelRegistry::MONARC_FAMILY_VIEWS;
+    public const FAMILY_VIEWS = [
+        'ecosystem' => ['Entity', 'Relation'],
+        'information_system' => ['MacroProcessus', 'Process', 'Actor', 'Information'],
+        'applications' => ['ApplicationBlock', 'Application', 'ApplicationService', 'ApplicationModule', 'Database'],
+        'administration' => ['Domain', 'ForestAd', 'Annuaire', 'ZoneAdmin', 'AdminUser'],
+        'logical_infrastructure' => ['Network', 'LogicalServer', 'Cluster', 'Container', 'Backup', 'Subnetwork', 'Gateway', 'Router', 'NetworkSwitch', 'SecurityDevice', 'DhcpServer', 'Dnsserver', 'Vlan', 'ExternalConnectedEntity'],
+        'physical_infrastructure' => ['Site', 'Building', 'Bay', 'Zone', 'PhysicalServer', 'PhysicalSwitch', 'PhysicalRouter', 'Workstation', 'StorageDevice', 'Peripheral', 'Phone', 'WifiTerminal', 'PhysicalSecurityDevice', 'Wan', 'Man', 'Lan'],
+    ];
 
     /**
      * The Mercator "view" a family belongs to (see FAMILY_VIEWS), or 'other'

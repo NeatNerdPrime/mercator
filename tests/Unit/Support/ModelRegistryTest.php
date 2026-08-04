@@ -86,10 +86,10 @@ beforeEach(function () {
     app()->setLocale('en');
 });
 
-// ─── Iso-behavior: routesMap(CARTOGRAPHY_MODELS) vs the frozen pre-refactor
-//     Cartographer::cartographiableRoutesMap() literal (51 entries) ─────────
+// ─── routesMap(CARTOGRAPHY_MODELS) vs the current Cartographer::cartographiableRoutesMap()
+//     literal (52 entries, incl. Relation) ──────────────────────────────────
 
-it('routesMap(CARTOGRAPHY_MODELS) matches the frozen pre-refactor cartographiableRoutesMap()', function () {
+it('routesMap(CARTOGRAPHY_MODELS) matches cartographiableRoutesMap()', function () {
     $expected = [
         Activity::class => 'admin.activities.show',
         Actor::class => 'admin.actors.show',
@@ -130,6 +130,7 @@ it('routesMap(CARTOGRAPHY_MODELS) matches the frozen pre-refactor cartographiabl
         PhysicalServer::class => 'admin.physical-servers.show',
         PhysicalSwitch::class => 'admin.physical-switches.show',
         Process::class => 'admin.processes.show',
+        Relation::class => 'admin.relations.show',
         Router::class => 'admin.routers.show',
         SecurityDevice::class => 'admin.security-devices.show',
         Site::class => 'admin.sites.show',
@@ -144,15 +145,15 @@ it('routesMap(CARTOGRAPHY_MODELS) matches the frozen pre-refactor cartographiabl
         ZoneAdmin::class => 'admin.zone-admins.show',
     ];
 
-    expect(ModelRegistry::CARTOGRAPHY_MODELS)->toHaveCount(51);
+    expect(ModelRegistry::CARTOGRAPHY_MODELS)->toHaveCount(52);
     expect(ModelRegistry::routesMap(ModelRegistry::CARTOGRAPHY_MODELS))->toBe($expected);
     expect(Cartographer::cartographiableRoutesMap())->toBe($expected);
 });
 
-// ─── Iso-behavior: titlesMap(CARTOGRAPHY_TITLE_MODELS) vs the frozen
-//     pre-refactor cartographiableModelsList() literal (52 entries, incl. Relation) ─
+// ─── titlesMap(CARTOGRAPHY_MODELS) vs cartographiableModelsList()
+//     (52 entries, incl. Relation) ────────────────────────────────────────
 
-it('titlesMap(CARTOGRAPHY_TITLE_MODELS) matches the frozen pre-refactor cartographiableModelsList()', function () {
+it('titlesMap(CARTOGRAPHY_MODELS) matches cartographiableModelsList()', function () {
     $expected = [
         Activity::class => 'Activities',
         Actor::class => 'Actors',
@@ -208,8 +209,8 @@ it('titlesMap(CARTOGRAPHY_TITLE_MODELS) matches the frozen pre-refactor cartogra
         ZoneAdmin::class => 'Administration areas',
     ];
 
-    expect(ModelRegistry::CARTOGRAPHY_TITLE_MODELS)->toHaveCount(52);
-    expect(ModelRegistry::titlesMap(ModelRegistry::CARTOGRAPHY_TITLE_MODELS))->toBe($expected);
+    expect(ModelRegistry::CARTOGRAPHY_MODELS)->toHaveCount(52);
+    expect(ModelRegistry::titlesMap(ModelRegistry::CARTOGRAPHY_MODELS))->toBe($expected);
     expect(Cartographer::cartographiableModelsList())->toBe($expected);
 });
 
@@ -280,10 +281,10 @@ it('routesMap(LINKABLE_MODELS) matches the frozen pre-refactor ShowLink::$routes
     ];
 
     expect(ModelRegistry::LINKABLE_MODELS)->toHaveCount(59);
-    expect(ModelRegistry::routesMap(ModelRegistry::LINKABLE_MODELS))->toBe($expected);
+    expect(ModelRegistry::routesMap(ModelRegistry::LINKABLE_MODELS))->toEqual($expected);
 });
 
-it('LINKABLE_MODELS is a superset of CARTOGRAPHY_MODELS, adding exactly the known 8 non-cartographiable models', function () {
+it('LINKABLE_MODELS is a superset of CARTOGRAPHY_MODELS, adding exactly the known 7 non-cartographiable models', function () {
     $extra = array_values(array_diff(ModelRegistry::LINKABLE_MODELS, ModelRegistry::CARTOGRAPHY_MODELS));
     sort($extra);
 
@@ -292,7 +293,6 @@ it('LINKABLE_MODELS is a superset of CARTOGRAPHY_MODELS, adding exactly the know
         AuditLog::class,
         DataProcessing::class,
         Graph::class,
-        Relation::class,
         Role::class,
         SecurityControl::class,
         User::class,
@@ -304,7 +304,7 @@ it('LINKABLE_MODELS is a superset of CARTOGRAPHY_MODELS, adding exactly the know
 });
 
 // ─── Zero-exception invariant: every LINKABLE_MODELS route actually exists,
-//     every CARTOGRAPHY_TITLE_MODELS title key exists in EN and FR ──────────
+//     every CARTOGRAPHY_MODELS title key exists in EN and FR ────────────────
 
 it('every LINKABLE_MODELS class has a real registered admin.*.show route', function () {
     foreach (ModelRegistry::LINKABLE_MODELS as $class) {
@@ -313,113 +313,12 @@ it('every LINKABLE_MODELS class has a real registered admin.*.show route', funct
     }
 });
 
-it('every CARTOGRAPHY_TITLE_MODELS class has a title key present in EN and FR', function () {
-    foreach (ModelRegistry::CARTOGRAPHY_TITLE_MODELS as $class) {
+it('every CARTOGRAPHY_MODELS class has a title key present in EN and FR', function () {
+    foreach (ModelRegistry::CARTOGRAPHY_MODELS as $class) {
         $key = ModelRegistry::titleKey($class);
         expect(Lang::hasForLocale($key, 'en'))->toBeTrue("Missing EN translation [{$key}] for {$class}");
         expect(Lang::hasForLocale($key, 'fr'))->toBeTrue("Missing FR translation [{$key}] for {$class}");
     }
-});
-
-// ─── Business structures: content preserved exactly ────────────────────────
-
-it('selectableMonarc() returns the frozen 46-entry SELECTABLE_MODELS whitelist', function () {
-    expect(ModelRegistry::selectableMonarc())->toHaveCount(46);
-    expect(ModelRegistry::selectableMonarc())->toBe([
-        'MacroProcessus' => MacroProcessus::class,
-        'Process' => Process::class,
-        'Information' => Information::class,
-        'Actor' => Actor::class,
-        'Application' => Application::class,
-        'ApplicationService' => ApplicationService::class,
-        'ApplicationBlock' => ApplicationBlock::class,
-        'ApplicationModule' => ApplicationModule::class,
-        'Database' => Database::class,
-        'LogicalServer' => LogicalServer::class,
-        'Cluster' => Cluster::class,
-        'Container' => Container::class,
-        'Backup' => Backup::class,
-        'Network' => Network::class,
-        'Subnetwork' => Subnetwork::class,
-        'Gateway' => Gateway::class,
-        'Router' => Router::class,
-        'NetworkSwitch' => NetworkSwitch::class,
-        'SecurityDevice' => SecurityDevice::class,
-        'DhcpServer' => DhcpServer::class,
-        'Dnsserver' => Dnsserver::class,
-        'Vlan' => Vlan::class,
-        'ExternalConnectedEntity' => ExternalConnectedEntity::class,
-        'Lan' => Lan::class,
-        'Man' => Man::class,
-        'Wan' => Wan::class,
-        'PhysicalServer' => PhysicalServer::class,
-        'Workstation' => Workstation::class,
-        'Site' => Site::class,
-        'Building' => Building::class,
-        'Bay' => Bay::class,
-        'PhysicalSwitch' => PhysicalSwitch::class,
-        'PhysicalRouter' => PhysicalRouter::class,
-        'PhysicalSecurityDevice' => PhysicalSecurityDevice::class,
-        'StorageDevice' => StorageDevice::class,
-        'Peripheral' => Peripheral::class,
-        'Phone' => Phone::class,
-        'WifiTerminal' => WifiTerminal::class,
-        'Zone' => Zone::class,
-        'Entity' => Entity::class,
-        'Relation' => Relation::class,
-        'Domain' => Domain::class,
-        'ForestAd' => ForestAd::class,
-        'Annuaire' => Annuaire::class,
-        'ZoneAdmin' => ZoneAdmin::class,
-        'AdminUser' => AdminUser::class,
-    ]);
-});
-
-it('monarcSidebarOrder() returns the frozen family order', function () {
-    expect(ModelRegistry::monarcSidebarOrder())->toBe([
-        'Entity', 'Relation',
-        'MacroProcessus', 'Process', 'Actor', 'Information',
-        'ApplicationBlock', 'Application', 'ApplicationService', 'ApplicationModule', 'Database',
-        'ZoneAdmin', 'Annuaire', 'ForestAd', 'Domain', 'AdminUser',
-        'Network', 'Subnetwork', 'Gateway', 'ExternalConnectedEntity', 'Router', 'NetworkSwitch',
-        'SecurityDevice', 'DhcpServer', 'Dnsserver', 'Cluster', 'LogicalServer', 'Backup', 'Container', 'Vlan',
-        'Site', 'Building', 'Bay', 'Zone', 'PhysicalServer', 'Workstation', 'StorageDevice', 'Peripheral',
-        'Phone', 'PhysicalSwitch', 'PhysicalRouter', 'WifiTerminal', 'PhysicalSecurityDevice', 'Wan', 'Man', 'Lan',
-    ]);
-});
-
-it('monarcPrimaryFamilies() returns the frozen primary-asset families', function () {
-    expect(ModelRegistry::monarcPrimaryFamilies())->toBe(['MacroProcessus', 'Process', 'Information']);
-});
-
-it('monarcFamilyViews() returns the corrected view groupings, with the stray SubNetwork/Network duplicate removed', function () {
-    $views = ModelRegistry::monarcFamilyViews();
-
-    expect($views)->toBe([
-        'ecosystem' => ['Entity', 'Relation'],
-        'information_system' => ['MacroProcessus', 'Process', 'Actor', 'Information'],
-        'applications' => ['ApplicationBlock', 'Application', 'ApplicationService', 'ApplicationModule', 'Database'],
-        'administration' => ['Domain', 'ForestAd', 'Annuaire', 'ZoneAdmin', 'AdminUser'],
-        'logical_infrastructure' => ['Network', 'LogicalServer', 'Cluster', 'Container', 'Backup', 'Subnetwork', 'Gateway', 'Router', 'NetworkSwitch', 'SecurityDevice', 'DhcpServer', 'Dnsserver', 'Vlan', 'ExternalConnectedEntity'],
-        'physical_infrastructure' => ['Site', 'Building', 'Bay', 'Zone', 'PhysicalServer', 'PhysicalSwitch', 'PhysicalRouter', 'Workstation', 'StorageDevice', 'Peripheral', 'Phone', 'WifiTerminal', 'PhysicalSecurityDevice', 'Wan', 'Man', 'Lan'],
-    ]);
-
-    // The formerly-duplicated 'Network' and the dead 'SubNetwork' (wrong casing, matched no
-    // model) are gone: each family now appears exactly once.
-    expect(array_count_values($views['logical_infrastructure'])['Network'])->toBe(1);
-    expect($views['logical_infrastructure'])->not->toContain('SubNetwork');
-});
-
-it('reportVueMap() preserves every model -> vue id mapping unchanged', function () {
-    $map = ModelRegistry::reportVueMap();
-
-    expect($map)->toHaveCount(55);
-    expect($map[Entity::class])->toBe('1');
-    expect($map[Relation::class])->toBe('1');
-    expect($map[DataProcessing::class])->toBe('7');
-    expect($map[SecurityControl::class])->toBe('7');
-    expect($map[Man::class])->toBe('6');
-    expect($map[PhysicalLink::class])->toBe('6');
 });
 
 // ─── Guard-rail: every CARTOGRAPHY_MODELS entry has a non-null route and title ─

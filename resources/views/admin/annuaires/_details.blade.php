@@ -52,5 +52,21 @@
             </td>
         </tr>
         @endcanAccess
+        @canAccess(App\Models\Application::class)
+        <tr>
+            <th>
+                {{ trans('cruds.annuaire.fields.application') }}
+            </th>
+            <td>
+                @if ($annuaire->application != null)
+                    @canShow($annuaire->application)
+                        <a href="{{ route('admin.applications.show', $annuaire->application->id) }}">{{ $annuaire->application->name }}</a>
+                    @elsecanShow
+                        {{ $annuaire->application->name }}
+                    @endcanShow
+                @endif
+            </td>
+        </tr>
+        @endcanAccess
     </tbody>
 </table>

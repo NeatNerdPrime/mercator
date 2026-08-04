@@ -185,6 +185,7 @@ class HomeController extends Controller
 
             'annuaires' => Cartographer::scopedQuery(Annuaire::query())->count(),
             'annuaires_lvl1' => Cartographer::scopedQuery(Annuaire::maturityLevel1())->count(),
+            'annuaires_lvl2' => Cartographer::scopedQuery(Annuaire::maturityLevel2())->count(),
 
             'forests' => Cartographer::scopedQuery(ForestAd::query())->count(),
             'forests_lvl1' => Cartographer::scopedQuery(ForestAd::maturityLevel1())->count(),
@@ -323,7 +324,7 @@ class HomeController extends Controller
                 ($levels['entities_lvl1'] + $levels['relations_lvl2'] +
             $levels['macroProcessuses_lvl2'] + $levels['processes_lvl2'] + $levels['activities_lvl2'] + $levels['operations_lvl2'] + $levels['actors_lvl2'] + $levels['informations_lvl2'] +
             $levels['applicationBlocks_lvl2'] + $levels['applications_lvl2'] + $levels['applicationServices_lvl2'] + $levels['applicationModules_lvl2'] + $levels['databases_lvl2'] + $levels['flows_lvl1'] +
-            $levels['zones_ad_lvl1'] + $levels['annuaires_lvl1'] + $levels['forests_lvl1'] + $levels['domaines_lvl1'] +
+            $levels['zones_ad_lvl1'] + $levels['annuaires_lvl2'] + $levels['forests_lvl1'] + $levels['domaines_lvl1'] +
             $levels['networks_lvl1'] + $levels['subnetworks_lvl1'] + $levels['gateways_lvl1'] + $levels['externalConnectedEntities_lvl2'] + $levels['switches_lvl1'] + $levels['routers_lvl1'] + $levels['securityDevices_lvl1'] + $levels['DHCPServers_lvl2'] + $levels['DNSServers_lvl2'] + $levels['clusters_lvl1'] + $levels['logicalServers_lvl1'] + $levels['containers_lvl1'] + $levels['certificates_lvl2'] +
             $levels['sites_lvl1'] + $levels['buildings_lvl1'] + $levels['bays_lvl1'] + $levels['physicalServers_lvl1'] + $levels['physicalRouters_lvl1'] + $levels['physicalSwitchs_lvl1'] + $levels['physicalSecurityDevices_lvl1'] +
             $levels['wans_lvl1'] + $levels['mans_lvl1'] + $levels['lans_lvl1'] + $levels['vlans_lvl1']) * 100 / $denominator,
@@ -346,7 +347,7 @@ class HomeController extends Controller
                 ($levels['entities_lvl1'] + $levels['relations_lvl2'] +
             $levels['macroProcessuses_lvl3'] + $levels['processes_lvl2'] + $levels['activities_lvl2'] + $levels['tasks_lvl3'] + $levels['operations_lvl2'] + $levels['actors_lvl2'] + $levels['informations_lvl2'] +
             $levels['applicationBlocks_lvl2'] + $levels['applications_lvl3'] + $levels['applicationServices_lvl2'] + $levels['applicationModules_lvl2'] + $levels['databases_lvl2'] + $levels['flows_lvl1'] +
-            $levels['zones_ad_lvl1'] + $levels['annuaires_lvl1'] + $levels['forests_lvl1'] + $levels['domaines_lvl1'] +
+            $levels['zones_ad_lvl1'] + $levels['annuaires_lvl2'] + $levels['forests_lvl1'] + $levels['domaines_lvl1'] +
             $levels['networks_lvl1'] + $levels['subnetworks_lvl1'] + $levels['gateways_lvl1'] + $levels['externalConnectedEntities_lvl2'] + $levels['switches_lvl1'] + $levels['routers_lvl1'] + $levels['securityDevices_lvl1'] + $levels['DHCPServers_lvl2'] + $levels['DNSServers_lvl2'] + $levels['clusters_lvl1'] + $levels['logicalServers_lvl1'] + $levels['containers_lvl1'] + $levels['certificates_lvl2'] +
             $levels['sites_lvl1'] + $levels['buildings_lvl1'] + $levels['bays_lvl1'] + $levels['physicalServers_lvl1'] + $levels['physicalRouters_lvl1'] + $levels['physicalSwitchs_lvl1'] + $levels['physicalSecurityDevices_lvl1'] + $levels['wans_lvl1'] + $levels['mans_lvl1'] + $levels['lans_lvl1'] + $levels['vlans_lvl1']) * 100 / $denominator,
                 0

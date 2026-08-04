@@ -1173,6 +1173,7 @@ erDiagram
         text description
         string solution
         int zone_admin_id FK
+        int application_id FK
         timestamp created_at
         timestamp updated_at
         timestamp deleted_at
@@ -1219,6 +1220,7 @@ erDiagram
 
     zone_admins ||--o{ annuaires : "zone_admin_id"
     zone_admins ||--o{ forest_ads : "zone_admin_id"
+    applications ||--o{ annuaires : "application_id"
     forest_ads }o--o{ domains : "domains"
     domains ||--o{ admin_users : "domain_id"
 ```
@@ -1251,7 +1253,7 @@ Un service d’annuaire d’administration est une application regroupant les do
 équipements informatiques de l’entreprise et permettant leur administration.
 
 Il peut s’agir d’un outil d’inventaire servant à la gestion des changements ou des tickets ou d’un outil de cartographie
-comme Mercator.
+comme Mercator. Il peut être rattaché, de manière facultative, à l’application qui le met en œuvre.
 
 | Table                                         | api              |
 |:----------------------------------------------|:-----------------|
@@ -1265,6 +1267,7 @@ comme Mercator.
 | description   | longtext     | Description de l'annuaire               |
 | solution      | varchar(255) | Solution technique                      |
 | zone_admin_id | int unsigned | Référence vers la zone d'administration |
+| application_id | int unsigned | Référence vers l'application qui gère cet annuaire |
 | created_at    | timestamp    | Date de création                        |
 | updated_at    | timestamp    | Date de mise à jour                     |
 | deleted_at    | timestamp    | Date de suppression                     |

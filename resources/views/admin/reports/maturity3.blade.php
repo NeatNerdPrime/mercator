@@ -194,7 +194,7 @@
                 <th><center>{{ trans("global.mature") }}</center></th>
                 <th><center>
                     {{ ($zones_ad+$annuaires+$forests+$domains)>0 ?
-                        number_format(($zones_ad_lvl1+$annuaires_lvl1+$forests_lvl1+$domaines_lvl1)*100/($zones_ad+$annuaires+$forests+$domains),0) : 0 }}%
+                        number_format(($zones_ad_lvl1+$annuaires_lvl2+$forests_lvl1+$domaines_lvl1)*100/($zones_ad+$annuaires+$forests+$domains),0) : 0 }}%
                 </center></th>
             </thead>
 
@@ -211,8 +211,8 @@
                 <tr>
                     <td><a href="/admin/annuaires">{{ trans("cruds.annuaire.title") }}</a></td>
                     <td><center>{{ $annuaires }}</center></td>
-                    <td><center>{{ $annuaires_lvl1 }}</center></td>
-                    <td><center>{{ $annuaires>0 ? number_format($annuaires_lvl1*100/$annuaires,0):0 }}%</center></td>
+                    <td><center>{{ $annuaires_lvl2 }}</center></td>
+                    <td><center>{{ $annuaires>0 ? number_format($annuaires_lvl2*100/$annuaires,0):0 }}%</center></td>
                 </tr>
                 @endcanAccess
                 @canAccess(\App\Models\ForestAd::class)

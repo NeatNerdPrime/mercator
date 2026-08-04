@@ -30,14 +30,17 @@
                         <th>
                             {{ trans('cruds.annuaire.fields.name') }}
                         </th>
+                        <th data-column="description">
+                            {{ trans('cruds.annuaire.fields.description') }}
+                        </th>
                         <th>
                             {{ trans('cruds.annuaire.fields.solution') }}
                         </th>
                         <th>
                             {{ trans('cruds.annuaire.fields.zone_admin') }}
                         </th>
-                        <th data-column="description">
-                            {{ trans('cruds.annuaire.fields.description') }}
+                        <th>
+                            {{ trans('cruds.annuaire.fields.application') }}
                         </th>
                         <th>
                             &nbsp;
@@ -50,7 +53,10 @@
                             @if (
                                 ($annuaire->description===null)||
                                 ($annuaire->solution===null)||
-                                ($annuaire->zone_admin_id===null)
+                                ($annuaire->zone_admin_id===null)||
+                                ((auth()->user()->granularity>=2)&&
+                                    ($annuaire->application_id===null)
+                                )
                                 )
                                 class="table-warning"
                                 @endif
@@ -62,6 +68,9 @@
                                 <x-show-link :model="$annuaire" />
                             </td>
                             <td>
+                                {!! $annuaire->description !!}
+                            </td>
+                            <td>
                                 {{ $annuaire->solution ?? '' }}
                             </td>
                             <td>
@@ -70,7 +79,9 @@
                                 @endif
                             </td>
                             <td>
-                                {!! $annuaire->description !!}
+                                @if ($annuaire->application!=null)
+                                    <x-show-link :model="$annuaire->application" />
+                                @endif
                             </td>
 
                             <td nowrap>

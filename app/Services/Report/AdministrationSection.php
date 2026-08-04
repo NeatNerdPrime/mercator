@@ -24,7 +24,7 @@ class AdministrationSection implements ReportSection
             ->sortBy(fn (ZoneAdmin $item) => mb_strtolower((string) $item->name));
 
         $annuaires = Cartographer::scopedQuery(Annuaire::query())
-            ->with('zoneAdmin')
+            ->with(['zoneAdmin', 'application'])
             ->get()
             ->sortBy(fn (Annuaire $item) => mb_strtolower((string) $item->name));
 
@@ -106,6 +106,11 @@ class AdministrationSection implements ReportSection
             if ($annuaire->zoneAdmin !== null) {
                 $run = $helper->addTextRunRow($table, trans('cruds.annuaire.fields.zone_admin'));
                 $helper->linkOrText($run, $annuaire->zoneAdmin, $selectedVues);
+            }
+
+            if ($annuaire->application !== null) {
+                $run = $helper->addTextRunRow($table, trans('cruds.annuaire.fields.application'));
+                $helper->linkOrText($run, $annuaire->application, $selectedVues);
             }
         }
     }
