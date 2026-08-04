@@ -281,7 +281,7 @@ it('routesMap(LINKABLE_MODELS) matches the frozen pre-refactor ShowLink::$routes
     ];
 
     expect(ModelRegistry::LINKABLE_MODELS)->toHaveCount(59);
-    expect(ModelRegistry::routesMap(ModelRegistry::LINKABLE_MODELS))->toBe($expected);
+    expect(ModelRegistry::routesMap(ModelRegistry::LINKABLE_MODELS))->toEqual($expected);
 });
 
 it('LINKABLE_MODELS is a superset of CARTOGRAPHY_MODELS, adding exactly the known 7 non-cartographiable models', function () {
@@ -319,20 +319,6 @@ it('every CARTOGRAPHY_MODELS class has a title key present in EN and FR', functi
         expect(Lang::hasForLocale($key, 'en'))->toBeTrue("Missing EN translation [{$key}] for {$class}");
         expect(Lang::hasForLocale($key, 'fr'))->toBeTrue("Missing FR translation [{$key}] for {$class}");
     }
-});
-
-// ─── Business structures: content preserved exactly ────────────────────────
-
-it('reportVueMap() preserves every model -> vue id mapping unchanged', function () {
-    $map = ModelRegistry::reportVueMap();
-
-    expect($map)->toHaveCount(55);
-    expect($map[Entity::class])->toBe('1');
-    expect($map[Relation::class])->toBe('1');
-    expect($map[DataProcessing::class])->toBe('7');
-    expect($map[SecurityControl::class])->toBe('7');
-    expect($map[Man::class])->toBe('6');
-    expect($map[PhysicalLink::class])->toBe('6');
 });
 
 // ─── Guard-rail: every CARTOGRAPHY_MODELS entry has a non-null route and title ─

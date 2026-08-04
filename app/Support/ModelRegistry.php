@@ -73,17 +73,17 @@ use ReflectionClass;
  * slug()/routeName()/titleKey()/title() are pure derivations from the class
  * name — no per-model override table — except for the single documented
  * exception in ROUTE_SLUG_OVERRIDES (see its docblock). Everything else
- * (CARTOGRAPHY_MODELS, LINKABLE_MODELS, REPORT_VUE_MAP) is explicit data
- * because it encodes a business decision, not something derivable from the
- * class name. Monarc-specific whitelists/groupings live on MonarcController
- * and MonarcExportService instead — they are the only consumers.
+ * (CARTOGRAPHY_MODELS, LINKABLE_MODELS) is explicit data because it encodes
+ * a business decision, not something derivable from the class name.
+ * Monarc-specific whitelists/groupings live on MonarcController and
+ * MonarcExportService instead — they are the only consumers.
  */
 final class ModelRegistry
 {
-    protected const MODEL_NAMESPACE = 'App\\Models\\';
+    protected const string MODEL_NAMESPACE = 'App\\Models\\';
 
     /** Mirrors QueryEngineIntrospector's original exclusions. */
-    private const EXCLUDED_MODELS = ['User', 'PasswordReset'];
+    private const array EXCLUDED_MODELS = ['User', 'PasswordReset'];
 
     /**
      * The sole exception to pure route-slug derivation: Str::plural(Str::snake('Man','-'))
@@ -93,7 +93,7 @@ final class ModelRegistry
      * go through admin.*.show (e.g. QueryEngineIntrospector::modelToApiName(), which already
      * produced 'men' for Man before this refactor) keep their exact prior output.
      */
-    private const ROUTE_SLUG_OVERRIDES = [
+    private const array ROUTE_SLUG_OVERRIDES = [
         'Man' => 'mans',
     ];
 
@@ -101,7 +101,7 @@ final class ModelRegistry
      * The ~52 models with a Cartographer-assignable route (ex-Cartographer::cartographiableRoutesMap()
      * keys). Drives AppServiceProvider's observer registration and the roles/users cartographer UI.
      */
-    public const CARTOGRAPHY_MODELS = [
+    public const array CARTOGRAPHY_MODELS = [
         Activity::class,
         Actor::class,
         Annuaire::class,
@@ -161,130 +161,15 @@ final class ModelRegistry
      * AdminUser, AuditLog, DataProcessing, Graph, Role, SecurityControl, User — models
      * with a show route but no cartographer assignment concept).
      */
-    public const LINKABLE_MODELS = [
-        Activity::class,
-        Actor::class,
+    public const array LINKABLE_MODELS = [
+        ...self::CARTOGRAPHY_MODELS,
         AdminUser::class,
-        Annuaire::class,
-        Application::class,
-        ApplicationBlock::class,
-        ApplicationFlow::class,
-        ApplicationModule::class,
-        ApplicationService::class,
         AuditLog::class,
-        Backup::class,
-        Bay::class,
-        Building::class,
-        Certificate::class,
-        Cluster::class,
-        Container::class,
-        Database::class,
         DataProcessing::class,
-        DhcpServer::class,
-        Dnsserver::class,
-        Domain::class,
-        Entity::class,
-        ExternalConnectedEntity::class,
-        ForestAd::class,
-        Gateway::class,
         Graph::class,
-        Information::class,
-        Lan::class,
-        LogicalFlow::class,
-        LogicalServer::class,
-        MacroProcessus::class,
-        Man::class,
-        Network::class,
-        NetworkSwitch::class,
-        Operation::class,
-        Peripheral::class,
-        Phone::class,
-        PhysicalLink::class,
-        PhysicalRouter::class,
-        PhysicalSecurityDevice::class,
-        PhysicalServer::class,
-        PhysicalSwitch::class,
-        Process::class,
-        Relation::class,
         Role::class,
-        Router::class,
         SecurityControl::class,
-        SecurityDevice::class,
-        Site::class,
-        StorageDevice::class,
-        Subnetwork::class,
-        Task::class,
         User::class,
-        Vlan::class,
-        Wan::class,
-        WifiTerminal::class,
-        Workstation::class,
-        Zone::class,
-        ZoneAdmin::class,
-    ];
-
-    /**
-     * Ex-WordHelper::MODEL_VUE_MAP — maps each cartographied model to the `vues[]` id of the
-     * report section it belongs to. Derived directly from docs/analysis-cartography-report.md §1.3.4.
-     *
-     * @var array<class-string, string>
-     */
-    public const REPORT_VUE_MAP = [
-        Entity::class => '1',
-        Relation::class => '1',
-        MacroProcessus::class => '2',
-        Process::class => '2',
-        Activity::class => '2',
-        Operation::class => '2',
-        Task::class => '2',
-        Actor::class => '2',
-        Information::class => '2',
-        ApplicationBlock::class => '3',
-        Application::class => '3',
-        ApplicationService::class => '3',
-        ApplicationModule::class => '3',
-        Database::class => '3',
-        ApplicationFlow::class => '3',
-        ZoneAdmin::class => '4',
-        Annuaire::class => '4',
-        ForestAd::class => '4',
-        Domain::class => '4',
-        AdminUser::class => '4',
-        Network::class => '5',
-        Subnetwork::class => '5',
-        Gateway::class => '5',
-        ExternalConnectedEntity::class => '5',
-        Router::class => '5',
-        NetworkSwitch::class => '5',
-        SecurityDevice::class => '5',
-        DhcpServer::class => '5',
-        Dnsserver::class => '5',
-        LogicalServer::class => '5',
-        Cluster::class => '5',
-        Backup::class => '5',
-        Container::class => '5',
-        LogicalFlow::class => '5',
-        Vlan::class => '5',
-        Certificate::class => '5',
-        Site::class => '6',
-        Building::class => '6',
-        Bay::class => '6',
-        Zone::class => '6',
-        PhysicalServer::class => '6',
-        Workstation::class => '6',
-        StorageDevice::class => '6',
-        Peripheral::class => '6',
-        Phone::class => '6',
-        PhysicalSwitch::class => '6',
-        PhysicalRouter::class => '6',
-        WifiTerminal::class => '6',
-        PhysicalSecurityDevice::class => '6',
-        PhysicalLink::class => '6',
-        Wan::class => '6',
-        Man::class => '6',
-        Lan::class => '6',
-        DataProcessing::class => '7',
-        SecurityControl::class => '7',
     ];
 
     // ─── Derivation engine (pure functions) ────────────────────────────────
@@ -370,14 +255,6 @@ final class ModelRegistry
         }
 
         return $map;
-    }
-
-    // ─── Business structure accessors ───────────────────────────────────────
-
-    /** @return array<class-string, string> Model class => report `vues[]` id. */
-    public static function reportVueMap(): array
-    {
-        return self::REPORT_VUE_MAP;
     }
 
     // ─── Dynamic model discovery ─────────────────────────────────────────────

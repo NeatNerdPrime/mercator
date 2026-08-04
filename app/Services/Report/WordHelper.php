@@ -5,16 +5,61 @@ namespace App\Services\Report;
 use App\Contracts\HasIconContract;
 use App\Contracts\HasUniqueIdentifierContract;
 use App\Models\Activity;
+use App\Models\Actor;
+use App\Models\AdminUser;
+use App\Models\Annuaire;
 use App\Models\Application;
+use App\Models\ApplicationBlock;
+use App\Models\ApplicationFlow;
+use App\Models\ApplicationModule;
+use App\Models\ApplicationService;
+use App\Models\Backup;
+use App\Models\Bay;
+use App\Models\Building;
+use App\Models\Certificate;
+use App\Models\Cluster;
+use App\Models\Container;
 use App\Models\Database;
 use App\Models\DataProcessing;
+use App\Models\DhcpServer;
+use App\Models\Dnsserver;
 use App\Models\Document;
+use App\Models\Domain;
+use App\Models\Entity;
 use App\Models\ExternalConnectedEntity;
+use App\Models\ForestAd;
+use App\Models\Gateway;
+use App\Models\Information;
+use App\Models\Lan;
+use App\Models\LogicalFlow;
+use App\Models\LogicalServer;
 use App\Models\MacroProcessus;
+use App\Models\Man;
 use App\Models\Network;
+use App\Models\NetworkSwitch;
+use App\Models\Operation;
+use App\Models\Peripheral;
+use App\Models\Phone;
+use App\Models\PhysicalLink;
+use App\Models\PhysicalRouter;
+use App\Models\PhysicalSecurityDevice;
+use App\Models\PhysicalServer;
+use App\Models\PhysicalSwitch;
 use App\Models\Process;
 use App\Models\Relation;
-use App\Support\ModelRegistry;
+use App\Models\Router;
+use App\Models\SecurityControl;
+use App\Models\SecurityDevice;
+use App\Models\Site;
+use App\Models\StorageDevice;
+use App\Models\Subnetwork;
+use App\Models\Task;
+use App\Models\Vlan;
+use App\Models\Wan;
+use App\Models\WifiTerminal;
+use App\Models\Workstation;
+use App\Models\Zone;
+use App\Models\ZoneAdmin;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\Log;
 use PhpOffice\PhpWord\Element\Cell;
@@ -124,7 +169,63 @@ class WordHelper
      *
      * @var array<class-string<Model>, string>
      */
-    public const MODEL_VUE_MAP = ModelRegistry::REPORT_VUE_MAP;
+    public const array MODEL_VUE_MAP = [
+        Entity::class => '1',
+        Relation::class => '1',
+        MacroProcessus::class => '2',
+        Process::class => '2',
+        Activity::class => '2',
+        Operation::class => '2',
+        Task::class => '2',
+        Actor::class => '2',
+        Information::class => '2',
+        ApplicationBlock::class => '3',
+        Application::class => '3',
+        ApplicationService::class => '3',
+        ApplicationModule::class => '3',
+        Database::class => '3',
+        ApplicationFlow::class => '3',
+        ZoneAdmin::class => '4',
+        Annuaire::class => '4',
+        ForestAd::class => '4',
+        Domain::class => '4',
+        AdminUser::class => '4',
+        Network::class => '5',
+        Subnetwork::class => '5',
+        Gateway::class => '5',
+        ExternalConnectedEntity::class => '5',
+        Router::class => '5',
+        NetworkSwitch::class => '5',
+        SecurityDevice::class => '5',
+        DhcpServer::class => '5',
+        Dnsserver::class => '5',
+        LogicalServer::class => '5',
+        Cluster::class => '5',
+        Backup::class => '5',
+        Container::class => '5',
+        LogicalFlow::class => '5',
+        Vlan::class => '5',
+        Certificate::class => '5',
+        Site::class => '6',
+        Building::class => '6',
+        Bay::class => '6',
+        Zone::class => '6',
+        PhysicalServer::class => '6',
+        Workstation::class => '6',
+        StorageDevice::class => '6',
+        Peripheral::class => '6',
+        Phone::class => '6',
+        PhysicalSwitch::class => '6',
+        PhysicalRouter::class => '6',
+        WifiTerminal::class => '6',
+        PhysicalSecurityDevice::class => '6',
+        PhysicalLink::class => '6',
+        Wan::class => '6',
+        Man::class => '6',
+        Lan::class => '6',
+        DataProcessing::class => '7',
+        SecurityControl::class => '7',
+    ];
 
     public function newDocument(): PhpWord
     {
