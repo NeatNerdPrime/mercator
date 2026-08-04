@@ -98,7 +98,7 @@ final class ModelRegistry
     ];
 
     /**
-     * The ~52 models with a Cartographer-assignable route (ex-Cartographer::cartographiableRoutesMap()
+     * The ~53 models with a Cartographer-assignable route (ex-Cartographer::cartographiableRoutesMap()
      * keys). Drives AppServiceProvider's observer registration and the roles/users cartographer UI.
      */
     public const array CARTOGRAPHY_MODELS = [
@@ -117,6 +117,7 @@ final class ModelRegistry
         Cluster::class,
         Container::class,
         Database::class,
+        DataProcessing::class,
         DhcpServer::class,
         Dnsserver::class,
         Domain::class,
@@ -157,15 +158,14 @@ final class ModelRegistry
     ];
 
     /**
-     * The ~59 models ShowLink can render a show-link for (superset of CARTOGRAPHY_MODELS: adds
-     * AdminUser, AuditLog, DataProcessing, Graph, Role, SecurityControl, User — models
+     * The ~58 models ShowLink can render a show-link for (superset of CARTOGRAPHY_MODELS: adds
+     * AdminUser, AuditLog, Graph, Role, SecurityControl, User — models
      * with a show route but no cartographer assignment concept).
      */
     public const array LINKABLE_MODELS = [
         ...self::CARTOGRAPHY_MODELS,
         AdminUser::class,
         AuditLog::class,
-        DataProcessing::class,
         Graph::class,
         Role::class,
         SecurityControl::class,
