@@ -1,6 +1,7 @@
 <?php
 
 use App\Models\Annuaire;
+use App\Models\Application;
 use App\Models\User;
 use Database\Seeders\PermissionRoleTableSeeder;
 use Database\Seeders\PermissionsTableSeeder;
@@ -21,7 +22,7 @@ beforeEach(function () {
         RoleUserTableSeeder::class,
     ]);
 
-    $this->user = User::query()->where('login','admin@admin.com')->first();
+    $this->user = User::query()->where('login', 'admin@admin.com')->first();
     $this->actingAs($this->user);
 
 });
@@ -46,6 +47,16 @@ describe('index', function () {
         $response->assertForbidden();
     });
 
+    test('displays the linked application name', function () {
+        $application = Application::factory()->create(['name' => 'LDAP Administration']);
+        Annuaire::factory()->create(['application_id' => $application->id]);
+
+        $response = $this->get(route('admin.annuaires.index'));
+
+        $response->assertOk();
+        $response->assertSee('LDAP Administration');
+    });
+
 });
 
 describe('create', function () {
@@ -54,7 +65,7 @@ describe('create', function () {
 
         $response->assertOk();
         $response->assertViewIs('admin.annuaires.create');
-        $response->assertViewHas(['zone_admins']);
+        $response->assertViewHas(['zone_admins', 'applications']);
     });
 
     test('denies access without permission', function () {
@@ -161,6 +172,69 @@ describe('destroy', function () {
         $response = $this->delete(route('admin.annuaires.destroy', $annuaire));
 
         $response->assertForbidden();
+    });
+});
+
+describe('application link', function () {
+    test('can associate an application on update', function () {
+        $application = Application::factory()->create();
+        $annuaire = Annuaire::factory()->create();
+
+        $response = $this->put(route('admin.annuaires.update', $annuaire), [
+            'name' => 'Directory with app',
+            'application_id' => $application->id,
+        ]);
+
+        $response->assertRedirect(route('admin.annuaires.index'));
+        $this->assertDatabaseHas('annuaires', [
+            'id' => $annuaire->id,
+            'application_id' => $application->id,
+        ]);
+    });
+
+    test('rejects a non existing application', function () {
+        $annuaire = Annuaire::factory()->create();
+
+        $response = $this->put(route('admin.annuaires.update', $annuaire), [
+            'name' => 'Directory bad app',
+            'application_id' => 999999,
+        ]);
+
+        $response->assertSessionHasErrors('application_id');
+    });
+
+    test('application relation resolves to the application model', function () {
+        $application = Application::factory()->create();
+        $annuaire = Annuaire::factory()->create(['application_id' => $application->id]);
+
+        expect($annuaire->application->is($application))->toBeTrue();
+    });
+
+    test('show displays the linked application name', function () {
+        $application = Application::factory()->create(['name' => 'LDAP Administration']);
+        $annuaire = Annuaire::factory()->create(['application_id' => $application->id]);
+
+        $response = $this->get(route('admin.annuaires.show', $annuaire->id));
+
+        $response->assertOk();
+        $response->assertSee('LDAP Administration');
+    });
+});
+
+describe('maturity', function () {
+    test('level 1 does not require an application', function () {
+        $annuaire = Annuaire::factory()->create(['application_id' => null]);
+
+        expect(Annuaire::maturityLevel1()->whereKey($annuaire->id)->exists())->toBeTrue();
+    });
+
+    test('level 2 requires an application', function () {
+        $withoutApp = Annuaire::factory()->create(['application_id' => null]);
+        $application = Application::factory()->create();
+        $withApp = Annuaire::factory()->create(['application_id' => $application->id]);
+
+        expect(Annuaire::maturityLevel2()->whereKey($withoutApp->id)->exists())->toBeFalse()
+            ->and(Annuaire::maturityLevel2()->whereKey($withApp->id)->exists())->toBeTrue();
     });
 });
 

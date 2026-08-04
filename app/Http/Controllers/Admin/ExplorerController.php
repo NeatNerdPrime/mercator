@@ -1354,7 +1354,6 @@ class ExplorerController extends Controller
                 );
             }
 
-
         }
 
         $this->linkJoinTable('application_application_service',
@@ -1479,7 +1478,7 @@ class ExplorerController extends Controller
     private function buildAnnuaires(): void
     {
         $annuaires = Cartographer::scopedQuery(Annuaire::query())
-            ->select('id', 'name', 'zone_admin_id')
+            ->select('id', 'name', 'zone_admin_id', 'application_id')
             ->get();
 
         foreach ($annuaires as $annuaire) {
@@ -1495,6 +1494,13 @@ class ExplorerController extends Controller
                 $this->addLinkEdge(
                     $this->formatId(Annuaire::$prefix, $annuaire->id),
                     $this->formatId(ZoneAdmin::$prefix, $annuaire->zone_admin_id)
+                );
+            }
+
+            if ($annuaire->application_id !== null) {
+                $this->addLinkEdge(
+                    $this->formatId(Annuaire::$prefix, $annuaire->id),
+                    $this->formatId(Application::$prefix, $annuaire->application_id)
                 );
             }
         }

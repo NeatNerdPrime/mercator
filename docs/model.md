@@ -1131,6 +1131,7 @@ erDiagram
         text description
         string solution
         int zone_admin_id FK
+        int application_id FK
         timestamp created_at
         timestamp updated_at
         timestamp deleted_at
@@ -1177,6 +1178,7 @@ erDiagram
 
     zone_admins ||--o{ annuaires : "zone_admin_id"
     zone_admins ||--o{ forest_ads : "zone_admin_id"
+    applications ||--o{ annuaires : "application_id"
     forest_ads }o--o{ domains : "domains"
     domains ||--o{ admin_users : "domain_id"
 ```
@@ -1208,7 +1210,8 @@ An administration zone is made up of Active Directory (AD) directory services an
 An administration directory service is an application that collects data on a company's users or IT equipment, enabling
 them to be administered.
 
-It can be an inventory tool used to manage changes or tickets, or a mapping tool such as Mercator.
+It can be an inventory tool used to manage changes or tickets, or a mapping tool such as Mercator. It can optionally be
+linked to the application implementing it.
 
 | Table                                         | api              |
 |:----------------------------------------------|:-----------------|
@@ -1222,6 +1225,7 @@ It can be an inventory tool used to manage changes or tickets, or a mapping tool
 | description   | longtext     | Description of the directory     |
 | solution      | varchar(255) | Techinical solution              |
 | zone_admin_id | int unsigned | Reference to administration area |
+| application_id | int unsigned | Reference to the application managing this directory |
 | created_at    | timestamp    | Date of creation                 |
 | updated_at    | timestamp    | Date of update                   |
 | deleted_at    | timestamp    | Date of deletion                 |

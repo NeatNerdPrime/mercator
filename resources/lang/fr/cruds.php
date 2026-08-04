@@ -104,6 +104,8 @@ return [
             'solution_helper' => '',
             'zone_admin' => 'Zone Admin',
             'zone_admin_helper' => '',
+            'application' => 'Application',
+            'application_helper' => "Application qui met en œuvre ce service d'annuaire d'administration",
         ],
         'title' => "Services d'annuaire d'administration",
         'title_short' => 'Annuaires',

@@ -62,6 +62,22 @@
                     @endif
                     <span class="help-block">{{ trans('cruds.annuaire.fields.zone_admin_helper') }}</span>
                 </div>
+                <div class="form-group">
+                    <label class="label-maturity-2"
+                           for="application_id">{{ trans('cruds.annuaire.fields.application') }}</label>
+                    <select class="form-control select2 {{ $errors->has('application_id') ? 'is-invalid' : '' }}"
+                            name="application_id" id="application_id">
+                        @foreach($applications as $id => $application)
+                            <option value="{{ $id }}" {{ old('application_id') == $id ? 'selected' : '' }}>{{ $application }}</option>
+                        @endforeach
+                    </select>
+                    @if($errors->has('application_id'))
+                        <div class="invalid-feedback">
+                            {{ $errors->first('application_id') }}
+                        </div>
+                    @endif
+                    <span class="help-block">{{ trans('cruds.annuaire.fields.application_helper') }}</span>
+                </div>
             </div>
         </div>
         <div class="form-group">

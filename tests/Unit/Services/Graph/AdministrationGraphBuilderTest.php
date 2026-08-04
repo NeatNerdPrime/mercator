@@ -2,6 +2,7 @@
 
 use App\Models\AdminUser;
 use App\Models\Annuaire;
+use App\Models\Application;
 use App\Models\Domain;
 use App\Models\ForestAd;
 use App\Models\User;
@@ -49,4 +50,22 @@ test('buildDot draws the zone-annuaire-forest-domain-adminUser chain', function 
         ->toContain('D'.$domain->id.' -> U'.$adminUser->id)
         ->toContain('U'.$adminUser->id.' [shape=none label=<')
         ->toContain('jdoe');
+});
+
+test('buildDot draws the application-annuaire link', function () {
+    $application = Application::factory()->create();
+    $annuaire = Annuaire::factory()->create(['application_id' => $application->id]);
+
+    $builder = new AdministrationGraphBuilder;
+    $dot = $builder->buildDot(
+        ZoneAdmin::with('annuaires', 'forestAds')->get(),
+        Annuaire::with('application')->get(),
+        ForestAd::with('domains')->get(),
+        Domain::all(),
+        AdminUser::all(),
+    );
+
+    expect($dot)
+        ->toContain('AP'.$application->id.' -> A'.$annuaire->id)
+        ->toContain('AP'.$application->id.' [shape=none label=<');
 });

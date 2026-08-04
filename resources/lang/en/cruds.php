@@ -102,6 +102,8 @@ return [
             'solution_helper' => '',
             'zone_admin' => 'Admin Zone',
             'zone_admin_helper' => '',
+            'application' => 'Application',
+            'application_helper' => 'Application implementing this administration directory service',
         ],
         'title' => 'Administration Directory Services',
         'title_short' => 'Directories',

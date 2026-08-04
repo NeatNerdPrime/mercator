@@ -7,6 +7,7 @@ use App\Http\Requests\MassDestroyAnnuaireRequest;
 use App\Http\Requests\StoreAnnuaireRequest;
 use App\Http\Requests\UpdateAnnuaireRequest;
 use App\Models\Annuaire;
+use App\Models\Application;
 use App\Models\Cartographer;
 use App\Models\ZoneAdmin;
 use Gate;
@@ -23,6 +24,7 @@ class AnnuaireController extends Controller
         }
 
         $annuaires = Annuaire::query()
+            ->with(['zoneAdmin', 'application'])
             ->when(request('search'), function ($q, $search) {
                 $q->where(function ($q) use ($search) {
                     foreach (Annuaire::$searchable as $field) {
@@ -48,8 +50,9 @@ class AnnuaireController extends Controller
         abort_if(Gate::denies('annuaire_create'), Response::HTTP_FORBIDDEN, '403 Forbidden');
 
         $zone_admins = ZoneAdmin::all()->sortBy('name')->pluck('name', 'id')->prepend(trans('global.pleaseSelect'), '');
+        $applications = Application::all()->sortBy('name')->pluck('name', 'id')->prepend(trans('global.pleaseSelect'), '');
 
-        return view('admin.annuaires.create', compact('zone_admins'));
+        return view('admin.annuaires.create', compact('zone_admins', 'applications'));
     }
 
     public function edit(Annuaire $annuaire)
@@ -57,10 +60,11 @@ class AnnuaireController extends Controller
         abort_if(Gate::denies('edit-object', $annuaire), Response::HTTP_FORBIDDEN, '403 Forbidden');
 
         $zone_admins = ZoneAdmin::all()->sortBy('name')->pluck('name', 'id')->prepend(trans('global.pleaseSelect'), '');
+        $applications = Application::all()->sortBy('name')->pluck('name', 'id')->prepend(trans('global.pleaseSelect'), '');
 
-        $annuaire->load('zoneAdmin');
+        $annuaire->load('zoneAdmin', 'application');
 
-        return view('admin.annuaires.edit', compact('zone_admins', 'annuaire'));
+        return view('admin.annuaires.edit', compact('zone_admins', 'applications', 'annuaire'));
     }
 
     public function update(UpdateAnnuaireRequest $request, Annuaire $annuaire)
@@ -76,7 +80,7 @@ class AnnuaireController extends Controller
     {
         abort_if(Gate::denies('show-object', $annuaire), Response::HTTP_FORBIDDEN, '403 Forbidden');
 
-        $annuaire->load('zoneAdmin');
+        $annuaire->load('zoneAdmin', 'application');
 
         return view('admin.annuaires.show', compact('annuaire'));
     }

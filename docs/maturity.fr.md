@@ -83,6 +83,7 @@ suivants :
 | **Administration**               |        |                                                                                      |
 | Zones                            | 1      | Description                                                                          |
 | Annuaires                        | 1      | Description, solution, zone d'administration                                         |
+| Annuaires                        | 2      | Application                                                                          |
 | Forêt                            | 1      | Description, zone d'administration                                                   |
 | Domaines                         | 1      | Description, Contrôleur de domaine, nombre d'utilisateurs, nombre de machines, relation inter domaine |
 | **Logique**                      |        |                                                                                      |

@@ -3,15 +3,15 @@
 namespace App\Http\Controllers\Report;
 
 use App\Http\Controllers\Controller;
-use App\Models\Cartographer;
-use Illuminate\Support\Facades\Gate;
-use Illuminate\View\View;
 use App\Models\AdminUser;
 use App\Models\Annuaire;
+use App\Models\Cartographer;
 use App\Models\Domain;
 use App\Models\ForestAd;
 use App\Models\ZoneAdmin;
 use App\Services\Graph\AdministrationGraphBuilder;
+use Illuminate\Support\Facades\Gate;
+use Illuminate\View\View;
 use Symfony\Component\HttpFoundation\Response;
 
 class AdministrationView extends Controller
@@ -21,20 +21,20 @@ class AdministrationView extends Controller
      *
      * Aborts with HTTP 403 Forbidden if the current user is denied the 'reports_access' gate.
      *
-     * @return \Illuminate\View\View The rendered 'admin/reports/administration' view with keys:
-     *                               - 'zones' => collection of ZoneAdmin
-     *                               - 'annuaires' => collection of Annuaire
-     *                               - 'forests' => collection of ForestAd
-     *                               - 'domains' => collection of Domain
-     *                               - 'adminUsers' => collection of AdminUser
+     * @return View The rendered 'admin/reports/administration' view with keys:
+     *              - 'zones' => collection of ZoneAdmin
+     *              - 'annuaires' => collection of Annuaire
+     *              - 'forests' => collection of ForestAd
+     *              - 'domains' => collection of Domain
+     *              - 'adminUsers' => collection of AdminUser
      */
     public function generate(): View
     {
         $allowed = Gate::allows('explore_access') || Cartographer::canAccessAny([ZoneAdmin::class, Annuaire::class, ForestAd::class, Domain::class]);
-        abort_if(!$allowed, Response::HTTP_FORBIDDEN, '403 Forbidden');
+        abort_if(! $allowed, Response::HTTP_FORBIDDEN, '403 Forbidden');
 
         $zones = Cartographer::scopedQuery(ZoneAdmin::query())->get();
-        $annuaires = Cartographer::scopedQuery(Annuaire::query())->get();
+        $annuaires = Cartographer::scopedQuery(Annuaire::query())->with(['zoneAdmin', 'application'])->get();
         $forests = Cartographer::scopedQuery(ForestAd::query())->get();
         $domains = Cartographer::scopedQuery(Domain::query())->get();
         $adminUsers = Cartographer::scopedQuery(AdminUser::query())->get();

@@ -10,14 +10,14 @@ class StoreAnnuaireRequest extends BaseFormRequest
 {
     protected array $htmlFields = ['description'];
 
-    public function authorize() : bool
+    public function authorize(): bool
     {
         abort_if(Gate::denies('annuaire_create'), Response::HTTP_FORBIDDEN, '403 Forbidden');
 
         return true;
     }
 
-    public function rules() : array
+    public function rules(): array
     {
         return [
             'name' => [
@@ -26,6 +26,7 @@ class StoreAnnuaireRequest extends BaseFormRequest
                 'required',
                 Rule::unique('annuaires')->whereNull('deleted_at'),
             ],
+            'application_id' => ['nullable', 'integer', 'exists:applications,id'],
         ];
     }
 }

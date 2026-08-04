@@ -8,12 +8,12 @@ class UpdateAnnuaireRequest extends BaseFormRequest
 {
     protected array $htmlFields = ['description'];
 
-    public function authorize() : bool
+    public function authorize(): bool
     {
         return $this->authorizeEdit();
     }
 
-    public function rules() : array
+    public function rules(): array
     {
         return [
             'name' => [
@@ -24,6 +24,7 @@ class UpdateAnnuaireRequest extends BaseFormRequest
                     ->ignore($this->route('annuaire')->id ?? $this->id)
                     ->whereNull('deleted_at'),
             ],
+            'application_id' => ['nullable', 'integer', 'exists:applications,id'],
         ];
     }
 }
