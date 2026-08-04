@@ -4,26 +4,58 @@ namespace App\Http\Controllers\Admin;
 
 use App\Exceptions\MonarcApiException;
 use App\Http\Controllers\Controller;
+use App\Models\Actor;
 use App\Models\AdminUser;
+use App\Models\Annuaire;
 use App\Models\Application;
+use App\Models\ApplicationBlock;
+use App\Models\ApplicationModule;
+use App\Models\ApplicationService;
+use App\Models\Backup;
+use App\Models\Bay;
 use App\Models\Building;
+use App\Models\Cluster;
+use App\Models\Container;
 use App\Models\Database;
 use App\Models\DhcpServer;
 use App\Models\Dnsserver;
+use App\Models\Domain;
 use App\Models\Entity;
 use App\Models\ExternalConnectedEntity;
+use App\Models\ForestAd;
+use App\Models\Gateway;
+use App\Models\Information;
+use App\Models\Lan;
+use App\Models\LogicalServer;
+use App\Models\MacroProcessus;
+use App\Models\Man;
 use App\Models\MonarcSyncItem;
+use App\Models\Network;
+use App\Models\NetworkSwitch;
+use App\Models\Peripheral;
+use App\Models\Phone;
+use App\Models\PhysicalRouter;
+use App\Models\PhysicalSecurityDevice;
+use App\Models\PhysicalServer;
+use App\Models\PhysicalSwitch;
+use App\Models\Process;
 use App\Models\Relation;
+use App\Models\Router;
 use App\Models\SecurityDevice;
+use App\Models\Site;
 use App\Models\StorageDevice;
+use App\Models\Subnetwork;
+use App\Models\Vlan;
+use App\Models\Wan;
 use App\Models\WifiTerminal;
 use App\Models\Workstation;
+use App\Models\Zone;
+use App\Models\ZoneAdmin;
 use App\Services\MonarcApiService;
 use App\Services\MonarcExportService;
 use App\Services\MonarcSyncService;
 use App\Services\MospService;
 use App\Services\MospToMonarcConverter;
-use App\Support\ModelRegistry;
 use App\Support\MonarcSelectionState;
 use App\Support\MonarcSettings;
 use App\Support\MonarcSyncState;
@@ -41,7 +73,54 @@ class MonarcController extends Controller
      * short name used throughout the selection payload/UI. Never resolve
      * a model class from client input without going through this map.
      */
-    private const SELECTABLE_MODELS = ModelRegistry::MONARC_SELECTABLE_MODELS;
+    private const SELECTABLE_MODELS = [
+        'MacroProcessus' => MacroProcessus::class,
+        'Process' => Process::class,
+        'Information' => Information::class,
+        'Actor' => Actor::class,
+        'Application' => Application::class,
+        'ApplicationService' => ApplicationService::class,
+        'ApplicationBlock' => ApplicationBlock::class,
+        'ApplicationModule' => ApplicationModule::class,
+        'Database' => Database::class,
+        'LogicalServer' => LogicalServer::class,
+        'Cluster' => Cluster::class,
+        'Container' => Container::class,
+        'Backup' => Backup::class,
+        'Network' => Network::class,
+        'Subnetwork' => Subnetwork::class,
+        'Gateway' => Gateway::class,
+        'Router' => Router::class,
+        'NetworkSwitch' => NetworkSwitch::class,
+        'SecurityDevice' => SecurityDevice::class,
+        'DhcpServer' => DhcpServer::class,
+        'Dnsserver' => Dnsserver::class,
+        'Vlan' => Vlan::class,
+        'ExternalConnectedEntity' => ExternalConnectedEntity::class,
+        'Lan' => Lan::class,
+        'Man' => Man::class,
+        'Wan' => Wan::class,
+        'PhysicalServer' => PhysicalServer::class,
+        'Workstation' => Workstation::class,
+        'Site' => Site::class,
+        'Building' => Building::class,
+        'Bay' => Bay::class,
+        'PhysicalSwitch' => PhysicalSwitch::class,
+        'PhysicalRouter' => PhysicalRouter::class,
+        'PhysicalSecurityDevice' => PhysicalSecurityDevice::class,
+        'StorageDevice' => StorageDevice::class,
+        'Peripheral' => Peripheral::class,
+        'Phone' => Phone::class,
+        'WifiTerminal' => WifiTerminal::class,
+        'Zone' => Zone::class,
+        'Entity' => Entity::class,
+        'Relation' => Relation::class,
+        'Domain' => Domain::class,
+        'ForestAd' => ForestAd::class,
+        'Annuaire' => Annuaire::class,
+        'ZoneAdmin' => ZoneAdmin::class,
+        'AdminUser' => AdminUser::class,
+    ];
 
     private const SCALES_AND_METHOD_KEYS = ['scales', 'operationalRiskScales', 'method', 'thresholds', 'soaScaleComments'];
 
@@ -55,7 +134,16 @@ class MonarcController extends Controller
      * which view a row is grouped under — rowsFromAssets() keeps its own,
      * unsorted families order for that.
      */
-    private const SIDEBAR_FAMILY_ORDER = ModelRegistry::MONARC_SIDEBAR_FAMILY_ORDER;
+    private const SIDEBAR_FAMILY_ORDER = [
+        'Entity', 'Relation',
+        'MacroProcessus', 'Process', 'Actor', 'Information',
+        'ApplicationBlock', 'Application', 'ApplicationService', 'ApplicationModule', 'Database',
+        'ZoneAdmin', 'Annuaire', 'ForestAd', 'Domain', 'AdminUser',
+        'Network', 'Subnetwork', 'Gateway', 'ExternalConnectedEntity', 'Router', 'NetworkSwitch',
+        'SecurityDevice', 'DhcpServer', 'Dnsserver', 'Cluster', 'LogicalServer', 'Backup', 'Container', 'Vlan',
+        'Site', 'Building', 'Bay', 'Zone', 'PhysicalServer', 'Workstation', 'StorageDevice', 'Peripheral',
+        'Phone', 'PhysicalSwitch', 'PhysicalRouter', 'WifiTerminal', 'PhysicalSecurityDevice', 'Wan', 'Man', 'Lan',
+    ];
 
     /**
      * Groups the selectable Mercator families into Mercator's own "views"

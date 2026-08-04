@@ -67,16 +67,16 @@ use ReflectionClass;
 /**
  * Single source of truth for model metadata that used to be duplicated across
  * several hand-maintained maps (Cartographer, ShowLink, GlobalSearchController,
- * MonarcController, MonarcExportService, WordHelper, QueryEngineIntrospector):
- * route names, title translation keys, and the business whitelists/groupings
- * built on top of them.
+ * WordHelper, QueryEngineIntrospector): route names, title translation keys,
+ * and the business whitelists/groupings built on top of them.
  *
  * slug()/routeName()/titleKey()/title() are pure derivations from the class
  * name — no per-model override table — except for the single documented
  * exception in ROUTE_SLUG_OVERRIDES (see its docblock). Everything else
- * (CARTOGRAPHY_MODELS, LINKABLE_MODELS, the Monarc/report structures) is
- * explicit data because it encodes a business decision, not something
- * derivable from the class name.
+ * (CARTOGRAPHY_MODELS, LINKABLE_MODELS, REPORT_VUE_MAP) is explicit data
+ * because it encodes a business decision, not something derivable from the
+ * class name. Monarc-specific whitelists/groupings live on MonarcController
+ * and MonarcExportService instead — they are the only consumers.
  */
 final class ModelRegistry
 {
@@ -98,71 +98,10 @@ final class ModelRegistry
     ];
 
     /**
-     * The ~51 models with a Cartographer-assignable route (ex-Cartographer::cartographiableRoutesMap()
-     * keys). Drives AppServiceProvider's observer registration and the roles/users cartographer UI —
-     * this exact set, unchanged.
+     * The ~52 models with a Cartographer-assignable route (ex-Cartographer::cartographiableRoutesMap()
+     * keys). Drives AppServiceProvider's observer registration and the roles/users cartographer UI.
      */
     public const CARTOGRAPHY_MODELS = [
-        Activity::class,
-        Actor::class,
-        Annuaire::class,
-        Application::class,
-        ApplicationBlock::class,
-        ApplicationFlow::class,
-        ApplicationModule::class,
-        ApplicationService::class,
-        Backup::class,
-        Bay::class,
-        Building::class,
-        Certificate::class,
-        Cluster::class,
-        Container::class,
-        Database::class,
-        DhcpServer::class,
-        Dnsserver::class,
-        Domain::class,
-        Entity::class,
-        ExternalConnectedEntity::class,
-        ForestAd::class,
-        Gateway::class,
-        Information::class,
-        Lan::class,
-        LogicalFlow::class,
-        LogicalServer::class,
-        MacroProcessus::class,
-        Man::class,
-        Network::class,
-        NetworkSwitch::class,
-        Operation::class,
-        Peripheral::class,
-        Phone::class,
-        PhysicalLink::class,
-        PhysicalRouter::class,
-        PhysicalSecurityDevice::class,
-        PhysicalServer::class,
-        PhysicalSwitch::class,
-        Process::class,
-        Router::class,
-        SecurityDevice::class,
-        Site::class,
-        StorageDevice::class,
-        Subnetwork::class,
-        Task::class,
-        Vlan::class,
-        Wan::class,
-        WifiTerminal::class,
-        Workstation::class,
-        Zone::class,
-        ZoneAdmin::class,
-    ];
-
-    /**
-     * CARTOGRAPHY_MODELS plus Relation — the ~52-model set ex-Cartographer::cartographiableModelsList()
-     * actually used (Relation has a working title and an admin.relations.show route via ShowLink, but
-     * was never added to CARTOGRAPHY_MODELS/cartographiableRoutesMap(); pre-existing asymmetry, kept
-     * as-is rather than silently unified).
-     */
-    public const CARTOGRAPHY_TITLE_MODELS = [
         Activity::class,
         Actor::class,
         Annuaire::class,
@@ -219,7 +158,7 @@ final class ModelRegistry
 
     /**
      * The ~59 models ShowLink can render a show-link for (superset of CARTOGRAPHY_MODELS: adds
-     * AdminUser, AuditLog, DataProcessing, Graph, Relation, Role, SecurityControl, User — models
+     * AdminUser, AuditLog, DataProcessing, Graph, Role, SecurityControl, User — models
      * with a show route but no cartographer assignment concept).
      */
     public const LINKABLE_MODELS = [
@@ -282,94 +221,6 @@ final class ModelRegistry
         Workstation::class,
         Zone::class,
         ZoneAdmin::class,
-    ];
-
-    /**
-     * Ex-MonarcController::SELECTABLE_MODELS — whitelist of Mercator models selectable for
-     * Monarc export, keyed by the short name used throughout the selection payload/UI.
-     */
-    public const MONARC_SELECTABLE_MODELS = [
-        'MacroProcessus' => MacroProcessus::class,
-        'Process' => Process::class,
-        'Information' => Information::class,
-        'Actor' => Actor::class,
-        'Application' => Application::class,
-        'ApplicationService' => ApplicationService::class,
-        'ApplicationBlock' => ApplicationBlock::class,
-        'ApplicationModule' => ApplicationModule::class,
-        'Database' => Database::class,
-        'LogicalServer' => LogicalServer::class,
-        'Cluster' => Cluster::class,
-        'Container' => Container::class,
-        'Backup' => Backup::class,
-        'Network' => Network::class,
-        'Subnetwork' => Subnetwork::class,
-        'Gateway' => Gateway::class,
-        'Router' => Router::class,
-        'NetworkSwitch' => NetworkSwitch::class,
-        'SecurityDevice' => SecurityDevice::class,
-        'DhcpServer' => DhcpServer::class,
-        'Dnsserver' => Dnsserver::class,
-        'Vlan' => Vlan::class,
-        'ExternalConnectedEntity' => ExternalConnectedEntity::class,
-        'Lan' => Lan::class,
-        'Man' => Man::class,
-        'Wan' => Wan::class,
-        'PhysicalServer' => PhysicalServer::class,
-        'Workstation' => Workstation::class,
-        'Site' => Site::class,
-        'Building' => Building::class,
-        'Bay' => Bay::class,
-        'PhysicalSwitch' => PhysicalSwitch::class,
-        'PhysicalRouter' => PhysicalRouter::class,
-        'PhysicalSecurityDevice' => PhysicalSecurityDevice::class,
-        'StorageDevice' => StorageDevice::class,
-        'Peripheral' => Peripheral::class,
-        'Phone' => Phone::class,
-        'WifiTerminal' => WifiTerminal::class,
-        'Zone' => Zone::class,
-        'Entity' => Entity::class,
-        'Relation' => Relation::class,
-        'Domain' => Domain::class,
-        'ForestAd' => ForestAd::class,
-        'Annuaire' => Annuaire::class,
-        'ZoneAdmin' => ZoneAdmin::class,
-        'AdminUser' => AdminUser::class,
-    ];
-
-    /**
-     * Ex-MonarcController::SIDEBAR_FAMILY_ORDER — every selectable family, in the exact order it
-     * appears in resources/views/partials/sidebar.blade.php (submenu order, then within-submenu
-     * order). Drives family display order on the Monarc selection screen.
-     */
-    public const MONARC_SIDEBAR_FAMILY_ORDER = [
-        'Entity', 'Relation',
-        'MacroProcessus', 'Process', 'Actor', 'Information',
-        'ApplicationBlock', 'Application', 'ApplicationService', 'ApplicationModule', 'Database',
-        'ZoneAdmin', 'Annuaire', 'ForestAd', 'Domain', 'AdminUser',
-        'Network', 'Subnetwork', 'Gateway', 'ExternalConnectedEntity', 'Router', 'NetworkSwitch',
-        'SecurityDevice', 'DhcpServer', 'Dnsserver', 'Cluster', 'LogicalServer', 'Backup', 'Container', 'Vlan',
-        'Site', 'Building', 'Bay', 'Zone', 'PhysicalServer', 'Workstation', 'StorageDevice', 'Peripheral',
-        'Phone', 'PhysicalSwitch', 'PhysicalRouter', 'WifiTerminal', 'PhysicalSecurityDevice', 'Wan', 'Man', 'Lan',
-    ];
-
-    /**
-     * Ex-MonarcExportService::PRIMARY_FAMILIES — families whose objects are "primary assets",
-     * always instance roots in the Monarc analysis tree.
-     */
-    public const MONARC_PRIMARY_FAMILIES = ['MacroProcessus', 'Process', 'Information'];
-
-    /**
-     * Ex-MonarcExportService::FAMILY_VIEWS — Mercator "views" grouping for the Monarc library/
-     * selection screen.
-     */
-    public const MONARC_FAMILY_VIEWS = [
-        'ecosystem' => ['Entity', 'Relation'],
-        'information_system' => ['MacroProcessus', 'Process', 'Actor', 'Information'],
-        'applications' => ['ApplicationBlock', 'Application', 'ApplicationService', 'ApplicationModule', 'Database'],
-        'administration' => ['Domain', 'ForestAd', 'Annuaire', 'ZoneAdmin', 'AdminUser'],
-        'logical_infrastructure' => ['Network', 'LogicalServer', 'Cluster', 'Container', 'Backup', 'Subnetwork', 'Gateway', 'Router', 'NetworkSwitch', 'SecurityDevice', 'DhcpServer', 'Dnsserver', 'Vlan', 'ExternalConnectedEntity'],
-        'physical_infrastructure' => ['Site', 'Building', 'Bay', 'Zone', 'PhysicalServer', 'PhysicalSwitch', 'PhysicalRouter', 'Workstation', 'StorageDevice', 'Peripheral', 'Phone', 'WifiTerminal', 'PhysicalSecurityDevice', 'Wan', 'Man', 'Lan'],
     ];
 
     /**
@@ -488,12 +339,12 @@ final class ModelRegistry
     }
 
     /**
-     * @param  array<int, class-string>|null  $only  Defaults to CARTOGRAPHY_TITLE_MODELS.
+     * @param  array<int, class-string>|null  $only  Defaults to CARTOGRAPHY_MODELS.
      * @return array<class-string, string> Model class => translated title.
      */
     public static function titlesMap(?array $only = null): array
     {
-        $classes = $only ?? self::CARTOGRAPHY_TITLE_MODELS;
+        $classes = $only ?? self::CARTOGRAPHY_MODELS;
 
         $map = [];
         foreach ($classes as $class) {
@@ -522,30 +373,6 @@ final class ModelRegistry
     }
 
     // ─── Business structure accessors ───────────────────────────────────────
-
-    /** @return array<string, class-string> Short name => model class. */
-    public static function selectableMonarc(): array
-    {
-        return self::MONARC_SELECTABLE_MODELS;
-    }
-
-    /** @return array<string, array<int, string>> View key => family short names. */
-    public static function monarcFamilyViews(): array
-    {
-        return self::MONARC_FAMILY_VIEWS;
-    }
-
-    /** @return array<int, string> */
-    public static function monarcPrimaryFamilies(): array
-    {
-        return self::MONARC_PRIMARY_FAMILIES;
-    }
-
-    /** @return array<int, string> */
-    public static function monarcSidebarOrder(): array
-    {
-        return self::MONARC_SIDEBAR_FAMILY_ORDER;
-    }
 
     /** @return array<class-string, string> Model class => report `vues[]` id. */
     public static function reportVueMap(): array

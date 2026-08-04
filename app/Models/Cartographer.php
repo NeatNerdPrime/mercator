@@ -87,7 +87,7 @@ class Cartographer extends Model
     /** @return array<class-string<Model>, string> */
     public static function cartographiableModelsList(): array
     {
-        return ModelRegistry::titlesMap(ModelRegistry::CARTOGRAPHY_TITLE_MODELS);
+        return ModelRegistry::titlesMap(ModelRegistry::CARTOGRAPHY_MODELS);
     }
 
     // ─── Détection contexte API (pas de session web initialisée) ─────────────
