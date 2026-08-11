@@ -35,6 +35,7 @@
     "@ckeditor/ckeditor5-build-classic": "^28.0.0",
     "@hpcc-js/wasm-graphviz": "^1.21.2",
     "@maxgraph/core": "^0.21.0",
+    "@r0kshan/cairn": "1.0.0-RC11",
     "@popperjs/core": "^2.11.8",
     "bootstrap": "^5.3.3",
     "bootstrap-icons": "^1.11.3",
