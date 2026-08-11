@@ -384,6 +384,7 @@ return [
             'prompt_empty' => 'Sélectionnez au moins un objet pour afficher le diagramme.',
             'loading' => 'Génération en cours...',
             'error_generate' => 'Une erreur est survenue lors de la génération du diagramme.',
+            'orphan_legend_note' => 'Les blocs gris représentent un service ou un module sans application propriétaire unique dans le graphe.',
         ],
         'title' => 'Diagramme Cairn',
         'title_short' => 'Cairn',

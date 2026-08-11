@@ -380,6 +380,7 @@ return [
             'prompt_empty' => 'Select at least one object to display the diagram.',
             'loading' => 'Generating diagram...',
             'error_generate' => 'An error occurred while generating the diagram.',
+            'orphan_legend_note' => 'Gray boxes represent a service or module without a single owning application in the graph.',
         ],
         'title' => 'Cairn diagram',
         'title_short' => 'Cairn',
