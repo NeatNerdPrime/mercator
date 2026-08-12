@@ -72,6 +72,7 @@
                     <i title="Activities" id="activities-btn" class="mapping-icon bpmn-icon" draggable="true" data-node-type="activities-node">&#xE861</i>
                     <i title="Annotation" id="annotation-btn" class="mapping-icon bpmn-icon" draggable="true" data-node-type="annotation-node">&#xE86B;</i>
                     <i title="Conversation" id="conversation-btn" class="mapping-icon bi bi-hexagon" draggable="true" data-node-type="conversation-node"></i>
+                    ---
                     <i id="zoom-in-btn" title="Zoom in" class="mapping-icon bi bi-zoom-in"></i>
                     <i id="zoom-out-btn" title="Zoom out" class="mapping-icon bi bi-zoom-out"></i>
                     ---
@@ -136,6 +137,13 @@
     font-style: normal;
     font-weight: normal;
     font-variant: normal;
+}
+
+/* Bootstrap icons (conversation, zoom, save, import, export…) don't get a
+   font-size from .mapping-icon, so they render smaller than the custom
+   "bpmn" glyphs above — bump them to match. */
+.mapping-icon.bi {
+    font-size: 22px;
 }
 
 #conversation-btn::before {
