@@ -85,7 +85,20 @@
 
                 </div>
 
-                <div id="graph-container" tabindex="0"></div>
+                <div id="graph-container" tabindex="0"
+                     style="
+                        flex: 1;
+                        min-width: 0;
+                        min-height: 0;
+                        height: 800px;
+                        position: relative;
+                        overflow: auto;
+                        background-color: #fff;
+                        background-image:
+                            linear-gradient(to right, rgba(0,0,0,0.06) 1px, transparent 1px),
+                            linear-gradient(to bottom, rgba(0,0,0,0.06) 1px, transparent 1px);
+                        background-size: 20px 20px;"
+                ></div>
                 <div class="status" id="status"></div>
 
                 <!-- The contextual vertex/edge menu is no longer markup here:
@@ -156,25 +169,12 @@
     gap: 12px;
 }
 
-/* 4) Graph : occupe tout, et on autorise le déplacement “feuille” via scroll si besoin */
-#graph-container {
-    flex: 1;
-    min-width: 0;
-    min-height: 0;
-    height: 800px;
-    position: relative;
-
-    /* IMPORTANT : pour panning/feuille, préfère auto (pas hidden) */
-    overflow: auto;
-
-    background-color: #fff;
-
-    /* Maillage léger (gris clair) */
-    background-image:
-        linear-gradient(to right, rgba(0,0,0,0.06) 1px, transparent 1px),
-        linear-gradient(to bottom, rgba(0,0,0,0.06) 1px, transparent 1px);
-    background-size: 20px 20px; /* taille du maillage */
-}
+/* 4) Graph : occupe tout, et on autorise le déplacement “feuille” via scroll si besoin.
+   Les dimensions/overflow/fond sont posés en style inline sur le div (voir markup
+   ci-dessus) plutôt qu'ici : resources/css/mapping.css (chargé sur cette page pour
+   le legacy mxGraph, cf. #graph-container qu'il redéfinit pour la cartographie
+   réseau) a une règle #graph-container de même spécificité — seul un style inline
+   est garanti de gagner face à elle quel que soit l'ordre de chargement Vite. */
 
 /* 5) Supprimer le ring/bord bleu quand le container a le focus */
 #graph-container:focus,
