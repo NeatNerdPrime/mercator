@@ -1,55 +1,98 @@
-// src/bpmn.ts
-import {enableArrowKeyMovement, initBpmnEditor, showStatus, wireEditorUi} from './bpmn-edit';
-import {bindBpmnFileInput} from './bpmn-import';
-import {bindSaveButton, exposeGraphHelpers} from './bpmn-save';
-import {initVertexMenuActions} from "./bpmn-menu-init";
-import {installEdgeRules} from "./bpmn-arrows";
-import {setupBpmnMenuSelect} from "./bpmn-menu-select";
+// resources/BPMN/bpmn.ts
+// Thin adapter: wires @sourcentis/bpmn-editor (mounted with `ui: 'none'` so
+// it reuses Mercator's own Bootstrap sidebar/toolbar instead of building its
+// own) to this page's DOM and to Mercator's provider/persistence
+// implementations. All Laravel/CSRF/routing concerns live in
+// mercator-provider.ts / mercator-persistence.ts — nothing here or in the
+// editor package itself knows about them.
+import { createBpmnEditor } from '@sourcentis/bpmn-editor';
+import { MercatorBpmnProvider } from './mercator-provider';
+import { MercatorBpmnPersistence } from './mercator-persistence';
 
-import {installDropInActivitiesParent} from "./bpmn-parent";
-import {initCopyPaste} from "./bpmn-copy-paste";
-import {initZOrder, setupBringToFrontKeyBinding} from "./bpmn-zorder";
+declare global {
+    interface Window {
+        loadGraph?: (xml: string) => void;
+        getXMLGraph?: () => string;
+    }
+}
 
-console.log("🚀 Initialisation de l'éditeur BPMN");
+function showStatus(message: string, duration = 2000): void {
+    const status = document.getElementById('status');
+    if (!status) return;
+    status.textContent = message;
+    status.classList.add('show');
+    setTimeout(() => status.classList.remove('show'), duration);
+}
 
-// Init éditeur (graph + undo/redo)
-const {graph, undoManager} = initBpmnEditor('graph-container');
+const graphContainer = document.getElementById('graph-container');
+if (!graphContainer) throw new Error('#graph-container introuvable');
 
-// UI (zoom, undo/redo, raccourcis)
-wireEditorUi(graph, undoManager);
+const editor = createBpmnEditor(graphContainer, {
+    ui: 'none',
+    // Mercator's own sidebar buttons (#task-btn, #state-btn, …) carry
+    // data-node-type attributes matching the editor's drag-to-insert
+    // contract — see resources/views/bpmn/edit.blade.php.
+    paletteRoot: document.getElementById('sidebar'),
+    provider: MercatorBpmnProvider,
+    persistence: MercatorBpmnPersistence,
+    onNavigate: (url) => { window.location.href = url; },
+});
 
-setupBringToFrontKeyBinding(graph, graph.container);
+editor.on('error', (err) => console.error('[bpmn]', err));
 
-initCopyPaste(graph);
+// ── Toolbar wiring — Mercator owns this chrome, drives the editor purely
+// through its public instance API ───────────────────────────────────────
+document.getElementById('zoom-in-btn')?.addEventListener('click', () => editor.zoomIn());
+document.getElementById('zoom-out-btn')?.addEventListener('click', () => editor.zoomOut());
 
-// Mouvement avec les flèches
-enableArrowKeyMovement(graph);
+document.getElementById('download-svg')?.addEventListener('click', () => {
+    void editor.exportSvg('bpmn-export.svg');
+});
 
-// Dashed edges for database vertices
-installEdgeRules(graph);
+const fileInput = document.getElementById('file-input') as HTMLInputElement | null;
+fileInput?.addEventListener('change', (e: Event) => {
+    void (async () => {
+        const target = e.target as HTMLInputElement;
+        const file = target.files?.[0];
+        if (!file) return;
 
-// Gestion des groupes de vertex
-installDropInActivitiesParent(graph);
+        try {
+            const text = await file.text();
+            editor.loadXml(text);
+            showStatus('✓ Fichier chargé avec succès');
+        } catch (error) {
+            console.error(error);
+            showStatus('✗ Erreur lors du chargement du fichier');
+        } finally {
+            target.value = '';
+        }
+    })();
+});
 
-// Chargement BPMN via input fichier
-bindBpmnFileInput(graph, 'file-input');
+document.getElementById('save-btn')?.addEventListener('click', () => {
+    void (async () => {
+        const id      = Number((document.querySelector('#id')   as HTMLInputElement | null)?.value);
+        const name    = (document.querySelector('#name') as HTMLInputElement | null)?.value ?? '';
+        const type    = (document.querySelector('#type') as HTMLInputElement | null)?.value ?? '';
+        const content = editor.getXml();
 
-// Sauvegarde / helpers globaux
-bindSaveButton(graph, 'save-btn');
+        if (!content) {
+            showStatus('✗ Impossible de générer le BPMN', 3000);
+            return;
+        }
 
-// Pour load/save
-exposeGraphHelpers(graph);
+        try {
+            await MercatorBpmnPersistence.save({ id, name, type, content });
+            showStatus('✓ Graphe sauvegardé', 2000);
+        } catch (error) {
+            alert(error instanceof Error ? error.message : 'Erreur lors de la sauvegarde du graphe.');
+        }
+    })();
+});
 
-// Menu and Actions
-const controller = initVertexMenuActions(graph, undoManager);
+// ── Compat shims for the inline blade <script> (form-submit fallback save
+// path and the initial `loadGraph($content)` call) ──────────────────────
+window.loadGraph   = (xml: string) => editor.loadXml(xml);
+window.getXMLGraph = () => editor.getXml();
 
-// Menu select
-setupBpmnMenuSelect(graph);
-
-// Init ZOrder - automatically place vertices in the right order
-initZOrder(graph);
-
-// Message de bienvenue
 showStatus('👋 Bienvenue ! Charge un fichier BPMN', 3000);
-
-console.log('✅ Éditeur BPMN initialisé et prêt');
