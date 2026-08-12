@@ -778,16 +778,16 @@ class AuditController extends HomeController
         $path = storage_path('app/changes-'.Carbon::today()->format('Ymd').'.xlsx');
 
         /*
-        select subject_type, description, YEAR(created_at) as year, MONTH(created_at) as month, count(*) as count
+        select subject_type, description, EXTRACT(YEAR FROM created_at) as yr, EXTRACT(MONTH FROM created_at) as mth, count(*) as count
         from audit_logs
         where created_at >= now() - INTERVAL 12 month
-        group by subject_type, description, YEAR(created_at), MONTH(created_at);
+        group by subject_type, description, EXTRACT(YEAR FROM created_at), EXTRACT(MONTH FROM created_at);
         */
 
         $auditLogs = DB::table('audit_logs')
-            ->select(DB::raw('subject_type, description, YEAR(created_at), MONTH(created_at), count(*) as count'))
+            ->select(DB::raw('subject_type, description, EXTRACT(YEAR FROM created_at) AS yr, EXTRACT(MONTH FROM created_at) AS mth, count(*) as count'))
             ->where('created_at', '>=', Carbon::now()->startOfMonth()->addMonths(-12))
-            ->groupBy('subject_type', 'description', 'YEAR(created_at)', 'MONTH(created_at)')
+            ->groupBy('subject_type', 'description', DB::raw('EXTRACT(YEAR FROM created_at)'), DB::raw('EXTRACT(MONTH FROM created_at)'))
             ->get();
 
         $header = [
@@ -945,8 +945,8 @@ class AuditController extends HomeController
                 }
 
                 // get year / month
-                $year = $auditLog->{'YEAR(created_at)'};
-                $month = $auditLog->{'MONTH(created_at)'};
+                $year = (int) $auditLog->yr;
+                $month = (int) $auditLog->mth;
 
                 // compute column
                 $delta = 14 - ($tMonths - ($year * 12 + $month));
