@@ -62,7 +62,7 @@
                 </div>
 
                 <div id="app-container" class="bpmn-app p-0">
-                    <div id="sidebar" class="bpmn-sidebar p-1">
+                    <div id="bpmn-sidebar" class="bpmn-sidebar p-1">
 
                     <i title="State" id="state-btn" class="mapping-icon bpmn-icon" draggable="true" data-node-type="state-node">&#xE845;</i>
                     <i title="Task" id="task-btn" class="mapping-icon bpmn-icon" draggable="true" data-node-type="task-node">&#xE821;</i>
@@ -297,7 +297,7 @@ document.addEventListener("DOMContentLoaded", function () {
     // Maximisation
     document.getElementById('maximizeBtn').addEventListener('click', function () {
         const div = document.getElementById('editor');
-        const sidebar = document.getElementById('sidebar');
+        const sidebar = document.getElementById('bpmn-sidebar');
         const sidebarFooter = document.querySelector('.sidebar-footer');
 
         if (div.classList.contains('maximized')) {

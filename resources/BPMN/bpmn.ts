@@ -32,7 +32,7 @@ const editor = createBpmnEditor(graphContainer, {
     // Mercator's own sidebar buttons (#task-btn, #state-btn, …) carry
     // data-node-type attributes matching the editor's drag-to-insert
     // contract — see resources/views/bpmn/edit.blade.php.
-    paletteRoot: document.getElementById('sidebar'),
+    paletteRoot: document.getElementById('bpmn-sidebar'),
     provider: MercatorBpmnProvider,
     persistence: MercatorBpmnPersistence,
     onNavigate: (url) => { window.location.href = url; },
