@@ -55,7 +55,16 @@ export default defineConfig({
     ],
 
     resolve: {
-        dedupe: ['chart.js'],
+        // @maxgraph/core: without this, Vite bundles it twice — once from
+        // Mercator's own node_modules, once from the locally-linked
+        // @sourcentis/bpmn-editor package's own node_modules (it lists
+        // @maxgraph/core as a peerDependency, but also as a devDependency
+        // for its own standalone build/tests, and npm's `file:` link
+        // preserves the symlink so Node resolution finds that copy too).
+        // Two separate MaxGraph module instances in one bundle risks real
+        // bugs (shared static state, registries, instanceof checks not
+        // agreeing across the two copies) — dedupe forces a single instance.
+        dedupe: ['chart.js', '@maxgraph/core'],
         alias: {
             '@': '/resources/js',
             '@sourcentis/chartjs-gauge': path.resolve(

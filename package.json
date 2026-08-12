@@ -36,6 +36,7 @@
     "@hpcc-js/wasm-graphviz": "^1.21.2",
     "@maxgraph/core": "^0.21.0",
     "@popperjs/core": "^2.11.8",
+    "@sourcentis/bpmn-editor": "^1.0.0",
     "bootstrap": "^5.3.3",
     "bootstrap-icons": "^1.11.3",
     "chart.js": "^4.4.8",
