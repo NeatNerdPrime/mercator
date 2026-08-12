@@ -68,7 +68,7 @@ export default defineConfig({
         alias: {
             '@': '/resources/js',
             '@sourcentis/chartjs-gauge': path.resolve(
-                __dirname,
+                import.meta.dirname,
                 'vendor/sourcentis/chartjs-gauge/js/index.js'
             ),
         },
