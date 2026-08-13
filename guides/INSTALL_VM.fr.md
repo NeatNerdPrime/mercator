@@ -21,6 +21,15 @@ Installer PHP et les librairies
 
     sudo apt install php-zip php-curl php-mbstring php-xml php-ldap php-soap php-xdebug php-mysql php-gd php-intl libapache2-mod-php
 
+> **Prérequis** : Mercator nécessite PHP **>= 8.4.1**. Il fonctionne également très bien avec PHP 8.5 : si votre
+> distribution installe par défaut une version plus récente que 8.4 (c'est le cas sur Ubuntu 24.04), il n'est pas
+> nécessaire de la remplacer par la 8.4.
+>
+> Si plusieurs versions de PHP sont installées côte à côte, `sudo update-alternatives --config php` ne change que la
+> version utilisée en ligne de commande (CLI) : elle n'a aucun effet sur la version utilisée par Apache. Voir la
+> section [Apache](#apache) ci-dessous en cas d'erreur du type *"Composer detected issues in your platform: Your
+> Composer dependencies require a PHP version >= 8.4.1"*.
+
 ## Project
 
 Créer le répertoire du projet
@@ -295,6 +304,15 @@ Pour une documentation plus complète sur la configuration de Keycloak, consulte
 Keycloak.
 
 ## Apache
+
+> **Attention aux versions multiples de PHP** : le module `libapache2-mod-php` installé plus haut se lie à une seule
+> version de PHP à la fois, indépendamment de la version sélectionnée en CLI avec `update-alternatives`. Si plusieurs
+> versions de PHP cohabitent sur le serveur (par exemple parce que la distribution en installe une par défaut en plus
+> de celle que vous avez ajoutée), Apache peut continuer à utiliser l'ancien module et afficher une erreur du type
+> *"Composer detected issues in your platform: Your Composer dependencies require a PHP version >= 8.4.1"*, suivie
+> d'une erreur HTTP 500 sur l'application. Vérifiez le module actif avec `apache2ctl -M | grep php`, puis désactivez
+> le mauvais module et activez le bon avec `sudo a2dismod phpX.Y` / `sudo a2enmod phpX.Z` avant de redémarrer Apache.
+> Pour éviter ce type d'ambiguïté, préférez la [variante PHP-FPM](#variante-php-fpm-avec-apache) décrite plus bas.
 
 Pour configurer Apache, modifiez les propriétés du répertoire mercator et accordez les autorisations appropriées au
 répertoire de stockage avec la commande suivante

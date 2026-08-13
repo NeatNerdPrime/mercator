@@ -17,6 +17,14 @@ Install PHP and some PHP libraries
 
     sudo apt install php-zip php-curl php-mbstring php-xml php-ldap php-soap php-xdebug php-mysql php-gd php-intl libapache2-mod-php
 
+> **Requirement**: Mercator requires PHP **>= 8.4.1**. It also works fine with PHP 8.5: if your distribution installs
+> a version newer than 8.4 by default (this is the case on Ubuntu 24.04), there is no need to replace it with 8.4.
+>
+> If several PHP versions are installed side by side, `sudo update-alternatives --config php` only changes the
+> version used from the command line (CLI): it has no effect on the version used by Apache. See the [Apache](#apache)
+> section below if you get an error such as *"Composer detected issues in your platform: Your Composer dependencies
+> require a PHP version >= 8.4.1"*.
+
 Install Apache2, GIT, Graphviz and Composer
 
     sudo apt install apache2 git graphviz composer
@@ -283,6 +291,15 @@ Once you make the KEYCLOAK parametre in 'enable' you would see a bouton in Login
 Find more complete documentation on Keycloak configuration [here](https://www.keycloak.org/documentation).
 
 ## Apache
+
+> **Watch out for multiple PHP versions**: the `libapache2-mod-php` module installed above binds to a single PHP
+> version, independently of the version selected in the CLI with `update-alternatives`. If several PHP versions
+> coexist on the server (for example because the distribution installs one by default in addition to the one you
+> added), Apache may keep using the old module and show an error such as *"Composer detected issues in your
+> platform: Your Composer dependencies require a PHP version >= 8.4.1"*, followed by an HTTP 500 error on the
+> application. Check the active module with `apache2ctl -M | grep php`, then disable the wrong module and enable the
+> right one with `sudo a2dismod phpX.Y` / `sudo a2enmod phpX.Z` before restarting Apache. To avoid this kind of
+> ambiguity, prefer the [PHP-FPM variant](#php-fpm-variant-with-apache) described further below.
 
 To configure Apache, change the properties of the mercator directory and grant the appropriate permissions to the hive
 with the following command:
