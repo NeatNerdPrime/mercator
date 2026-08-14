@@ -15,7 +15,33 @@ Update the linux distribution
 
 Install PHP and some PHP libraries
 
-    sudo apt install php-zip php-curl php-mbstring php-xml php-ldap php-soap php-xdebug php-mysql php-gd php-intl libapache2-mod-php
+> **Requirement**: Mercator requires PHP **8.4.x** (>= 8.4.1). **PHP 8.5 is not supported yet**: the
+> `phpoffice/phpspreadsheet` dependency (used for Excel exports) restricts its own `composer.json` to
+> `php >=7.4.0 <8.5.0`, which makes `composer install` fail on PHP 8.5. Ubuntu 24.04's official repositories only
+> provide PHP **8.3**, which is also too old. You therefore need to add the `ondrej/php` PPA, which provides PHP 8.4:
+>
+>     sudo apt install software-properties-common
+>     sudo add-apt-repository ppa:ondrej/php
+>     sudo apt update
+
+Then install PHP 8.4 and the required extensions, **always using the version number in the package names**
+(`php8.4-xxx`), not the unversioned packages (`php-xxx`), which point to Ubuntu's default version (8.3) rather than
+the one installed from the PPA:
+
+    sudo apt install php8.4 php8.4-zip php8.4-curl php8.4-mbstring php8.4-xml php8.4-ldap php8.4-soap php8.4-xdebug php8.4-mysql php8.4-gd php8.4-intl libapache2-mod-php8.4
+
+> Stick to version **8.4** above, not 8.5 (see the note above). Make sure to install *all* the matching versioned
+> extension packages: installing only the bare `php8.4` package (without `php8.4-curl`, `php8.4-xml` which provides
+> `ext-dom`/`ext-simplexml`, `php8.4-ldap`, `php8.4-zip`, etc.) makes `composer install` fail with errors such as
+> *"... requires PHP extension ext-curl / ext-dom / ext-ldap / ... but it is missing from your system"*.
+
+If several PHP versions are installed side by side, select the default version used from the command line (CLI):
+
+    sudo update-alternatives --config php
+
+This command has **no effect on the version used by Apache** — see the [Apache](#apache) section below if you get an
+error such as *"Composer detected issues in your platform: Your Composer dependencies require a PHP version >=
+8.4.1"* displayed by the web server.
 
 Install Apache2, GIT, Graphviz and Composer
 
@@ -58,7 +84,19 @@ Create the database _mercator_ and the user _mercator_user_.
     GRANT PROCESS ON *.* TO 'mercator_user'@'localhost';
 
     FLUSH PRIVILEGES;
+
+The initial schema load (`php artisan migrate --seed`, see below) creates a few SQL functions (`rand_person`,
+`rand_short`...). If binary logging (`log_bin`) is enabled on your MySQL server — which is the case by default with
+Ubuntu's `mysql-server` package — their creation fails with *"You do not have the SUPER privilege and binary logging
+is enabled"*, because `mercator_user` doesn't have the SUPER privilege. Rather than granting that broad privilege to
+the application user, allow function creation from the same `mysql` session:
+
+    SET GLOBAL log_bin_trust_function_creators = 1;
     EXIT;
+
+> This setting does not persist across a MySQL restart. If you need to reload the schema later (reinstall,
+> `migrate:fresh`...), add `log_bin_trust_function_creators=1` under `[mysqld]` in
+> `/etc/mysql/mysql.conf.d/mysqld.cnf` and restart MySQL (`sudo systemctl restart mysql`) to make it permanent.
 
 ## Configuration
 
@@ -283,6 +321,15 @@ Once you make the KEYCLOAK parametre in 'enable' you would see a bouton in Login
 Find more complete documentation on Keycloak configuration [here](https://www.keycloak.org/documentation).
 
 ## Apache
+
+> **Watch out for multiple PHP versions**: the `libapache2-mod-php` module installed above binds to a single PHP
+> version, independently of the version selected in the CLI with `update-alternatives`. If several PHP versions
+> coexist on the server (for example because the distribution installs one by default in addition to the one you
+> added), Apache may keep using the old module and show an error such as *"Composer detected issues in your
+> platform: Your Composer dependencies require a PHP version >= 8.4.1"*, followed by an HTTP 500 error on the
+> application. Check the active module with `apache2ctl -M | grep php`, then disable the wrong module and enable the
+> right one with `sudo a2dismod phpX.Y` / `sudo a2enmod phpX.Z` before restarting Apache. To avoid this kind of
+> ambiguity, prefer the [PHP-FPM variant](#php-fpm-variant-with-apache) described further below.
 
 To configure Apache, change the properties of the mercator directory and grant the appropriate permissions to the hive
 with the following command:
