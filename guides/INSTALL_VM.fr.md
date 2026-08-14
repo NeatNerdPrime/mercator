@@ -19,16 +19,34 @@ Installer Apache2, GIT, Graphviz et Composer
 
 Installer PHP et les librairies
 
-    sudo apt install php-zip php-curl php-mbstring php-xml php-ldap php-soap php-xdebug php-mysql php-gd php-intl libapache2-mod-php
-
-> **Prérequis** : Mercator nécessite PHP **>= 8.4.1**. Il fonctionne également très bien avec PHP 8.5 : si votre
-> distribution installe par défaut une version plus récente que 8.4 (c'est le cas sur Ubuntu 24.04), il n'est pas
-> nécessaire de la remplacer par la 8.4.
+> **Prérequis** : Mercator nécessite PHP **>= 8.4.1**. Les dépôts officiels d'Ubuntu 24.04 ne fournissent que PHP
+> **8.3**, ce qui est insuffisant. Il faut donc ajouter le dépôt PPA `ondrej/php`, qui fournit PHP 8.4 et les versions
+> ultérieures (Mercator fonctionne aussi très bien avec PHP 8.5) :
 >
-> Si plusieurs versions de PHP sont installées côte à côte, `sudo update-alternatives --config php` ne change que la
-> version utilisée en ligne de commande (CLI) : elle n'a aucun effet sur la version utilisée par Apache. Voir la
-> section [Apache](#apache) ci-dessous en cas d'erreur du type *"Composer detected issues in your platform: Your
-> Composer dependencies require a PHP version >= 8.4.1"*.
+>     sudo apt install software-properties-common
+>     sudo add-apt-repository ppa:ondrej/php
+>     sudo apt update
+
+Installez ensuite PHP 8.4 et les extensions requises, **en utilisant systématiquement le numéro de version dans le
+nom des paquets** (`php8.4-xxx`), et non les paquets non versionnés (`php-xxx`), qui pointent vers la version par
+défaut d'Ubuntu (8.3) et non vers celle installée depuis le PPA :
+
+    sudo apt install php8.4 php8.4-zip php8.4-curl php8.4-mbstring php8.4-xml php8.4-ldap php8.4-soap php8.4-xdebug php8.4-mysql php8.4-gd php8.4-intl libapache2-mod-php8.4
+
+> Remplacez `8.4` par `8.5` (ou toute version >= 8.4.1) dans les commandes ci-dessus si vous préférez cette version.
+> Attention à bien installer *tous* les paquets d'extensions versionnés correspondants : une installation "nue" du
+> seul paquet `phpX.Y` (sans `phpX.Y-curl`, `phpX.Y-xml` qui fournit `ext-dom`/`ext-simplexml`, `phpX.Y-ldap`,
+> `phpX.Y-zip`, etc.) fait échouer `composer install` avec des erreurs *"... requires PHP extension ext-curl / ext-dom
+> / ext-ldap / ... but it is missing from your system"*.
+
+Si plusieurs versions de PHP sont installées côte à côte, sélectionnez la version par défaut utilisée en ligne de
+commande (CLI) :
+
+    sudo update-alternatives --config php
+
+Cette commande n'a **aucun effet sur la version utilisée par Apache** — voir la section [Apache](#apache) ci-dessous
+en cas d'erreur du type *"Composer detected issues in your platform: Your Composer dependencies require a PHP
+version >= 8.4.1"* affichée par le serveur web.
 
 ## Project
 
