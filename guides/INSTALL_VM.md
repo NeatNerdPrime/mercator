@@ -15,9 +15,10 @@ Update the linux distribution
 
 Install PHP and some PHP libraries
 
-> **Requirement**: Mercator requires PHP **>= 8.4.1**. Ubuntu 24.04's official repositories only provide PHP **8.3**,
-> which is too old. You therefore need to add the `ondrej/php` PPA, which provides PHP 8.4 and later versions
-> (Mercator also works fine with PHP 8.5):
+> **Requirement**: Mercator requires PHP **8.4.x** (>= 8.4.1). **PHP 8.5 is not supported yet**: the
+> `phpoffice/phpspreadsheet` dependency (used for Excel exports) restricts its own `composer.json` to
+> `php >=7.4.0 <8.5.0`, which makes `composer install` fail on PHP 8.5. Ubuntu 24.04's official repositories only
+> provide PHP **8.3**, which is also too old. You therefore need to add the `ondrej/php` PPA, which provides PHP 8.4:
 >
 >     sudo apt install software-properties-common
 >     sudo add-apt-repository ppa:ondrej/php
@@ -29,11 +30,10 @@ the one installed from the PPA:
 
     sudo apt install php8.4 php8.4-zip php8.4-curl php8.4-mbstring php8.4-xml php8.4-ldap php8.4-soap php8.4-xdebug php8.4-mysql php8.4-gd php8.4-intl libapache2-mod-php8.4
 
-> Replace `8.4` with `8.5` (or any version >= 8.4.1) in the commands above if you prefer that version. Make sure to
-> install *all* the matching versioned extension packages: installing only the bare `phpX.Y` package (without
-> `phpX.Y-curl`, `phpX.Y-xml` which provides `ext-dom`/`ext-simplexml`, `phpX.Y-ldap`, `phpX.Y-zip`, etc.) makes
-> `composer install` fail with errors such as *"... requires PHP extension ext-curl / ext-dom / ext-ldap / ... but it
-> is missing from your system"*.
+> Stick to version **8.4** above, not 8.5 (see the note above). Make sure to install *all* the matching versioned
+> extension packages: installing only the bare `php8.4` package (without `php8.4-curl`, `php8.4-xml` which provides
+> `ext-dom`/`ext-simplexml`, `php8.4-ldap`, `php8.4-zip`, etc.) makes `composer install` fail with errors such as
+> *"... requires PHP extension ext-curl / ext-dom / ext-ldap / ... but it is missing from your system"*.
 
 If several PHP versions are installed side by side, select the default version used from the command line (CLI):
 

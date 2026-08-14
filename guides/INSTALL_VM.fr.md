@@ -19,9 +19,11 @@ Installer Apache2, GIT, Graphviz et Composer
 
 Installer PHP et les librairies
 
-> **Prérequis** : Mercator nécessite PHP **>= 8.4.1**. Les dépôts officiels d'Ubuntu 24.04 ne fournissent que PHP
-> **8.3**, ce qui est insuffisant. Il faut donc ajouter le dépôt PPA `ondrej/php`, qui fournit PHP 8.4 et les versions
-> ultérieures (Mercator fonctionne aussi très bien avec PHP 8.5) :
+> **Prérequis** : Mercator nécessite PHP **8.4.x** (>= 8.4.1). **PHP 8.5 n'est pas encore supporté** : la
+> dépendance `phpoffice/phpspreadsheet` (utilisée pour les exports Excel) restreint son propre `composer.json` à
+> `php >=7.4.0 <8.5.0`, ce qui fait échouer `composer install` sous PHP 8.5. Les dépôts officiels d'Ubuntu 24.04 ne
+> fournissent que PHP **8.3**, ce qui est également insuffisant. Il faut donc ajouter le dépôt PPA `ondrej/php`, qui
+> fournit PHP 8.4 :
 >
 >     sudo apt install software-properties-common
 >     sudo add-apt-repository ppa:ondrej/php
@@ -33,11 +35,11 @@ défaut d'Ubuntu (8.3) et non vers celle installée depuis le PPA :
 
     sudo apt install php8.4 php8.4-zip php8.4-curl php8.4-mbstring php8.4-xml php8.4-ldap php8.4-soap php8.4-xdebug php8.4-mysql php8.4-gd php8.4-intl libapache2-mod-php8.4
 
-> Remplacez `8.4` par `8.5` (ou toute version >= 8.4.1) dans les commandes ci-dessus si vous préférez cette version.
-> Attention à bien installer *tous* les paquets d'extensions versionnés correspondants : une installation "nue" du
-> seul paquet `phpX.Y` (sans `phpX.Y-curl`, `phpX.Y-xml` qui fournit `ext-dom`/`ext-simplexml`, `phpX.Y-ldap`,
-> `phpX.Y-zip`, etc.) fait échouer `composer install` avec des erreurs *"... requires PHP extension ext-curl / ext-dom
-> / ext-ldap / ... but it is missing from your system"*.
+> Utilisez bien la version **8.4** ci-dessus, pas 8.5 (voir l'encadré précédent). Attention à bien installer *tous*
+> les paquets d'extensions versionnés correspondants : une installation "nue" du seul paquet `php8.4` (sans
+> `php8.4-curl`, `php8.4-xml` qui fournit `ext-dom`/`ext-simplexml`, `php8.4-ldap`, `php8.4-zip`, etc.) fait échouer
+> `composer install` avec des erreurs *"... requires PHP extension ext-curl / ext-dom / ext-ldap / ... but it is
+> missing from your system"*.
 
 Si plusieurs versions de PHP sont installées côte à côte, sélectionnez la version par défaut utilisée en ligne de
 commande (CLI) :
