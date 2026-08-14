@@ -49,6 +49,24 @@ document.getElementById('download-svg')?.addEventListener('click', () => {
     void editor.exportSvg('bpmn-export.svg');
 });
 
+document.getElementById('download-btn')?.addEventListener('click', () => {
+    try {
+        const xml = editor.exportBpmnXml();
+        const name = (document.querySelector('#name') as HTMLInputElement | null)?.value || 'bpmn-export';
+
+        const blob = new Blob([xml], { type: 'application/xml' });
+        const url = URL.createObjectURL(blob);
+        const link = document.createElement('a');
+        link.href = url;
+        link.download = `${name}.bpmn`;
+        link.click();
+        URL.revokeObjectURL(url);
+    } catch (error) {
+        console.error(error);
+        showStatus('✗ Erreur lors de l\'export BPMN', 3000);
+    }
+});
+
 const fileInput = document.getElementById('file-input') as HTMLInputElement | null;
 fileInput?.addEventListener('change', (e: Event) => {
     void (async () => {

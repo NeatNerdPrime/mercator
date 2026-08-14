@@ -82,7 +82,7 @@
                         <input type="file" id="file-input" accept=".bpmn,.xml"/>
                     </label>
                     <i id="download-svg" title="Download SVG" class="mapping-icon bi bi-card-image"></i>
-                    <i id="download-btn" title="Export BPMN" class="disabled mapping-icon bi bi-download"></i>
+                    <i id="download-btn" title="Export BPMN" class="mapping-icon bi bi-download"></i>
 
                 </div>
 
