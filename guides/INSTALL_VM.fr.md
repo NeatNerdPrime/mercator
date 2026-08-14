@@ -19,7 +19,36 @@ Installer Apache2, GIT, Graphviz et Composer
 
 Installer PHP et les librairies
 
-    sudo apt install php-zip php-curl php-mbstring php-xml php-ldap php-soap php-xdebug php-mysql php-gd php-intl libapache2-mod-php
+> **Prérequis** : Mercator nécessite PHP **8.4.x** (>= 8.4.1). **PHP 8.5 n'est pas encore supporté** : la
+> dépendance `phpoffice/phpspreadsheet` (utilisée pour les exports Excel) restreint son propre `composer.json` à
+> `php >=7.4.0 <8.5.0`, ce qui fait échouer `composer install` sous PHP 8.5. Les dépôts officiels d'Ubuntu 24.04 ne
+> fournissent que PHP **8.3**, ce qui est également insuffisant. Il faut donc ajouter le dépôt PPA `ondrej/php`, qui
+> fournit PHP 8.4 :
+>
+>     sudo apt install software-properties-common
+>     sudo add-apt-repository ppa:ondrej/php
+>     sudo apt update
+
+Installez ensuite PHP 8.4 et les extensions requises, **en utilisant systématiquement le numéro de version dans le
+nom des paquets** (`php8.4-xxx`), et non les paquets non versionnés (`php-xxx`), qui pointent vers la version par
+défaut d'Ubuntu (8.3) et non vers celle installée depuis le PPA :
+
+    sudo apt install php8.4 php8.4-zip php8.4-curl php8.4-mbstring php8.4-xml php8.4-ldap php8.4-soap php8.4-xdebug php8.4-mysql php8.4-gd php8.4-intl libapache2-mod-php8.4
+
+> Utilisez bien la version **8.4** ci-dessus, pas 8.5 (voir l'encadré précédent). Attention à bien installer *tous*
+> les paquets d'extensions versionnés correspondants : une installation "nue" du seul paquet `php8.4` (sans
+> `php8.4-curl`, `php8.4-xml` qui fournit `ext-dom`/`ext-simplexml`, `php8.4-ldap`, `php8.4-zip`, etc.) fait échouer
+> `composer install` avec des erreurs *"... requires PHP extension ext-curl / ext-dom / ext-ldap / ... but it is
+> missing from your system"*.
+
+Si plusieurs versions de PHP sont installées côte à côte, sélectionnez la version par défaut utilisée en ligne de
+commande (CLI) :
+
+    sudo update-alternatives --config php
+
+Cette commande n'a **aucun effet sur la version utilisée par Apache** — voir la section [Apache](#apache) ci-dessous
+en cas d'erreur du type *"Composer detected issues in your platform: Your Composer dependencies require a PHP
+version >= 8.4.1"* affichée par le serveur web.
 
 ## Project
 
@@ -58,7 +87,21 @@ Créer la base de données _mercator_ et l'utilisateur _mercator_user_
     GRANT PROCESS ON *.* TO 'mercator_user'@'localhost';
 
     FLUSH PRIVILEGES;
+
+Le chargement initial du schéma (`php artisan migrate --seed`, voir plus bas) crée quelques fonctions SQL
+(`rand_person`, `rand_short`...). Si la journalisation binaire (`log_bin`) est activée sur votre serveur MySQL —
+c'est le cas par défaut sur le paquet `mysql-server` d'Ubuntu — leur création échoue avec l'erreur *"You do not
+have the SUPER privilege and binary logging is enabled"*, car `mercator_user` n'a pas le privilège SUPER. Plutôt
+que d'accorder ce privilège élevé à l'utilisateur applicatif, autorisez la création de fonctions depuis la même
+session `mysql` :
+
+    SET GLOBAL log_bin_trust_function_creators = 1;
     EXIT;
+
+> Ce réglage n'est pas persistant après un redémarrage de MySQL. Si vous devez recharger le schéma plus tard
+> (réinstallation, `migrate:fresh`...), ajoutez `log_bin_trust_function_creators=1` sous `[mysqld]` dans
+> `/etc/mysql/mysql.conf.d/mysqld.cnf` puis redémarrez MySQL (`sudo systemctl restart mysql`) pour le rendre
+> permanent.
 
 ## Configuration
 
@@ -295,6 +338,15 @@ Pour une documentation plus complète sur la configuration de Keycloak, consulte
 Keycloak.
 
 ## Apache
+
+> **Attention aux versions multiples de PHP** : le module `libapache2-mod-php` installé plus haut se lie à une seule
+> version de PHP à la fois, indépendamment de la version sélectionnée en CLI avec `update-alternatives`. Si plusieurs
+> versions de PHP cohabitent sur le serveur (par exemple parce que la distribution en installe une par défaut en plus
+> de celle que vous avez ajoutée), Apache peut continuer à utiliser l'ancien module et afficher une erreur du type
+> *"Composer detected issues in your platform: Your Composer dependencies require a PHP version >= 8.4.1"*, suivie
+> d'une erreur HTTP 500 sur l'application. Vérifiez le module actif avec `apache2ctl -M | grep php`, puis désactivez
+> le mauvais module et activez le bon avec `sudo a2dismod phpX.Y` / `sudo a2enmod phpX.Z` avant de redémarrer Apache.
+> Pour éviter ce type d'ambiguïté, préférez la [variante PHP-FPM](#variante-php-fpm-avec-apache) décrite plus bas.
 
 Pour configurer Apache, modifiez les propriétés du répertoire mercator et accordez les autorisations appropriées au
 répertoire de stockage avec la commande suivante

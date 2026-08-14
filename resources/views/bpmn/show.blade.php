@@ -221,13 +221,9 @@
 
 @section('styles')
     @vite('resources/css/mapping.css')
-<style>
-@font-face {
-    font-family: "bpmn";
-    src: url("/build/fonts/bpmn.ttf") format("truetype");
-    font-display: block;
-}
-</style>
+{{-- No @font-face here anymore: @sourcentis/bpmn-editor bundles and injects
+     its own BPMN glyph font; this page has no other element depending on
+     the "bpmn" font-family. --}}
 @endsection
 
 @section('scripts')
