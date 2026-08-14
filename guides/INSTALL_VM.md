@@ -84,7 +84,19 @@ Create the database _mercator_ and the user _mercator_user_.
     GRANT PROCESS ON *.* TO 'mercator_user'@'localhost';
 
     FLUSH PRIVILEGES;
+
+The initial schema load (`php artisan migrate --seed`, see below) creates a few SQL functions (`rand_person`,
+`rand_short`...). If binary logging (`log_bin`) is enabled on your MySQL server — which is the case by default with
+Ubuntu's `mysql-server` package — their creation fails with *"You do not have the SUPER privilege and binary logging
+is enabled"*, because `mercator_user` doesn't have the SUPER privilege. Rather than granting that broad privilege to
+the application user, allow function creation from the same `mysql` session:
+
+    SET GLOBAL log_bin_trust_function_creators = 1;
     EXIT;
+
+> This setting does not persist across a MySQL restart. If you need to reload the schema later (reinstall,
+> `migrate:fresh`...), add `log_bin_trust_function_creators=1` under `[mysqld]` in
+> `/etc/mysql/mysql.conf.d/mysqld.cnf` and restart MySQL (`sudo systemctl restart mysql`) to make it permanent.
 
 ## Configuration
 

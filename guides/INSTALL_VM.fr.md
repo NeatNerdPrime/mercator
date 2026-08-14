@@ -87,7 +87,21 @@ Créer la base de données _mercator_ et l'utilisateur _mercator_user_
     GRANT PROCESS ON *.* TO 'mercator_user'@'localhost';
 
     FLUSH PRIVILEGES;
+
+Le chargement initial du schéma (`php artisan migrate --seed`, voir plus bas) crée quelques fonctions SQL
+(`rand_person`, `rand_short`...). Si la journalisation binaire (`log_bin`) est activée sur votre serveur MySQL —
+c'est le cas par défaut sur le paquet `mysql-server` d'Ubuntu — leur création échoue avec l'erreur *"You do not
+have the SUPER privilege and binary logging is enabled"*, car `mercator_user` n'a pas le privilège SUPER. Plutôt
+que d'accorder ce privilège élevé à l'utilisateur applicatif, autorisez la création de fonctions depuis la même
+session `mysql` :
+
+    SET GLOBAL log_bin_trust_function_creators = 1;
     EXIT;
+
+> Ce réglage n'est pas persistant après un redémarrage de MySQL. Si vous devez recharger le schéma plus tard
+> (réinstallation, `migrate:fresh`...), ajoutez `log_bin_trust_function_creators=1` sous `[mysqld]` dans
+> `/etc/mysql/mysql.conf.d/mysqld.cnf` puis redémarrez MySQL (`sudo systemctl restart mysql`) pour le rendre
+> permanent.
 
 ## Configuration
 
