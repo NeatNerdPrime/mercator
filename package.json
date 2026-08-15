@@ -26,8 +26,8 @@
     "dev": "vite",
     "build": "vite build --config vite.config.mjs",
     "watch": "node watch-and-sync.mjs",
-    "bpmn:use-local": "npm link ../bpmn-editor && npm run build",
-    "bpmn:use-npm": "npm unlink @sourcentis/bpmn-editor --no-save && npm install && npm run build",
+    "bpmn:use-local": "mkdir -p node_modules/@sourcentis && rm -rf node_modules/@sourcentis/bpmn-editor && ln -s \"$(cd ../bpmn-editor && pwd)\" node_modules/@sourcentis/bpmn-editor && npm run build",
+    "bpmn:use-npm": "rm -rf node_modules/@sourcentis/bpmn-editor && npm install && npm run build",
     "bpmn:build-local": "npm --prefix ../bpmn-editor run build"
   },
   "require": {
