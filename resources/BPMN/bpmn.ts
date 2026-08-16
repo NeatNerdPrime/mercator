@@ -76,7 +76,7 @@ fileInput?.addEventListener('change', (e: Event) => {
 
         try {
             const text = await file.text();
-            editor.loadXml(text);
+            editor.importBpmnXml(text);
             showStatus('✓ Fichier chargé avec succès');
         } catch (error) {
             console.error(error);
