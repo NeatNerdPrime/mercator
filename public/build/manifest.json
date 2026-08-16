@@ -10,8 +10,8 @@
       "_ModelXmlSerializer-BmflUOgu.js"
     ]
   },
-  "_bpmn-editor-CWmQB75o.js": {
-    "file": "assets/bpmn-editor-CWmQB75o.js",
+  "_bpmn-editor-CfFWSWHB.js": {
+    "file": "assets/bpmn-editor-CfFWSWHB.js",
     "name": "bpmn-editor",
     "imports": [
       "_ModelXmlSerializer-BmflUOgu.js",
@@ -53,21 +53,21 @@
     "src": "node_modules/bootstrap-icons/font/fonts/bootstrap-icons.woff2"
   },
   "resources/BPMN/bpmn-show.ts": {
-    "file": "assets/bpmn-show-BDRfTMYd.js",
+    "file": "assets/bpmn-show-C1JC447R.js",
     "name": "bpmn-show",
     "src": "resources/BPMN/bpmn-show.ts",
     "isEntry": true,
     "imports": [
-      "_bpmn-editor-CWmQB75o.js"
+      "_bpmn-editor-CfFWSWHB.js"
     ]
   },
   "resources/BPMN/bpmn.ts": {
-    "file": "assets/bpmn-GriqSrtP.js",
+    "file": "assets/bpmn-CRBEMrdQ.js",
     "name": "bpmn",
     "src": "resources/BPMN/bpmn.ts",
     "isEntry": true,
     "imports": [
-      "_bpmn-editor-CWmQB75o.js"
+      "_bpmn-editor-CfFWSWHB.js"
     ]
   },
   "resources/charts/chart-home.js": {
