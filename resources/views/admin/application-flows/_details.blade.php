@@ -1,8 +1,8 @@
 @props([
-    'flux',
+    'applicationFlow',
     'withLink' => false,
 ])
-<table class="table table-bordered table-striped table-report">
+<table class="table table-bordered table-striped table-report" id="{{ $flow->getUID() }}">
     <tbody>
     <tr>
         <th width="10%">
