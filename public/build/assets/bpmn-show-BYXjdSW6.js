@@ -1,0 +1,2 @@
+import{t as e}from"./bpmn-editor-zeztdhVL.js";var t=document.getElementById(`graph-container`);if(!t)throw Error(`#graph-container introuvable`);var n=e(t,{ui:`none`,readOnly:!0,onNavigate:e=>{window.location.href=e}});n.on(`error`,e=>console.error(`[bpmn-show]`,e)),window.loadGraph=e=>n.loadXml(e),window.getXMLGraph=()=>n.getXml();
+//# sourceMappingURL=bpmn-show-BYXjdSW6.js.map
