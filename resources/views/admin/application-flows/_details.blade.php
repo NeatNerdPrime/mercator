@@ -2,7 +2,7 @@
     'applicationFlow',
     'withLink' => false,
 ])
-<table class="table table-bordered table-striped table-report">
+<table class="table table-bordered table-striped table-report" id="{{ $flow->getUID() }}">
     <tbody>
     <tr>
         <th width="10%">
@@ -10,26 +10,26 @@
         </th>
         <td width="30%">
         @if ($withLink)
-        @canShow($applicationFlow)
-        <a href="{{ route('admin.application-flows.show', $applicationFlow->id) }}">{{ $applicationFlow->name }}</a>
+        @canShow($flow)
+        <a href="{{ route('admin.application-flows.show', $flow->id) }}">{{ $flow->name }}</a>
         @elsecanShow
-        {{ $applicationFlow->name }}
+        {{ $flow->name }}
         @endcanShow
         @else
-            {{ $applicationFlow->name }}
+            {{ $flow->name }}
         @endif
         </td>
         <th width="10%">
             {{ trans('cruds.applicationFlow.fields.nature') }}
         </th>
         <td width="20%">
-            {{ $applicationFlow->nature }}
+            {{ $flow->nature }}
         </td>
         <th width="10%">
             {{ trans('cruds.applicationFlow.fields.attributes') }}
         </th>
         <td width="20%">
-            @foreach(explode(" ",$applicationFlow->attributes) as $attribute)
+            @foreach(explode(" ",$flow->attributes) as $attribute)
                 <span class="badge badge-info">{{ $attribute }}</span>
             @endforeach
         </td>
@@ -39,7 +39,7 @@
             {{ trans('cruds.applicationFlow.fields.description') }}
         </th>
         <td colspan="5">
-            {!! $applicationFlow->description !!}
+            {!! $flow->description !!}
         </td>
     </tr>
 
@@ -49,35 +49,35 @@
             {{ trans('cruds.applicationFlow.fields.source') }}
         </th>
         <td colspan="1">
-            @if ($applicationFlow->applicationSource!=null)
-                @canShow($applicationFlow->applicationSource)
-                    <a href="{{ route('admin.applications.show',$applicationFlow->applicationSource->id) }}">{{ $applicationFlow->applicationSource->name }}</a>
+            @if ($flow->applicationSource!=null)
+                @canShow($flow->applicationSource)
+                    <a href="{{ route('admin.applications.show',$flow->applicationSource->id) }}">{{ $flow->applicationSource->name }}</a>
                 @elsecanShow
-                    {{ $applicationFlow->applicationSource->name }}
+                    {{ $flow->applicationSource->name }}
                 @endcanShow
                 [Application]
             @endif
-            @if($applicationFlow->serviceSource!=null)
-                @canShow($applicationFlow->serviceSource)
-                    <a href="{{ route('admin.application-services.show', $applicationFlow->serviceSource->id) }}">{{ $applicationFlow->serviceSource->name }}</a>
+            @if($flow->serviceSource!=null)
+                @canShow($flow->serviceSource)
+                    <a href="{{ route('admin.application-services.show', $flow->serviceSource->id) }}">{{ $flow->serviceSource->name }}</a>
                 @elsecanShow
-                    {{ $applicationFlow->serviceSource->name }}
+                    {{ $flow->serviceSource->name }}
                 @endcanShow
                 [Service]
             @endif
-            @if ($applicationFlow->moduleSource!=null)
-                @canShow($applicationFlow->moduleSource)
-                    <a href="{{ route('admin.application-modules.show', $applicationFlow->moduleSource->id) }}">{{ $applicationFlow->moduleSource->name }}</a>
+            @if ($flow->moduleSource!=null)
+                @canShow($flow->moduleSource)
+                    <a href="{{ route('admin.application-modules.show', $flow->moduleSource->id) }}">{{ $flow->moduleSource->name }}</a>
                 @elsecanShow
-                    {{ $applicationFlow->moduleSource->name }}
+                    {{ $flow->moduleSource->name }}
                 @endcanShow
                 [Module]
             @endif
-            @if ($applicationFlow->databaseSource!=null)
-                @canShow($applicationFlow->databaseSource)
-                    <a href="{{ route('admin.databases.show',$applicationFlow->databaseSource->id) }}">{{ $applicationFlow->databaseSource->name }}</a>
+            @if ($flow->databaseSource!=null)
+                @canShow($flow->databaseSource)
+                    <a href="{{ route('admin.databases.show',$flow->databaseSource->id) }}">{{ $flow->databaseSource->name }}</a>
                 @elsecanShow
-                    {{ $applicationFlow->databaseSource->name }}
+                    {{ $flow->databaseSource->name }}
                 @endcanShow
                 [Database]
             @endif
@@ -87,35 +87,35 @@
             {{ trans('cruds.applicationFlow.fields.destination') }}
         </th>
         <td colspan="3">
-            @if ($applicationFlow->applicationDest!=null)
-                @canShow($applicationFlow->applicationDest)
-                    <a href="{{ route('admin.applications.show',$applicationFlow->applicationDest->id) }}">{{ $applicationFlow->applicationDest->name }}</a>
+            @if ($flow->applicationDest!=null)
+                @canShow($flow->applicationDest)
+                    <a href="{{ route('admin.applications.show',$flow->applicationDest->id) }}">{{ $flow->applicationDest->name }}</a>
                 @elsecanShow
-                    {{ $applicationFlow->applicationDest->name }}
+                    {{ $flow->applicationDest->name }}
                 @endcanShow
                 [Application]
             @endif
-            @if ($applicationFlow->serviceDest!=null)
-                @canShow($applicationFlow->serviceDest)
-                    <a href="{{ route('admin.application-services.show', $applicationFlow->serviceDest->id) }}">{{ $applicationFlow->serviceDest->name }}</a>
+            @if ($flow->serviceDest!=null)
+                @canShow($flow->serviceDest)
+                    <a href="{{ route('admin.application-services.show', $flow->serviceDest->id) }}">{{ $flow->serviceDest->name }}</a>
                 @elsecanShow
-                    {{ $applicationFlow->serviceDest->name }}
+                    {{ $flow->serviceDest->name }}
                 @endcanShow
                 [Service]
             @endif
-            @if ($applicationFlow->moduleDest!=null)
-                @canShow($applicationFlow->moduleDest)
-                    <a href="{{ route('admin.application-modules.show', $applicationFlow->moduleDest->id) }}">{{ $applicationFlow->moduleDest->name }}</a>
+            @if ($flow->moduleDest!=null)
+                @canShow($flow->moduleDest)
+                    <a href="{{ route('admin.application-modules.show', $flow->moduleDest->id) }}">{{ $flow->moduleDest->name }}</a>
                 @elsecanShow
-                    {{ $applicationFlow->moduleDest->name }}
+                    {{ $flow->moduleDest->name }}
                 @endcanShow
                 [Module]
             @endif
-            @if ($applicationFlow->databaseDest!=null)
-                @canShow($applicationFlow->databaseDest)
-                    <a href="{{ route('admin.databases.show',$applicationFlow->databaseDest->id) }}">{{ $applicationFlow->databaseDest->name }}</a>
+            @if ($flow->databaseDest!=null)
+                @canShow($flow->databaseDest)
+                    <a href="{{ route('admin.databases.show',$flow->databaseDest->id) }}">{{ $flow->databaseDest->name }}</a>
                 @elsecanShow
-                    {{ $applicationFlow->databaseDest->name }}
+                    {{ $flow->databaseDest->name }}
                 @endcanShow
                 [Database]
             @endif
@@ -128,7 +128,7 @@
             {{ trans('cruds.applicationFlow.fields.information') }}
         </th>
         <td colspan="5">
-            @foreach($applicationFlow->informations as $info)
+            @foreach($flow->informations as $info)
                 @canShow($info)
                     <a href="{{ route('admin.information.show',$info->id) }}">{{ $info->name }}</a>
                 @elsecanShow
@@ -144,9 +144,9 @@
             {{ trans('cruds.applicationFlow.fields.crypted') }}
         </th>
         <td>
-            @if ($applicationFlow->crypted==0)
+            @if ($flow->crypted==0)
                 Non
-            @elseif ($applicationFlow->crypted==1)
+            @elseif ($flow->crypted==1)
                 Oui
             @endif
         </td>
@@ -154,9 +154,9 @@
             {{ trans('cruds.applicationFlow.fields.bidirectional') }}
         </th>
         <td colspan="3">
-            @if ($applicationFlow->bidirectional==0)
+            @if ($flow->bidirectional==0)
                 Non
-            @elseif ($applicationFlow->bidirectional==1)
+            @elseif ($flow->bidirectional==1)
                 Oui
             @endif
         </td>
