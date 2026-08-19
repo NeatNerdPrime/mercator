@@ -64,25 +64,25 @@
                 <div id="app-container" class="bpmn-app p-0">
                     <div id="bpmn-sidebar" class="bpmn-sidebar p-1">
 
-                    <i title="State" id="state-btn" class="mapping-icon bpmn-icon" draggable="true" data-node-type="state-node">&#xE845;</i>
-                    <i title="Task" id="task-btn" class="mapping-icon bpmn-icon" draggable="true" data-node-type="task-node">&#xE821;</i>
-                    <i title="Gateway" id="gateway-btn" class="mapping-icon bpmn-icon" draggable="true" data-node-type="gateway-node">&#xE834;</i>
-                    <i title="Data" id="data-btn" class="mapping-icon bpmn-icon" draggable="true" data-node-type="data-node">&#xE84B;</i>
-                    <i title="Lane" id="lane-btn" class="mapping-icon bpmn-icon" draggable="true" data-node-type="lane-node">&#xE85C;</i>
-                    <i title="Activities" id="activities-btn" class="mapping-icon bpmn-icon" draggable="true" data-node-type="activities-node">&#xE861</i>
-                    <i title="Annotation" id="annotation-btn" class="mapping-icon bpmn-icon" draggable="true" data-node-type="annotation-node">&#xE86B;</i>
-                    <i title="Conversation" id="conversation-btn" class="mapping-icon bi bi-hexagon" draggable="true" data-node-type="conversation-node"></i>
+                    <i title="{{ trans('cruds.bpmn.buttons.state') }}" id="state-btn" class="mapping-icon bpmn-icon" draggable="true" data-node-type="state-node">&#xE845;</i>
+                    <i title="{{ trans('cruds.bpmn.buttons.task') }}" id="task-btn" class="mapping-icon bpmn-icon" draggable="true" data-node-type="task-node">&#xE821;</i>
+                    <i title="{{ trans('cruds.bpmn.buttons.gateway') }}" id="gateway-btn" class="mapping-icon bpmn-icon" draggable="true" data-node-type="gateway-node">&#xE834;</i>
+                    <i title="{{ trans('cruds.bpmn.buttons.data') }}" id="data-btn" class="mapping-icon bpmn-icon" draggable="true" data-node-type="data-node">&#xE84B;</i>
+                    <i title="{{ trans('cruds.bpmn.buttons.lane') }}" id="lane-btn" class="mapping-icon bpmn-icon" draggable="true" data-node-type="lane-node">&#xE85C;</i>
+                    <i title="{{ trans('cruds.bpmn.buttons.activities') }}" id="activities-btn" class="mapping-icon bpmn-icon" draggable="true" data-node-type="activities-node">&#xE861</i>
+                    <i title="{{ trans('cruds.bpmn.buttons.annotation') }}" id="annotation-btn" class="mapping-icon bpmn-icon" draggable="true" data-node-type="annotation-node">&#xE86B;</i>
+                    <i title="{{ trans('cruds.bpmn.buttons.conversation') }}" id="conversation-btn" class="mapping-icon bi bi-hexagon" draggable="true" data-node-type="conversation-node"></i>
                     ---
-                    <i id="zoom-in-btn" title="Zoom in" class="mapping-icon bi bi-zoom-in"></i>
-                    <i id="zoom-out-btn" title="Zoom out" class="mapping-icon bi bi-zoom-out"></i>
+                    <i id="zoom-in-btn" title="{{ trans('cruds.bpmn.buttons.zoom_in') }}" class="mapping-icon bi bi-zoom-in"></i>
+                    <i id="zoom-out-btn" title="{{ trans('cruds.bpmn.buttons.zoom_out') }}" class="mapping-icon bi bi-zoom-out"></i>
                     ---
-                    <u id="save-btn" title="Save" class="mapping-icon bi bi-floppy-fill"></u>
-                    <label for="file-input" title="Import BPMN"
+                    <u id="save-btn" title="{{ trans('cruds.bpmn.buttons.save') }}" class="mapping-icon bi bi-floppy-fill"></u>
+                    <label for="file-input" title="{{ trans('cruds.bpmn.buttons.import') }}"
                            class="mapping-icon bi bi-box-arrow-in-down">
                         <input type="file" id="file-input" accept=".bpmn,.xml"/>
                     </label>
-                    <i id="download-svg" title="Download SVG" class="mapping-icon bi bi-card-image"></i>
-                    <i id="download-btn" title="Export BPMN" class="mapping-icon bi bi-box-arrow-down"></i>
+                    <i id="download-svg" title="{{ trans('cruds.bpmn.buttons.download_svg') }}" class="mapping-icon bi bi-card-image"></i>
+                    <i id="download-btn" title="{{ trans('cruds.bpmn.buttons.export') }}" class="mapping-icon bi bi-box-arrow-down"></i>
 
                 </div>
 
