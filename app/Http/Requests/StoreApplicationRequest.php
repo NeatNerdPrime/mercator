@@ -65,6 +65,10 @@ class StoreApplicationRequest extends BaseFormRequest
                 'date',
                 'nullable',
             ],
+            'prod_date' => [
+                'date',
+                'nullable',
+            ],
             'update_date' => [
                 'date',
                 'nullable',
