@@ -390,7 +390,7 @@
                         <div class="form-group">
                             <label for="prod_date">{{ trans('cruds.application.fields.prod_date') }}</label>
                             <input class="form-control date" type="date" name="prod_date" id="prod_date"
-                                   value="{{ old('prod_date', $application->prod_date) }}">
+                                   value="{{ old('prod_date', optional($application->prod_date)->format('Y-m-d')) }}">
                             <span class="help-block">{{ trans('cruds.application.fields.prod_date_helper') }}</span>
                         </div>
                     </div>
@@ -398,7 +398,7 @@
                         <div class="form-group">
                             <label for="update_date">{{ trans('cruds.application.fields.update_date') }}</label>
                             <input class="form-control date" type="date" id="update_date" name="update_date"
-                                   value="{{ old('update_date', $application->update_date) }}">
+                                   value="{{ old('update_date', optional($application->update_date)->format('Y-m-d')) }}">
                             <span class="help-block">{{ trans('cruds.application.fields.update_date_helper') }}</span>
                         </div>
                     </div>
