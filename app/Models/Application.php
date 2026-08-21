@@ -92,6 +92,7 @@ class Application extends Model implements HasIconContract, HasPrefix, HasUnique
 
     protected $casts = [
         'patching_frequency' => 'integer',
+        'install_date' => 'date',
         'update_date' => 'date',
         'next_update' => 'date',
         'prod_date' => 'date',

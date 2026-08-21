@@ -382,7 +382,7 @@
                         <div class="form-group">
                             <label for="install_date">{{ trans('cruds.application.fields.install_date') }}</label>
                             <input class="form-control date" type="date" name="install_date" id="install_date"
-                                   value="{{ old('install_date', $application->install_date) }}">
+                                   value="{{ old('install_date', optional($application->install_date)->format('Y-m-d')) }}">
                             <span class="help-block">{{ trans('cruds.application.fields.install_date_helper') }}</span>
                         </div>
                     </div>
