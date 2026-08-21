@@ -183,7 +183,7 @@
                         {{ trans('cruds.application.fields.install_date') }}
                     </th>
                     <td width="15%">
-                        {{ $application->install_date }}
+                        {{ optional($application->install_date)->format('Y-m-d') }}
                     </td>
                     <th width="10%">
                         {{ trans('cruds.application.fields.prod_date') }}
