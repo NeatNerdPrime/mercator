@@ -55,6 +55,8 @@ class TemplateMergerService
 
     private const OFFICE_WORD_NS = 'urn:schemas-microsoft-com:office:word';
 
+    private const HYPERLINK_REL_TYPE = 'http://schemas.openxmlformats.org/officeDocument/2006/relationships/hyperlink';
+
     private const IMAGE_EXTENSION_MIME_MAP = [
         'png' => 'image/png',
         'jpg' => 'image/jpeg',
@@ -63,6 +65,19 @@ class TemplateMergerService
         'bmp' => 'image/bmp',
         'tiff' => 'image/tiff',
         'svg' => 'image/svg+xml',
+    ];
+
+    /**
+     * CT_TblPrBase's schema child sequence (see fixTablePropertyChildOrder()). Elements PhpWord
+     * never emits (tblStyle, tblOverlap, tblStyleRowBandSize, tblStyleColBandSize, tblCaption,
+     * tblDescription) are listed anyway so the ordering stays correct if a future template merge
+     * ever needs them.
+     */
+    private const TBL_PR_CHILD_ORDER = [
+        'tblStyle', 'tblpPr', 'tblOverlap', 'bidiVisual', 'tblStyleRowBandSize',
+        'tblStyleColBandSize', 'tblW', 'jc', 'tblCellSpacing', 'tblInd',
+        'tblBorders', 'shd', 'tblLayout', 'tblCellMar', 'tblLook',
+        'tblCaption', 'tblDescription',
     ];
 
     public function merge(string $templatePath, string $bodyReportPath, string $outputPath): void
@@ -121,6 +136,9 @@ class TemplateMergerService
 
         $fragmentNodes = $this->extractBodyContentNodes($reportDoc);
 
+        $this->fixTablePropertyOrder($fragmentNodes);
+        $this->fixTablePropertyChildOrder($fragmentNodes);
+        $this->fixUnwrappedLineBreaks($reportDoc, $fragmentNodes);
         $this->renumberBookmarkIds($templateDoc, $fragmentNodes);
 
         // Loaded once and mutated in place by mergeMedia()/mergeStylesAndNumbering() (which may
@@ -134,6 +152,7 @@ class TemplateMergerService
 
         $ridMap = $this->mergeMedia($output, $report, $fragmentNodes, $outputRels, $contentTypes);
         $this->remapImageEmbeds($fragmentNodes, $ridMap);
+        $this->mergeHyperlinks($report, $fragmentNodes, $outputRels);
 
         $this->mergeStylesAndNumbering($output, $report, $fragmentNodes, $outputRels, $contentTypes);
 
@@ -327,6 +346,100 @@ class TemplateMergerService
         }
 
         return $nodes;
+    }
+
+    /**
+     * PhpWord 1.4's Word2007 writer emits every <w:tbl> with <w:tblGrid> before <w:tblPr>
+     * (Writer\Word2007\Element\Table::write() writes the columns, then the style), but CT_Tbl's
+     * schema sequence requires tblPr before tblGrid. Swaps the two elements back into schema order
+     * for every <w:tbl> in the fragment, at any nesting depth, before it's merged into the
+     * template. See also fixTablePropertyChildOrder(), which fixes a second, independent ordering
+     * defect inside <w:tblPr> itself.
+     *
+     * @param  array<int, DOMNode>  $fragmentNodes
+     */
+    private function fixTablePropertyOrder(array $fragmentNodes): void
+    {
+        foreach ($this->collectElementsByTagNS($fragmentNodes, self::WORD_NS, 'tbl') as $tbl) {
+            $tblPr = null;
+            $tblGrid = null;
+            foreach ($tbl->childNodes as $child) {
+                if (! $child instanceof DOMElement || $child->namespaceURI !== self::WORD_NS) {
+                    continue;
+                }
+                if ($child->localName === 'tblPr') {
+                    $tblPr = $child;
+                } elseif ($child->localName === 'tblGrid') {
+                    $tblGrid = $child;
+                }
+            }
+
+            if ($tblPr !== null && $tblGrid !== null) {
+                $tbl->insertBefore($tblPr, $tblGrid);
+            }
+        }
+    }
+
+    /**
+     * CT_TblPrBase's schema sequence is (in order): tblStyle, tblpPr, tblOverlap, bidiVisual,
+     * tblStyleRowBandSize, tblStyleColBandSize, tblW, jc, tblCellSpacing, tblInd, tblBorders, shd,
+     * tblLayout, tblCellMar, tblLook (confirmed against the published OOXML schema documentation).
+     * PhpWord 1.4's Writer\Word2007\Style\Table::writeStyle() instead writes, in this fixed order:
+     * jc, tblW, tblCellSpacing, tblInd, tblLayout, tblpPr (position), bidiVisual, tblCellMar,
+     * tblBorders -- e.g. tblLayout ends up before tblCellMar/tblBorders instead of after, and jc
+     * before tblW instead of after. Word's reader is strict about this content-model sequence and
+     * removes an out-of-order <w:tblPr> wholesale ("Repaired Records: Table properties from
+     * /word/document.xml part"); LibreOffice is not. Reorders every <w:tblPr>'s direct children
+     * into schema order, at any nesting depth, before the fragment is merged into the template.
+     *
+     * @param  array<int, DOMNode>  $fragmentNodes
+     */
+    private function fixTablePropertyChildOrder(array $fragmentNodes): void
+    {
+        $rank = array_flip(self::TBL_PR_CHILD_ORDER);
+
+        foreach ($this->collectElementsByTagNS($fragmentNodes, self::WORD_NS, 'tblPr') as $tblPr) {
+            $children = [];
+            foreach ($tblPr->childNodes as $child) {
+                if ($child instanceof DOMElement) {
+                    $children[] = $child;
+                }
+            }
+
+            usort($children, fn (DOMElement $a, DOMElement $b) => ($rank[$a->localName] ?? PHP_INT_MAX) <=> ($rank[$b->localName] ?? PHP_INT_MAX));
+
+            foreach ($children as $child) {
+                $tblPr->appendChild($child);
+            }
+        }
+    }
+
+    /**
+     * PhpWord 1.4's Writer\Word2007\Element\TextBreak::write() writes a bare <w:br/> (no <w:r>
+     * wrapper) whenever the break is written "withoutP" — i.e. straight into an already-open
+     * run-level container such as a TextRun or, critically, a list item (ListItemRun): our own
+     * WordHelper::addHtmlSafely() feeds report HTML (e.g. an entity's rich-text "Description")
+     * through PhpWord's HTML parser, and a `<li>...<br>...</li>` in that source reliably hits this
+     * path. A <w:br/> directly under <w:p> (sibling of <w:r>, not inside one) is well-formed XML
+     * but violates CT_R's content model -- Word's reader rejects it ("found unreadable content"),
+     * while LibreOffice's more forgiving one renders it anyway, which is why this only ever showed
+     * up for report fields built from user-entered rich text. Wraps every such orphaned <w:br/> in
+     * a <w:r> in place.
+     *
+     * @param  array<int, DOMNode>  $fragmentNodes
+     */
+    private function fixUnwrappedLineBreaks(DOMDocument $reportDoc, array $fragmentNodes): void
+    {
+        foreach ($this->collectElementsByTagNS($fragmentNodes, self::WORD_NS, 'br') as $br) {
+            $parent = $br->parentNode;
+            if (! $parent instanceof DOMElement || $parent->namespaceURI !== self::WORD_NS || $parent->localName !== 'p') {
+                continue;
+            }
+
+            $run = $reportDoc->createElementNS(self::WORD_NS, 'w:r');
+            $parent->replaceChild($run, $br);
+            $run->appendChild($br);
+        }
     }
 
     /**
@@ -555,6 +668,80 @@ class TemplateMergerService
     }
 
     /**
+     * Copies every external hyperlink relationship the fragment references (via a <w:hyperlink
+     * r:id="..."> -- an *internal*, same-document link instead carries its target as a plain
+     * w:anchor attribute and needs no relationship at all) into the template, assigning fresh
+     * relationship ids and remapping the fragment's r:id attributes to match. Unlike mergeMedia(),
+     * there's no file to copy: an external hyperlink relationship is just Type + Target +
+     * TargetMode="External" (e.g. a "mailto:" link from a report field's rich-text HTML, or an
+     * addLink() call with $internal=false). Without this, every such link keeps referencing the
+     * *report's own* relationship id, which doesn't exist in the merged package's rels -- an
+     * unresolvable r:id that Word's reader can't recover from, and which was reliably reported as
+     * "unreadable content" ("Table Properties") for every entity with a hyperlinked contact point.
+     *
+     * @param  array<int, DOMNode>  $fragmentNodes
+     */
+    private function mergeHyperlinks(ZipArchive $report, array $fragmentNodes, DOMDocument $outputRels): void
+    {
+        $usedRids = [];
+        foreach ($this->collectElementsByTagNS($fragmentNodes, self::WORD_NS, 'hyperlink') as $element) {
+            if ($element->hasAttributeNS(self::RELS_NS, 'id')) {
+                $usedRids[$element->getAttributeNS(self::RELS_NS, 'id')] = true;
+            }
+        }
+
+        if ($usedRids === []) {
+            return;
+        }
+
+        $reportRels = $this->loadXmlEntry($report, 'word/_rels/document.xml.rels');
+        $reportHyperlinks = [];
+        foreach ($reportRels->getElementsByTagNameNS(self::PACKAGE_RELS_NS, 'Relationship') as $rel) {
+            $id = $rel->getAttribute('Id');
+            if (isset($usedRids[$id]) && $rel->getAttribute('Type') === self::HYPERLINK_REL_TYPE) {
+                $reportHyperlinks[$id] = $rel;
+            }
+        }
+
+        if ($reportHyperlinks === []) {
+            return;
+        }
+
+        $nextRid = 1;
+        foreach ($outputRels->getElementsByTagNameNS(self::PACKAGE_RELS_NS, 'Relationship') as $rel) {
+            if (preg_match('/^rId(\d+)$/', $rel->getAttribute('Id'), $m)) {
+                $nextRid = max($nextRid, (int) $m[1] + 1);
+            }
+        }
+
+        $ridMap = [];
+        foreach ($reportHyperlinks as $oldRid => $reportRel) {
+            $newRid = 'rId'.$nextRid++;
+            $ridMap[$oldRid] = $newRid;
+
+            $relationship = $outputRels->createElementNS(self::PACKAGE_RELS_NS, 'Relationship');
+            $relationship->setAttribute('Id', $newRid);
+            $relationship->setAttribute('Type', self::HYPERLINK_REL_TYPE);
+            $relationship->setAttribute('Target', $reportRel->getAttribute('Target'));
+            if ($reportRel->getAttribute('TargetMode') !== '') {
+                $relationship->setAttribute('TargetMode', $reportRel->getAttribute('TargetMode'));
+            }
+            $outputRels->documentElement->appendChild($relationship);
+        }
+
+        foreach ($this->collectElementsByTagNS($fragmentNodes, self::WORD_NS, 'hyperlink') as $element) {
+            if (! $element->hasAttributeNS(self::RELS_NS, 'id')) {
+                continue;
+            }
+
+            $oldRid = $element->getAttributeNS(self::RELS_NS, 'id');
+            if (isset($ridMap[$oldRid])) {
+                $element->getAttributeNodeNS(self::RELS_NS, 'id')->value = $ridMap[$oldRid];
+            }
+        }
+    }
+
+    /**
      * Copies every named style used by the fragment (or its copied styles) that the template does
      * not already define — the template's own style wins on a styleId conflict, per spec. Any
      * w:numId referenced by a copied style (or directly by the fragment body) is renumbered and
@@ -666,16 +853,31 @@ class TemplateMergerService
             $reportAbstractNums[$abstractNum->getAttributeNS(self::WORD_NS, 'abstractNumId')] = $abstractNum;
         }
 
+        // CT_Numbering's schema requires every <w:abstractNum> to precede every <w:num> (and both
+        // to precede a trailing <w:numIdMacAtCleanup>, if present). Word validates this element
+        // order strictly and silently misnumbers/misrenders headings when it's violated; LibreOffice
+        // tolerates any order, which is why a broken merge only shows up in Word. A plain
+        // appendChild() per numId would interleave newly-copied abstractNum/num pairs (abstract1,
+        // num1, abstract2, num2, ...), so insertion anchors are resolved once up front from the
+        // template's original content and every abstractNum is inserted before every num via two
+        // separate passes below.
+        $cleanup = $this->collectElementsByTagNS([$templateNumbering->documentElement], self::WORD_NS, 'numIdMacAtCleanup')[0] ?? null;
+        $firstNum = $this->collectElementsByTagNS([$templateNumbering->documentElement], self::WORD_NS, 'num')[0] ?? null;
+        $abstractAnchor = $firstNum ?? $cleanup;
+        $numAnchor = $cleanup;
+
+        $pendingNums = [];
+        foreach ($oldNumIds as $oldNumId) {
+            if (isset($reportNums[$oldNumId])) {
+                $pendingNums[$oldNumId] = $reportNums[$oldNumId];
+            }
+        }
+
         $numIdMap = [];
         $abstractIdMap = [];
         $changed = false;
 
-        foreach ($oldNumIds as $oldNumId) {
-            if (! isset($reportNums[$oldNumId])) {
-                continue;
-            }
-
-            $num = $reportNums[$oldNumId];
+        foreach ($pendingNums as $num) {
             $abstractRefs = $this->collectElementsByTagNS([$num], self::WORD_NS, 'abstractNumId');
             $oldAbstractId = $abstractRefs === [] ? null : $abstractRefs[0]->getAttributeNS(self::WORD_NS, 'val');
 
@@ -685,9 +887,18 @@ class TemplateMergerService
 
                 $importedAbstract = $this->importElement($templateNumbering, $reportAbstractNums[$oldAbstractId]);
                 $importedAbstract->getAttributeNodeNS(self::WORD_NS, 'abstractNumId')->value = $newAbstractId;
-                $templateNumbering->documentElement->appendChild($importedAbstract);
+                if ($abstractAnchor !== null) {
+                    $templateNumbering->documentElement->insertBefore($importedAbstract, $abstractAnchor);
+                } else {
+                    $templateNumbering->documentElement->appendChild($importedAbstract);
+                }
                 $changed = true;
             }
+        }
+
+        foreach ($pendingNums as $oldNumId => $num) {
+            $abstractRefs = $this->collectElementsByTagNS([$num], self::WORD_NS, 'abstractNumId');
+            $oldAbstractId = $abstractRefs === [] ? null : $abstractRefs[0]->getAttributeNS(self::WORD_NS, 'val');
 
             $newNumId = (string) $nextNumId++;
             $numIdMap[$oldNumId] = $newNumId;
@@ -698,7 +909,11 @@ class TemplateMergerService
                 $this->collectElementsByTagNS([$importedNum], self::WORD_NS, 'abstractNumId')[0]
                     ->getAttributeNodeNS(self::WORD_NS, 'val')->value = $abstractIdMap[$oldAbstractId];
             }
-            $templateNumbering->documentElement->appendChild($importedNum);
+            if ($numAnchor !== null) {
+                $templateNumbering->documentElement->insertBefore($importedNum, $numAnchor);
+            } else {
+                $templateNumbering->documentElement->appendChild($importedNum);
+            }
             $changed = true;
         }
 
