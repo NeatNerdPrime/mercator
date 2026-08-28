@@ -137,6 +137,29 @@ describe('update', function () {
         $response->assertRedirect(route('admin.logical-servers.index'));
         $this->assertDatabaseHas('logical_servers', ['name' => 'Updated Name']);
     });
+
+    test('keeps the server active when the active checkbox is submitted', function () {
+        $logicalServer = LogicalServer::factory()->create(['active' => true]);
+
+        $data = [
+            'name' => $logicalServer->name,
+            'description' => $logicalServer->description,
+            'active' => '1',
+        ];
+
+        $this->put(route('admin.logical-servers.update', $logicalServer), $data);
+
+        $this->assertDatabaseHas('logical_servers', ['id' => $logicalServer->id, 'active' => true]);
+    });
+
+    test('edit form contains an active checkbox reflecting the current state', function () {
+        $logicalServer = LogicalServer::factory()->create(['active' => true]);
+
+        $response = $this->get(route('admin.logical-servers.edit', $logicalServer));
+
+        $response->assertOk();
+        $response->assertSee('name="active"', false);
+    });
 });
 
 describe('destroy', function () {
