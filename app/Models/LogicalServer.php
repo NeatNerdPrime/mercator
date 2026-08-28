@@ -149,21 +149,23 @@ class LogicalServer extends Model implements HasIconContract, HasPrefix, HasUniq
     /** @param Builder<static> $query */
     public function scopeMaturityLevel1(Builder $query): Builder
     {
-        return $query
-            ->whereNotNull('description')
-            ->where('active', 1)
-            ->whereNotNull('operating_system')
-            ->whereNotNull('environment')
-            ->whereNotNull('address_ip')
-            ->whereExists(fn ($q) => $q
-                ->from('application_logical_server')
-                ->whereColumn('application_logical_server.logical_server_id', 'logical_servers.id'))
-            ->where(fn ($q) => $q
-                ->whereExists(fn ($q1) => $q1
-                    ->from('logical_server_physical_server')
-                    ->whereColumn('logical_server_physical_server.logical_server_id', 'logical_servers.id'))
-                ->orWhereExists(fn ($q2) => $q2
-                    ->from('cluster_logical_server')
-                    ->whereColumn('cluster_logical_server.logical_server_id', 'logical_servers.id')));
+        return $query->where(fn ($q) => $q
+            ->where('active', 0)
+            ->orWhere(fn ($q1) => $q1
+                ->where('active', 1)
+                ->whereNotNull('description')
+                ->whereNotNull('operating_system')
+                ->whereNotNull('environment')
+                ->whereNotNull('address_ip')
+                ->whereExists(fn ($q2) => $q2
+                    ->from('application_logical_server')
+                    ->whereColumn('application_logical_server.logical_server_id', 'logical_servers.id'))
+                ->where(fn ($q3) => $q3
+                    ->whereExists(fn ($q4) => $q4
+                        ->from('logical_server_physical_server')
+                        ->whereColumn('logical_server_physical_server.logical_server_id', 'logical_servers.id'))
+                    ->orWhereExists(fn ($q5) => $q5
+                        ->from('cluster_logical_server')
+                        ->whereColumn('cluster_logical_server.logical_server_id', 'logical_servers.id')))));
     }
 }
