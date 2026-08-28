@@ -62,106 +62,49 @@
                 </div>
 
                 <div id="app-container" class="bpmn-app p-0">
-                    <div id="sidebar" class="bpmn-sidebar p-1">
+                    <div id="bpmn-sidebar" class="bpmn-sidebar p-1">
 
-                    <i title="State" id="state-btn" class="mapping-icon bpmn-icon" draggable="true">&#xE845;</i>
-                    <i title="Task" id="task-btn" class="mapping-icon bpmn-icon" draggable="true">&#xE821;</i>
-                    <i title="Gateway" id="gateway-btn" class="mapping-icon bpmn-icon" draggable="true">&#xE834;</i>
-                    <i title="Data" id="data-btn" class="mapping-icon bpmn-icon" draggable="true">&#xE84B;</i>
-                    <i title="Lane" id="lane-btn" class="mapping-icon bpmn-icon" draggable="true">&#xE85C;</i>
-                    <i title="Activities" id="activities-btn" class="mapping-icon bpmn-icon" draggable="true">&#xE861</i>
-                    <i title="Annotation" id="annotation-btn" class="mapping-icon bpmn-icon" draggable="true">&#xE86B;</i>
-                    <i title="Conversation" id="conversation-btn" class="mapping-icon bi bi-hexagon" draggable="true"></i>
-                    <i id="zoom-in-btn" title="Zoom in" class="mapping-icon bi bi-zoom-in"></i>
-                    <i id="zoom-out-btn" title="Zoom out" class="mapping-icon bi bi-zoom-out"></i>
+                    <i title="{{ trans('cruds.bpmn.buttons.state') }}" id="state-btn" class="mapping-icon bpmn-icon" draggable="true" data-node-type="state-node">&#xE845;</i>
+                    <i title="{{ trans('cruds.bpmn.buttons.task') }}" id="task-btn" class="mapping-icon bpmn-icon" draggable="true" data-node-type="task-node">&#xE821;</i>
+                    <i title="{{ trans('cruds.bpmn.buttons.gateway') }}" id="gateway-btn" class="mapping-icon bpmn-icon" draggable="true" data-node-type="gateway-node">&#xE834;</i>
+                    <i title="{{ trans('cruds.bpmn.buttons.data') }}" id="data-btn" class="mapping-icon bpmn-icon" draggable="true" data-node-type="data-node">&#xE84B;</i>
+                    <i title="{{ trans('cruds.bpmn.buttons.lane') }}" id="lane-btn" class="mapping-icon bpmn-icon" draggable="true" data-node-type="lane-node">&#xE85C;</i>
+                    <i title="{{ trans('cruds.bpmn.buttons.activities') }}" id="activities-btn" class="mapping-icon bpmn-icon" draggable="true" data-node-type="activities-node">&#xE861</i>
+                    <i title="{{ trans('cruds.bpmn.buttons.annotation') }}" id="annotation-btn" class="mapping-icon bpmn-icon" draggable="true" data-node-type="annotation-node">&#xE86B;</i>
+                    <i title="{{ trans('cruds.bpmn.buttons.conversation') }}" id="conversation-btn" class="mapping-icon bi bi-hexagon" draggable="true" data-node-type="conversation-node"></i>
                     ---
-                    <u id="save-btn" title="Save" class="mapping-icon bi bi-floppy-fill"></u>
-                    <label for="file-input" title="Import BPMN"
+                    <i id="zoom-in-btn" title="{{ trans('cruds.bpmn.buttons.zoom_in') }}" class="mapping-icon bi bi-zoom-in"></i>
+                    <i id="zoom-out-btn" title="{{ trans('cruds.bpmn.buttons.zoom_out') }}" class="mapping-icon bi bi-zoom-out"></i>
+                    ---
+                    <u id="save-btn" title="{{ trans('cruds.bpmn.buttons.save') }}" class="mapping-icon bi bi-floppy-fill"></u>
+                    <label for="file-input" title="{{ trans('cruds.bpmn.buttons.import') }}"
                            class="mapping-icon bi bi-box-arrow-in-down">
                         <input type="file" id="file-input" accept=".bpmn,.xml"/>
                     </label>
-                    <i id="download-svg" title="Download SVG" class="mapping-icon bi bi-card-image"></i>
-                    <i id="download-btn" title="Export BPMN" class="disabled mapping-icon bi bi-download"></i>
+                    <i id="download-svg" title="{{ trans('cruds.bpmn.buttons.download_svg') }}" class="mapping-icon bi bi-card-image"></i>
+                    <i id="download-btn" title="{{ trans('cruds.bpmn.buttons.export') }}" class="mapping-icon bi bi-box-arrow-down"></i>
 
                 </div>
 
-                <div id="graph-container" tabindex="0"></div>
+                <div id="graph-container" tabindex="0"
+                     style="
+                        flex: 1;
+                        min-width: 0;
+                        min-height: 0;
+                        height: 800px;
+                        position: relative;
+                        overflow: auto;
+                        background-color: #fff;
+                        background-image:
+                            linear-gradient(to right, rgba(0,0,0,0.06) 1px, transparent 1px),
+                            linear-gradient(to bottom, rgba(0,0,0,0.06) 1px, transparent 1px);
+                        background-size: 20px 20px;"
+                ></div>
                 <div class="status" id="status"></div>
 
-                <div id="vertex-menu" class="vertex-menu hidden">
-
-                    <button data-action="add-state" title="State">
-                        <i class="bi bi-circle"></i>
-                    </button>
-                    <button data-action="add-task" title="Task">
-                        <i class="bi bi-app"></i>
-                    </button>
-                    <button data-action="add-gateway" title="Condition">
-                        <i class="bi bi-diamond"></i>
-                    </button>
-                    <button data-action="connect" title="Lier">
-                        <i class="bi bi-arrow-right"></i>
-                    </button>
-                    <span data-action="menu-break" class="menu-break"></span>
-                    <button data-action="config" title="Configuration">
-                        <i class="bi bi-wrench-adjustable"></i>
-                    </button>
-                        <div class="menu-item menu-color">
-                            <button data-action="color" title="Couleur" class="color-btn">
-                                <i class="bi bi-palette-fill"></i>
-                            </button>
-
-  <!-- sous-menu palette -->
-  <div class="color-palette hidden" data-role="color-palette" aria-hidden="true">
-    <button type="button" class="color-swatch" data-color="#ffffff" style="background:#ffffff"></button>
-
-    <!-- 11 pastels -->
-    <!-- "#99cbed", "#dfe9f6", "#ffcc9f", "#ffe4c9" -->
-    <button type="button" class="color-swatch" data-color="#99cbed" style="background:#99cbed"></button>
-    <button type="button" class="color-swatch" data-color="#dfe9f6" style="background:#dfe9f6"></button>
-    <button type="button" class="color-swatch" data-color="#ffcc9f" style="background:#ffcc9f"></button>
-    <button type="button" class="color-swatch" data-color="#dfe9f6" style="background:#dfe9f6"></button>
-
-    <!-- #9fe59f", "#d6f2d0", "#efa8a8", "#ffd6d5", -->
-    <button type="button" class="color-swatch" data-color="#9fe59f" style="background:#9fe59f"></button>
-    <button type="button" class="color-swatch" data-color="#d6f2d0" style="background:#d6f2d0"></button>
-    <button type="button" class="color-swatch" data-color="#efa8a8" style="background:#efa8a8"></button>
-    <button type="button" class="color-swatch" data-color="#ffd6d5" style="background:#ffd6d5"></button>
-
-    <!-- "#d4c2e5", "#e8dfee", "#d3b9d6", "#e7d7d4", -->
-    <button type="button" class="color-swatch" data-color="#d4c2e5" style="background:#d4c2e5"></button>
-    <button type="button" class="color-swatch" data-color="#e8dfee" style="background:#e8dfee"></button>
-    <button type="button" class="color-swatch" data-color="#d3b9d6" style="background:#d3b9d6"></button>
-    <button type="button" class="color-swatch" data-color="#e7d7d4" style="background:#e7d7d4"></button>
-
-    <!-- "#f4c9e7", "#fce2ed", "#cccccc", "#e9e9e9", -->
-    <button type="button" class="color-swatch" data-color="#f4c9e7" style="background:#f4c9e7"></button>
-    <button type="button" class="color-swatch" data-color="#fce2ed" style="background:#fce2ed"></button>
-    <button type="button" class="color-swatch" data-color="#cccccc" style="background:#cccccc"></button>
-    <button type="button" class="color-swatch" data-color="#e9e9e9" style="background:#e9e9e9"></button>
-
-    <!-- "#eded9e", "#f1f1d1", "#9aecf4", "#d8f0f5" -->
-    <button type="button" class="color-swatch" data-color="#eded9e" style="background:#eded9e"></button>
-    <button type="button" class="color-swatch" data-color="#f1f1d1" style="background:#f1f1d1"></button>
-    <button type="button" class="color-swatch" data-color="#9aecf4" style="background:#9aecf4"></button>
-    <button type="button" class="color-swatch" data-color="#d8f0f5" style="background:#d8f0f5"></button>
-
-  </div>
-                   </div>
-                    <button data-action="rotate" title="Rotate">
-                        <i class="bi bi-arrow-clockwise"></i>
-                    </button>
-                    <button data-action="add-annotations" title="Supprimer">
-                        <i class="mapping-icon bpmn-icon bi">&#xE86B;</i>
-                    </button>
-                    <button data-action="delete" title="Supprimer">
-                        <i class="bi bi-trash-fill"></i>
-                    </button>
-                    <span class="menu-break"></span>
-                    <button data-action="search" title="Search">
-                        <i class="bi bi-search"></i>
-                    </button>
-                </div>
+                <!-- The contextual vertex/edge menu is no longer markup here:
+                     @sourcentis/bpmn-editor builds and manages its own inside
+                     #graph-container (same icons, same actions). -->
             </div>
         </div>
     </div>
@@ -196,6 +139,13 @@
     font-variant: normal;
 }
 
+/* Bootstrap icons (conversation, zoom, save, import, export…) don't get a
+   font-size from .mapping-icon, so they render smaller than the custom
+   "bpmn" glyphs above — bump them to match. */
+.mapping-icon.bi {
+    font-size: 22px;
+}
+
 #conversation-btn::before {
     transform: rotate(30deg);
 }
@@ -227,25 +177,12 @@
     gap: 12px;
 }
 
-/* 4) Graph : occupe tout, et on autorise le déplacement “feuille” via scroll si besoin */
-#graph-container {
-    flex: 1;
-    min-width: 0;
-    min-height: 0;
-    height: 800px;
-    position: relative;
-
-    /* IMPORTANT : pour panning/feuille, préfère auto (pas hidden) */
-    overflow: auto;
-
-    background-color: #fff;
-
-    /* Maillage léger (gris clair) */
-    background-image:
-        linear-gradient(to right, rgba(0,0,0,0.06) 1px, transparent 1px),
-        linear-gradient(to bottom, rgba(0,0,0,0.06) 1px, transparent 1px);
-    background-size: 20px 20px; /* taille du maillage */
-}
+/* 4) Graph : occupe tout, et on autorise le déplacement “feuille” via scroll si besoin.
+   Les dimensions/overflow/fond sont posés en style inline sur le div (voir markup
+   ci-dessus) plutôt qu'ici : resources/css/mapping.css (chargé sur cette page pour
+   le legacy mxGraph, cf. #graph-container qu'il redéfinit pour la cartographie
+   réseau) a une règle #graph-container de même spécificité — seul un style inline
+   est garanti de gagner face à elle quel que soit l'ordre de chargement Vite. */
 
 /* 5) Supprimer le ring/bord bleu quand le container a le focus */
 #graph-container:focus,
@@ -325,105 +262,10 @@ input[type="file"] {
     opacity: 1;
 }
 
-/* Menu contextuel des vertex */
-
-.vertex-menu {
-    position: absolute;
-    display: inline-flex;
-    flex-wrap: wrap;      /* ← autorise le retour à la ligne */
-    max-width: 105px;      /* largeur contrôlée (à ajuster) */
-    align-items: center;
-    gap: 4px;
-    padding: 2px 4px;
-    background: #ffffff;
-    border: none;
-    box-shadow: none;
-    z-index: 1000;
-}
-
-.menu-break {
-    flex-basis: 100%;
-    height: 0;
-}
-
-.vertex-menu.hidden {
-    display: none;
-}
-
-.vertex-menu button {
-    background: #ffffff;
-    border: none;
-    padding: 2px;
-    cursor: pointer;
-}
-
-.vertex-menu i.bi {
-    font-size: 16px;      /* TAILLE DE L’ICÔNE */
-    line-height: 1;
-    color: #333;
-    opacity: 0.75;
-    transition: opacity 120ms ease, transform 120ms ease, color 120ms ease;
-}
-
-.vertex-menu button:hover i.bi {
-    background: #eeeeee;
-    opacity: 1;
-    transform: scale(1.15);
-}
-
-.vertex-menu button:active i.bi {
-    transform: scale(0.95);
-}
-
-/* Palette de couleurs */
-
-/* le conteneur color est le point d’ancrage */
-.menu-color {
-    position: relative; /* 🔑 référence locale */
-    display: inline-flex;
-}
-
-/* palette SOUS le bouton color */
-.menu-color .color-palette {
-    position: absolute;
-    top: calc(100% + 6px);     /* ✅ juste en dessous du bouton */
-    left: 50%;
-    transform: translateX(-50%);
-
-    z-index: 1001;
-    margin: 0;
-
-    padding: 4px;
-    border-radius: 6px;
-    background: #fff;
-    border: 1px solid #ccc;
-    box-shadow: 0 4px 12px rgba(0,0,0,.12);
-
-    display: grid;
-    grid-template-columns: repeat(5, 22px);
-    gap: 4px;
-}
-
-.color-swatch {
-  width: 22px;
-  height: 22px;
-  border-radius: 5px;
-  border: 1px solid #000;
-  cursor: pointer;
-  padding: 0;
-  outline: 1px solid #000;
-}
-
-/* Hover discret, pas de zoom agressif */
-.color-swatch:hover {
-  outline: 1px solid #000;
-  outline-offset: -2px;
-}
-
-/* Blanc : contraste garanti */
-.color-swatch[data-color="#ffffff"] {
-  background: #ffffff;
-}
+/* The contextual vertex/edge menu (formerly .vertex-menu / .menu-break /
+   .color-palette / .color-swatch here) is now built and styled entirely by
+   @sourcentis/bpmn-editor itself (bpmn-editor-* prefixed classes), so that
+   CSS no longer lives in this page. */
 
 .hidden { display: none !important; }
 
@@ -463,7 +305,7 @@ document.addEventListener("DOMContentLoaded", function () {
     // Maximisation
     document.getElementById('maximizeBtn').addEventListener('click', function () {
         const div = document.getElementById('editor');
-        const sidebar = document.getElementById('sidebar');
+        const sidebar = document.getElementById('bpmn-sidebar');
         const sidebarFooter = document.querySelector('.sidebar-footer');
 
         if (div.classList.contains('maximized')) {

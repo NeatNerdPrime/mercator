@@ -1,3 +1,7 @@
+@props([
+    'relation',
+    'withLink' => false,
+])
 <table class="table table-bordered table-striped table-report" id="{{ $relation->getUID() }}">
     <tbody>
         <tr>
@@ -5,7 +9,15 @@
                 {{ trans('cruds.relation.fields.name') }}
             </th>
             <td>
+            @if ($withLink)
+            @canShow($relation)
+            <a href="{{ route('admin.relations.show', $relation->id) }}">{{ $relation->name }}</a>
+            @elsecanShow
+            {{ $entity->name }}
+            @endcanShow
+            @else
                 {{ $relation->name }}
+            @endif
             </td>
             <th>
                 {{ trans('cruds.relation.fields.type') }}

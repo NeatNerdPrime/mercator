@@ -99,21 +99,21 @@
                             <td>
                                 {{ $relation->responsible ?? '' }}
                             </td>
-                            <td>
+                            <td data-order="{{ $relation->importance }}">
                               @if ($relation->importance==1)
-                                  <span id=1 class="veryLowRisk">
+                                  <span class="veryLowRisk">
                                   {{ trans('cruds.relation.fields.importance_level.low') }}
                               </span>
                               @elseif ($relation->importance==2)
-                                  <span id=2 class="lowRisk">
+                                  <span class="lowRisk">
                                   {{ trans('cruds.relation.fields.importance_level.medium') }}
                               </span>
                               @elseif ($relation->importance==3)
-                                <span id=3 class="mediumRisk">
+                                <span class="mediumRisk">
                                   {{ trans('cruds.relation.fields.importance_level.high') }}
                                 </span>
                               @elseif ($relation->importance==4)
-                                <span id=4 class="highRisk">
+                                <span class="highRisk">
                                 {{ trans('cruds.relation.fields.importance_level.critical') }}
                                 </span>
                               @endif

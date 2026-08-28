@@ -119,108 +119,14 @@
                 <div class="card-body">
                     <p>{{ trans('cruds.applicationFlow.description') }}</p>
                     @foreach($flows as $flow)
-                        <div class="row">
-                            <div class="col-sm-6">
-                                <table class="table table-bordered table-striped table-hover table-report">
-                                    <thead id="FLOW{{$flow->id}}">
-                                    <th colspan="2">
-                                        <a href="/admin/fluxes/{{ $flow->id }}">{{ $flow->name }}</a>
-                                    </th>
-                                    </thead>
-                                    <tbody>
-                                    <tr>
-                                        <th width="30%">{{ trans('cruds.applicationFlow.fields.description') }}</th>
-                                        <td>{!! $flow->description !!}</td>
-                                    </tr>
-                                    @if ($flow->applicationSource!=null)
-                                        <tr>
-                                            <th>{{ trans('cruds.applicationFlow.fields.application_source') }}</th>
-                                            <td>
-                                                <a href="#APPLICATION{{$flow->applicationSource->id}}">{{$flow->applicationSource->name}}</a>
-                                            </td>
-                                        </tr>
-                                    @endif
-
-                                    @if ($flow->serviceSource!=null)
-                                        <tr>
-                                            <th>{{ trans('cruds.applicationFlow.fields.service_source') }}</th>
-                                            <td>
-                                                <a href="#SERVICE{{$flow->serviceSource->id}}">{{$flow->serviceSource->name}}</a>
-                                            </td>
-                                        </tr>
-                                    @endif
-
-                                    @if ($flow->moduleSource!=null)
-                                        <tr>
-                                            <th>{{ trans('cruds.applicationFlow.fields.module_source') }}</th>
-                                            <td>
-                                                <a href="#MODULE{{$flow->moduleSource->id}}">{{$flow->moduleSource->name}}</a>
-                                            </td>
-                                        </tr>
-                                    @endif
-
-                                    @if ($flow->databaseSource!=null)
-                                        <tr>
-                                            <th>{{ trans('cruds.applicationFlow.fields.database_source') }}</th>
-                                            <td>
-                                                <a href="#DATABASE{{$flow->databaseSource->id}}">{{$flow->databaseSource->name}}</a>
-                                            </td>
-                                        </tr>
-                                    @endif
-
-                                    @if ($flow->applicationDest!=null)
-                                        <tr>
-                                            <th>{{ trans('cruds.applicationFlow.fields.application_dest') }}</th>
-                                            <td>
-                                                <a href="#APPLICATION{{$flow->applicationDest->id}}">{{$flow->applicationDest->name}}</a>
-                                            </td>
-                                        </tr>
-                                    @endif
-
-                                    @if ($flow->serviceDest!=null)
-                                        <tr>
-                                            <th>{{ trans('cruds.applicationFlow.fields.service_dest') }}</th>
-                                            <td>
-                                                <a href="#SERVICE{{$flow->serviceDest->id}}">{{$flow->serviceDest->name}}</a>
-                                            </td>
-                                        </tr>
-                                    @endif
-
-                                    @if ($flow->moduleDest!=null)
-                                        <tr>
-                                            <th>{{ trans('cruds.applicationFlow.fields.module_dest') }}</th>
-                                            <td>
-                                                <a href="#MODULE{{$flow->moduleDest->id}}">{{$flow->moduleDest->name}}</a>
-                                            </td>
-                                        </tr>
-                                    @endif
-
-                                    @if ($flow->databaseDest!=null)
-                                        <tr>
-                                            <th>{{ trans('cruds.applicationFlow.fields.database_dest') }}</th>
-                                            <td>
-                                                <a href="#DATABASE{{$flow->databaseDest->id}}">{{$flow->databaseDest->name}}</a>
-                                            </td>
-                                        </tr>
-                                    @endif
-
-                                    @if ($flow->crypted || $flow->bidirectional)
-                                        <tr>
-                                            <td colspan="2">
-                                                @if ($flow->crypted)
-                                                    {{ trans('cruds.applicationFlow.fields.crypted_helper') }}
-                                                @endif
-                                                @if ($flow->bidirectional)
-                                                    {{ trans('cruds.applicationFlow.fields.bidirectional_helper') }}
-                                                @endif
-                                            </td>
-                                        </tr>
-                                    @endif
-
-                                    </tbody>
-                                </table>
-                            </div>
+                    <div class="row">
+                        <div class="col">
+                            @include('admin.application-flows._details', [
+                                'applicationFlow' => $flow,
+                                'withLink' => true,
+                            ])
                         </div>
+                    </div>
                     @endforeach
                 </div>
             </div>
@@ -237,138 +143,14 @@
                 <div class="card-body">
                     <p>{{ trans('cruds.application.description') }}</p>
                     @foreach($applications as $application)
-                        <div class="row">
-                            <div class="col-sm-6">
-                                <table class="table table-bordered table-striped table-hover table-report">
-                                    <thead id="APPLICATION{{$application->id}}">
-                                    <th colspan="2">
-                                        <a href="/admin/applications/{{ $application->id }}">{{ $application->name }}</a>
-                                    </th>
-                                    </thead>
-                                    <tbody>
-                                    <tr>
-                                        <th width="30%">{{ trans('cruds.application.fields.description') }}</th>
-                                        <td>{!! $application->description !!}</td>
-                                    </tr>
-                                    <tr>
-                                        <th>{{ trans('cruds.application.fields.entities') }}</th>
-                                        <td>
-                                            @foreach($application->entities as $entity)
-                                                <a href="/admin/report/ecosystem#ENTITY{{$entity->id}}">{{ $entity->name }}</a>
-                                                {{ $loop->last ? '' : ',' }}
-                                            @endforeach
-                                        </td>
-                                    </tr>
-                                    <tr>
-                                        <th>{{ trans('cruds.application.fields.entity_resp') }}</th>
-                                        <td>
-                                            @if (isset($application->entityResp))
-                                                <a href="/admin/report/ecosystem#ENTITY{{$application->entityResp->id}}">{{  $application->entityResp->name }}</a>
-                                            @endif
-                                        </td>
-                                    </tr>
-                                    <tr>
-                                        <th>{{ trans('cruds.application.fields.responsible') }}</th>
-                                        <td>{{ $application->responsible}}</td>
-                                    </tr>
-                                    <tr>
-                                        <th>{{ trans('cruds.application.fields.technology') }}</th>
-                                        <td> {{ $application->technology}}</td>
-                                    </tr>
-                                    <tr>
-                                        <th>{{ trans('cruds.application.fields.type') }}</th>
-                                        <td> {{ $application->type}}</td>
-                                    </tr>
-                                    <tr>
-                                        <th>{{ trans('cruds.application.fields.users') }}</th>
-                                        <td> {{ $application->users}}</td>
-                                    </tr>
-                                    <tr>
-                                        <th>{{ trans('cruds.application.fields.documentation') }}</th>
-                                        <td>
-                                            <a href="{{ $application->documentation}}">{{ $application->documentation}}</a>
-                                        </td>
-                                    </tr>
-                                    <tr>
-                                        <th>{{ trans('cruds.application.fields.flux') }}</th>
-                                        <td>
-                                            {{ trans('cruds.applicationFlow.fields.source') }} :
-                                            @foreach($application->applicationSourceFluxes as $flow)
-                                                <a href="#FLOW{{$flow->id}}">{{ $flow->name }}</a>
-                                                {{ $loop->last ? '' : ',' }}
-                                            @endforeach
-                                            <br>
-                                            {{ trans('cruds.applicationFlow.fields.destination') }} :
-                                            @foreach($application->applicationDestFluxes as $flow)
-                                                <a href="#FLOW{{$flow->id}}">{{ $flow->name }}</a>
-                                                {{ $loop->last ? '' : ',' }}
-                                            @endforeach
-                                        </td>
-                                    </tr>
-                                    <tr>
-                                        <th>{{ trans('cruds.application.fields.security_need') }}</th>
-                                        <td>
-                                            {{ trans('global.confidentiality') }} :
-                                            {{ array(1=>trans('global.low'),2=>trans('global.medium'),3=>trans('global.strong'),4=>trans('global.very_strong'))
-                                            [$application->security_need_c] ?? "" }}
-                                            <br>
-                                            {{ trans('global.integrity') }} :
-                                            {{ array(1=>trans('global.low'),2=>trans('global.medium'),3=>trans('global.strong'),4=>trans('global.very_strong'))
-                                            [$application->security_need_i] ?? "" }}
-                                            <br>
-                                            {{ trans('global.availability') }} :
-                                            {{ array(1=>trans('global.low'),2=>trans('global.medium'),3=>trans('global.strong'),4=>trans('global.very_strong'))
-                                            [$application->security_need_a] ?? "" }}
-                                            <br>
-                                            {{ trans('global.tracability') }} :
-                                            {{ array(1=>trans('global.low'),2=>trans('global.medium'),3=>trans('global.strong'),4=>trans('global.very_strong'))
-                                            [$application->security_need_t] ?? "" }}
-                                        </td>
-                                    </tr>
-                                    <tr>
-                                        <th>{{ trans('cruds.application.fields.external') }}</th>
-                                        <td>{{ $application->external}}</td>
-                                    </tr>
-                                    <tr>
-                                        <th>{{ trans('cruds.application.fields.processes') }}</th>
-                                        <td>
-                                            @foreach($application->processes as $process)
-                                                <a href="/admin/report/information_system#PROCESS{{$process->id}}">{{ $process->name }}</a>
-                                                {{ $loop->last ? '' : ',' }}
-                                            @endforeach
-                                        </td>
-                                    </tr>
-                                    <tr>
-                                        <th>{{ trans('cruds.application.fields.services') }}</th>
-                                        <td>
-                                            @foreach($application->services as $service)
-                                                <a href="#SERVICE{{$service->id}}">{{ $service->name }}</a>
-                                                {{ $loop->last ? '' : ',' }}
-                                            @endforeach
-                                        </td>
-                                    </tr>
-                                    <tr>
-                                        <th>{{ trans('cruds.application.fields.databases') }}</th>
-                                        <td>
-                                            @foreach($application->databases as $database)
-                                                <a href="#DATABASE{{$database->id}}">{{ $database->name }}</a>
-                                                {{ $loop->last ? '' : ',' }}
-                                            @endforeach
-                                        </td>
-                                    </tr>
-                                    <tr>
-                                        <th>{{ trans('cruds.application.fields.logical_servers') }}</th>
-                                        <td>
-                                            @foreach($application->logicalServers as $logicalServer)
-                                                <a href="{{ route('admin.logical-servers.show', $logicalServer->id) }}">{{ $logicalServer->name }}</a>
-                                                {{ $loop->last ? '' : ',' }}
-                                            @endforeach
-                                        </td>
-                                    </tr>
-                                    </tbody>
-                                </table>
-                            </div>
+                    <div class="row">
+                        <div class="col">
+                            @include('admin.applications._details', [
+                                'application' => $application,
+                                'withLink' => true,
+                            ])
                         </div>
+                    </div>
                     @endforeach
                 </div>
             </div>
@@ -385,61 +167,14 @@
                 <div class="card-body">
                     <p>{{ trans('cruds.applicationService.description') }}</p>
                     @foreach($applicationServices as $applicationService)
-                        <div class="row">
-                            <div class="col-sm-6">
-                                <table class="table table-bordered table-striped table-hover table-report">
-                                    <thead id="SERVICE{{$applicationService->id}}">
-                                    <th colspan="2">
-                                        <a href="/admin/application-services/{{ $applicationService->id }}">{{ $applicationService->name }}</a>
-                                    </th>
-                                    </thead>
-                                    <tbody>
-                                    <tr>
-                                        <th width="30%">{{ trans('cruds.applicationService.fields.description') }}</th>
-                                        <td>{!! $applicationService->description !!}</td>
-                                    </tr>
-                                    <tr>
-                                        <th>{{ trans('cruds.applicationService.fields.modules') }}</th>
-                                        <td>
-                                            @foreach($applicationService->modules as $module)
-                                                <a href="#MODULE{{ $module->id }}">{{ $module->name }}</a>
-                                                {{ $loop->last ? '' : ',' }}
-                                            @endforeach
-                                        </td>
-                                    </tr>
-                                    <tr>
-                                        <th>{{ trans('cruds.applicationService.fields.flux') }}</th>
-                                        <td>
-                                            {{ trans('cruds.applicationFlow.fields.source') }} :
-                                            @foreach($applicationService->serviceSourceFluxes as $flow)
-                                                <a href="#FLOW{{$flow->id}}">{{ $flow->name }}</a>
-                                                {{ $loop->last ? '' : ',' }}
-                                            @endforeach
-                                            <br>{{ trans('cruds.applicationFlow.fields.destination') }} :
-                                            @foreach($applicationService->serviceDestFluxes as $flow)
-                                                <a href="#FLOW{{$flow->id}}">{{ $flow->name }}</a>
-                                                {{ $loop->last ? '' : ',' }}
-                                            @endforeach
-                                        </td>
-                                    </tr>
-                                    <tr>
-                                        <th>{{ trans('cruds.applicationService.fields.exposition') }}</th>
-                                        <td>{{ $applicationService->exposition }}</td>
-                                    </tr>
-                                    <tr>
-                                        <th>{{ trans('cruds.applicationService.fields.applications') }}</th>
-                                        <td>
-                                            @foreach($applicationService->applications as $application)
-                                                <a href="#APPLICATION{{ $application->id }}">{{ $application->name }}</a>
-                                                {{ $loop->last ? '' : ',' }}
-                                            @endforeach
-                                        </td>
-                                    </tr>
-
-                                    </tbody>
-                                </table>
-                            </div>
+                    <div class="row">
+                        <div class="col">
+                            @include('admin.applicationServices._details', [
+                                'applicationService' => $applicationService,
+                                'withLink' => true,
+                            ])
                         </div>
+                    </div>
                     @endforeach
                 </div>
             </div>
@@ -456,47 +191,14 @@
                 <div class="card-body">
                     <p>{{ trans('cruds.applicationModule.description') }}</p>
                     @foreach($applicationModules as $applicationModule)
-                        <div class="row">
-                            <div class="col-sm-6">
-                                <table class="table table-bordered table-striped table-hover table-report">
-                                    <thead id="MODULE{{$applicationModule->id}}">
-                                    <th colspan="2">
-                                        <a href="/admin/application-modules/{{ $applicationModule->id }}">{{ $applicationModule->name }}</a>
-                                    </th>
-                                    </thead>
-                                    <tbody>
-                                    <tr>
-                                        <th width="30%">{{ trans('cruds.applicationModule.fields.description') }}</th>
-                                        <td>{!! $applicationModule->description !!}</td>
-                                    </tr>
-                                    <tr>
-                                        <th>{{ trans('cruds.applicationModule.fields.services') }}</th>
-                                        <td>
-                                            @foreach($applicationModule->applicationServices as $service)
-                                                <a href="#SERVICE{{ $service->id }}">{{ $service->name }}</a>
-                                                {{ $loop->last ? '' : ',' }}
-                                            @endforeach
-                                        </td>
-                                    </tr>
-                                    <tr>
-                                        <th>{{ trans('cruds.applicationFlow.title') }}</th>
-                                        <td>
-                                            {{ trans('cruds.applicationFlow.fields.source') }} :
-                                            @foreach($applicationModule->moduleSourceFluxes as $flow)
-                                                <a href="#FLOW{{$flow->id}}">{{ $flow->name }}</a>
-                                                {{ $loop->last ? '' : ',' }}
-                                            @endforeach
-                                            <br>{{ trans('cruds.applicationFlow.fields.destination') }} :
-                                            @foreach($applicationModule->moduleSourceFluxes as $flow)
-                                                <a href="#FLOW{{$flow->id}}">{{ $flow->name }}</a>
-                                                {{ $loop->last ? '' : ',' }}
-                                            @endforeach
-                                        </td>
-                                    </tr>
-                                    </tbody>
-                                </table>
-                            </div>
+                    <div class="row">
+                        <div class="col">
+                            @include('admin.applicationModules._details', [
+                                'applicationModule' => $applicationModule,
+                                'withLink' => true,
+                            ])
                         </div>
+                    </div>
                     @endforeach
                 </div>
             </div>
@@ -513,100 +215,14 @@
                 <div class="card-body">
                     <p>{{ trans('cruds.database.description') }}</p>
                     @foreach($databases as $database)
-                        <div class="row">
-                            <div class="col-sm-6">
-                                <table class="table table-bordered table-striped table-hover table-report">
-                                    <thead id="DATABASE{{$database->id}}">
-                                    <th colspan="2">
-                                        <a href="/admin/databases/{{ $database->id }}">{{ $database->name }}</a>
-                                    </th>
-                                    </thead>
-                                    <tbody>
-                                    <tr>
-                                        <th width="30%">{{ trans('cruds.database.fields.description') }}</th>
-                                        <td>{!! $database->description !!}</td>
-                                    </tr>
-                                    <tr>
-                                        <th>{{ trans('cruds.database.fields.entities') }}</th>
-                                        <td>
-                                            @foreach($database->entities as $entity)
-                                                <a href="/admin/report/ecosystem#ENTITY{{ $entity->id }}">{{ $entity->name }}</a>
-                                                @if(!$loop->last)
-                                                    ,
-                                                @endif
-                                            @endforeach
-                                        </td>
-                                    </tr>
-                                    <tr>
-                                        <th>{{ trans('cruds.database.fields.entity_resp') }}</th>
-                                        <td>
-                                            @if ($database->entityResp!=null)
-                                                <a href="/admin/report/ecosystem#ENTITY{{ $database->entityResp->id }}">{{ $database->entityResp->name }}</a>
-                                            @endif
-                                        </td>
-                                    </tr>
-                                    <tr>
-                                        <th>{{ trans('cruds.database.fields.responsible') }}</th>
-                                        <td>{{ $database->responsible }}</td>
-                                    </tr>
-                                    <tr>
-                                        <th>{{ trans('cruds.database.fields.type') }}</th>
-                                        <td>{{ $database->type }}</td>
-                                    </tr>
-                                    <tr>
-                                        <th>{{ trans('cruds.applicationFlow.title') }}</th>
-                                        <td>
-                                            {{ trans('cruds.applicationFlow.fields.source') }} :
-                                            @foreach($database->databaseSourceFluxes as $flow)
-                                                <a href="#FLOW{{$flow->id}}">{{ $flow->name }}</a>
-                                                {{ $loop->last ? '' : ',' }}
-                                            @endforeach
-                                            <br>{{ trans('cruds.applicationFlow.fields.destination') }} :
-                                            @foreach($database->databaseDestFluxes as $flow)
-                                                <a href="#FLOW{{$flow->id}}">{{ $flow->name }}</a>
-                                                {{ $loop->last ? '' : ',' }}
-                                            @endforeach
-                                        </td>
-                                    </tr>
-                                    <tr>
-                                        <th>{{ trans('cruds.database.fields.informations') }}</th>
-                                        <td>
-                                            @foreach($database->informations as $information)
-                                                <a href="/admin/report/information_system#INFORMATION{{ $information->id }}">{{ $information->name }}</a>
-                                                @if(!$loop->last)
-                                                    ,
-                                                @endif
-                                            @endforeach
-                                        </td>
-                                    </tr>
-                                    <tr>
-                                        <th>{{ trans('cruds.database.fields.security_need') }}</th>
-                                        <td>
-                                            {{ trans('global.confidentiality') }} :
-                                            {{ array(1=>trans('global.low'),2=>trans('global.medium'),3=>trans('global.strong'),4=>trans('global.very_strong'))
-                                            [$database->security_need_c] ?? "" }}
-                                            <br>
-                                            {{ trans('global.integrity') }} :
-                                            {{ array(1=>trans('global.low'),2=>trans('global.medium'),3=>trans('global.strong'),4=>trans('global.very_strong'))
-                                            [$database->security_need_i] ?? "" }}
-                                            <br>
-                                            {{ trans('global.availability') }} :
-                                            {{ array(1=>trans('global.low'),2=>trans('global.medium'),3=>trans('global.strong'),4=>trans('global.very_strong'))
-                                            [$database->security_need_a] ?? "" }}
-                                            <br>
-                                            {{ trans('global.tracability') }} :
-                                            {{ array(1=>trans('global.low'),2=>trans('global.medium'),3=>trans('global.strong'),4=>trans('global.very_strong'))
-                                            [$database->security_need_t] ?? "" }}
-                                        </td>
-                                    </tr>
-                                    <tr>
-                                        <th>{{ trans('cruds.database.fields.external') }}</th>
-                                        <td>{{ $database->external }}</td>
-                                    </tr>
-                                    </tbody>
-                                </table>
-                            </div>
+                    <div class="row">
+                        <div class="col">
+                            @include('admin.databases._details', [
+                                'database' => $database,
+                                'withLink' => true,
+                            ])
                         </div>
+                    </div>
                     @endforeach
                 </div>
             </div>

@@ -51,7 +51,7 @@ class Application extends Model implements HasIconContract, HasPrefix, HasUnique
         'install_date',
         'update_date',
         'next_update',
-        'date_prod',
+        'prod_date',
     ];
 
     protected $fillable = [
@@ -82,7 +82,7 @@ class Application extends Model implements HasIconContract, HasPrefix, HasUnique
         'external',
         'patching_frequency',
         'install_date',
-        'date_prod',
+        'prod_date',
         'update_date',
         'next_update',
         'status',
@@ -92,9 +92,10 @@ class Application extends Model implements HasIconContract, HasPrefix, HasUnique
 
     protected $casts = [
         'patching_frequency' => 'integer',
+        'install_date' => 'date',
         'update_date' => 'date',
         'next_update' => 'date',
-        'date_prod' => 'date',
+        'prod_date' => 'date',
     ];
 
     protected static function newFactory(): Factory

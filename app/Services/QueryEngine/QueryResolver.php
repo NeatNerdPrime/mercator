@@ -142,7 +142,7 @@ class QueryResolver
     {
         // EXISTS : { exists: 'backups', ?conditions: [...] }
         if (array_key_exists('exists', $filter)) {
-            $relation   = $filter['exists'];
+            $relation   = QueryEngineIntrospector::resolveRelationMethod(get_class($builder->getModel()), $filter['exists']);
             $conditions = $filter['conditions'] ?? [];
             $boolean    = strtolower($filter['boolean'] ?? 'and');
             $method     = $boolean === 'or' ? 'orWhereHas' : 'whereHas';
@@ -157,7 +157,7 @@ class QueryResolver
 
         // NOT EXISTS : { not_exists: 'backups', ?conditions: [...] }
         if (array_key_exists('not_exists', $filter)) {
-            $relation   = $filter['not_exists'];
+            $relation   = QueryEngineIntrospector::resolveRelationMethod(get_class($builder->getModel()), $filter['not_exists']);
             $conditions = $filter['conditions'] ?? [];
             $boolean    = strtolower($filter['boolean'] ?? 'and');
             $method     = $boolean === 'or' ? 'orWhereDoesntHave' : 'whereDoesntHave';

@@ -272,14 +272,14 @@ class ApplicationSection implements ReportSection
 
             $helper->addTextRow($table, trans('cruds.application.fields.status'), $application->status);
             if ($application->prod_date !== null) {
-                $helper->addTextRow($table, trans('cruds.application.fields.prod_date'), (string) $application->prod_date);
+                $helper->addTextRow($table, trans('cruds.application.fields.prod_date'), $application->prod_date->format('Y-m-d'));
             }
             if ($application->install_date !== null) {
-                $helper->addTextRow($table, trans('cruds.application.fields.install_date'), (string) $application->install_date);
+                $helper->addTextRow($table, trans('cruds.application.fields.install_date'), $application->install_date->format('Y-m-d'));
             }
 
             if ($application->update_date !== null) {
-                $helper->addTextRow($table, trans('cruds.application.fields.update_date'), (string) $application->update_date);
+                $helper->addTextRow($table, trans('cruds.application.fields.update_date'), $application->update_date->format('Y-m-d'));
             }
 
             if ($application->events->isNotEmpty()) {

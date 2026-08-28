@@ -12,7 +12,7 @@
     "cartographie",
     "urbanisation"
   ],
-  "version": "2026.06.28",
+  "version": "2026.08.18",
   "license": "GPL-3.0",
   "author": "Didier Barzin",
   "repository": "https://www.github.com/dbarzin/mercator",
@@ -25,7 +25,10 @@
   "scripts": {
     "dev": "vite",
     "build": "vite build --config vite.config.mjs",
-    "watch": "node watch-and-sync.mjs"
+    "watch": "node watch-and-sync.mjs",
+    "bpmn:use-local": "mkdir -p node_modules/@sourcentis && rm -rf node_modules/@sourcentis/bpmn-editor && ln -s \"$(cd ../bpmn-editor && pwd)\" node_modules/@sourcentis/bpmn-editor && npm run build",
+    "bpmn:use-npm": "rm -rf node_modules/@sourcentis/bpmn-editor && npm install && npm run build",
+    "bpmn:build-local": "npm --prefix ../bpmn-editor run build"
   },
   "require": {
     "laravel/framework": "^12.0",
@@ -37,6 +40,7 @@
     "@maxgraph/core": "^0.21.0",
     "@r0kshan/cairn": "1.0.0-RC11",
     "@popperjs/core": "^2.11.8",
+    "@sourcentis/bpmn-editor": "^1.7.0",
     "bootstrap": "^5.3.3",
     "bootstrap-icons": "^1.11.3",
     "chart.js": "^4.4.8",
@@ -62,7 +66,7 @@
     "datatables.net-searchpanes-bs5": "^2.3.3",
     "datatables.net-select-bs5": "^3.0.0",
     "datatables.net-staterestore-bs5": "^1.4.1",
-    "dompurify": "^3.4.12",
+    "dompurify": "^3.4.13",
     "dropzone": "^6.0.0-beta.2",
     "jquery": "^3.6.0",
     "jszip": "^3.10.1",
