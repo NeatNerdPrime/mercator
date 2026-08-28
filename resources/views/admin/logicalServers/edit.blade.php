@@ -51,7 +51,18 @@
                             <span class="help-block">{{ trans('cruds.logicalServer.fields.type_helper') }}</span>
                         </div>
                     </div>
-                    <div class="col-sm-5">
+                    <div class="col-sm-2">
+                        <div class="form-check">
+                            <label for="active">{{ trans('cruds.logicalServer.fields.active') }}</label>
+                            <div class="form-switch">
+                                <input class="form-check-input" type="checkbox" id="active"
+                                       name="active" {{ old('active', $logicalServer->active) ? "checked" : "" }}>
+                                <label class="form-check-label"
+                                       for="active">{{ trans('cruds.logicalServer.fields.active_helper') }}</label>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-sm-3">
                         <div class="form-group">
                             <label for="attributes">{{ trans('cruds.logicalServer.fields.attributes') }}</label>
                             <select class="form-control select2-free-tags {{ $errors->has('patching_group') ? 'is-invalid' : '' }}"
@@ -138,7 +149,7 @@
                         <div class="form-group">
                             <label for="install_date">{{ trans('cruds.logicalServer.fields.install_date') }}</label>
                             <input class="form-control" type="date" name="install_date" id="install_date"
-                                   value="{{ old('install_date', $logicalServer->install_date) }}">
+                                   value="{{ old('install_date', optional($logicalServer->install_date)->format('Y-m-d')) }}">
                             <span class="help-block">{{ trans('cruds.logicalServer.fields.install_date_helper') }}</span>
                         </div>
                     </div>
@@ -146,7 +157,7 @@
                         <div class="form-group">
                             <label for="update_date">{{ trans('cruds.logicalServer.fields.update_date') }}</label>
                             <input class="form-control" type="date" id="update_date" name="update_date"
-                                   value="{{ old('update_date', $logicalServer->update_date) }}">
+                                   value="{{ old('update_date', optional($logicalServer->update_date)->format('Y-m-d')) }}">
                             <span class="help-block">{{ trans('cruds.logicalServer.fields.update_date_helper') }}</span>
                         </div>
                     </div>

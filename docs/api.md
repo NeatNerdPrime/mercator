@@ -202,12 +202,7 @@ DOC_ID=$(echo "$RESPONSE" | jq -r '.id // empty' 2>/dev/null)
 - <img src="/mercator/images/get.png" width="30"> /api/report/impacts
 - <img src="/mercator/images/get.png" width="30"> /api/report/rto
 
-<<<<<<< HEAD
 ### Excel reports can be extracted as csv. 
-=======
-
-### Excel reports can be extracted as CSV.
->>>>>>> origin/master
 
 - Example for report extracted with excel format
 ```bash
@@ -223,7 +218,6 @@ curl -s -X GET "http://localhost:8081/api/report/cve?format=csv" \
      -H "Accept: text/csv" \
      -o "rapport_cve_$(date +%Y%m%d).csv"
 ```
-
 
 ## Actions managed by the resource controller
 

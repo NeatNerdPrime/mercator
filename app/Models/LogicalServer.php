@@ -76,6 +76,7 @@ class LogicalServer extends Model implements HasIconContract, HasPrefix, HasUniq
 
     protected $casts = [
         'patching_frequency' => 'integer',
+        'install_date'       => 'date',
         'update_date'        => 'date',
         'next_update'        => 'date',
     ];
