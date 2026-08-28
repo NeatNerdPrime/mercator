@@ -29,6 +29,7 @@ return [
         'ecosystem' => 'Ecosystème',
         'explore' => 'Exploration',
         'dependency' => 'Dépendances',
+        'cairn' => 'Diagramme Cairn',
         'guide' => 'Guide',
         'gdpr' => 'RGPD',
         'information_system' => "Système d'information",

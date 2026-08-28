@@ -362,6 +362,14 @@ Route::group(['prefix' => 'admin', 'as' => 'admin.', 'middleware' => ['web.prote
     // Graphs test
     Route::view('graph/test', 'admin.graphs.test')->name('graphs.test');
 
+    // Cairn — routes littérales déclarées avant le futur Route::resource('cairn', ...) (CRUD),
+    // pour ne pas être capturées par le segment cairn/{cairn}.
+    Route::get('cairn/search', [Admin\CairnController::class, 'search'])->name('cairn.search');
+    Route::post('cairn/generate', [Admin\CairnController::class, 'generate'])->name('cairn.generate');
+    // TEMPORAIRE (vérification Phase 3) — à retirer quand Route::resource('cairn', ...) sera
+    // ajoutée par le CRUD resourceful (prompt "sauvegarde"), qui redéfinira cairn.create.
+    Route::get('cairn/create', [Admin\CairnController::class, 'create'])->name('cairn.create');
+
     // Explorer
     Route::get('report/explore', [Admin\ExplorerController::class, 'explore'])->name('report.explore');
 
