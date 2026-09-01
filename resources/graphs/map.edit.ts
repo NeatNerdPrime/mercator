@@ -177,9 +177,28 @@ if (rubberBandHandler) {
 }
 
 // La taille d'un groupe ne doit jamais être modifiée manuellement (elle est
-// calculée à la création et doit rester cohérente avec son contenu).
+// calculée à la création et doit rester cohérente avec son contenu). Un
+// border reste resizable même avec des enfants : le listener CELLS_RESIZED
+// (plus bas) le ré-agrandit ensuite si besoin pour continuer à les contenir.
 const _isResizable = graph.isCellResizable.bind(graph);
-graph.isCellResizable = (cell) => (cell?.children?.length ?? 0) === 0 && _isResizable(cell);
+graph.isCellResizable = (cell) =>
+    (isRectangleCell(cell) || (cell?.children?.length ?? 0) === 0) && _isResizable(cell);
+
+// Borders imbriqués : le parent grandit pour contenir un enfant redimensionné
+// (cf. listener CELLS_RESIZED plus bas), qui doit donc pouvoir dépasser
+// librement les bords de son parent — on désactive l'extension native
+// (sans padding, sans gestion du débordement haut/gauche) pour ne garder que
+// notre propre logique comme unique source de vérité.
+graph.setExtendParents(false);
+
+// Un enfant de border ne doit pas être bridé aux bords de son parent : c'est
+// le parent qui s'adapte (n'affecte pas les icônes ni les groupes du bouton
+// Group, dont le parent n'est pas un border).
+const _isConstrainChild = graph.isConstrainChild.bind(graph);
+graph.isConstrainChild = (cell) => {
+    if (isRectangleCell(cell?.getParent())) return false;
+    return _isConstrainChild(cell);
+};
 
 // Sélection des sommets
 VertexHandlerConfig.selectionColor = '#00a8ff';
@@ -1000,6 +1019,153 @@ function modelCenter(cell: Cell): Point {
     return new Point(x + w / 2, y + h / 2);
 }
 
+// --------------------------------------------------------------------------------
+// Borders imbriqués : ré-parenté + croissance du parent
+
+const BORDER_PADDING = 20;
+
+// Coin haut-gauche absolu du repère propre d'une cellule (somme des géométries
+// de la cellule jusqu'à la racine, arêtes exclues). Même parcours que
+// modelCenter, sans le +w/2,+h/2.
+function absTopLeft(cell: Cell | null): Point {
+    let x = 0, y = 0;
+    const root = graph.getDefaultParent();
+    let c: Cell | null = cell;
+    while (c && c !== root) {
+        const g = c.getGeometry();
+        if (g && !c.isEdge()) { x += g.x; y += g.y; }
+        c = c.getParent();
+    }
+    return new Point(x, y);
+}
+
+function isDescendantOf(cell: Cell, ancestor: Cell): boolean {
+    let c: Cell | null = cell;
+    while (c) { if (c === ancestor) return true; c = c.getParent(); }
+    return false;
+}
+
+// Plus petit border (par aire) contenant le point (x,y) en coordonnées MODÈLE
+// absolues. Exclut `exclude` et toute sa descendance (un border ne peut pas
+// devenir enfant de son propre enfant).
+function findContainingBorder(x: number, y: number, exclude: Cell | null): Cell | null {
+    let best: Cell | null = null;
+    let bestArea = Infinity;
+    const walk = (parent: Cell) => {
+        for (const c of parent.children ?? []) {
+            if (isRectangleCell(c) && !(exclude && (c === exclude || isDescendantOf(c, exclude)))) {
+                const tl = absTopLeft(c);
+                const g = c.getGeometry();
+                if (g && x >= tl.x && x <= tl.x + g.width && y >= tl.y && y <= tl.y + g.height) {
+                    const area = g.width * g.height;
+                    if (area < bestArea) { bestArea = area; best = c; }
+                }
+            }
+            if (c.children?.length) walk(c);
+        }
+    };
+    walk(graph.getDefaultParent());
+    return best;
+}
+
+// Reparente `cell` sous `newParent` en conservant sa position absolue.
+// Les rectangles restent derrière leurs frères (comme au drop palette).
+function reparentCell(cell: Cell, newParent: Cell): void {
+    if (cell.getParent() === newParent) return;
+    const childAbs  = absTopLeft(cell);        // avant re-rattachement (chaîne actuelle)
+    const parentAbs = absTopLeft(newParent);
+    model.add(newParent, cell);                // retire de l'ancien parent + ajoute au nouveau
+    const geo = cell.getGeometry()?.clone();
+    if (geo) {
+        geo.x = childAbs.x - parentAbs.x;
+        geo.y = childAbs.y - parentAbs.y;
+        cell.setGeometry(geo);
+    }
+    if (isRectangleCell(cell)) graph.orderCells(true, [cell]);
+    ensureBackgroundAtBottom();
+}
+
+// Agrandit un border (jamais rétréci) pour contenir tous ses enfants + padding.
+// Si des enfants débordent en haut/à gauche, on décale l'origine du border et
+// on ré-offsette les enfants pour préserver leur position absolue.
+function growBorderToFitChildren(border: Cell): void {
+    const geo = border.getGeometry()?.clone();
+    if (!geo) return;
+    let left = 0, top = 0, right = geo.width, bottom = geo.height;
+    for (const child of border.children ?? []) {
+        if (child.isEdge()) continue;
+        const cg = child.getGeometry();
+        if (!cg) continue;
+        left   = Math.min(left,   cg.x - BORDER_PADDING);
+        top    = Math.min(top,    cg.y - BORDER_PADDING);
+        right  = Math.max(right,  cg.x + cg.width  + BORDER_PADDING);
+        bottom = Math.max(bottom, cg.y + cg.height + BORDER_PADDING);
+    }
+    const dx = -Math.min(0, left);
+    const dy = -Math.min(0, top);
+    if (dx === 0 && dy === 0 && right === geo.width && bottom === geo.height) return;
+
+    graph.batchUpdate(() => {
+        if (dx !== 0 || dy !== 0) {
+            for (const child of border.children ?? []) {
+                if (child.isEdge()) continue;
+                const cg = child.getGeometry()?.clone();
+                if (!cg) continue;
+                cg.x += dx; cg.y += dy;
+                child.setGeometry(cg);
+            }
+        }
+        geo.x -= dx;                 // conserve la position absolue des enfants
+        geo.y -= dy;
+        geo.width  = right - left;
+        geo.height = bottom - top;
+        border.setGeometry(geo);
+    });
+}
+
+// Propage la croissance vers les borders ancêtres (imbrication profonde).
+function growAncestorBorders(cell: Cell): void {
+    let p = cell.getParent();
+    while (p && isRectangleCell(p)) {
+        growBorderToFitChildren(p);
+        p = p.getParent();
+    }
+}
+
+// Un border agrandi (resize utilisateur) capture tout objet qu'il recouvre
+// désormais, même partiellement (icône, texte, autre border...). Boucle
+// jusqu'à stabilisation : capturer peut faire grandir le border (padding),
+// ce qui peut à son tour recouvrir de nouveaux objets. Bornée par sécurité.
+function captureOverlappingObjects(border: Cell): void {
+    for (let i = 0; i < 20; i++) {
+        const tl = absTopLeft(border);
+        const g = border.getGeometry();
+        if (!g) return;
+
+        let capturedAny = false;
+        for (const v of collectVertices()) {
+            if (v === border || isBackgroundCell(v)) continue;
+            // Ni déjà enfant (évite un ré-ordonnancement inutile), ni ancêtre
+            // (empêcherait tout cycle parent/enfant).
+            if (isDescendantOf(v, border) || isDescendantOf(border, v)) continue;
+
+            const vg = v.getGeometry();
+            if (!vg) continue;
+            const vtl = absTopLeft(v);
+            const overlap =
+                tl.x < vtl.x + vg.width && vtl.x < tl.x + g.width &&
+                tl.y < vtl.y + vg.height && vtl.y < tl.y + g.height;
+            if (overlap) {
+                reparentCell(v, border);
+                capturedAny = true;
+            }
+        }
+
+        growBorderToFitChildren(border); // recouvre complètement, même un objet capturé partiellement
+        if (!capturedAny) return;
+    }
+}
+
 function pairKeyOf(source: Cell, target: Cell): string {
     const a = String(source.id), b = String(target.id);
     return a < b ? `${a}|${b}` : `${b}|${a}`;
@@ -1170,10 +1336,15 @@ container.addEventListener('drop', (event: DragEvent) => {
 
     if (type === 'square-node') {
         graph.batchUpdate(() => {
+            // Border ciblé par le point de drop : le nouveau border devient
+            // son enfant plutôt que d'être inséré dans le parent par défaut.
+            const target = findContainingBorder(pt.x, pt.y, null);
+            const dropParent = target ?? parent;
+            const origin = absTopLeft(dropParent);
             const vertex = graph.insertVertex({
-                parent,
+                parent: dropParent,
                 value: '',
-                position: [pt.x, pt.y],
+                position: [pt.x - origin.x, pt.y - origin.y],
                 size: [150, 120],
                 style: {
                     fillColor: '#fffacd',
@@ -1185,6 +1356,7 @@ container.addEventListener('drop', (event: DragEvent) => {
             });
             graph.orderCells(true, [vertex]);
             ensureBackgroundAtBottom();
+            if (target) growAncestorBorders(vertex);
             graph.setSelectionCell(vertex);
         });
         return;
@@ -1204,11 +1376,18 @@ container.addEventListener('drop', (event: DragEvent) => {
                 const node = _nodes.get(nodeId);
                 if (!node) return;
 
+                // Un objet déposé sur un border en devient l'enfant (le
+                // border grandit pour l'englober) ; les liens restent
+                // rattachés au parent par défaut, indépendamment de ce nid.
+                const dropTarget = findContainingBorder(pt.x, pt.y, null);
+                const vertexParent = dropTarget ?? parent;
+                const vertexOrigin = absTopLeft(vertexParent);
+
                 const newVertex = graph.insertVertex({
-                    parent,
+                    parent: vertexParent,
                     id: nodeId,
                     value: buildLabel(node),
-                    position: [pt.x - 16, pt.y - 16],
+                    position: [pt.x - vertexOrigin.x - 16, pt.y - vertexOrigin.y - 16],
                     size: [32, 32],
                     style: {
                         shape: 'image',
@@ -1219,6 +1398,7 @@ container.addEventListener('drop', (event: DragEvent) => {
                         spacingTop: -15,
                     },
                 });
+                if (dropTarget) growAncestorBorders(newVertex);
 
                 node.edges.forEach((edge) => {
                     const targetCell = model.getCell(edge.attachedNodeId) as Cell | null;
@@ -1412,6 +1592,57 @@ graph.addListener(InternalEvent.MOVE_CELLS, (_sender: unknown, evt: EventObject)
         graph.orderCells(true, groups);
         ensureBackgroundAtBottom();
     }
+});
+
+// Ré-parenté des objets déplacés à la souris (borders comme icônes) : tout
+// objet déposé dans un border en devient l'enfant (le parent grandit pour
+// l'englober) ; un objet sorti de son border parent redevient enfant du
+// parent par défaut. On ne touche pas à l'appartenance à un Group (bouton
+// Group) : celle-ci n'est pas régie par la géométrie d'un border.
+graph.addListener(InternalEvent.MOVE_CELLS, (_sender: unknown, evt: EventObject) => {
+    const cells = evt.getProperty('cells') as Cell[] | undefined;
+    if (!cells) return;
+    const movedObjects = cells.filter((c) => c.isVertex() && !isBackgroundCell(c));
+    if (movedObjects.length === 0) return;
+
+    graph.batchUpdate(() => {
+        const root = graph.getDefaultParent();
+        for (const obj of movedObjects) {
+            const g = obj.getGeometry();
+            if (!g) continue;
+            const tl = absTopLeft(obj);
+            const target = findContainingBorder(tl.x + g.width / 2, tl.y + g.height / 2, obj);
+            const currentParent = obj.getParent();
+
+            if (target && target !== currentParent) {
+                reparentCell(obj, target);
+                growAncestorBorders(obj);
+            } else if (!target && isRectangleCell(currentParent) && currentParent !== root) {
+                reparentCell(obj, root);
+            }
+        }
+    });
+    graph.refresh();
+});
+
+// Redimensionnement (CELLS_RESIZED, non couvert par le listener MOVE_CELLS
+// ci-dessus) :
+// - un border directement redimensionné (rétréci y compris) doit toujours
+//   contenir tous ses enfants : on l'agrandit au minimum nécessaire si besoin ;
+// - un enfant de border redimensionné fait grandir la chaîne parente.
+graph.addListener(InternalEvent.CELLS_RESIZED, (_sender: unknown, evt: EventObject) => {
+    const cells = evt.getProperty('cells') as Cell[] | undefined;
+    if (!cells) return;
+
+    graph.batchUpdate(() => {
+        for (const c of cells) {
+            // Capture les objets désormais recouverts (même partiellement) et
+            // fait grandir le border pour toujours les contenir entièrement.
+            if (isRectangleCell(c)) captureOverlappingObjects(c);
+            growAncestorBorders(c);
+        }
+    });
+    graph.refresh();
 });
 
 //---------------------------------------------------------------------------
@@ -1826,6 +2057,7 @@ let stableTicks = 0;
 
 function isMovableObject(cell: Cell): boolean {
     if (!cell.isVertex()) return false;
+    if (isRectangleCell(cell)) return false;   // un border ne bouge jamais en physique
     const s = styleOf(cell);
     const hasImage = s?.shape === 'image' && !!s?.image;
     const hasChildren = (cell.children?.length ?? 0) > 0;
