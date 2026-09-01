@@ -9,6 +9,7 @@ use App\Http\Requests\UpdateVlanRequest;
 use App\Models\Cartographer;
 use App\Models\Subnetwork;
 use App\Models\Vlan;
+use App\Services\SubnetworkDeviceLocator;
 use Gate;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -116,7 +117,29 @@ class VlanController extends Controller
 
         $vlan->load('subnetworks');
 
-        return view('admin.vlans.show', compact('vlan'));
+        $rows = app(SubnetworkDeviceLocator::class)->devicesIn($vlan->subnetworks);
+        $rowsBySubnetwork = $rows->groupBy('subnetwork_id');
+
+        $subnetworksData = $vlan->subnetworks
+            ->sortBy(function (Subnetwork $subnetwork) {
+                $base = explode('/', (string) $subnetwork->address)[0];
+                $ip = filter_var($base, FILTER_VALIDATE_IP, FILTER_FLAG_IPV4) ? ip2long($base) : null;
+
+                return [$ip === null ? 1 : 0, $ip ?? 0, (string) $subnetwork->address];
+            })
+            ->map(fn (Subnetwork $subnetwork) => [
+                'subnetwork' => $subnetwork,
+                'ips' => ($rowsBySubnetwork->get($subnetwork->id) ?? collect())
+                    ->groupBy('ip')
+                    ->sortBy(fn ($items, $ip) => ip2long((string) $ip))
+                    ->map(fn ($items) => $items
+                        ->map(fn (array $row) => ['name' => $row['name'], 'route' => $row['route']])
+                        ->sortBy(fn (array $item) => mb_strtolower($item['name']))
+                        ->values()),
+            ])
+            ->values();
+
+        return view('admin.vlans.show', compact('vlan', 'subnetworksData'));
     }
 
     public function destroy(Vlan $vlan)
