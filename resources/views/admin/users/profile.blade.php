@@ -45,6 +45,20 @@
             </div>
 
             <div class="form-group">
+                <label for="flow_label">{{ trans("cruds.user.fields.flow_label") }}</label>
+                <select class="form-control select2 {{ $errors->has('flow_label') ? 'is-invalid' : '' }}" name="flow_label" id="flow_label">
+                    <option value="nature" {{ auth()->user()->flow_label === 'nature' || auth()->user()->flow_label === null ? 'selected' : '' }}>{{ trans("cruds.user.fields.flow_label_nature") }}</option>
+                    <option value="name" {{ auth()->user()->flow_label === 'name' ? 'selected' : '' }}>{{ trans("cruds.user.fields.flow_label_name") }}</option>
+                </select>
+                @if($errors->has('flow_label'))
+                    <div class="invalid-feedback">
+                        {{ $errors->first('flow_label') }}
+                    </div>
+                @endif
+                <span class="help-block">{{ trans('cruds.user.fields.flow_label_helper') }}</span>
+            </div>
+
+            <div class="form-group">
                 <button id="btn-save" class="btn btn-success" type="submit">
                     {{ trans('global.save') }}
                 </button>

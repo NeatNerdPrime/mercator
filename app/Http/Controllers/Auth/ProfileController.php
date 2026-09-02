@@ -16,10 +16,15 @@ class ProfileController extends Controller
 
     public function saveProfile(Request $request)
     {
+        $request->validate([
+            'flow_label' => ['nullable', 'in:name,nature'],
+        ]);
+
         $user = Auth::guard()->user();
 
         $user->granularity = $request->granularity;
         $user->language = $request->language;
+        $user->flow_label = $request->flow_label;
 
         $user->save();
 

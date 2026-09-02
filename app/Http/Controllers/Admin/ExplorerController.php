@@ -1275,6 +1275,10 @@ class ExplorerController extends Controller
 
     private function buildApplicationFlows(): void
     {
+        // Préférence utilisateur : libellé des flux applicatifs ('name' ou 'nature').
+        // Repli 'nature' pour préserver le comportement courant (et couvrir CLI/tests sans utilisateur authentifié).
+        $useName = (auth()->user()->flow_label ?? 'nature') === 'name';
+
         // Fluxes
         $flows = Cartographer::scopedQuery(ApplicationFlow::query())->get();
         foreach ($flows as $flow) {
@@ -1302,7 +1306,8 @@ class ExplorerController extends Controller
                 continue;
             }
 
-            $this->addFluxEdge($flow->nature, $flow->bidirectional ?? false, $src_id, $dest_id);
+            $label = $useName ? $flow->name : $flow->nature;
+            $this->addFluxEdge($label, $flow->bidirectional ?? false, $src_id, $dest_id);
         }
     }
 
