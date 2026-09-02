@@ -43,7 +43,8 @@ class User extends Authenticatable implements OAuthenticatable, HasIconContract
         'email',
         'password',
         'granularity',
-        'language'
+        'language',
+        'flow_label'
     ];
 
     protected static function newFactory(): Factory
