@@ -337,6 +337,7 @@ class PermissionRoleTableSeeder extends Seeder
                 ['role_id' => $adminRoleId, 'permission_id' => 332],
                 ['role_id' => $adminRoleId, 'permission_id' => 333],
                 ['role_id' => $adminRoleId, 'permission_id' => 334],
+                ['role_id' => $adminRoleId, 'permission_id' => 335],
                 ]
             );
 

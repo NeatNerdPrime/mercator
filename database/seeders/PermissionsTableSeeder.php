@@ -346,6 +346,7 @@ class PermissionsTableSeeder extends Seeder
                 ['id' => 332, 'title' => 'cartographer_edit'],
                 ['id' => 333, 'title' => 'cartographer_show'],
                 ['id' => 334, 'title' => 'cartographer_delete'],
+                ['id' => 335, 'title' => 'cairn_access'],
             ]);
         }
     }
