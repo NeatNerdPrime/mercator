@@ -120,7 +120,7 @@ class BackupController extends Controller
 
     public function massDestroy(MassDestroyBackupRequest $request)
     {
-        Backup::query()->whereIn('id', $request->input('ids', []))->delete();
+        Backup::query()->whereIn('id', $request->input('ids', []))->get()->each->delete();
 
         return response(null, Response::HTTP_NO_CONTENT);
     }

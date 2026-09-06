@@ -115,7 +115,7 @@ class ApplicationServiceController extends Controller
 
     public function massDestroy(MassDestroyApplicationServiceRequest $request)
     {
-        ApplicationService::whereIn('id', request('ids'))->delete();
+        ApplicationService::whereIn('id', request('ids'))->get()->each->delete();
 
         return response(null, Response::HTTP_NO_CONTENT);
     }

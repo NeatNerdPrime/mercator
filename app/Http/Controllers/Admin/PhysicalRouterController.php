@@ -156,7 +156,7 @@ class PhysicalRouterController extends Controller
 
     public function massDestroy(MassDestroyPhysicalRouterRequest $request)
     {
-        PhysicalRouter::whereIn('id', request('ids'))->delete();
+        PhysicalRouter::whereIn('id', request('ids'))->get()->each->delete();
 
         return response(null, Response::HTTP_NO_CONTENT);
     }

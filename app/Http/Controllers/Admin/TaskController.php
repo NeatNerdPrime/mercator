@@ -84,7 +84,7 @@ class TaskController extends Controller
 
     public function massDestroy(MassDestroyTaskRequest $request)
     {
-        Task::whereIn('id', request('ids'))->delete();
+        Task::whereIn('id', request('ids'))->get()->each->delete();
 
         return response(null, Response::HTTP_NO_CONTENT);
     }

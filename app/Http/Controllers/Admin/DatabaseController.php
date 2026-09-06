@@ -183,7 +183,7 @@ class DatabaseController extends Controller
 
     public function massDestroy(MassDestroyDatabaseRequest $request)
     {
-        Database::whereIn('id', request('ids'))->delete();
+        Database::whereIn('id', request('ids'))->get()->each->delete();
 
         return response(null, Response::HTTP_NO_CONTENT);
     }

@@ -153,7 +153,7 @@ class VlanController extends Controller
 
     public function massDestroy(MassDestroyVlanRequest $request)
     {
-        Vlan::whereIn('id', request('ids'))->delete();
+        Vlan::whereIn('id', request('ids'))->get()->each->delete();
 
         return response(null, Response::HTTP_NO_CONTENT);
     }

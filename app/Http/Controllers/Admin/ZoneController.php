@@ -111,7 +111,7 @@ class ZoneController extends Controller
 
     public function massDestroy(MassDestroyZoneRequest $request)
     {
-        Zone::whereIn('id', request('ids'))->delete();
+        Zone::whereIn('id', request('ids'))->get()->each->delete();
 
         return response(null, Response::HTTP_NO_CONTENT);
     }

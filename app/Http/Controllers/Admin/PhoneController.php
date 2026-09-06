@@ -133,7 +133,7 @@ class PhoneController extends Controller
 
     public function massDestroy(MassDestroyPhoneRequest $request)
     {
-        Phone::whereIn('id', request('ids'))->delete();
+        Phone::whereIn('id', request('ids'))->get()->each->delete();
 
         return response(null, Response::HTTP_NO_CONTENT);
     }

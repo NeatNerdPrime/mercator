@@ -104,7 +104,7 @@ class RouterController extends Controller
 
     public function massDestroy(MassDestroyRouterRequest $request)
     {
-        Router::whereIn('id', request('ids'))->delete();
+        Router::whereIn('id', request('ids'))->get()->each->delete();
 
         return response(null, Response::HTTP_NO_CONTENT);
     }

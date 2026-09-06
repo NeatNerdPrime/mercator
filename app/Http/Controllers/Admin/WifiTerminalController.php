@@ -137,7 +137,7 @@ class WifiTerminalController extends Controller
 
     public function massDestroy(MassDestroyWifiTerminalRequest $request)
     {
-        WifiTerminal::whereIn('id', request('ids'))->delete();
+        WifiTerminal::whereIn('id', request('ids'))->get()->each->delete();
 
         return response(null, Response::HTTP_NO_CONTENT);
     }

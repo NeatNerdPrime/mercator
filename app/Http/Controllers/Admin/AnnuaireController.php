@@ -96,7 +96,7 @@ class AnnuaireController extends Controller
 
     public function massDestroy(MassDestroyAnnuaireRequest $request)
     {
-        Annuaire::whereIn('id', request('ids'))->delete();
+        Annuaire::whereIn('id', request('ids'))->get()->each->delete();
 
         return response(null, Response::HTTP_NO_CONTENT);
     }

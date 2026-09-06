@@ -102,7 +102,7 @@ class ApplicationModuleController extends Controller
 
     public function massDestroy(MassDestroyApplicationModuleRequest $request)
     {
-        ApplicationModule::whereIn('id', request('ids'))->delete();
+        ApplicationModule::whereIn('id', request('ids'))->get()->each->delete();
 
         return response(null, Response::HTTP_NO_CONTENT);
     }

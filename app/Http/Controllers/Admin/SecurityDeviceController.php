@@ -146,7 +146,7 @@ class SecurityDeviceController extends Controller
 
     public function massDestroy(MassDestroySecurityDeviceRequest $request)
     {
-        SecurityDevice::whereIn('id', request('ids'))->delete();
+        SecurityDevice::whereIn('id', request('ids'))->get()->each->delete();
 
         return response(null, Response::HTTP_NO_CONTENT);
     }

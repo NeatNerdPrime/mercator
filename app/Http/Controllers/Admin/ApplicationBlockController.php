@@ -106,7 +106,7 @@ class ApplicationBlockController extends Controller
 
     public function massDestroy(MassDestroyApplicationBlockRequest $request)
     {
-        ApplicationBlock::whereIn('id', request('ids'))->delete();
+        ApplicationBlock::whereIn('id', request('ids'))->get()->each->delete();
 
         return response(null, Response::HTTP_NO_CONTENT);
     }

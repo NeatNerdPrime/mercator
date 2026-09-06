@@ -108,7 +108,7 @@ class CertificateController extends Controller
 
     public function massDestroy(MassDestroyCertificateRequest $request)
     {
-        Certificate::whereIn('id', request('ids'))->delete();
+        Certificate::whereIn('id', request('ids'))->get()->each->delete();
 
         return response(null, Response::HTTP_NO_CONTENT);
     }

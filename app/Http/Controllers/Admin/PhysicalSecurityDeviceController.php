@@ -170,7 +170,7 @@ class PhysicalSecurityDeviceController extends Controller
 
     public function massDestroy(MassDestroyPhysicalSecurityDeviceRequest $request)
     {
-        PhysicalSecurityDevice::whereIn('id', request('ids'))->delete();
+        PhysicalSecurityDevice::whereIn('id', request('ids'))->get()->each->delete();
 
         return response(null, Response::HTTP_NO_CONTENT);
     }

@@ -129,7 +129,7 @@ class ContainerController extends Controller
 
     public function massDestroy(MassDestroyContainerRequest $request)
     {
-        Container::whereIn('id', request('ids'))->delete();
+        Container::whereIn('id', request('ids'))->get()->each->delete();
 
         return response(null, Response::HTTP_NO_CONTENT);
     }

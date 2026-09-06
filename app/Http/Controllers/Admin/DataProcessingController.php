@@ -198,7 +198,7 @@ class DataProcessingController extends Controller
 
     public function massDestroy(MassDestroyDataProcessingRequest $request)
     {
-        DataProcessing::whereIn('id', request('ids'))->delete();
+        DataProcessing::whereIn('id', request('ids'))->get()->each->delete();
 
         return response(null, Response::HTTP_NO_CONTENT);
     }

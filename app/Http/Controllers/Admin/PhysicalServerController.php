@@ -233,7 +233,7 @@ class PhysicalServerController extends Controller
 
     public function massDestroy(MassDestroyPhysicalServerRequest $request)
     {
-        PhysicalServer::whereIn('id', request('ids'))->delete();
+        PhysicalServer::whereIn('id', request('ids'))->get()->each->delete();
 
         return response(null, Response::HTTP_NO_CONTENT);
     }

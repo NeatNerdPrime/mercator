@@ -135,7 +135,7 @@ class StorageDeviceController extends Controller
 
     public function massDestroy(MassDestroyStorageDeviceRequest $request)
     {
-        StorageDevice::query()->whereIn('id', request('ids'))->delete();
+        StorageDevice::query()->whereIn('id', request('ids'))->get()->each->delete();
 
         return response(null, Response::HTTP_NO_CONTENT);
     }

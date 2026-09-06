@@ -651,7 +651,7 @@ class PhysicalLinkController extends Controller
     {
         abort_if(Gate::denies('physical_link_delete'), Response::HTTP_FORBIDDEN, '403 Forbidden');
 
-        PhysicalLink::whereIn('id', request('ids'))->delete();
+        PhysicalLink::whereIn('id', request('ids'))->get()->each->delete();
 
         return response(null, Response::HTTP_NO_CONTENT);
     }

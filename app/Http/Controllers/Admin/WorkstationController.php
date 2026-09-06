@@ -343,7 +343,7 @@ class WorkstationController extends Controller
 
     public function massDestroy(MassDestroyWorkstationRequest $request)
     {
-        Workstation::whereIn('id', request('ids'))->delete();
+        Workstation::whereIn('id', request('ids'))->get()->each->delete();
 
         return response(null, Response::HTTP_NO_CONTENT);
     }

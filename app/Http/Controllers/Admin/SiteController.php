@@ -143,7 +143,7 @@ class SiteController extends Controller
 
     public function massDestroy(MassDestroySiteRequest $request)
     {
-        Site::whereIn('id', request('ids'))->delete();
+        Site::whereIn('id', request('ids'))->get()->each->delete();
 
         return response(null, Response::HTTP_NO_CONTENT);
     }

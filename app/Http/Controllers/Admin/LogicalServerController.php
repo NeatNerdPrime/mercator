@@ -209,7 +209,7 @@ class LogicalServerController extends Controller
 
     public function massDestroy(MassDestroyLogicalServerRequest $request)
     {
-        LogicalServer::query()->whereIn('id', request('ids'))->delete();
+        LogicalServer::query()->whereIn('id', request('ids'))->get()->each->delete();
 
         return response(null, Response::HTTP_NO_CONTENT);
     }

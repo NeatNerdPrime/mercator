@@ -173,7 +173,7 @@ class GraphController extends Controller
 
     public function massDestroy(MassDestroyGraphRequest $request)
     {
-        Graph::query()->whereIn('id', request('ids'))->delete();
+        Graph::query()->whereIn('id', request('ids'))->get()->each->delete();
 
         return response(null, Response::HTTP_NO_CONTENT);
     }

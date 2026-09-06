@@ -83,7 +83,7 @@ class DnsserverController extends Controller
 
     public function massDestroy(MassDestroyDnsserverRequest $request)
     {
-        Dnsserver::whereIn('id', request('ids'))->delete();
+        Dnsserver::whereIn('id', request('ids'))->get()->each->delete();
 
         return response(null, Response::HTTP_NO_CONTENT);
     }

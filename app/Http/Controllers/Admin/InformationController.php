@@ -143,7 +143,7 @@ class InformationController extends Controller
 
     public function massDestroy(MassDestroyInformationRequest $request)
     {
-        Information::query()->whereIn('id', request('ids'))->delete();
+        Information::query()->whereIn('id', request('ids'))->get()->each->delete();
 
         return response(null, Response::HTTP_NO_CONTENT);
     }

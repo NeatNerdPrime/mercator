@@ -467,7 +467,7 @@ class ApplicationController extends Controller
 
     public function massDestroy(MassDestroyApplicationRequest $request): Response
     {
-        Application::query()->whereIn('id', request('ids'))->delete();
+        Application::query()->whereIn('id', request('ids'))->get()->each->delete();
 
         return response(null, Response::HTTP_NO_CONTENT);
     }
