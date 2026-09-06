@@ -300,7 +300,7 @@ abstract class APIController extends Controller
             return;
         }
 
-        $this->newQuery()->whereIn('id', $ids)->delete();
+        $this->newQuery()->whereIn('id', $ids)->get()->each->delete();
     }
 
     protected function massStoreItems(array $items): array

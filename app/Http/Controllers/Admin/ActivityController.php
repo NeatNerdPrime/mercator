@@ -182,7 +182,7 @@ class ActivityController extends Controller
 
     public function massDestroy(MassDestroyActivityRequest $request)
     {
-        Activity::query()->whereIn('id', request('ids'))->delete();
+        Activity::query()->whereIn('id', request('ids'))->get()->each->delete();
 
         return response(null, Response::HTTP_NO_CONTENT);
     }

@@ -182,7 +182,7 @@ class RelationController extends Controller
 
     public function massDestroy(MassDestroyRelationRequest $request)
     {
-        Relation::whereIn('id', request('ids'))->delete();
+        Relation::whereIn('id', request('ids'))->get()->each->delete();
 
         return response(null, Response::HTTP_NO_CONTENT);
     }

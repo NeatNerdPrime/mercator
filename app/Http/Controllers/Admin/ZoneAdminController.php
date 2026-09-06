@@ -85,7 +85,7 @@ class ZoneAdminController extends Controller
 
     public function massDestroy(MassDestroyZoneAdminRequest $request)
     {
-        ZoneAdmin::whereIn('id', request('ids'))->delete();
+        ZoneAdmin::whereIn('id', request('ids'))->get()->each->delete();
 
         return response(null, Response::HTTP_NO_CONTENT);
     }

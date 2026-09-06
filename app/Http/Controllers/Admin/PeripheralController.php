@@ -221,7 +221,7 @@ class PeripheralController extends Controller
 
     public function massDestroy(MassDestroyPeripheralRequest $request)
     {
-        Peripheral::whereIn('id', request('ids'))->delete();
+        Peripheral::whereIn('id', request('ids'))->get()->each->delete();
 
         return response(null, Response::HTTP_NO_CONTENT);
     }

@@ -161,7 +161,7 @@ class SecurityControlController extends Controller
 
     public function massDestroy(MassDestroySecurityControlRequest $request)
     {
-        SecurityControl::whereIn('id', request('ids'))->delete();
+        SecurityControl::whereIn('id', request('ids'))->get()->each->delete();
 
         return response(null, Response::HTTP_NO_CONTENT);
     }

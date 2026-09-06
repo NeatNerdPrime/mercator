@@ -99,7 +99,7 @@ class ForestAdController extends Controller
 
     public function massDestroy(MassDestroyForestAdRequest $request)
     {
-        ForestAd::whereIn('id', request('ids'))->delete();
+        ForestAd::whereIn('id', request('ids'))->get()->each->delete();
 
         return response(null, Response::HTTP_NO_CONTENT);
     }

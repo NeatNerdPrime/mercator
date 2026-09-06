@@ -83,7 +83,7 @@ class ActorController extends Controller
 
     public function massDestroy(MassDestroyActorRequest $request)
     {
-        Actor::whereIn('id', request('ids'))->delete();
+        Actor::whereIn('id', request('ids'))->get()->each->delete();
 
         return response(null, Response::HTTP_NO_CONTENT);
     }

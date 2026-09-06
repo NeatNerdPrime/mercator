@@ -99,7 +99,7 @@ class GatewayController extends Controller
 
     public function massDestroy(MassDestroyGatewayRequest $request)
     {
-        Gateway::whereIn('id', request('ids'))->delete();
+        Gateway::whereIn('id', request('ids'))->get()->each->delete();
 
         return response(null, Response::HTTP_NO_CONTENT);
     }

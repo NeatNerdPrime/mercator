@@ -85,7 +85,7 @@ class LanController extends Controller
 
     public function massDestroy(MassDestroyLanRequest $request)
     {
-        Lan::whereIn('id', request('ids'))->delete();
+        Lan::whereIn('id', request('ids'))->get()->each->delete();
 
         return response(null, Response::HTTP_NO_CONTENT);
     }

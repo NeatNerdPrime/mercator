@@ -372,7 +372,7 @@ class LogicalFlowController extends Controller
 
     public function massDestroy(MassDestroyLogicalFlowRequest $request)
     {
-        LogicalFlow::query()->whereIn('id', request('ids'))->delete();
+        LogicalFlow::query()->whereIn('id', request('ids'))->get()->each->delete();
 
         return response(null, Response::HTTP_NO_CONTENT);
     }

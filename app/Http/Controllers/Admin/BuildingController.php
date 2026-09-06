@@ -227,7 +227,7 @@ class BuildingController extends Controller
 
     public function massDestroy(MassDestroyBuildingRequest $request)
     {
-        Building::query()->whereIn('id', request('ids'))->delete();
+        Building::query()->whereIn('id', request('ids'))->get()->each->delete();
 
         // due to soft delete, also set null to all children
         Building::query()

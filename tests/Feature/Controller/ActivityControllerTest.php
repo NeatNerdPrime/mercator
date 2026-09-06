@@ -2,6 +2,7 @@
 <?php
 
 use App\Models\Activity;
+use App\Models\AuditLog;
 use App\Models\User;
 use Database\Seeders\PermissionRoleTableSeeder;
 use Database\Seeders\PermissionsTableSeeder;
@@ -198,6 +199,22 @@ describe('massDestroy', function () {
         ]);
 
         $response->assertForbidden();
+    });
+
+    test('creates an audit log entry for each deleted activity', function () {
+        $activities = Activity::factory()->count(3)->create();
+        $ids = $activities->pluck('id')->toArray();
+
+        $this->delete(route('admin.activities.massDestroy'), ['ids' => $ids]);
+
+        foreach ($ids as $id) {
+            expect(AuditLog::query()
+                ->where('subject_type', Activity::class)
+                ->where('subject_id', $id)
+                ->where('description', 'deleted')
+                ->exists()
+            )->toBeTrue();
+        }
     });
 
 });

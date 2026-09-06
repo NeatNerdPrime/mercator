@@ -181,7 +181,7 @@ class PhysicalSwitchController extends Controller
 
     public function massDestroy(MassDestroyPhysicalSwitchRequest $request)
     {
-        PhysicalSwitch::whereIn('id', request('ids'))->delete();
+        PhysicalSwitch::whereIn('id', request('ids'))->get()->each->delete();
 
         return response(null, Response::HTTP_NO_CONTENT);
     }

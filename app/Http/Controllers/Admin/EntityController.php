@@ -159,7 +159,7 @@ class EntityController extends Controller
 
     public function massDestroy(MassDestroyEntityRequest $request)
     {
-        Entity::query()->whereIn('id', request('ids'))->delete();
+        Entity::query()->whereIn('id', request('ids'))->get()->each->delete();
 
         return response(null, Response::HTTP_NO_CONTENT);
     }

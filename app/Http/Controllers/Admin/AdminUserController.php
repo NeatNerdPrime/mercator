@@ -122,7 +122,7 @@ class AdminUserController extends Controller
 
     public function massDestroy(MassDestroyAdminUserRequest $request)
     {
-        AdminUser::whereIn('id', request('ids'))->delete();
+        AdminUser::whereIn('id', request('ids'))->get()->each->delete();
 
         return response(null, Response::HTTP_NO_CONTENT);
     }

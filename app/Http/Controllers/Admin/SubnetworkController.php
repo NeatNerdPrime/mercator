@@ -178,7 +178,7 @@ class SubnetworkController extends Controller
 
     public function massDestroy(MassDestroySubnetworkRequest $request)
     {
-        Subnetwork::whereIn('id', request('ids'))->delete();
+        Subnetwork::whereIn('id', request('ids'))->get()->each->delete();
 
         return response(null, Response::HTTP_NO_CONTENT);
     }

@@ -114,7 +114,7 @@ class MacroProcessusController extends Controller
 
     public function massDestroy(MassDestroyMacroProcessusRequest $request)
     {
-        MacroProcessus::whereIn('id', request('ids'))->delete();
+        MacroProcessus::whereIn('id', request('ids'))->get()->each->delete();
 
         return response(null, Response::HTTP_NO_CONTENT);
     }

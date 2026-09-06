@@ -107,7 +107,7 @@ class ManController extends Controller
 
     public function massDestroy(MassDestroyManRequest $request)
     {
-        Man::query()->whereIn('id', request('ids'))->delete();
+        Man::query()->whereIn('id', request('ids'))->get()->each->delete();
 
         return response(null, Response::HTTP_NO_CONTENT);
     }

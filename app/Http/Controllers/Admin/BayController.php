@@ -175,7 +175,7 @@ class BayController extends Controller
      */
     public function massDestroy(MassDestroyBayRequest $request): Response
     {
-        Bay::whereIn('id', request('ids'))->delete();
+        Bay::whereIn('id', request('ids'))->get()->each->delete();
 
         return response(null, Response::HTTP_NO_CONTENT);
     }

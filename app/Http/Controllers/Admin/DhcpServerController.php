@@ -83,7 +83,7 @@ class DhcpServerController extends Controller
 
     public function massDestroy(MassDestroyDhcpServerRequest $request)
     {
-        DhcpServer::whereIn('id', request('ids'))->delete();
+        DhcpServer::whereIn('id', request('ids'))->get()->each->delete();
 
         return response(null, Response::HTTP_NO_CONTENT);
     }

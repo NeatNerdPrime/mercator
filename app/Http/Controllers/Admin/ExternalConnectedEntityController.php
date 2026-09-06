@@ -123,7 +123,7 @@ class ExternalConnectedEntityController extends Controller
 
     public function massDestroy(MassDestroyExternalConnectedEntityRequest $request)
     {
-        ExternalConnectedEntity::whereIn('id', request('ids'))->delete();
+        ExternalConnectedEntity::whereIn('id', request('ids'))->get()->each->delete();
 
         return response(null, Response::HTTP_NO_CONTENT);
     }
