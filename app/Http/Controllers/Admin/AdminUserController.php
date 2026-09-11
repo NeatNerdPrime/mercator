@@ -26,7 +26,7 @@ class AdminUserController extends Controller
                 });
             })
             ->orderBy('user_id')
-            ->paginate(min(max((int) request('per_page', 50), 10), 500));
+            ->paginate($this->resolvePerPage());
 
         return view('admin.adminUser.index', compact('users'));
     }

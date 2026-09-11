@@ -28,7 +28,7 @@ class RelationController extends Controller
                 });
             })
             ->orderBy('name')
-            ->paginate(min(max((int) request('per_page', 50), 10), 500));
+            ->paginate($this->resolvePerPage());
 
         return view('admin.relations.index', compact('relations'));
     }
