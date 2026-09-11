@@ -15,7 +15,7 @@
 
                 {{-- Ligne 1 : nom, type, attributs --}}
                 <div class="row">
-                    <div class="col-md-4">
+                    <div class="col-md-5">
                         <div class="form-group">
                             <label class="label-required" for="name">{{ trans('cruds.zone.fields.name') }}</label>
                             <input class="form-control {{ $errors->has('name') ? 'is-invalid' : '' }}"
@@ -25,7 +25,7 @@
                             <span class="help-block">{{ trans('cruds.zone.fields.name_helper') }}</span>
                         </div>
                     </div>
-                    <div class="col-md-4">
+                    <div class="col-md-2">
                         <div class="form-group">
                             <label for="type">{{ trans('cruds.zone.fields.type') }}</label>
                             <select class="form-control select2-free {{ $errors->has('type') ? 'is-invalid' : '' }}"
@@ -41,7 +41,7 @@
                             <span class="help-block">{{ trans('cruds.zone.fields.type_helper') }}</span>
                         </div>
                     </div>
-                    <div class="col-md-4">
+                    <div class="col-md-5">
                         <div class="form-group">
                             <label for="attributes">{{ trans('cruds.zone.fields.attributes') }}</label>
                             <select class="form-control select2-free-tags {{ $errors->has('attributes') ? 'is-invalid' : '' }}"

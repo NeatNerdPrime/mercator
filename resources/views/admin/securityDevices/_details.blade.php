@@ -28,7 +28,7 @@
             <th width="10%">
                 {{ trans('cruds.securityDevice.fields.attributes') }}
             </th>
-            <td width="20%">
+            <td width="30%" colspan="2">
                 @foreach(explode(" ",$securityDevice->attributes) as $attribute)
                     <span class="badge badge-info">{{ $attribute }}</span>
                 @endforeach
@@ -38,7 +38,7 @@
             <th>
                 {{ trans('cruds.securityDevice.fields.description') }}
             </th>
-            <td colspan="4">
+            <td colspan="5">
                 {!! $securityDevice->description !!}
             </td>
             <td width="10%">
@@ -54,7 +54,7 @@
             <th>
                 {{ trans('cruds.securityDevice.fields.address_ip') }}
             </th>
-            <td colspan="5">
+            <td colspan="6">
                 {{ $securityDevice->address_ip}}
             </td>
         </tr>
@@ -63,7 +63,7 @@
             <th>
                 {{ trans('cruds.securityDevice.fields.applications') }}
             </th>
-            <td colspan="5">
+            <td colspan="6">
                 @foreach($securityDevice->applications as $application)
                     @canShow($application)
                     <a href="{{ route('admin.applications.show', $application->id) }}">{{ $application->name }}</a>
@@ -82,7 +82,7 @@
             <th>
                 {{ trans('cruds.securityDevice.fields.physical_security_devices') }}
             </th>
-            <td colspan="5">
+            <td colspan="6">
                 @foreach($securityDevice->physicalSecurityDevices as $device)
                     @canShow($device)
                     <a href="{{ route('admin.physical-security-devices.show', $device->id) }}">{{ $device->name }}</a>

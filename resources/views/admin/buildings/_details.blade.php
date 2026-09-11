@@ -28,7 +28,7 @@
         <th width="10%">
             {{ trans('cruds.building.fields.attributes') }}
         </th>
-        <td>
+        <td width="30%" colspan="2">
             @foreach(explode(" ",$building->attributes) as $attribute)
                 <span class="badge badge-info">{{ $attribute }}</span>
             @endforeach
@@ -38,7 +38,7 @@
         <th>
             {{ trans('cruds.building.fields.description') }}
         </th>
-        <td colspan="4">
+        <td colspan="5">
             {!! $building->description !!}
         </td>
         <td width="10%" align="center">

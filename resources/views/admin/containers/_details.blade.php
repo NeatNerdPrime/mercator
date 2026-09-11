@@ -4,19 +4,19 @@
             <th width="10%">
                 {{ trans('cruds.container.fields.name') }}
             </th>
-            <td>
+            <td width="20%">
                 {{ $container->name }}
             </td>
             <th width="10%">
                 <dt>{{ trans('cruds.container.fields.type') }}</dt>
             </th>
-            <td width="10%">
+            <td width="20%">
                 {{ $container->type }}
             </td>
             <th width="10%">
                 {{ trans('cruds.container.fields.attributes') }}
             </th>
-            <td>
+            <td width="30%" colspan="2">
                 @foreach(explode(" ", (string) $container->attributes) as $attribute)
                     @if(strlen(trim($attribute)) > 0)
                         <span class="badge badge-info">{{ $attribute }}</span>
@@ -28,7 +28,7 @@
             <th>
                 {{ trans('cruds.container.fields.description') }}
             </th>
-            <td colspan="2">
+            <td colspan="5">
                 {!! $container->description !!}
             </td>
             <td width="10%">

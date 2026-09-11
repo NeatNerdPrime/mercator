@@ -65,28 +65,6 @@
                     </div>
                 </div>
                 <div class="row">
-                    <div class="col-sm-3">
-                        <div class="form-group">
-                            <label for="status">{{ trans('cruds.workstation.fields.status') }}</label>
-                            <select class="form-control select2-free {{ $errors->has('status') ? 'is-invalid' : '' }}"
-                                    name="status" id="status">
-                                @if (!$type_list->contains(old('status')))
-                                    <option> {{ old('status') }}</option>
-                                @endif
-                                @foreach($status_list as $status)
-                                    <option {{ old('status') == $status ? 'selected' : '' }}>{{$status}}</option>
-                                @endforeach
-                            </select>
-                            @if($errors->has('status'))
-                                <div class="invalid-feedback">
-                                    {{ $errors->first('status') }}
-                                </div>
-                            @endif
-                            <span class="help-block">{{ trans('cruds.workstation.fields.status_helper') }}</span>
-                        </div>
-                    </div>
-                </div>
-                <div class="row">
                     <div class="col-md-9">
                         <div class="form-group">
                             <label class="label-maturity-1"
@@ -302,6 +280,31 @@
                     </div>
 
                 </div>
+
+                <div class="row">
+                    <div class="col-sm-3">
+                        <div class="form-group">
+                            <label for="status">{{ trans('cruds.workstation.fields.status') }}</label>
+                            <select class="form-control select2-free {{ $errors->has('status') ? 'is-invalid' : '' }}"
+                                    name="status" id="status">
+                                @if (!$type_list->contains(old('status')))
+                                    <option> {{ old('status') }}</option>
+                                @endif
+                                @foreach($status_list as $status)
+                                    <option {{ old('status') == $status ? 'selected' : '' }}>{{$status}}</option>
+                                @endforeach
+                            </select>
+                            @if($errors->has('status'))
+                                <div class="invalid-feedback">
+                                    {{ $errors->first('status') }}
+                                </div>
+                            @endif
+                            <span class="help-block">{{ trans('cruds.workstation.fields.status_helper') }}</span>
+                        </div>
+                    </div>
+                </div>
+
+
             </div>
             <!---------------------------------------------------------------------------------------------------->
             <div class="card-header">
