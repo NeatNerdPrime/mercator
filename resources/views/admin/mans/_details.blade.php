@@ -59,7 +59,6 @@
                 @endcanShow
                 @if(!$loop->last), @endif
                 @endforeach
-
             </td>
             <th>
             {{ trans('cruds.man.fields.parent_man') }}
