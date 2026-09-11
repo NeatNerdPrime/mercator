@@ -22,6 +22,8 @@ CREATE TABLE `activities` (
   `created_at` timestamp NULL DEFAULT NULL,
   `updated_at` timestamp NULL DEFAULT NULL,
   `deleted_at` timestamp NULL DEFAULT NULL,
+  `type` varchar(255) DEFAULT NULL,
+  `attributes` varchar(255) DEFAULT NULL,
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
@@ -113,6 +115,7 @@ CREATE TABLE `actors` (
   `created_at` timestamp NULL DEFAULT NULL,
   `updated_at` timestamp NULL DEFAULT NULL,
   `deleted_at` timestamp NULL DEFAULT NULL,
+  `attributes` varchar(255) DEFAULT NULL,
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
@@ -178,8 +181,13 @@ CREATE TABLE `annuaires` (
   `created_at` timestamp NULL DEFAULT NULL,
   `updated_at` timestamp NULL DEFAULT NULL,
   `deleted_at` timestamp NULL DEFAULT NULL,
+  `application_id` int(10) unsigned DEFAULT NULL,
+  `type` varchar(255) DEFAULT NULL,
+  `attributes` varchar(255) DEFAULT NULL,
   PRIMARY KEY (`id`),
   KEY `zone_admin_fk_1482666` (`zone_admin_id`),
+  KEY `annuaires_application_id_foreign` (`application_id`),
+  CONSTRAINT `annuaires_application_id_foreign` FOREIGN KEY (`application_id`) REFERENCES `applications` (`id`),
   CONSTRAINT `zone_admin_fk_1482666` FOREIGN KEY (`zone_admin_id`) REFERENCES `zone_admins` (`id`) ON DELETE NO ACTION ON UPDATE NO ACTION
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
@@ -207,6 +215,8 @@ CREATE TABLE `application_blocks` (
   `created_at` timestamp NULL DEFAULT NULL,
   `updated_at` timestamp NULL DEFAULT NULL,
   `deleted_at` timestamp NULL DEFAULT NULL,
+  `type` varchar(255) DEFAULT NULL,
+  `attributes` varchar(255) DEFAULT NULL,
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
@@ -323,7 +333,7 @@ CREATE TABLE `application_flows` (
   `id` int(10) unsigned NOT NULL AUTO_INCREMENT,
   `ext_refs` varchar(255) DEFAULT NULL,
   `name` varchar(255) NOT NULL,
-  `nature` varchar(255) DEFAULT NULL,
+  `type` varchar(255) DEFAULT NULL,
   `attributes` varchar(255) DEFAULT NULL,
   `description` longtext DEFAULT NULL,
   `application_source_id` int(10) unsigned DEFAULT NULL,
@@ -408,6 +418,8 @@ CREATE TABLE `application_modules` (
   `created_at` timestamp NULL DEFAULT NULL,
   `updated_at` timestamp NULL DEFAULT NULL,
   `deleted_at` timestamp NULL DEFAULT NULL,
+  `type` varchar(255) DEFAULT NULL,
+  `attributes` varchar(255) DEFAULT NULL,
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
@@ -483,6 +495,8 @@ CREATE TABLE `application_services` (
   `created_at` timestamp NULL DEFAULT NULL,
   `updated_at` timestamp NULL DEFAULT NULL,
   `deleted_at` timestamp NULL DEFAULT NULL,
+  `type` varchar(255) DEFAULT NULL,
+  `attributes` varchar(255) DEFAULT NULL,
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
@@ -517,8 +531,11 @@ CREATE TABLE `applications` (
   `functional_referent` varchar(255) DEFAULT NULL,
   `type` varchar(255) DEFAULT NULL,
   `icon_id` int(10) unsigned DEFAULT NULL,
+  `status` varchar(255) DEFAULT NULL,
   `technology` varchar(255) DEFAULT NULL,
   `external` varchar(255) DEFAULT NULL,
+  `hosting` varchar(255) DEFAULT NULL,
+  `urls` varchar(255) DEFAULT NULL,
   `users` varchar(255) DEFAULT NULL,
   `editor` varchar(255) DEFAULT NULL,
   `entity_resp_id` int(10) unsigned DEFAULT NULL,
@@ -528,6 +545,7 @@ CREATE TABLE `applications` (
   `rto` int(11) DEFAULT NULL,
   `rpo` int(11) DEFAULT NULL,
   `install_date` date DEFAULT NULL,
+  `prod_date` date DEFAULT NULL,
   `update_date` date DEFAULT NULL,
   `attributes` varchar(255) DEFAULT NULL,
   `patching_frequency` int(11) DEFAULT NULL,
@@ -628,6 +646,8 @@ CREATE TABLE `bays` (
   `created_at` timestamp NULL DEFAULT NULL,
   `updated_at` timestamp NULL DEFAULT NULL,
   `deleted_at` timestamp NULL DEFAULT NULL,
+  `type` varchar(255) DEFAULT NULL,
+  `attributes` varchar(255) DEFAULT NULL,
   PRIMARY KEY (`id`),
   KEY `room_fk_1483441` (`building_id`),
   KEY `site_id_fk_1483442` (`site_id`),
@@ -720,6 +740,7 @@ CREATE TABLE `certificates` (
   `created_at` timestamp NULL DEFAULT NULL,
   `updated_at` timestamp NULL DEFAULT NULL,
   `deleted_at` timestamp NULL DEFAULT NULL,
+  `attributes` varchar(255) DEFAULT NULL,
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
@@ -816,6 +837,7 @@ CREATE TABLE `containers` (
   `created_at` timestamp NULL DEFAULT NULL,
   `updated_at` timestamp NULL DEFAULT NULL,
   `deleted_at` timestamp NULL DEFAULT NULL,
+  `attributes` varchar(255) DEFAULT NULL,
   PRIMARY KEY (`id`),
   UNIQUE KEY `container_name_unique` (`name`,`deleted_at`),
   KEY `document_id_fk_43948593` (`icon_id`),
@@ -984,6 +1006,7 @@ CREATE TABLE `databases` (
   `created_at` timestamp NULL DEFAULT NULL,
   `updated_at` timestamp NULL DEFAULT NULL,
   `deleted_at` timestamp NULL DEFAULT NULL,
+  `attributes` varchar(255) DEFAULT NULL,
   PRIMARY KEY (`id`),
   KEY `entity_resp_fk_1485569` (`entity_resp_id`),
   KEY `databases_icon_id_foreign` (`icon_id`),
@@ -1003,6 +1026,8 @@ CREATE TABLE `dhcp_servers` (
   `created_at` timestamp NULL DEFAULT NULL,
   `updated_at` timestamp NULL DEFAULT NULL,
   `deleted_at` timestamp NULL DEFAULT NULL,
+  `type` varchar(255) DEFAULT NULL,
+  `attributes` varchar(255) DEFAULT NULL,
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
@@ -1018,6 +1043,8 @@ CREATE TABLE `dnsservers` (
   `created_at` timestamp NULL DEFAULT NULL,
   `updated_at` timestamp NULL DEFAULT NULL,
   `deleted_at` timestamp NULL DEFAULT NULL,
+  `type` varchar(255) DEFAULT NULL,
+  `attributes` varchar(255) DEFAULT NULL,
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
@@ -1100,6 +1127,8 @@ CREATE TABLE `domains` (
   `created_at` timestamp NULL DEFAULT NULL,
   `updated_at` timestamp NULL DEFAULT NULL,
   `deleted_at` timestamp NULL DEFAULT NULL,
+  `type` varchar(255) DEFAULT NULL,
+  `attributes` varchar(255) DEFAULT NULL,
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
@@ -1114,8 +1143,7 @@ CREATE TABLE `entities` (
   `security_level` longtext DEFAULT NULL,
   `contact_point` longtext DEFAULT NULL,
   `description` longtext DEFAULT NULL,
-  `is_external` tinyint(1) DEFAULT NULL,
-  `entity_type` varchar(255) DEFAULT NULL,
+  `type` varchar(255) DEFAULT NULL,
   `attributes` varchar(255) DEFAULT NULL,
   `reference` varchar(255) DEFAULT NULL,
   `parent_entity_id` int(10) unsigned DEFAULT NULL,
@@ -1124,8 +1152,7 @@ CREATE TABLE `entities` (
   `updated_at` timestamp NULL DEFAULT NULL,
   `deleted_at` timestamp NULL DEFAULT NULL,
   PRIMARY KEY (`id`),
-  KEY `is_external` (`is_external`),
-  KEY `type` (`entity_type`),
+  KEY `type` (`type`),
   KEY `entity_id_fk_4398013` (`parent_entity_id`),
   KEY `document_id_fk_129486` (`icon_id`),
   CONSTRAINT `document_id_fk_129486` FOREIGN KEY (`icon_id`) REFERENCES `documents` (`id`) ON UPDATE NO ACTION,
@@ -1176,6 +1203,7 @@ CREATE TABLE `external_connected_entities` (
   `created_at` timestamp NULL DEFAULT NULL,
   `updated_at` timestamp NULL DEFAULT NULL,
   `deleted_at` timestamp NULL DEFAULT NULL,
+  `attributes` varchar(255) DEFAULT NULL,
   PRIMARY KEY (`id`),
   KEY `entity_id_fk_1295034` (`entity_id`),
   KEY `network_id_fk_8596554` (`network_id`),
@@ -1207,6 +1235,8 @@ CREATE TABLE `forest_ads` (
   `created_at` timestamp NULL DEFAULT NULL,
   `updated_at` timestamp NULL DEFAULT NULL,
   `deleted_at` timestamp NULL DEFAULT NULL,
+  `type` varchar(255) DEFAULT NULL,
+  `attributes` varchar(255) DEFAULT NULL,
   PRIMARY KEY (`id`),
   KEY `zone_admin_fk_1482667` (`zone_admin_id`),
   CONSTRAINT `zone_admin_fk_1482667` FOREIGN KEY (`zone_admin_id`) REFERENCES `zone_admins` (`id`) ON DELETE NO ACTION ON UPDATE NO ACTION
@@ -1225,6 +1255,8 @@ CREATE TABLE `gateways` (
   `created_at` timestamp NULL DEFAULT NULL,
   `updated_at` timestamp NULL DEFAULT NULL,
   `deleted_at` timestamp NULL DEFAULT NULL,
+  `type` varchar(255) DEFAULT NULL,
+  `attributes` varchar(255) DEFAULT NULL,
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
@@ -1344,6 +1376,8 @@ CREATE TABLE `lans` (
   `created_at` timestamp NULL DEFAULT NULL,
   `updated_at` timestamp NULL DEFAULT NULL,
   `deleted_at` timestamp NULL DEFAULT NULL,
+  `type` varchar(255) DEFAULT NULL,
+  `attributes` varchar(255) DEFAULT NULL,
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
@@ -1498,6 +1532,8 @@ CREATE TABLE `macro_processuses` (
   `created_at` timestamp NULL DEFAULT NULL,
   `updated_at` timestamp NULL DEFAULT NULL,
   `deleted_at` timestamp NULL DEFAULT NULL,
+  `type` varchar(255) DEFAULT NULL,
+  `attributes` varchar(255) DEFAULT NULL,
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
@@ -1525,6 +1561,8 @@ CREATE TABLE `mans` (
   `created_at` timestamp NULL DEFAULT NULL,
   `updated_at` timestamp NULL DEFAULT NULL,
   `deleted_at` timestamp NULL DEFAULT NULL,
+  `type` varchar(255) DEFAULT NULL,
+  `attributes` varchar(255) DEFAULT NULL,
   PRIMARY KEY (`id`),
   KEY `man_id_fk_4385454` (`parent_man_id`),
   CONSTRAINT `man_id_fk_4385454` FOREIGN KEY (`parent_man_id`) REFERENCES `mans` (`id`) ON DELETE SET NULL ON UPDATE NO ACTION
@@ -1576,6 +1614,22 @@ CREATE TABLE `migrations` (
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
+DROP TABLE IF EXISTS `monarc_sync_items`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8mb4 */;
+CREATE TABLE `monarc_sync_items` (
+  `id` bigint(20) unsigned NOT NULL AUTO_INCREMENT,
+  `model` varchar(255) NOT NULL,
+  `mercator_id` int(10) unsigned NOT NULL,
+  `object_uuid` char(36) NOT NULL,
+  `anr_id` int(10) unsigned NOT NULL,
+  `sent_at` timestamp NULL DEFAULT NULL,
+  `created_at` timestamp NULL DEFAULT NULL,
+  `updated_at` timestamp NULL DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `monarc_sync_items_unique` (`anr_id`,`model`,`mercator_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+/*!40101 SET character_set_client = @saved_cs_client */;
 DROP TABLE IF EXISTS `network_switch_physical_switch`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!40101 SET character_set_client = utf8mb4 */;
@@ -1613,6 +1667,8 @@ CREATE TABLE `network_switches` (
   `created_at` timestamp NULL DEFAULT NULL,
   `updated_at` timestamp NULL DEFAULT NULL,
   `deleted_at` timestamp NULL DEFAULT NULL,
+  `type` varchar(255) DEFAULT NULL,
+  `attributes` varchar(255) DEFAULT NULL,
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
@@ -1756,6 +1812,8 @@ CREATE TABLE `operations` (
   `created_at` timestamp NULL DEFAULT NULL,
   `updated_at` timestamp NULL DEFAULT NULL,
   `deleted_at` timestamp NULL DEFAULT NULL,
+  `type` varchar(255) DEFAULT NULL,
+  `attributes` varchar(255) DEFAULT NULL,
   PRIMARY KEY (`id`),
   KEY `process_id_fk_7945129` (`process_id`),
   CONSTRAINT `process_id_fk_7945129` FOREIGN KEY (`process_id`) REFERENCES `processes` (`id`) ON DELETE CASCADE ON UPDATE NO ACTION
@@ -1802,21 +1860,24 @@ CREATE TABLE `peripherals` (
   `building_id` int(10) unsigned DEFAULT NULL,
   `bay_id` int(10) unsigned DEFAULT NULL,
   `address_ip` varchar(255) DEFAULT NULL,
-  `domain` varchar(255) DEFAULT NULL,
   `provider_id` int(10) unsigned DEFAULT NULL,
   `created_at` timestamp NULL DEFAULT NULL,
   `updated_at` timestamp NULL DEFAULT NULL,
   `deleted_at` timestamp NULL DEFAULT NULL,
+  `domain_id` int(10) unsigned DEFAULT NULL,
+  `attributes` varchar(255) DEFAULT NULL,
   PRIMARY KEY (`id`),
   KEY `site_fk_1485449` (`site_id`),
   KEY `building_fk_1485450` (`building_id`),
   KEY `bay_fk_1485451` (`bay_id`),
   KEY `entity_id_fk_4383234` (`provider_id`),
   KEY `document_id_fk_129484` (`icon_id`),
+  KEY `peripherals_domain_id_foreign` (`domain_id`),
   CONSTRAINT `bay_fk_1485451` FOREIGN KEY (`bay_id`) REFERENCES `bays` (`id`) ON DELETE NO ACTION ON UPDATE NO ACTION,
   CONSTRAINT `building_fk_1485450` FOREIGN KEY (`building_id`) REFERENCES `buildings` (`id`) ON DELETE NO ACTION ON UPDATE NO ACTION,
   CONSTRAINT `document_id_fk_129484` FOREIGN KEY (`icon_id`) REFERENCES `documents` (`id`) ON UPDATE NO ACTION,
   CONSTRAINT `entity_id_fk_4383234` FOREIGN KEY (`provider_id`) REFERENCES `entities` (`id`) ON DELETE NO ACTION ON UPDATE NO ACTION,
+  CONSTRAINT `peripherals_domain_id_foreign` FOREIGN KEY (`domain_id`) REFERENCES `domains` (`id`),
   CONSTRAINT `site_fk_1485449` FOREIGN KEY (`site_id`) REFERENCES `sites` (`id`) ON DELETE NO ACTION ON UPDATE NO ACTION
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
@@ -1883,6 +1944,7 @@ CREATE TABLE `phones` (
   `created_at` timestamp NULL DEFAULT NULL,
   `updated_at` timestamp NULL DEFAULT NULL,
   `deleted_at` timestamp NULL DEFAULT NULL,
+  `attributes` varchar(255) DEFAULT NULL,
   PRIMARY KEY (`id`),
   KEY `site_fk_1485479` (`site_id`),
   KEY `building_fk_1485480` (`building_id`),
@@ -2024,6 +2086,7 @@ CREATE TABLE `physical_routers` (
   `created_at` timestamp NULL DEFAULT NULL,
   `updated_at` timestamp NULL DEFAULT NULL,
   `deleted_at` timestamp NULL DEFAULT NULL,
+  `attributes` varchar(255) DEFAULT NULL,
   PRIMARY KEY (`id`),
   KEY `site_fk_1485497` (`site_id`),
   KEY `building_fk_1485498` (`building_id`),
@@ -2102,11 +2165,12 @@ CREATE TABLE `physical_servers` (
   `install_date` datetime DEFAULT NULL,
   `update_date` datetime DEFAULT NULL,
   `patching_group` varchar(255) DEFAULT NULL,
-  `paching_frequency` int(11) DEFAULT NULL,
+  `patching_frequency` int(11) DEFAULT NULL,
   `next_update` date DEFAULT NULL,
   `created_at` timestamp NULL DEFAULT NULL,
   `updated_at` timestamp NULL DEFAULT NULL,
   `deleted_at` timestamp NULL DEFAULT NULL,
+  `attributes` varchar(255) DEFAULT NULL,
   PRIMARY KEY (`id`),
   KEY `site_fk_1485322` (`site_id`),
   KEY `building_fk_1485323` (`building_id`),
@@ -2139,6 +2203,7 @@ CREATE TABLE `physical_switches` (
   `created_at` timestamp NULL DEFAULT NULL,
   `updated_at` timestamp NULL DEFAULT NULL,
   `deleted_at` timestamp NULL DEFAULT NULL,
+  `attributes` varchar(255) DEFAULT NULL,
   PRIMARY KEY (`id`),
   KEY `site_fk_1485488` (`site_id`),
   KEY `building_fk_1485489` (`building_id`),
@@ -2170,6 +2235,8 @@ CREATE TABLE `processes` (
   `created_at` timestamp NULL DEFAULT NULL,
   `updated_at` timestamp NULL DEFAULT NULL,
   `deleted_at` timestamp NULL DEFAULT NULL,
+  `type` varchar(255) DEFAULT NULL,
+  `attributes` varchar(255) DEFAULT NULL,
   PRIMARY KEY (`id`),
   KEY `process_fk_4342342` (`macroprocess_id`),
   KEY `document_id_fk_5938654` (`icon_id`),
@@ -2263,6 +2330,7 @@ CREATE TABLE `routers` (
   `created_at` timestamp NULL DEFAULT NULL,
   `updated_at` timestamp NULL DEFAULT NULL,
   `deleted_at` timestamp NULL DEFAULT NULL,
+  `attributes` varchar(255) DEFAULT NULL,
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
@@ -2358,6 +2426,7 @@ CREATE TABLE `storage_devices` (
   `id` int(10) unsigned NOT NULL AUTO_INCREMENT,
   `ext_refs` varchar(255) DEFAULT NULL,
   `name` varchar(255) NOT NULL,
+  `icon_id` int(10) unsigned DEFAULT NULL,
   `type` varchar(255) DEFAULT NULL,
   `description` longtext DEFAULT NULL,
   `vendor` varchar(255) DEFAULT NULL,
@@ -2370,12 +2439,15 @@ CREATE TABLE `storage_devices` (
   `created_at` timestamp NULL DEFAULT NULL,
   `updated_at` timestamp NULL DEFAULT NULL,
   `deleted_at` timestamp NULL DEFAULT NULL,
+  `attributes` varchar(255) DEFAULT NULL,
   PRIMARY KEY (`id`),
   KEY `site_fk_1485361` (`site_id`),
   KEY `building_fk_1485362` (`building_id`),
   KEY `bay_fk_1485363` (`bay_id`),
+  KEY `document_id_fk_53812733` (`icon_id`),
   CONSTRAINT `bay_fk_1485363` FOREIGN KEY (`bay_id`) REFERENCES `bays` (`id`) ON DELETE NO ACTION ON UPDATE NO ACTION,
   CONSTRAINT `building_fk_1485362` FOREIGN KEY (`building_id`) REFERENCES `buildings` (`id`) ON DELETE NO ACTION ON UPDATE NO ACTION,
+  CONSTRAINT `document_id_fk_53812733` FOREIGN KEY (`icon_id`) REFERENCES `documents` (`id`),
   CONSTRAINT `site_fk_1485361` FOREIGN KEY (`site_id`) REFERENCES `sites` (`id`) ON DELETE NO ACTION ON UPDATE NO ACTION
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
@@ -2428,6 +2500,8 @@ CREATE TABLE `tasks` (
   `created_at` timestamp NULL DEFAULT NULL,
   `updated_at` timestamp NULL DEFAULT NULL,
   `deleted_at` timestamp NULL DEFAULT NULL,
+  `type` varchar(255) DEFAULT NULL,
+  `attributes` varchar(255) DEFAULT NULL,
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
@@ -2447,6 +2521,7 @@ CREATE TABLE `users` (
   `created_at` timestamp NULL DEFAULT NULL,
   `updated_at` timestamp NULL DEFAULT NULL,
   `deleted_at` timestamp NULL DEFAULT NULL,
+  `flow_label` varchar(16) DEFAULT NULL,
   PRIMARY KEY (`id`),
   UNIQUE KEY `users_email_unique` (`email`,`deleted_at`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
@@ -2463,6 +2538,8 @@ CREATE TABLE `vlans` (
   `created_at` timestamp NULL DEFAULT NULL,
   `updated_at` timestamp NULL DEFAULT NULL,
   `deleted_at` timestamp NULL DEFAULT NULL,
+  `type` varchar(255) DEFAULT NULL,
+  `attributes` varchar(255) DEFAULT NULL,
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
@@ -2476,6 +2553,8 @@ CREATE TABLE `wans` (
   `created_at` timestamp NULL DEFAULT NULL,
   `updated_at` timestamp NULL DEFAULT NULL,
   `deleted_at` timestamp NULL DEFAULT NULL,
+  `type` varchar(255) DEFAULT NULL,
+  `attributes` varchar(255) DEFAULT NULL,
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
@@ -2497,6 +2576,7 @@ CREATE TABLE `wifi_terminals` (
   `created_at` timestamp NULL DEFAULT NULL,
   `updated_at` timestamp NULL DEFAULT NULL,
   `deleted_at` timestamp NULL DEFAULT NULL,
+  `attributes` varchar(255) DEFAULT NULL,
   PRIMARY KEY (`id`),
   KEY `site_fk_1485507` (`site_id`),
   KEY `building_fk_1485508` (`building_id`),
@@ -2548,6 +2628,7 @@ CREATE TABLE `workstations` (
   `created_at` timestamp NULL DEFAULT NULL,
   `updated_at` timestamp NULL DEFAULT NULL,
   `deleted_at` timestamp NULL DEFAULT NULL,
+  `attributes` varchar(255) DEFAULT NULL,
   PRIMARY KEY (`id`),
   KEY `site_fk_1485332` (`site_id`),
   KEY `building_fk_1485333` (`building_id`),
@@ -2578,6 +2659,8 @@ CREATE TABLE `zone_admins` (
   `created_at` timestamp NULL DEFAULT NULL,
   `updated_at` timestamp NULL DEFAULT NULL,
   `deleted_at` timestamp NULL DEFAULT NULL,
+  `type` varchar(255) DEFAULT NULL,
+  `attributes` varchar(255) DEFAULT NULL,
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
@@ -2990,3 +3073,15 @@ INSERT INTO `migrations` (`id`, `migration`, `batch`) VALUES (356,'2026_06_22_00
 INSERT INTO `migrations` (`id`, `migration`, `batch`) VALUES (357,'2026_06_22_000002_add_description_and_attributes_to_physical_links',47);
 INSERT INTO `migrations` (`id`, `migration`, `batch`) VALUES (358,'2026_06_28_000000_drop_unique_name_from_backups_table',48);
 INSERT INTO `migrations` (`id`, `migration`, `batch`) VALUES (359,'2019_12_14_000001_create_personal_access_tokens_table',48);
+INSERT INTO `migrations` (`id`, `migration`, `batch`) VALUES (360,'2026_07_05_000000_change_peripheral_domain_to_domain_id',49);
+INSERT INTO `migrations` (`id`, `migration`, `batch`) VALUES (361,'2026_07_18_000000_create_monarc_sync_items_table',49);
+INSERT INTO `migrations` (`id`, `migration`, `batch`) VALUES (362,'2026_07_24_000000_add_status_hosting_fields_to_applications',49);
+INSERT INTO `migrations` (`id`, `migration`, `batch`) VALUES (363,'2026_08_04_000000_add_application_id_to_annuaires',49);
+INSERT INTO `migrations` (`id`, `migration`, `batch`) VALUES (364,'2026_08_04_000000_fix_physical_servers_patching_typo',49);
+INSERT INTO `migrations` (`id`, `migration`, `batch`) VALUES (365,'2026_08_11_000000_add_cairn_access_permission',49);
+INSERT INTO `migrations` (`id`, `migration`, `batch`) VALUES (366,'2026_09_02_000000_add_flow_label_to_users_table',49);
+INSERT INTO `migrations` (`id`, `migration`, `batch`) VALUES (367,'2026_09_08_000000_add_icon_to_storage_devices',49);
+INSERT INTO `migrations` (`id`, `migration`, `batch`) VALUES (368,'2026_09_09_000000_add_type_attributes_to_cartography_objects',49);
+INSERT INTO `migrations` (`id`, `migration`, `batch`) VALUES (369,'2026_09_09_000001_rename_nature_to_type_on_application_flows',49);
+INSERT INTO `migrations` (`id`, `migration`, `batch`) VALUES (370,'2026_09_10_000000_rename_entity_type_to_type_on_entities',49);
+INSERT INTO `migrations` (`id`, `migration`, `batch`) VALUES (371,'2026_09_10_000001_move_is_external_to_attributes_on_entities',49);
