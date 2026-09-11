@@ -16,7 +16,7 @@
 
             <div class="card-body">
                 <div class="row">
-                    <div class="col-md-6">
+                    <div class="col-md-5">
                         <div class="form-group">
                             <label class="label-required" for="name">
                                 {{ trans('cruds.subnetwork.fields.name') }}
@@ -36,7 +36,7 @@
                             <span>{{ trans('cruds.subnetwork.fields.name_helper') }}</span>
                         </div>
                     </div>
-                    <div class="col-md-3">
+                    <div class="col-md-2">
                         <div class="form-group">
                             <label for="type">{{ trans('cruds.subnetwork.fields.type') }}</label>
                             <select class="form-control select2-free {{ $errors->has('type') ? 'is-invalid' : '' }}"
@@ -57,7 +57,7 @@
                             <span class="help-block">{{ trans('cruds.subnetwork.fields.type_helper') }}</span>
                         </div>
                     </div>
-                    <div class="col-md-3">
+                    <div class="col-md-5">
                         <div class="form-group">
                             <label for="attributes">{{ trans('cruds.subnetwork.fields.attributes') }}</label>
                             <select class="form-control select2-free-tags {{ $errors->has('attributes') ? 'is-invalid' : '' }}"

@@ -55,6 +55,43 @@
             'withLink' => false,
         ])
     </div>
+
+    <!---------------------------------------------------------------------------------------------------->
+    <div class="card-header">
+        Model / Configuration
+    </div>
+    <!---------------------------------------------------------------------------------------------------->
+    <div class="card-body">
+
+        <table class="table table-bordered table-striped table-report">
+            <tbody>
+
+               <tr>
+                    <th width="10%">{{ trans('cruds.workstation.fields.manufacturer') }}</th>
+                    <td width="20%">{{ $workstation->manufacturer }}</td>
+                    <th width="10%">{{ trans('cruds.workstation.fields.model') }}</th>
+                    <td width="20%">{{ $workstation->model }}</td>
+                    <th width="10%">{{ trans('cruds.workstation.fields.serial_number') }}</th>
+                    <td width="20%" colspan="2">{{ $workstation->serial_number }}</td>
+               </tr>
+               <tr>
+                    <th>{{ trans('cruds.workstation.fields.cpu') }}</th>
+                    <td>{{ $workstation->cpu }}</td>
+                    <th>{{ trans('cruds.workstation.fields.memory') }}</th>
+                    <td>{{ $workstation->memory }}</td>
+                    <th>{{ trans('cruds.workstation.fields.disk') }}</th>
+                    <td colspan="2">{{ $workstation->disk }}</td>
+               </tr>
+               <tr>
+                    <th width="10%">{{ trans('cruds.workstation.fields.operating_system') }}</th>
+                    <td colspan="6">{{ $workstation->operating_system ?? '' }}</td>
+               </tr>
+
+            </tbody>
+        </table>
+    </div>
+
+
     <!---------------------------------------------------------------------------------------------------->
     <div class="card-header">
         {{ trans("cruds.menu.administration.title_short") }}
@@ -65,6 +102,7 @@
             <div class="col">
                 <table class="table table-bordered table-striped table-report">
                    <tbody>
+                       <tr>
                       <th width="10%">{{ trans('cruds.workstation.fields.entity') }}</th>
                       <td width="15%">
                         @if ($workstation->entity!=null)
@@ -99,8 +137,13 @@
                     </td>
                     <th width="10%">{{ trans('cruds.workstation.fields.other_user') }}</th>
                     <td>{{ $workstation->other_user ?? '' }}</td>
-                </tbody>
-            </table>
+                    </tr>
+                    <tr>
+                      <th width="10%">{{ trans('cruds.workstation.fields.status') }}</th>
+                      <td colspan="3">{{ $workstation->status }}</td>
+                    </tr>
+                    </tbody>
+                </table>
             </div>
         </div>
     </div>

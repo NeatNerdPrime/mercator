@@ -8,7 +8,7 @@
             <th width="10%">
                 {{ trans('cruds.networkSwitch.fields.name') }}
             </th>
-            <td>
+            <td width="20%">
             @if ($withLink)
             @canShow($networkSwitch)
             <a href="{{ route('admin.network-switches.show', $networkSwitch->id) }}">{{ $networkSwitch->name }}</a>
@@ -19,12 +19,28 @@
             {{ $networkSwitch->name }}
             @endif
             </td>
+            <th width="10%">
+                {{ trans('cruds.networkSwitch.fields.type') }}
+            </th>
+            <td width="20%">
+                {{ $networkSwitch->type }}
+            </td>
+            <th width="10%">
+                {{ trans('cruds.networkSwitch.fields.attributes') }}
+            </th>
+            <td width="30%">
+                @foreach(explode(" ", (string) $networkSwitch->attributes) as $attribute)
+                    @if(strlen(trim($attribute)) > 0)
+                        <span class="badge badge-info">{{ $attribute }}</span>
+                    @endif
+                @endforeach
+            </td>
         </tr>
         <tr>
             <th>
                 {{ trans('cruds.networkSwitch.fields.description') }}
             </th>
-            <td>
+            <td colspan="5">
                 {!! $networkSwitch->description !!}
             </td>
         </tr>
@@ -32,7 +48,7 @@
             <th>
                 {{ trans('cruds.networkSwitch.fields.ip') }}
             </th>
-            <td>
+            <td colspan="5">
                 {{ $networkSwitch->ip }}
             </td>
         </tr>
@@ -41,7 +57,7 @@
             <th>
                 {{ trans('cruds.networkSwitch.fields.physical_switches') }}
             </th>
-            <td>
+            <td colspan="5">
                 @foreach($networkSwitch->physicalSwitches as $physicalSwitch)
                     @canShow($physicalSwitch)
                         <a href="{{ route('admin.physical-switches.show', $physicalSwitch->id) }}">

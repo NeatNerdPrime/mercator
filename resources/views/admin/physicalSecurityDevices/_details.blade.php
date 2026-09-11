@@ -28,7 +28,7 @@
         <th width='10%'>
             {{ trans('cruds.physicalSecurityDevice.fields.attributes') }}
         </th>
-        <td width="20%">
+        <td width="30%" colspan="2">
             @foreach(explode(" ",$physicalSecurityDevice->attributes) as $attribute)
                 <span class="badge badge-info">{{ $attribute }}</span>
             @endforeach
@@ -38,7 +38,7 @@
         <th>
             {{ trans('cruds.physicalSecurityDevice.fields.description') }}
         </th>
-        <td colspan="4">
+        <td colspan="5">
             {!! $physicalSecurityDevice->description !!}
         </td>
         <td width="10%">
@@ -55,7 +55,7 @@
         <th>
             {{ trans('cruds.physicalSecurityDevice.fields.address_ip') }}
         </th>
-        <td colspan="5">
+        <td colspan="6">
             {{ $physicalSecurityDevice->address_ip }}
         </td>
     </tr>
@@ -64,7 +64,7 @@
         <th>
             {{ trans('cruds.physicalSecurityDevice.fields.security_devices') }}
         </th>
-        <td colspan="5">
+        <td colspan="6">
             @foreach($physicalSecurityDevice->securityDevices as $device)
                 @canShow($device)
                     <a href="{{ route('admin.security-devices.show', $device->id) }}">{{ $device->name }}</a>
@@ -80,7 +80,7 @@
     @endcanAccess
     @canAccessAny(App\Models\Site::class, App\Models\Building::class, App\Models\Bay::class)
     <tr>
-        <th width='10%'>
+        <th>
             {{ trans('cruds.physicalSecurityDevice.fields.site') }}
         </th>
         <td>
@@ -94,7 +94,7 @@
                 @endcanShow
             @endif
         </td>
-        <th width='10%'>
+        <th>
             {{ trans('cruds.physicalSecurityDevice.fields.building') }}
         </th>
         <td>
@@ -108,10 +108,10 @@
                 @endcanShow
             @endif
         </td>
-        <th width='10%'>
+        <th>
             {{ trans('cruds.physicalSecurityDevice.fields.bay') }}
         </th>
-        <td>
+        <td colspan="2">
             @if($physicalSecurityDevice->bay!=null)
                 @canShow($physicalSecurityDevice->bay)
                     <a href="{{ route('admin.bays.show', $physicalSecurityDevice->bay->id) }}">

@@ -9,7 +9,7 @@
             <th width="10%">
                 {{ trans('cruds.process.fields.name') }}
             </th>
-            <td colspan="1">
+            <td width="20%">
                 @if ($withLink)
                 @canShow($process)
                 <a href="{{ route('admin.processes.show', $process->id) }}">{{ $process->name }}</a>
@@ -21,9 +21,27 @@
                 @endif
             </td>
             <th width="10%">
+                {{ trans('cruds.process.fields.type') }}
+            </th>
+            <td width="20%">
+                {{ $process->type }}
+            </td>
+            <th width="10%">
+                {{ trans('cruds.process.fields.attributes') }}
+            </th>
+            <td colspan="30%" colspan="2">
+                @foreach(explode(" ", (string) $process->attributes) as $attribute)
+                    @if(strlen(trim($attribute)) > 0)
+                        <span class="badge badge-info">{{ $attribute }}</span>
+                    @endif
+                @endforeach
+            </td>
+        </tr>
+        <tr>
+            <th>
                 {{ trans('cruds.process.fields.macroprocessus') }}
             </th>
-            <td colspan="2">
+            <td colspan="6">
                 @if($process->macroProcess!=null)
                     @canShow($process->macroProcess)
                         <a href="{{ route('admin.macro-processuses.show', $process->macroProcess->id) }}">
@@ -39,10 +57,10 @@
             <th>
                 {{ trans('cruds.process.fields.description') }}
             </th>
-            <td colspan="3">
+            <td colspan="5">
                 {!! $process->description !!}
             </td>
-            <td colspan=2 align="center" width="10%">
+            <td align="center" width="10%">
                 @if ($process->icon_id === null)
                 <img src='/images/process.png' width='60' height='60'>
                 @else
@@ -54,7 +72,7 @@
             <th>
                 {{ trans('cruds.process.fields.in_out') }}
             </th>
-            <td colspan="5">
+            <td colspan="6">
                 {!! $process->in_out !!}
             </td>
         </tr>
@@ -62,7 +80,7 @@
             <th>
                 {{ trans('cruds.process.fields.security_need') }}
             </th>
-            <td>
+            <td colspan="3">
             {{ trans('global.confidentiality') }} :
                 @if ($process->security_need_c==0){{ trans('global.none') }}@endif
                 @if ($process->security_need_c==1)<span class="veryLowRisk">{{ trans('global.low') }}</span>@endif
@@ -103,7 +121,7 @@
             <th>
                 {{ trans('cruds.process.fields.owner') }}
             </th>
-            <td colspan="3">
+            <td colspan="2">
                 {{ $process->owner }}
             </td>
         </tr>
@@ -113,7 +131,7 @@
             <th>
                 {{ trans('cruds.process.fields.activities') }}
             </th>
-            <td colspan="5">
+            <td colspan="6">
                 @foreach($process->activities as $activity)
                     @canShow($activity)
                         <a href="{{ route('admin.activities.show', $activity->id) }}">
@@ -135,7 +153,7 @@
             <th>
                 {{ trans('cruds.process.fields.entities') }}
             </th>
-            <td colspan="5">
+            <td colspan="6">
                 @foreach($process->entities as $entity)
                     @canShow($entity)
                         <a href="{{ route('admin.entities.show', $entity->id) }}">
@@ -156,7 +174,7 @@
             <th>
                 {{ trans('cruds.process.fields.informations') }}
             </th>
-            <td colspan="5">
+            <td colspan="6">
                 @foreach($process->information as $info)
                     @canShow($info)
                         <a href="{{ route('admin.information.show', $info->id) }}">
@@ -178,7 +196,7 @@
             <th>
                 {{ trans('cruds.process.fields.applications') }}
             </th>
-            <td colspan="5">
+            <td colspan="6">
                 @foreach($process->applications as $application)
                     @canShow($application)
                         <a href="{{ route('admin.applications.show', $application->id) }}">

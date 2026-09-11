@@ -9,7 +9,7 @@
         <th width="10%">
             {{ trans('cruds.externalConnectedEntity.fields.name') }}
         </th>
-        <td>
+        <td width="20%">
         @if($withLink)
             @canShow($externalConnectedEntity)
                 <a href="{{ route('admin.external-connected-entities.show', $externalConnectedEntity) }}">{{ $externalConnectedEntity->name }}</a>
@@ -23,15 +23,25 @@
         <th width="10%">
             {{ trans('cruds.externalConnectedEntity.fields.type') }}
         </th>
-        <td>
+        <td width="20%">
             {{ $externalConnectedEntity->type }}
+        </td>
+        <th width="10%">
+            {{ trans('cruds.externalConnectedEntity.fields.attributes') }}
+        </th>
+        <td width="30%">
+            @foreach(explode(" ", (string) $externalConnectedEntity->attributes) as $attribute)
+                @if(strlen(trim($attribute)) > 0)
+                    <span class="badge badge-info">{{ $attribute }}</span>
+                @endif
+            @endforeach
         </td>
     </tr>
     <tr>
         <th width="10%">
             {{ trans('cruds.externalConnectedEntity.fields.description') }}
         </th>
-        <td colspan="3">
+        <td colspan="5">
             {!! $externalConnectedEntity->description !!}
         </td>
 

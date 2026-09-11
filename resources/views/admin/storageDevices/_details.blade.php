@@ -8,7 +8,7 @@
             <th width="10%">
                 {{ trans('cruds.storageDevice.fields.name') }}
             </th>
-            <td width="40%" colspan="2">
+            <td width="20%">
             @if ($withLink)
                 @canShow($storageDevice)
                 <a href="{{ route('admin.storage-devices.show', $storageDevice->id) }}">{{ $storageDevice->name }}</a>
@@ -22,8 +22,18 @@
             <th width="10%">
                 {{ trans('cruds.storageDevice.fields.type') }}
             </th>
-            <td width="40%" colspan="3">
+            <td width="20%">
                 {{ $storageDevice->type }}
+            </td>
+            <th width="10%">
+                {{ trans('cruds.storageDevice.fields.attributes') }}
+            </th>
+            <td width="30%"colspan="2">
+                @foreach(explode(" ", (string) $storageDevice->attributes) as $attribute)
+                    @if(strlen(trim($attribute)) > 0)
+                        <span class="badge badge-info">{{ $attribute }}</span>
+                    @endif
+                @endforeach
             </td>
         </tr>
         <tr>

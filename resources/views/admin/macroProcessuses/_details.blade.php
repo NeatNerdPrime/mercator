@@ -9,7 +9,7 @@
             <th width="10%">
                 {{ trans('cruds.macroProcessus.fields.name') }}
             </th>
-            <td>
+            <td width="20%">
             @if($withLink ?? false)
                 @canShow($macroProcessus)
                     <a href="{{ route('admin.macro-processuses.show', $macroProcessus->id) }}">
@@ -22,12 +22,28 @@
                 {{ $macroProcessus->name }}
             @endif
             </td>
+            <th width="10%">
+                {{ trans('cruds.macroProcessus.fields.type') }}
+            </th>
+            <td width="20%">
+                {{ $macroProcessus->type }}
+            </td>
+            <th width="10%">
+                {{ trans('cruds.macroProcessus.fields.attributes') }}
+            </th>
+            <td width="30%">
+                @foreach(explode(" ", (string) $macroProcessus->attributes) as $attribute)
+                    @if(strlen(trim($attribute)) > 0)
+                        <span class="badge badge-info">{{ $attribute }}</span>
+                    @endif
+                @endforeach
+            </td>
         </tr>
         <tr>
             <th>
                 {{ trans('cruds.macroProcessus.fields.description') }}
             </th>
-            <td>
+            <td colspan="5">
                 {!! $macroProcessus->description !!}
             </td>
         </tr>
@@ -35,7 +51,7 @@
             <th>
                 {{ trans('cruds.macroProcessus.fields.io_elements') }}
             </th>
-            <td>
+            <td colspan="5">
                 {!! $macroProcessus->io_elements !!}
             </td>
         </tr>
@@ -43,7 +59,7 @@
             <th>
                 {{ trans('cruds.macroProcessus.fields.security_need') }}
             </th>
-            <td>
+            <td colspan="5">
             {{ trans('global.confidentiality') }} :
                 @if ($macroProcessus->security_need_c==0){{ trans('global.none') }}@endif
                 @if ($macroProcessus->security_need_c==1)<span class="veryLowRisk">{{ trans('global.low') }}</span>@endif
@@ -86,7 +102,7 @@
             <th>
                 {{ trans('cruds.macroProcessus.fields.owner') }}
             </th>
-            <td>
+            <td colspan="5">
                 {{ $macroProcessus->owner }}
             </td>
         </tr>
@@ -95,7 +111,7 @@
             <th>
                 {{ trans('cruds.macroProcessus.fields.processes') }}
             </th>
-            <td>
+            <td colspan="5">
                 @foreach($macroProcessus->processes as $process)
                     @canShow($process)
                         <a href="{{ route('admin.processes.show', $process->id) }}">

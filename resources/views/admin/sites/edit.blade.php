@@ -14,7 +14,7 @@
             </div>
             <div class="card-body">
                 <div class="row">
-                    <div class="col-md-4">
+                    <div class="col-md-5">
                         <div class="form-group">
                             <label class="label-required" for="name">{{ trans('cruds.site.fields.name') }}</label>
                             <input class="form-control {{ $errors->has('name') ? 'is-invalid' : '' }}" type="text"
@@ -28,7 +28,7 @@
                             <span class="help-block">{{ trans('cruds.site.fields.name_helper') }}</span>
                         </div>
                     </div>
-                    <div class="col-md-3">
+                    <div class="col-md-2">
                         <div class="form-group">
                             <label for="type">{{ trans('cruds.site.fields.type') }}</label>
                             <select class="form-control select2-free {{ $errors->has('type') ? 'is-invalid' : '' }}"

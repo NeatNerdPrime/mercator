@@ -9,7 +9,7 @@
             <th width="10%">
                 {{ trans('cruds.actor.fields.name') }}
             </th>
-            <td>
+            <td width="20%">
             @if($withLink)
             @canShow($actor)
             <a href="{{ route('admin.actors.show', $actor->id) }}">{{ $actor->name }}</a>
@@ -20,12 +20,28 @@
                 {{ $actor->name }}
             @endif
             </td>
+            <th width="10%">
+                {{ trans('cruds.actor.fields.type') }}
+            </th>
+            <td width="20%">
+                {{ $actor->type }}
+            </td>
+            <th width="10%">
+                {{ trans('cruds.actor.fields.attributes') }}
+            </th>
+            <td width="30%">
+                @foreach(explode(" ", (string) $actor->attributes) as $attribute)
+                    @if(strlen(trim($attribute)) > 0)
+                        <span class="badge badge-info">{{ $attribute }}</span>
+                    @endif
+                @endforeach
+            </td>
         </tr>
         <tr>
             <th>
                 {{ trans('cruds.actor.fields.contact') }}
             </th>
-            <td>
+            <td colspan="5">
                 {{ $actor->contact }}
             </td>
         </tr>
@@ -33,16 +49,8 @@
             <th>
                 {{ trans('cruds.actor.fields.nature') }}
             </th>
-            <td>
+            <td colspan="5">
                 {{ $actor->nature }}
-            </td>
-        </tr>
-        <tr>
-            <th>
-                {{ trans('cruds.actor.fields.type') }}
-            </th>
-            <td>
-                {{ $actor->type }}
             </td>
         </tr>
         @canAccess(App\Models\Operation::class)
@@ -50,7 +58,7 @@
             <th>
                 {{ trans('cruds.actor.fields.operations') }}
             </th>
-            <td>
+            <td colspan="5">
             @foreach($actor->operations as $operation)
                 @canShow($operation)
                     <a href="{{ route('admin.operations.show', $operation->id) }}">{{ $operation->name }}</a>
@@ -80,7 +88,7 @@
                     <span style="color: black;">BPMN</span>
                 </span>
             </th>
-            <td style="vertical-align: middle;">
+            <td style="vertical-align: middle;" colspan="5">
                 @foreach($actor->graphs() as $graph)
                     @canShow($graph)
                         <a href="{{ route('admin.bpmn.show', $graph->id) }}">

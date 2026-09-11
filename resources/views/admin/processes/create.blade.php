@@ -14,7 +14,7 @@
             </div>
             <div class="card-body">
                 <div class="row">
-                    <div class="col-md-7">
+                    <div class="col-md-5">
                         <div class="form-group">
                             <label class="label-required" for="name">{{ trans('cruds.process.fields.name') }}</label>
                             <input class="form-control {{ $errors->has('name') ? 'is-invalid' : '' }}" type="text"
@@ -28,26 +28,40 @@
                         </div>
                     </div>
 
-                    <div class="col-4">
+                    <div class="col-sm-2">
                         <div class="form-group">
-                            <label class="label-maturity-2"
-                                   for="macroprocessus_id">{{ trans('cruds.process.fields.macroprocessus') }}</label>
-                            <select class="form-control select2 {{ $errors->has('macroprocessus') ? 'is-invalid' : '' }}"
-                                    name="macroprocess_id" id="macroprocess_id">
+                            <label for="type">{{ trans('cruds.process.fields.type') }}</label>
+                            <select class="form-control select2-free {{ $errors->has('type') ? 'is-invalid' : '' }}"
+                                    name="type" id="type">
                                 <option></option>
-                                @foreach($macroProcessuses as $id => $macroprocessus)
-                                    <option value="{{ $id }}" {{ old('macroprocessus_id') == $id ? 'selected' : '' }}>{{ $macroprocessus }}</option>
+                                @if (!$type_list->contains(old('type', '')))
+                                    <option>{{ old('type', '') }}</option>
+                                @endif
+                                @foreach($type_list as $type)
+                                    <option {{ old('type', '') == $type ? 'selected' : '' }}>{{ $type }}</option>
                                 @endforeach
                             </select>
-                            @if($errors->has('macroprocessus'))
-                                <div class="invalid-feedback">
-                                    {{ $errors->first('macroprocessus') }}
-                                </div>
+                            @if($errors->has('type'))
+                                <div class="invalid-feedback">{{ $errors->first('type') }}</div>
                             @endif
-                            <span class="help-block">{{ trans('cruds.process.fields.macroprocessus_helper') }}</span>
+                            <span class="help-block">{{ trans('cruds.process.fields.type_helper') }}</span>
                         </div>
                     </div>
-
+                    <div class="col-sm-5">
+                        <div class="form-group">
+                            <label for="attributes">{{ trans('cruds.process.fields.attributes') }}</label>
+                            <select class="form-control select2-free-tags {{ $errors->has('attributes') ? 'is-invalid' : '' }}"
+                                    name="attributes[]" id="attributes" multiple>
+                                @foreach($attributes_list as $a)
+                                    <option {{ in_array($a, old('attributes', [])) ? 'selected' : '' }}>{{ $a }}</option>
+                                @endforeach
+                            </select>
+                            @if($errors->has('attributes'))
+                                <div class="invalid-feedback">{{ $errors->first('attributes') }}</div>
+                            @endif
+                            <span class="help-block">{{ trans('cruds.process.fields.attributes_helper') }}</span>
+                        </div>
+                    </div>
                 </div>
 
                 <div class="row">
@@ -98,14 +112,12 @@
                 </div>
 
                 <div class="row">
-                    <div class="col-6">
+                    <div class="col-4">
                         <div class="form-group">
+                            <label class="label-maturity-2"
+                                   for="security_need">{{ trans('cruds.process.fields.security_need') }}</label>
                             <table cellspacing="5" cellpadding="5" border="0" width='100%'>
                                 <tr>
-                                    <td width='20%' nowrap>
-                                        <label class="label-maturity-2"
-                                               for="security_need">{{ trans('cruds.process.fields.security_need') }}</label>
-                                    </td>
                                     <td align="right">
                                         <label for="security_need">{{ trans('global.confidentiality_short') }}</label>
                                     </td>
@@ -190,8 +202,27 @@
 
                     </div>
 
+                    <div class="col-4">
+                        <div class="form-group">
+                            <label class="label-maturity-2"
+                                   for="macroprocessus_id">{{ trans('cruds.process.fields.macroprocessus') }}</label>
+                            <select class="form-control select2 {{ $errors->has('macroprocessus') ? 'is-invalid' : '' }}"
+                                    name="macroprocess_id" id="macroprocess_id">
+                                <option></option>
+                                @foreach($macroProcessuses as $id => $macroprocessus)
+                                    <option value="{{ $id }}" {{ old('macroprocessus_id') == $id ? 'selected' : '' }}>{{ $macroprocessus }}</option>
+                                @endforeach
+                            </select>
+                            @if($errors->has('macroprocessus'))
+                                <div class="invalid-feedback">
+                                    {{ $errors->first('macroprocessus') }}
+                                </div>
+                            @endif
+                            <span class="help-block">{{ trans('cruds.process.fields.macroprocessus_helper') }}</span>
+                        </div>
+                    </div>
 
-                    <div class="col-6">
+                    <div class="col-4">
                         <div class="form-group">
                             <label class="label-maturity-1" for="owner">{{ trans('cruds.process.fields.owner') }}</label>
                             <select class="form-control select2-free {{ $errors->has('owner') ? 'is-invalid' : '' }}"

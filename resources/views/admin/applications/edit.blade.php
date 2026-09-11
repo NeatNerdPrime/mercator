@@ -17,7 +17,7 @@
             <!---------------------------------------------------------------------------------------------------->
             <div class="card-body">
                 <div class="row">
-                    <div class="col-6">
+                    <div class="col-5">
                         <div class="form-group">
                             <label class="label-required" for="name">{{ trans('cruds.application.fields.name') }}</label>
                             <input type="text" class="form-control" id="name" name="name"
@@ -25,25 +25,24 @@
                             <span class="help-block">{{ trans('cruds.application.fields.name_helper') }}</span>
                         </div>
                     </div>
-                    <div class="col-3">
+                    <div class="col-2">
                         <div class="form-group">
-                            <label for="application_block_id">{{ trans('cruds.application.fields.application_block') }}</label>
-                            <select class="form-control select2 {{ $errors->has('application_block') ? 'is-invalid' : '' }}"
-                                    name="application_block_id" id="application_block_id">
-                                <option value="">...</option>
-                                @foreach($applicationBlocks as $id => $applicationBlock)
-                                    <option value="{{ $id }}" {{ ($application->applicationBlock ? $application->applicationBlock->id : old('application_block_id')) == $id ? 'selected' : '' }}>{{ $applicationBlock }}</option>
+                            <label class="label-maturity-1" for="type">{{ trans('cruds.application.fields.type') }}</label>
+                            <select class="form-control select2-free {{ $errors->has('type') ? 'is-invalid' : '' }}"
+                                    name="types[]" id="types" multiple>
+                                @foreach($type_list as $t)
+                                    <option {{ str_contains($application->type, $t) ? 'selected' : '' }}>{{$t}}</option>
                                 @endforeach
                             </select>
-                            @if($errors->has('application_block'))
+                            @if($errors->has('type'))
                                 <div class="invalid-feedback">
-                                    {{ $errors->first('application_block') }}
+                                    {{ $errors->first('type') }}
                                 </div>
                             @endif
-                            <span class="help-block">{{ trans('cruds.application.fields.application_block_helper') }}</span>
+                            <span class="help-block">{{ trans('cruds.application.fields.type_helper') }}</span>
                         </div>
                     </div>
-                    <div class="col-3">
+                    <div class="col-5">
                         <div class="form-group">
                             <label for="attributes">{{ trans('cruds.application.fields.attributes') }}</label>
                             <select class="form-control select2-free-tags {{ $errors->has('patching_group') ? 'is-invalid' : '' }}"
@@ -270,6 +269,24 @@
                 <div class="row">
                     <div class="col-4">
                         <div class="form-group">
+                            <label for="application_block_id">{{ trans('cruds.application.fields.application_block') }}</label>
+                            <select class="form-control select2 {{ $errors->has('application_block') ? 'is-invalid' : '' }}"
+                                    name="application_block_id" id="application_block_id">
+                                <option value="">...</option>
+                                @foreach($applicationBlocks as $id => $applicationBlock)
+                                    <option value="{{ $id }}" {{ ($application->applicationBlock ? $application->applicationBlock->id : old('application_block_id')) == $id ? 'selected' : '' }}>{{ $applicationBlock }}</option>
+                                @endforeach
+                            </select>
+                            @if($errors->has('application_block'))
+                                <div class="invalid-feedback">
+                                    {{ $errors->first('application_block') }}
+                                </div>
+                            @endif
+                            <span class="help-block">{{ trans('cruds.application.fields.application_block_helper') }}</span>
+                        </div>
+                    </div>
+                    <div class="col-4">
+                        <div class="form-group">
                             <label class="label-maturity-1"
                                    for="technology">{{ trans('cruds.application.fields.technology') }}</label>
                             <select class="form-control select2-free {{ $errors->has('technology') ? 'is-invalid' : '' }}"
@@ -284,23 +301,6 @@
                                 </div>
                             @endif
                             <span class="help-block">{{ trans('cruds.application.fields.technology_helper') }}</span>
-                        </div>
-                    </div>
-                    <div class="col-4">
-                        <div class="form-group">
-                            <label class="label-maturity-1" for="type">{{ trans('cruds.application.fields.type') }}</label>
-                            <select class="form-control select2-free {{ $errors->has('type') ? 'is-invalid' : '' }}"
-                                    name="types[]" id="types" multiple>
-                                @foreach($type_list as $t)
-                                    <option {{ str_contains($application->type, $t) ? 'selected' : '' }}>{{$t}}</option>
-                                @endforeach
-                            </select>
-                            @if($errors->has('type'))
-                                <div class="invalid-feedback">
-                                    {{ $errors->first('type') }}
-                                </div>
-                            @endif
-                            <span class="help-block">{{ trans('cruds.application.fields.type_helper') }}</span>
                         </div>
                     </div>
                     <div class="col-4">

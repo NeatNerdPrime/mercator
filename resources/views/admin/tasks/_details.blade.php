@@ -9,7 +9,7 @@
             <th width="10%">
                 {{ trans('cruds.task.fields.name') }}
             </th>
-            <td>
+            <td width="20%">
             @if($withLink)
                 @canShow($task)
                 <a href="{{ route('admin.tasks.show', $task) }}">{{ $task->name }}</a>
@@ -20,12 +20,28 @@
                 {{ $task->name }}
             @endif
             </td>
+            <th width="10%">
+                {{ trans('cruds.task.fields.type') }}
+            </th>
+            <td width="20%">
+                {{ $task->type }}
+            </td>
+            <th width="10%">
+                {{ trans('cruds.task.fields.attributes') }}
+            </th>
+            <td width="30%">
+                @foreach(explode(" ", (string) $task->attributes) as $attribute)
+                    @if(strlen(trim($attribute)) > 0)
+                        <span class="badge badge-info">{{ $attribute }}</span>
+                    @endif
+                @endforeach
+            </td>
         </tr>
         <tr>
             <th>
                 {{ trans('cruds.task.fields.description') }}
             </th>
-            <td>
+            <td colspan="5">
                 {!! $task->description !!}
             </td>
         </tr>
@@ -34,7 +50,7 @@
             <th>
                 {{ trans('cruds.task.fields.operations') }}
             </th>
-            <td>
+            <td colspan="5">
                 @foreach($task->operations as $operation)
                     @canShow($operation)
                     <a href="{{ route('admin.operations.show', $operation->id) }}">

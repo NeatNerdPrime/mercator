@@ -8,7 +8,7 @@
         <th width="10%">
             {{ trans('cruds.bay.fields.name') }}
         </th>
-        <td>
+        <td width="20%">
         @if($withLink)
         @canShow($bay)
         <a href="{{ route('admin.bays.show', $bay->id) }}">{{ $bay->name }}</a>
@@ -19,12 +19,28 @@
         {{ $bay->name }}
         @endif
         </td>
+        <th width="10%">
+            {{ trans('cruds.bay.fields.type') }}
+        </th>
+        <td width="20%">
+            {{ $bay->type }}
+        </td>
+        <th width="10%">
+            {{ trans('cruds.bay.fields.attributes') }}
+        </th>
+        <td width="30%">
+            @foreach(explode(" ", (string) $bay->attributes) as $attribute)
+                @if(strlen(trim($attribute)) > 0)
+                    <span class="badge badge-info">{{ $attribute }}</span>
+                @endif
+            @endforeach
+        </td>
     </tr>
     <tr>
         <th>
             {{ trans('cruds.bay.fields.description') }}
         </th>
-        <td>
+        <td colspan="5">
             {!! $bay->description !!}
         </td>
     </tr>
@@ -33,7 +49,7 @@
         <th>
             {{ trans('cruds.bay.fields.site') }}
         </th>
-        <td>
+        <td colspan="5">
             @if ($bay->site!=null)
                 @canShow($bay->site)
                     <a href="{{ route('admin.sites.show', $bay->site->id) }}">
@@ -51,7 +67,7 @@
         <th>
             {{ trans('cruds.bay.fields.building') }}
         </th>
-        <td>
+        <td colspan="5">
             @if ($bay->building!=null)
                 @canShow($bay->building)
                     <a href="{{ route('admin.buildings.show', $bay->building->id) }}">
@@ -69,7 +85,7 @@
         <th>
             {{ trans('cruds.menu.physical_infrastructure.title_short') }}
         </th>
-        <td>
+        <td colspan="5">
             @foreach($bay->physicalServers as $physicalServer)
                 @canShow($physicalServer)
                     <a href="{{ route('admin.physical-servers.show', $physicalServer->id) }}">{{ $physicalServer->name }}</a>

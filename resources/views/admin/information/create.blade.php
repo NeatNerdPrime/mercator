@@ -13,7 +13,7 @@
         </div>
         <div class="card-body">
             <div class="row">
-                <div class="col-6">
+                <div class="col-5">
                     <div class="form-group">
                         <label class="label-required" for="name">{{ trans('cruds.information.fields.name') }}</label>
                         <input class="form-control {{ $errors->has('name') ? 'is-invalid' : '' }}" type="text" name="name"
@@ -26,7 +26,7 @@
                         <span class="help-block">{{ trans('cruds.information.fields.name_helper') }}</span>
                     </div>
                 </div>
-                <div class="col-3">
+                <div class="col-2">
                     <div class="form-group">
                         <label for="type">{{ trans('cruds.information.fields.type') }}</label>
                         <select class="form-control select2-free {{ $errors->has('type') ? 'is-invalid' : '' }}"
@@ -47,7 +47,7 @@
                         <span class="help-block">{{ trans('cruds.information.fields.type_helper') }}</span>
                     </div>
                 </div>
-                <div class="col-3">
+                <div class="col-5">
                     <div class="form-group">
                         <label for="attributes">{{ trans('cruds.information.fields.attributes') }}</label>
                         <select class="form-control select2-free-tags {{ $errors->has('attributes') ? 'is-invalid' : '' }}"
@@ -175,16 +175,14 @@
                         </div>
                     </div>
 
-                <div class="col-8">
+                <div class="col-4">
                     <div class="form-group">
+                        <label
+                                class="label-maturity-2"
+                                for="security_need">{{ trans('cruds.information.fields.security_need') }}
+                        </label>
                         <table cellspacing="5" cellpadding="5" border="0" width='100%'>
                             <tr>
-                                <td width='20%'>
-                                    <label
-                                            class="label-maturity-2"
-                                            for="security_need">{{ trans('cruds.information.fields.security_need') }}
-                                    </label>
-                                </td>
                                 <td align="right" width="10">
                                     <label for="security_need">{{ trans('global.confidentiality_short') }}</label>
                                 </td>

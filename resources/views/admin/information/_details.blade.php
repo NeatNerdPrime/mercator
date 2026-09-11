@@ -9,7 +9,7 @@
             <th width="10%">
                 {{ trans('cruds.information.fields.name') }}
             </th>
-            <td width="25%">
+            <td width="20%">
             @if ($withLink)
                 @canShow($information)
                     <a href="{{ route('admin.information.show', $information->id) }}">{{ $information->name }}</a>
@@ -29,7 +29,7 @@
             <th width="10%">
                 {{ trans('cruds.information.fields.attributes') }}
             </th>
-            <td>
+            <td width="30%">
                 @foreach(explode(" ", $information->attributes) as $attribute)
                     <span class="badge badge-info">{{ $attribute }}</span>
                 @endforeach
