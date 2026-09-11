@@ -39,22 +39,6 @@
         </tr>
         <tr>
             <th>
-                {{ trans('cruds.process.fields.macroprocessus') }}
-            </th>
-            <td colspan="6">
-                @if($process->macroProcess!=null)
-                    @canShow($process->macroProcess)
-                        <a href="{{ route('admin.macro-processuses.show', $process->macroProcess->id) }}">
-                            {{ $process->macroProcess->name }}
-                        </a>
-                    @elsecanShow
-                        {{ $process->macroProcess->name }}
-                    @endcanShow
-                @endif
-            </td>
-        </tr>
-        <tr>
-            <th>
                 {{ trans('cruds.process.fields.description') }}
             </th>
             <td colspan="5">
@@ -118,14 +102,33 @@
                 @if ($process->security_need_auth==4)<span class="highRisk">{{ trans('global.very_strong') }}</span>@endif
             @endif
             </td>
+        </tr>
+        <tr>
             <th>
                 {{ trans('cruds.process.fields.owner') }}
             </th>
-            <td colspan="2">
+            <td colspan="6">
                 {{ $process->owner }}
             </td>
         </tr>
 
+        <tr>
+            <th>
+                {{ trans('cruds.process.fields.macroprocessus') }}
+            </th>
+            <td colspan="6">
+                @if($process->macroProcess!=null)
+                    @canShow($process->macroProcess)
+                        <a href="{{ route('admin.macro-processuses.show', $process->macroProcess->id) }}">
+                            {{ $process->macroProcess->name }}
+                        </a>
+                    @elsecanShow
+                        {{ $process->macroProcess->name }}
+                    @endcanShow
+                @endif
+            </td>
+
+        </tr>
         @canAccess(App\Models\Activity::class)
         <tr>
             <th>
