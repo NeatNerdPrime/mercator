@@ -8,7 +8,7 @@
             <th width='10%'>
                 {{ trans('cruds.annuaire.fields.name') }}
             </th>
-            <td>
+            <td width='20%'>
             @if ($withLink)
             @canShow($annuaire)
             <a href="{{ route('admin.annuaires.show', $annuaire->id) }}">{{ $annuaire->name }}</a>
@@ -28,7 +28,7 @@
             <th width="10%">
                 {{ trans('cruds.annuaire.fields.attributes') }}
             </th>
-            <td>
+            <td width='30%'>
                 @foreach(explode(" ", (string) $annuaire->attributes) as $attribute)
                     @if(strlen(trim($attribute)) > 0)
                         <span class="badge badge-info">{{ $attribute }}</span>
@@ -48,7 +48,7 @@
             <th>
                 {{ trans('cruds.annuaire.fields.solution') }}
             </th>
-            <td>
+            <td colspan="5">
                 {{ $annuaire->solution }}
             </td>
         </tr>
@@ -57,7 +57,7 @@
             <th>
                 {{ trans('cruds.annuaire.fields.zone_admin') }}
             </th>
-            <td>
+            <td colspan="5">
                 @if ($annuaire->zoneAdmin!=null)
                     @canShow($annuaire->zoneAdmin)
                         <a href="{{ route('admin.zone-admins.show', $annuaire->zoneAdmin->id) }}">{{ $annuaire->zoneAdmin->name }}</a>
@@ -73,7 +73,7 @@
             <th>
                 {{ trans('cruds.annuaire.fields.application') }}
             </th>
-            <td>
+            <td colspan="5">
                 @if ($annuaire->application != null)
                     @canShow($annuaire->application)
                         <a href="{{ route('admin.applications.show', $annuaire->application->id) }}">{{ $annuaire->application->name }}</a>

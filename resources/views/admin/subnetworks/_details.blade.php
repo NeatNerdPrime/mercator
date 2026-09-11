@@ -23,13 +23,13 @@
         <th width="10%">
             {{ trans('cruds.subnetwork.fields.type') }}
         </th>
-        <td>
+        <td width="20%">
             {{ $subnetwork->type }}
         </td>
         <th width="10%">
             {{ trans('cruds.subnetwork.fields.attributes') }}
         </th>
-        <td>
+        <td width="30%">
             @foreach(explode(" ", $subnetwork->attributes) as $attribute)
                 <span class="badge badge-info">{{ $attribute }}</span>
             @endforeach

@@ -8,7 +8,7 @@
             <th width='10%'>
                 {{ trans('cruds.forestAd.fields.name') }}
             </th>
-            <td>
+            <td width='20%'>
             @if ($withLink)
                 @canShow($forestAd)
                 <a href="{{ route('admin.forest-ads.show', $forestAd->id) }}">{{ $forestAd->name }}</a>
@@ -28,7 +28,7 @@
             <th width="10%">
                 {{ trans('cruds.forestAd.fields.attributes') }}
             </th>
-            <td>
+            <td width='30%'>
                 @foreach(explode(" ", (string) $forestAd->attributes) as $attribute)
                     @if(strlen(trim($attribute)) > 0)
                         <span class="badge badge-info">{{ $attribute }}</span>
@@ -49,7 +49,7 @@
             <th>
                 {{ trans('cruds.forestAd.fields.zone_admin') }}
             </th>
-            <td>
+            <td colspan="5">
                 @if ($forestAd->zone_admin_id!=null)
                 @canShow($forestAd->zoneAdmin)
                 <a href="{{ route('admin.zone-admins.show', $forestAd->zoneAdmin->id) }}">
@@ -67,7 +67,7 @@
             <th>
                 {{ trans('cruds.forestAd.fields.domains') }}
             </th>
-            <td>
+            <td colspan="5">
                 @foreach($forestAd->domains as $domain)
                 @canShow($domain)
                 <a href="{{ route('admin.domains.show', $domain->id) }}">

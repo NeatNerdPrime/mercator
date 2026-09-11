@@ -95,7 +95,7 @@
                                 {!! $entity->description !!}
                             </td>
                             <td>
-                                {{ $entity->security_level }}
+                                {!! $entity->security_level !!}
                             </td>
                             <td nowrap>
                                 @can('entity_show')

@@ -8,7 +8,7 @@
             <th width="10%">
                 {{ trans('cruds.applicationModule.fields.name') }}
             </th>
-            <td>
+            <td width="20%">
             @if ($withLink)
                 @canShow($applicationModule)
                 <a href='{{ route("admin.application-modules.show", $applicationModule->id) }}'>{{ $applicationModule->name }}</a>
@@ -28,7 +28,7 @@
             <th width="10%">
                 {{ trans('cruds.applicationModule.fields.attributes') }}
             </th>
-            <td>
+            <td width="30%">
                 @foreach(explode(" ", (string) $applicationModule->attributes) as $attribute)
                     @if(strlen(trim($attribute)) > 0)
                         <span class="badge badge-info">{{ $attribute }}</span>
@@ -49,7 +49,7 @@
             <th>
                 {{ trans('cruds.applicationModule.fields.entities') }}
             </th>
-            <td>
+            <td colspan="5">
                 @foreach($applicationModule->entities as $entity)
                     @canShow($entity)
                         <a href="{{ route('admin.entities.show', $entity->id) }}">{{ $entity->name }}</a>
@@ -68,7 +68,7 @@
             <th>
                 {{ trans('cruds.applicationModule.fields.services') }}
             </th>
-            <td>
+            <td colspan="5">
                 @foreach($applicationModule->applicationServices as $service)
                     @canShow($service)
                         <a href="{{ route('admin.application-services.show', $service->id) }}">{{ $service->name }}</a>

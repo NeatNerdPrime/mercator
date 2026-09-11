@@ -8,7 +8,7 @@
             <th width="10%">
                 {{ trans('cruds.activity.fields.name') }}
             </th>
-            <td>
+            <td width="20%">
             @if($withLink)
                 @canShow($activity)
                 <a href="{{ route('admin.activities.show', $activity->id) }}">{{ $activity->name }}</a>
@@ -28,7 +28,7 @@
             <th width="10%">
                 {{ trans('cruds.activity.fields.attributes') }}
             </th>
-            <td>
+            <td width="30%">
                 @foreach(explode(" ", (string) $activity->attributes) as $attribute)
                     @if(strlen(trim($attribute)) > 0)
                         <span class="badge badge-info">{{ $attribute }}</span>
@@ -50,7 +50,7 @@
             <th>
                 {{ trans('cruds.activity.fields.processes') }}
             </th>
-            <td>
+            <td colspan="5">
                 @foreach($activity->processes as $process)
                     @canShow($process)
                         <a href="{{ route('admin.processes.show', $process->id) }}">{{ $process->name }}</a>
@@ -70,7 +70,7 @@
             <th>
                 {{ trans('cruds.activity.fields.operations') }}
             </th>
-            <td>
+            <td colspan="5">
                 @foreach($activity->operations as $operation)
                     @canShow($operation)
                         <a href="{{ route('admin.operations.show', $operation->id) }}">{{ $operation->name }}</a>

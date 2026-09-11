@@ -15,7 +15,7 @@
             </div>
             <div class="card-body">
                 <div class="row">
-                    <div class="col-7">
+                    <div class="col-5">
                         <div class="form-group">
                             <label class="label-required" for="name">{{ trans('cruds.process.fields.name') }}</label>
                             <input class="form-control {{ $errors->has('name') ? 'is-invalid' : '' }}" type="text"
@@ -30,29 +30,6 @@
                         </div>
                     </div>
 
-                    <div class="col-4">
-                        <div class="form-group">
-                            <label class="label-maturity-2"
-                                   for="macroprocessus">{{ trans('cruds.process.fields.macroprocessus') }}</label>
-                            <select class="form-control select2 {{ $errors->has('macroProcessues') ? 'is-invalid' : '' }}"
-                                    name="macroprocess_id" id="macroprocess_id">
-                                <option></option>
-                                @foreach($macroProcessuses as $id => $macroprocess)
-                                    <option value="{{ $id }}" {{ ($process->macroprocess_id ? $process->macroprocess_id : old('macroprocess_id')) == $id ? 'selected' : '' }}>{{ $macroprocess }}</option>
-                                @endforeach
-                                {{ $process->macroprocess_id }}
-                            </select>
-                            @if($errors->has('macroProcessues'))
-                                <div class="invalid-feedback">
-                                    {{ $errors->first('macroProcessues') }}
-                                </div>
-                            @endif
-                            <span class="help-block">{{ trans('cruds.process.fields.macroprocessus_helper') }}</span>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="row">
                     <div class="col-sm-2">
                         <div class="form-group">
                             <label for="type">{{ trans('cruds.process.fields.type') }}</label>
@@ -140,15 +117,13 @@
                 </div>
 
                 <div class="row">
-                    <div class="col-6">
 
+                    <div class="col-4">
                         <div class="form-group">
+                            <label class="label-maturity-2"
+                                   for="security_need">{{ trans('cruds.process.fields.security_need') }}</label>
                             <table cellspacing="5" cellpadding="5" border="0" width='100%'>
                                 <tr>
-                                    <td width='20%' nowrap>
-                                        <label class="label-maturity-2"
-                                               for="security_need">{{ trans('cruds.process.fields.security_need') }}</label>
-                                    </td>
                                     <td align="right" width="10">
                                         <label for="security_need">{{ trans('global.confidentiality_short') }}</label>
                                     </td>
@@ -232,7 +207,28 @@
                         </div>
                     </div>
 
-                    <div class="col-6">
+                    <div class="col-4">
+                        <div class="form-group">
+                            <label class="label-maturity-2"
+                                   for="macroprocessus">{{ trans('cruds.process.fields.macroprocessus') }}</label>
+                            <select class="form-control select2 {{ $errors->has('macroProcessues') ? 'is-invalid' : '' }}"
+                                    name="macroprocess_id" id="macroprocess_id">
+                                <option></option>
+                                @foreach($macroProcessuses as $id => $macroprocess)
+                                    <option value="{{ $id }}" {{ ($process->macroprocess_id ? $process->macroprocess_id : old('macroprocess_id')) == $id ? 'selected' : '' }}>{{ $macroprocess }}</option>
+                                @endforeach
+                                {{ $process->macroprocess_id }}
+                            </select>
+                            @if($errors->has('macroProcessues'))
+                                <div class="invalid-feedback">
+                                    {{ $errors->first('macroProcessues') }}
+                                </div>
+                            @endif
+                            <span class="help-block">{{ trans('cruds.process.fields.macroprocessus_helper') }}</span>
+                        </div>
+                    </div>
+
+                    <div class="col-4">
                         <div class="form-group">
                             <label class="label-maturity-1"
                                    for="owner">{{ trans('cruds.process.fields.owner') }}</label>

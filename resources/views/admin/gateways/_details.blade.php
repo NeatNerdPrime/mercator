@@ -4,19 +4,19 @@
             <th width="10%">
                 {{ trans('cruds.gateway.fields.name') }}
             </th>
-            <td>
+            <td width="20%">
                 {{ $gateway->name }}
             </td>
             <th width="10%">
                 {{ trans('cruds.gateway.fields.type') }}
             </th>
-            <td width="20%">
+            <td width="10%">
                 {{ $gateway->type }}
             </td>
             <th width="10%">
                 {{ trans('cruds.gateway.fields.attributes') }}
             </th>
-            <td>
+            <td width="30%">
                 @foreach(explode(" ", (string) $gateway->attributes) as $attribute)
                     @if(strlen(trim($attribute)) > 0)
                         <span class="badge badge-info">{{ $attribute }}</span>
@@ -36,7 +36,7 @@
             <th>
                 {{ trans('cruds.gateway.fields.authentification') }}
             </th>
-            <td>
+            <td colspan="5">
                 {{ $gateway->authentification }}
             </td>
         </tr>
@@ -44,7 +44,7 @@
             <th>
                 {{ trans('cruds.gateway.fields.ip') }}
             </th>
-            <td>
+            <td colspan="5">
                 {{ $gateway->ip }}
             </td>
         </tr>

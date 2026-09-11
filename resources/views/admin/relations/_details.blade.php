@@ -8,7 +8,7 @@
             <th width="10%">
                 {{ trans('cruds.relation.fields.name') }}
             </th>
-            <td>
+            <td width="23%">
             @if ($withLink)
             @canShow($relation)
             <a href="{{ route('admin.relations.show', $relation->id) }}">{{ $relation->name }}</a>
@@ -19,16 +19,16 @@
                 {{ $relation->name }}
             @endif
             </td>
-            <th>
+            <th width="10%">
                 {{ trans('cruds.relation.fields.type') }}
             </th>
-            <td>
+            <td width="23%">
                 {{ $relation->type }}
             </td>
-            <th>
+            <th width="10%">
                 {{ trans('cruds.relation.fields.attributes') }}
             </th>
-            <td>
+            <td width="23%">
                 @foreach(explode(" ",$relation->attributes) as $attribute)
                 <span class="badge badge-info">{{ $attribute }}</span>
                 @endforeach

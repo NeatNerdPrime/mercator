@@ -144,15 +144,9 @@
                         {{ $application->technology }}
                     </td>
                     <th>
-                        {{ trans('cruds.application.fields.type') }}
-                    </th>
-                    <td colspan="2">
-                        {{ $application->type }}
-                    </td>
-                    <th>
                         {{ trans('cruds.application.fields.external') }}
                     </th>
-                    <td colspan="2">
+                    <td colspan="4">
                         {{ $application->external }}
                     </td>
                 </tr>

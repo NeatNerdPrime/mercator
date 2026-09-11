@@ -8,7 +8,7 @@
             <th width="10%">
                 {{ trans('cruds.domain.fields.name') }}
             </th>
-            <td>
+            <td width="20%">
             @if ($withLink)
                 @canShow($domain)
                 <a href="{{ route('admin.domains.show', $domain->id) }}">{{ $domain->name }}</a>
@@ -28,7 +28,7 @@
             <th width="10%">
                 {{ trans('cruds.domain.fields.attributes') }}
             </th>
-            <td>
+            <td width="30%">
                 @foreach(explode(" ", (string) $domain->attributes) as $attribute)
                     @if(strlen(trim($attribute)) > 0)
                         <span class="badge badge-info">{{ $attribute }}</span>
@@ -48,7 +48,7 @@
             <th>
                 {{ trans('cruds.domain.fields.domain_ctrl_cnt') }}
             </th>
-            <td>
+            <td colspan="5">
                 {{ $domain->domain_ctrl_cnt }}
             </td>
         </tr>
@@ -56,7 +56,7 @@
             <th>
                 {{ trans('cruds.domain.fields.user_count') }}
             </th>
-            <td>
+            <td colspan="5">
                 {{ $domain->user_count }}
             </td>
         </tr>
@@ -64,7 +64,7 @@
             <th>
                 {{ trans('cruds.domain.fields.machine_count') }}
             </th>
-            <td>
+            <td colspan="5">
                 {{ $domain->machine_count }}
             </td>
         </tr>
@@ -72,7 +72,7 @@
             <th>
                 {{ trans('cruds.domain.fields.relation_inter_domaine') }}
             </th>
-            <td>
+            <td colspan="5">
                 {{ $domain->relation_inter_domaine }}
             </td>
         </tr>
@@ -81,7 +81,7 @@
             <th>
                 {{ trans('cruds.domain.fields.forestAds') }}
             </th>
-            <td>
+            <td colspan="5">
                 @foreach($domain->forestAds as $forestAd)
                     @canShow($forestAd)
                         <a href="{{ route('admin.forest-ads.show', $forestAd->id) }}">
@@ -102,7 +102,7 @@
             <th>
                 {{ trans('cruds.domain.fields.logical_servers') }}
             </th>
-            <td>
+            <td colspan="5">
                 @foreach($domain->logicalServers as $logicalServer)
                     @canShow($logicalServer)
                         <a href="{{ route('admin.logical-servers.show', $logicalServer->id) }}">

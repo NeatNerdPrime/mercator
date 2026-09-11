@@ -6,7 +6,7 @@
     <tbody>
     <tr>
         <th width="10%">{{ trans('cruds.application.fields.name') }}</th>
-        <td>
+        <td width="20%">
         @if ($withLink)
             @canShow($application)
             <a href='{{ route("admin.applications.show", $application->id) }}'>{{ $application->name }}</a>
@@ -18,21 +18,15 @@
         @endif
         </td>
         <th width="10%">
-            {{ trans('cruds.application.fields.application_block') }}
+            {{ trans('cruds.application.fields.type') }}
         </th>
         <td width="20%">
-            @if ($application->applicationBlock!=null)
-                @canShow($application->applicationBlock)
-                    <a href='{{ route("admin.application-blocks.show", $application->applicationBlock->id) }}'>{{ $application->applicationBlock->name }}</a>
-                @elsecanShow
-                    {{ $application->applicationBlock->name }}
-                @endcanShow
-            @endif
+            {{ $application->type }}
         </td>
         <th width="10%">
             {{ trans('cruds.application.fields.attributes') }}
         </th>
-        <td width="10%">
+        <td width="30%" colspan="2">
             {{ $application->attributes }}
         </td>
     </tr>
@@ -40,7 +34,7 @@
         <th>
             {{ trans('cruds.application.fields.description') }}
         </th>
-        <td colspan="4">
+        <td colspan="5">
             {!! $application->description !!}
         </td>
         <td width="10%" align="center">
@@ -68,5 +62,19 @@
                     </td>
                 </tr>
         @endif
+        <tr>
+            <th width="10%">
+                {{ trans('cruds.application.fields.application_block') }}
+            </th>
+            <td colspan="6">
+                @if ($application->applicationBlock!=null)
+                    @canShow($application->applicationBlock)
+                        <a href='{{ route("admin.application-blocks.show", $application->applicationBlock->id) }}'>{{ $application->applicationBlock->name }}</a>
+                    @elsecanShow
+                        {{ $application->applicationBlock->name }}
+                    @endcanShow
+                @endif
+            </td>
+        </tr>
     </tbody>
 </table>
