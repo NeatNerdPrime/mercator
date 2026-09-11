@@ -245,7 +245,6 @@ class ApplicationController extends Controller
         $request->merge(['responsible' => implode(', ', $request->responsibles !== null ? $request->responsibles : [])]);
         $request->merge(['technology' => implode(', ', $request->technologies !== null ? $request->technologies : [])]);
         $request->merge(['external' => implode(', ', $request->externals !== null ? $request->externals : [])]);
-        $request->merge(['type' => implode(', ', $request->types !== null ? $request->types : [])]);
         $request['attributes'] = implode(' ', $request->get('attributes') !== null ? $request->get('attributes') : []);
 
         // Create application
@@ -417,7 +416,6 @@ class ApplicationController extends Controller
         $application->responsible = implode(', ', $request->responsibles !== null ? $request->responsibles : []);
         $application->technology = implode(', ', $request->technologies !== null ? $request->technologies : []);
         $application->external = implode(', ', $request->externals !== null ? $request->externals : []);
-        $application->type = implode(', ', $request->types !== null ? $request->types : []);
         $request['attributes'] = implode(' ', $request->get('attributes') !== null ? $request->get('attributes') : []);
 
         // RTO-RPO
