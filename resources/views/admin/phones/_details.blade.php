@@ -8,7 +8,7 @@
             <th width="10%">
                 {{ trans('cruds.phone.fields.name') }}
             </th>
-            <td>
+            <td width="20%">
             @if($withLink)
             @canShow($phone)
             <a href="{{ route('admin.phones.show', $phone) }}">{{ $phone->name }}</a>
@@ -19,20 +19,16 @@
             {{ $phone->name }}
             @endif
             </td>
-        </tr>
-        <tr>
-            <th>
+            <th width="10%">
                 {{ trans('cruds.phone.fields.type') }}
             </th>
-            <td>
+            <td width="20%">
                 {{ $phone->type }}
             </td>
-        </tr>
-        <tr>
-            <th>
+            <th width="10%">
                 {{ trans('cruds.phone.fields.attributes') }}
             </th>
-            <td>
+            <td width="30%">
                 @foreach(explode(" ", (string) $phone->attributes) as $attribute)
                     @if(strlen(trim($attribute)) > 0)
                         <span class="badge badge-info">{{ $attribute }}</span>
@@ -44,7 +40,7 @@
             <th>
                 {{ trans('cruds.phone.fields.description') }}
             </th>
-            <td>
+            <td colspan="5">
                 {!! $phone->description !!}
             </td>
         </tr>
@@ -52,7 +48,7 @@
             <th>
                 {{ trans('cruds.phone.fields.address_ip') }}
             </th>
-            <td>
+            <td colspan="5">
                 {{ $phone->address_ip }}
             </td>
         </tr>
@@ -70,10 +66,8 @@
                     @endcanShow
                 @endif
             </td>
-        </tr>
         @endcanAccess
         @canAccess(App\Models\Building::class)
-        <tr>
             <th>
                 {{ trans('cruds.phone.fields.building') }}
             </th>

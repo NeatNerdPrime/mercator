@@ -66,25 +66,6 @@
                     </div>
                 </div>
 
-                <div class="row">
-                    <div class="col-md-4">
-                        <div class="form-group">
-                            <label for="domain_id">{{ trans('cruds.peripheral.fields.domain') }}</label>
-                            <select class="form-control select2 {{ $errors->has('domain_id') ? 'is-invalid' : '' }}"
-                                    name="domain_id" id="domain_id">
-                                @foreach($domains as $id => $name)
-                                    <option value="{{ $id }}" {{ old('domain_id') == $id ? 'selected' : '' }}>{{$name}}</option>
-                                @endforeach
-                            </select>
-                            @if($errors->has('domain_id'))
-                                <div class="invalid-feedback">
-                                    {{ $errors->first('domain_id') }}
-                                </div>
-                            @endif
-                            <span class="help-block">{{ trans('cruds.peripheral.fields.domain_helper') }}</span>
-                        </div>
-                    </div>
-                </div>
 
                 <div class="row">
                     <div class="col-md-9">
@@ -205,6 +186,33 @@
                 'product' => '',
                 'version' => '',
             ])
+
+            <!------------------------------------------------------------------------------------------------------------->
+            <div class="card-header">
+                {{ trans("cruds.menu.administration.title") }}
+            </div>
+            <!------------------------------------------------------------------------------------------------------------->
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-md-4">
+                        <div class="form-group">
+                            <label for="domain_id">{{ trans('cruds.peripheral.fields.domain') }}</label>
+                            <select class="form-control select2 {{ $errors->has('domain_id') ? 'is-invalid' : '' }}"
+                                    name="domain_id" id="domain_id">
+                                @foreach($domains as $id => $name)
+                                    <option value="{{ $id }}" {{ old('domain_id') == $id ? 'selected' : '' }}>{{$name}}</option>
+                                @endforeach
+                            </select>
+                            @if($errors->has('domain_id'))
+                                <div class="invalid-feedback">
+                                    {{ $errors->first('domain_id') }}
+                                </div>
+                            @endif
+                            <span class="help-block">{{ trans('cruds.peripheral.fields.domain_helper') }}</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
             <!------------------------------------------------------------------------------------------------------------->
             <div class="card-header">
                 {{ trans("cruds.menu.logical_infrastructure.title_short") }}

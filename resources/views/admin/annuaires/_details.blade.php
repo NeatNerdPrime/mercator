@@ -19,13 +19,13 @@
                 {{ $annuaire->name }}
             @endif
             </td>
-            <th width="10%">
+            <td width='20%'>
                 {{ trans('cruds.annuaire.fields.type') }}
             </th>
             <td width="20%">
                 {{ $annuaire->type }}
             </td>
-            <th width="10%">
+            <td width='10%'>
                 {{ trans('cruds.annuaire.fields.attributes') }}
             </th>
             <td width='30%'>

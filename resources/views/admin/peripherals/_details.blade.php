@@ -9,7 +9,7 @@
             <th width="10%">
                 {{ trans('cruds.peripheral.fields.name') }}
             </th>
-            <td width="40%">
+            <td width="20%">
             @if($withLink)
                 @canShow($peripheral)
                     <a href="{{ route('admin.peripherals.show', $peripheral) }}">{{ $peripheral->name }}</a>
@@ -21,29 +21,15 @@
             @endif
             </td>
             <th width="10%">
-                {{ trans('cruds.peripheral.fields.domain') }}
-            </th>
-            <td width="10%">
-                @if($peripheral->domain!=null)
-                    @canShow($peripheral->domain)
-                        <a href="{{ route('admin.domains.show', $peripheral->domain->id) }}">
-                            {{ $peripheral->domain->name }}
-                        </a>
-                    @elsecanShow
-                        {{ $peripheral->domain->name }}
-                    @endcanShow
-                @endif
-            </td>
-            <th width="10%">
                 {{ trans('cruds.peripheral.fields.type') }}
             </th>
-            <td width="10%">
+            <td width="20%">
                 {{ $peripheral->type }}
             </td>
             <th width="10%">
                 {{ trans('cruds.peripheral.fields.attributes') }}
             </th>
-            <td>
+            <td width="30%" colspan="2">
                 @foreach(explode(" ", (string) $peripheral->attributes) as $attribute)
                     @if(strlen(trim($attribute)) > 0)
                         <span class="badge badge-info">{{ $attribute }}</span>
@@ -55,7 +41,7 @@
             <th>
                 {{ trans('cruds.peripheral.fields.description') }}
             </th>
-            <td colspan='4'>
+            <td colspan='5'>
                 {!! $peripheral->description !!}
             </td>
             <td width="10%" align="center">

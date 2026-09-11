@@ -84,6 +84,7 @@
             </tbody>
         </table>
     </div>
+
     <!------------------------------------------------------------------------------------------------------------->
     <div class="card-header">
         {{ trans("cruds.menu.application.title") }}
@@ -139,6 +140,34 @@
                     <td width="23%">
                         {{ $peripheral->pversion }}
                     </td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+    <!------------------------------------------------------------------------------------------------------------->
+    <div class="card-header">
+        {{ trans("cruds.menu.administration.title") }}
+    </div>
+    <!------------------------------------------------------------------------------------------------------------->
+    <div class="card-body">
+        <table class="table table-bordered table-striped table-report">
+            <tbody>
+                <tr>
+                    <th width="10%">
+                        {{ trans('cruds.peripheral.fields.domain') }}
+                    </th>
+                    <td>
+                        @if($peripheral->domain!=null)
+                            @canShow($peripheral->domain)
+                                <a href="{{ route('admin.domains.show', $peripheral->domain->id) }}">
+                                    {{ $peripheral->domain->name }}
+                                </a>
+                            @elsecanShow
+                                {{ $peripheral->domain->name }}
+                            @endcanShow
+                        @endif
+                    </td>
+
                 </tr>
             </tbody>
         </table>

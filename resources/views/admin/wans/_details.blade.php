@@ -9,7 +9,7 @@
             <th width="10%">
                 {{ trans('cruds.wan.fields.name') }}
             </th>
-            <td>
+            <td width="20%">
             @if($withLink)
             @canShow($wan)
             <a href="{{ route('admin.wans.show', $wan) }}">{{ $wan->name }}</a>
@@ -29,7 +29,7 @@
             <th width="10%">
                 {{ trans('cruds.wan.fields.attributes') }}
             </th>
-            <td>
+            <td width="30%">
                 @foreach(explode(" ", (string) $wan->attributes) as $attribute)
                     @if(strlen(trim($attribute)) > 0)
                         <span class="badge badge-info">{{ $attribute }}</span>
@@ -42,7 +42,7 @@
             <th>
                 {{ trans('cruds.wan.fields.mans') }}
             </th>
-            <td>
+            <td colspan="5">
                 @foreach($wan->mans as $mans)
                 @canShow($mans)
                 <a href="{{ route('admin.mans.show', $mans) }}">{{ $mans->name }}</a>
@@ -59,7 +59,7 @@
             <th>
                 {{ trans('cruds.wan.fields.lans') }}
             </th>
-            <td>
+            <td colspan="5">
                 @foreach($wan->lans as $lan)
                 @canShow($lan)
                 <a href="{{ route('admin.lans.show', $lan) }}">{{ $lan->name }}</a>

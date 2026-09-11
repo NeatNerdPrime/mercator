@@ -8,7 +8,7 @@
             <th width="10%">
                 {{ trans('cruds.physicalRouter.fields.name') }}
             </th>
-            <td colspan="3">
+            <td width="20%">
             @if($withLink)
             @canShow($physicalRouter)
             <a href="{{ route('admin.physical-routers.show', $physicalRouter->id) }}">{{ $physicalRouter->name }}</a>
@@ -22,13 +22,13 @@
             <th width="10%">
                 {{ trans('cruds.physicalRouter.fields.type') }}
             </th>
-            <td>
+            <td width="20%">
                 {{ $physicalRouter->type }}
             </td>
             <th width="10%">
                 {{ trans('cruds.physicalRouter.fields.attributes') }}
             </th>
-            <td>
+            <td width="30%">
                 @foreach(explode(" ", (string) $physicalRouter->attributes) as $attribute)
                     @if(strlen(trim($attribute)) > 0)
                         <span class="badge badge-info">{{ $attribute }}</span>

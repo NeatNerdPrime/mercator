@@ -8,7 +8,7 @@
         <th width="10%">
             {{ trans('cruds.wifiTerminal.fields.name') }}
         </th>
-        <td>
+        <td width="20%">
         @if($withLink)
             @canShow($wifiTerminal)
                 <a href="{{ route('admin.wifi-terminals.show', $wifiTerminal) }}">{{ $wifiTerminal->name }}</a>
@@ -22,15 +22,13 @@
         <th width="10%">
             {{ trans('cruds.wifiTerminal.fields.type') }}
         </th>
-        <td>
+        <td width="20%">
             {{ $wifiTerminal->type }}
         </td>
-    </tr>
-    <tr>
         <th width="10%">
             {{ trans('cruds.wifiTerminal.fields.attributes') }}
         </th>
-        <td colspan="3">
+        <td width="30%">
             @foreach(explode(" ", (string) $wifiTerminal->attributes) as $attribute)
                 @if(strlen(trim($attribute)) > 0)
                     <span class="badge badge-info">{{ $attribute }}</span>
@@ -42,17 +40,15 @@
         <th>
             {{ trans('cruds.wifiTerminal.fields.description') }}
         </th>
-        <td colspan="3">
+        <td colspan="5">
             {!! $wifiTerminal->description !!}
         </td>
-    </tr>
-    <tr>
     </tr>
     <tr>
         <th>
             {{ trans('cruds.wifiTerminal.fields.address_ip') }}
         </th>
-        <td colspan="3">
+        <td colspan="5">
             {{ $wifiTerminal->address_ip ?? '' }}
         </td>
     </tr>
