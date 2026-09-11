@@ -29,9 +29,12 @@
                         <div class="form-group">
                             <label class="label-maturity-1" for="type">{{ trans('cruds.application.fields.type') }}</label>
                             <select class="form-control select2-free {{ $errors->has('type') ? 'is-invalid' : '' }}"
-                                    name="types[]" id="types" multiple>
+                                    name="type" id="type">
+                                @if (!in_array(old('type', $application->type), $type_list))
+                                    <option> {{ old('type', $application->type) }}</option>
+                                @endif
                                 @foreach($type_list as $t)
-                                    <option {{ str_contains($application->type, $t) ? 'selected' : '' }}>{{$t}}</option>
+                                    <option {{ old('type', $application->type) == $t ? 'selected' : '' }}>{{$t}}</option>
                                 @endforeach
                             </select>
                             @if($errors->has('type'))
