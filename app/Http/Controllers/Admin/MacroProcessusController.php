@@ -33,7 +33,7 @@ class MacroProcessusController extends Controller
             })
             ->orderBy('name')
 
-            ->when($allowedIds !== null, fn ($q) => $q->whereIn('id', $allowedIds))->paginate(min(max((int) request('per_page', 50), 10), 500));
+            ->when($allowedIds !== null, fn ($q) => $q->whereIn('id', $allowedIds))->paginate($this->resolvePerPage());
 
         return view('admin.macroProcessuses.index', compact('macroProcessuses'));
     }

@@ -17,13 +17,15 @@ class AuditLogsController extends Controller
         abort_if(Gate::denies('audit_log_access'), Response::HTTP_FORBIDDEN, '403 Forbidden');
 
         $search = $request->input('search');
-        $perPage = (int) $request->input('per_page', 100);
+        $perPage = (int) $request->input('per_page', session($this->perPageSessionKey(), 100));
 
         // On borne les valeurs possibles pour éviter les conneries
         $allowedPerPage = [10, 25, 50, 100, 1000];
         if (! in_array($perPage, $allowedPerPage)) {
             $perPage = 100;
         }
+
+        session()->put($this->perPageSessionKey(), $perPage);
 
         $query = DB::table('audit_logs')
             ->select(

@@ -29,7 +29,7 @@ class DataProcessingController extends Controller
                 });
             })
             ->orderBy('name')
-            ->paginate(min(max((int) request('per_page', 50), 10), 500));
+            ->paginate($this->resolvePerPage());
 
         return view('admin.dataProcessing.index', compact('processingRegister'));
     }
@@ -113,7 +113,7 @@ class DataProcessingController extends Controller
                 });
             })
             ->orderBy('name')
-            ->paginate(min(max((int) request('per_page', 50), 10), 500));
+            ->paginate($this->resolvePerPage());
 
         // Get Legal Basis
         $legal_basis_list = DataProcessing::select('legal_basis')
