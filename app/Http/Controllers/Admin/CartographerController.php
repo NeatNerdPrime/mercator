@@ -23,7 +23,15 @@ class CartographerController extends Controller
     {
         abort_if(Gate::denies('cartographer_access'), Response::HTTP_FORBIDDEN, '403 Forbidden');
 
-        $cartographers = Cartographer::with(['user', 'role', 'cartographiable'])->orderBy('cartographiable_type')->paginate(50);
+        $cartographers = Cartographer::with(['user', 'role', 'cartographiable'])
+            ->when(request('search'), function ($q, $search) {
+                $q->where(function ($q) use ($search) {
+                    $q->whereHas('user', fn ($q) => $q->whereRaw('LOWER(name) LIKE ?', ['%'.mb_strtolower($search).'%']))
+                        ->orWhereHas('role', fn ($q) => $q->whereRaw('LOWER(title) LIKE ?', ['%'.mb_strtolower($search).'%']));
+                });
+            })
+            ->orderBy('cartographiable_type')
+            ->paginate($this->resolvePerPage());
         $models = $this->cartographiableModels();
         $routes = Cartographer::cartographiableRoutesMap();
 
