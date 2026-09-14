@@ -1,4 +1,31 @@
 <nav id="sidebar" class="sidebar">
+    @if (\App\Support\PerimetreSettings::isEnabled())
+        @php
+            $sidebarPerimetreIds = auth()->user()->perimetreIds();
+        @endphp
+        @if (count($sidebarPerimetreIds) >= 2)
+            <div class="perimetre-box px-0 pt-0">
+                <form id="active-perimetre-form" method="POST" action="{{ route('admin.perimetre.active') }}">
+                    @csrf
+                    <select name="perimetre" id="active-perimetre" class="form-control select2">
+                        <option value="0" {{ (int) session('active_perimetre', 0) === 0 ? 'selected' : '' }}></option>
+                        @foreach (\App\Models\Perimetre::whereIn('id', $sidebarPerimetreIds)->orderBy('nom')->get() as $sidebarPerimetre)
+                            <option value="{{ $sidebarPerimetre->id }}"
+                                    {{ (int) session('active_perimetre', 0) === $sidebarPerimetre->id ? 'selected' : '' }}>
+                                {{ $sidebarPerimetre->nom }}
+                            </option>
+                        @endforeach
+                    </select>
+                </form>
+            </div>
+        @elseif (count($sidebarPerimetreIds) === 1)
+            <div class="perimetre-box px-2 pt-2">
+                <span class="badge bg-secondary">
+                    {{ \App\Models\Perimetre::find($sidebarPerimetreIds[0])->nom ?? '' }}
+                </span>
+            </div>
+        @endif
+    @endif
     <div class="search-box">
         <form id="search-form" action="/admin/global-search" method="GET">
             <input type="text" name="search" class="form-control" placeholder="Rechercher...">
@@ -565,3 +592,15 @@
         Version {{ app('mercator.version') }}
     </div>
 </nav>
+
+<script>
+(function () {
+    'use strict';
+    var select = document.getElementById('active-perimetre');
+    var form = document.getElementById('active-perimetre-form');
+    if (!select || !form) return;
+    select.addEventListener('change', function () {
+        form.submit();
+    });
+})();
+</script>

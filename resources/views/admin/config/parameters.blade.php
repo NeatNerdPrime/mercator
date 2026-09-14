@@ -34,6 +34,15 @@
         </button>
     </li>
     <li class="nav-item" role="presentation">
+        <button class="nav-link fw-bold {{ $tab === 'perimetres' ? 'active' : '' }}"
+                id="tab-perimetres-btn" data-bs-toggle="tab" data-bs-target="#tab-perimetres"
+                type="button" role="tab"
+                aria-controls="tab-perimetres" aria-selected="{{ $tab === 'perimetres' ? 'true' : 'false' }}">
+            <i class="fas fa-object-group me-1"></i>
+            {{ trans('cruds.configuration.perimetres.title_short') }}
+        </button>
+    </li>
+    <li class="nav-item" role="presentation">
         <button class="nav-link fw-bold {{ $tab === 'cert' ? 'active' : '' }}"
                 id="tab-cert-btn" data-bs-toggle="tab" data-bs-target="#tab-cert"
                 type="button" role="tab"
@@ -859,6 +868,150 @@
         </div>
 
     </div>{{-- /tab-monarc --}}
+
+    {{-- ================================================================== --}}
+    {{-- TAB 8 : Périmètres                                                  --}}
+    {{-- ================================================================== --}}
+    <div class="tab-pane fade {{ $tab === 'perimetres' ? 'show active' : '' }}"
+         id="tab-perimetres" role="tabpanel" aria-labelledby="tab-perimetres-btn">
+
+        <div class="card">
+            <div class="card-body">
+                <div class="form-group mb-3">
+                    <label>{{ trans('cruds.configuration.perimetres.help') }}</label>
+                </div>
+
+                <form method="POST" action="{{ route('admin.perimetres.activation') }}">
+                    @method('PUT')
+                    @csrf
+                    <div class="form-group mb-3">
+                        <div class="form-check form-switch">
+                            <input name="perimeters_enabled" id="perimeters_enabled"
+                                   type="checkbox" class="form-check-input"
+                                   {{ $perimetres_enabled ? 'checked' : '' }}>
+                            <label class="form-check-label" for="perimeters_enabled">
+                                {{ trans('cruds.configuration.perimetres.enabled') }}
+                            </label>
+                        </div>
+                    </div>
+                    <button class="btn btn-success" type="submit">
+                        <i class="fas fa-save me-1"></i>{{ trans('global.save') }}
+                    </button>
+                </form>
+            </div>
+
+            <div class="card-body border-top">
+                <div class="col-6">
+                    <div class="d-flex justify-content-between align-items-center mb-3">
+                        <h6 class="fw-bold mb-0">{{ trans('cruds.perimetre.title') }}</h6>
+                        <button type="button" class="btn btn-success btn-sm" data-bs-toggle="modal" data-bs-target="#addPerimetreModal">
+                            <i class="fas fa-plus me-1"></i>{{ trans('global.add') }}
+                        </button>
+                    </div>
+
+                    <table class="table table-sm table-bordered table-hover">
+                        <thead class="table-light">
+                            <tr>
+                                <th>{{ trans('cruds.perimetre.fields.id') }}</th>
+                                <th>{{ trans('cruds.perimetre.fields.nom') }}</th>
+                                <th>&nbsp;</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach ($perimetres as $perimetre)
+                                <tr>
+                                    <td>{{ $perimetre->id }}</td>
+                                    <td>{{ $perimetre->nom }}</td>
+                                    <td nowrap>
+                                        <button type="button" class="btn btn-xs btn-info"
+                                                data-bs-toggle="modal" data-bs-target="#editPerimetreModal{{ $perimetre->id }}">
+                                            {{ trans('global.edit') }}
+                                        </button>
+
+                                        @if ($perimetre->id !== \App\Models\Perimetre::DEFAULT_ID)
+                                            @if ($perimetre->roles_count > 0)
+                                                <button type="button" class="btn btn-xs btn-danger" disabled
+                                                        title="{{ trans('cruds.perimetre.errors.in_use') }}">
+                                                    {{ trans('global.delete') }}
+                                                </button>
+                                            @else
+                                                <form action="{{ route('admin.perimetres.destroy', $perimetre->id) }}" method="POST"
+                                                      onsubmit="return confirm('{{ trans('global.areYouSure') }}');" style="display:inline-block;">
+                                                    @csrf
+                                                    @method('DELETE')
+                                                    <button type="submit" class="btn btn-xs btn-danger">
+                                                        {{ trans('global.delete') }}
+                                                    </button>
+                                                </form>
+                                            @endif
+                                        @endif
+                                    </td>
+                                </tr>
+
+                                {{-- Modale d'édition (nom uniquement — id auto, non modifiable) --}}
+                                <div class="modal fade" id="editPerimetreModal{{ $perimetre->id }}" tabindex="-1" aria-hidden="true">
+                                    <div class="modal-dialog">
+                                        <div class="modal-content">
+                                            <form method="POST" action="{{ route('admin.perimetres.update', $perimetre->id) }}">
+                                                @method('PUT')
+                                                @csrf
+                                                <div class="modal-header">
+                                                    <h5 class="modal-title">{{ trans('global.edit') }} {{ trans('cruds.perimetre.title_singular') }}</h5>
+                                                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="{{ trans('global.cancel') }}"></button>
+                                                </div>
+                                                <div class="modal-body">
+                                                    <div class="form-group mb-3">
+                                                        <label class="label-required" for="nom{{ $perimetre->id }}">
+                                                            {{ trans('cruds.perimetre.fields.nom') }}
+                                                        </label>
+                                                        <input class="form-control" type="text" minlength="2" maxlength="32"
+                                                               name="nom" id="nom{{ $perimetre->id }}" value="{{ $perimetre->nom }}" required/>
+                                                    </div>
+                                                </div>
+                                                <div class="modal-footer">
+                                                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">{{ trans('global.cancel') }}</button>
+                                                    <button type="submit" class="btn btn-success">{{ trans('global.save') }}</button>
+                                                </div>
+                                            </form>
+                                        </div>
+                                    </div>
+                                </div>
+                            @endforeach
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        {{-- Modale de création --}}
+        <div class="modal fade" id="addPerimetreModal" tabindex="-1" aria-hidden="true">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <form method="POST" action="{{ route('admin.perimetres.store') }}">
+                        @csrf
+                        <div class="modal-header">
+                            <h5 class="modal-title">{{ trans('global.add') }} {{ trans('cruds.perimetre.title_singular') }}</h5>
+                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="{{ trans('global.cancel') }}"></button>
+                        </div>
+                        <div class="modal-body">
+                            <div class="form-group mb-3">
+                                <label class="label-required" for="new_perimetre_nom">
+                                    {{ trans('cruds.perimetre.fields.nom') }}
+                                </label>
+                                <input class="form-control" type="text" minlength="2" maxlength="32"
+                                       name="nom" id="new_perimetre_nom" required/>
+                            </div>
+                        </div>
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">{{ trans('global.cancel') }}</button>
+                            <button type="submit" class="btn btn-success">{{ trans('global.save') }}</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+    </div>{{-- /tab-perimetres --}}
 </div>{{-- /tab-content --}}
 
 {{-- ─── Persistance de l'onglet lors de la navigation manuelle ─────────── --}}

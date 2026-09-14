@@ -21,6 +21,11 @@ class StoreRoleRequest extends FormRequest
             'title' => [
                 'required',
             ],
+            'perimetre_id' => [
+                'required',
+                'integer',
+                'exists:perimetres,id',
+            ],
             'permissions.*' => [
                 'integer',
             ],

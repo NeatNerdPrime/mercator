@@ -127,6 +127,7 @@ describe('update', function () {
 
         $data = [
             'title' => 'Updated Name',
+            'perimetre_id' => \App\Models\Perimetre::DEFAULT_ID,
             'description' => fake()->sentence(),
         ];
 

@@ -2,8 +2,6 @@
 
 namespace App\Http\Requests;
 
-use Illuminate\Foundation\Http\FormRequest;
-use App\Http\Requests\BaseFormRequest;
 use Illuminate\Validation\Rule;
 
 class UpdateRoleRequest extends BaseFormRequest
@@ -23,6 +21,11 @@ class UpdateRoleRequest extends BaseFormRequest
                 Rule::unique('roles')
                     ->ignore($this->route('role')->id ?? $this->id)
                     ->whereNull('deleted_at'),
+            ],
+            'perimetre_id' => [
+                'required',
+                'integer',
+                'exists:perimetres,id',
             ],
             'permissions.*' => [
                 'integer',

@@ -23,6 +23,22 @@
                         @endif
                         <span class="help-block">{{ trans('cruds.role.fields.title_helper') }}</span>
                     </div>
+                    <div class="col-md-4">
+                        <label class="label-required" for="perimetre_id">{{ trans('cruds.role.fields.perimetre') }}</label>
+                        <select class="form-control select2 {{ $errors->has('perimetre_id') ? 'is-invalid' : '' }}"
+                                name="perimetre_id" id="perimetre_id" required>
+                            @foreach ($perimetres as $perimetre)
+                                <option value="{{ $perimetre->id }}"
+                                        {{ (int) old('perimetre_id', \App\Models\Perimetre::DEFAULT_ID) === $perimetre->id ? 'selected' : '' }}>
+                                    {{ $perimetre->nom }}
+                                </option>
+                            @endforeach
+                        </select>
+                        @if($errors->has('perimetre_id'))
+                            <div class="invalid-feedback">{{ $errors->first('perimetre_id') }}</div>
+                        @endif
+                        <span class="help-block">{{ trans('cruds.role.fields.perimetre_helper') }}</span>
+                    </div>
                 </div>
             </div>
         </div>

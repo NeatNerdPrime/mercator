@@ -2,14 +2,15 @@
 
 namespace App\Models;
 
+use App\Factories\RoleFactory;
 use Illuminate\Database\Eloquent\Factories\Factory;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Support\Facades\Cache;
-use App\Factories\RoleFactory;
 
 /**
  * App\Role
@@ -22,6 +23,7 @@ class Role extends Model
 
     protected $fillable = [
         'title',
+        'perimetre_id',
         'created_at',
         'updated_at',
         'deleted_at',
@@ -50,6 +52,7 @@ class Role extends Model
             Cache::put('roles_last_update', now()->timestamp);
         });
     }
+
     public static function getRoleByTitle(string $title): ?Role
     {
         return Role::whereTitle($title)->first();
@@ -71,5 +74,11 @@ class Role extends Model
     public function cartographerEntries(): HasMany
     {
         return $this->hasMany(Cartographer::class, 'role_id');
+    }
+
+    /** @return BelongsTo<Perimetre, $this> */
+    public function perimetre(): BelongsTo
+    {
+        return $this->belongsTo(Perimetre::class);
     }
 }
