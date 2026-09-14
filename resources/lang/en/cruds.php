@@ -572,7 +572,7 @@ return [
             'error_mosp_unreachable' => 'The MOSP objects platform (objects.monarc.lu) could not be reached',
             'link_reset_help' => 'This action only deletes the local link between Mercator objects and the Monarc risk analysis objects (the correspondences tracked by Mercator). It deletes nothing in Monarc itself: the ANR and its content remain intact.',
         ],
-        'perimetres' => [
+        'perimeters' => [
             'title' => 'Perimeter management',
             'title_short' => 'Perimeters',
             'help' => 'A perimeter partitions the cartography by site: each object belongs to a single perimeter. This feature is disabled by default; while disabled, the application behaves as if a single perimeter existed.',
@@ -1760,7 +1760,7 @@ return [
             'engine' => 'Engine',
         ],
     ],
-    'perimetre' => [
+    'perimeter' => [
         'fields' => [
             'id' => '#',
             'nom' => 'Name',
@@ -1780,8 +1780,8 @@ return [
             'permissions_helper' => '',
             'title' => 'Name',
             'title_helper' => 'Role name',
-            'perimetre' => 'Perimeter',
-            'perimetre_helper' => 'Perimeter this role belongs to',
+            'perimeter' => 'Perimeter',
+            'perimeter_helper' => 'Perimeter this role belongs to',
         ],
         'title' => 'Roles',
         'title_singular' => 'Role',

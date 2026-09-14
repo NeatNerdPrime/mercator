@@ -6,9 +6,10 @@
     <tbody>
     <tr>
         <th width="10%">
-            {{ trans('cruds.wifiTerminal.fields.name') }}
+            {{ auth()->user()->hasMultiplePerimeters() ? trans('cruds.perimeter.title_short').' / ' : '' }}{{ trans('cruds.wifiTerminal.fields.name') }}
         </th>
         <td width="20%">
+                @if (auth()->user()->hasMultiplePerimeters()){{ $wifiTerminal->perimeter->nom }} / @endif
         @if($withLink)
             @canShow($wifiTerminal)
                 <a href="{{ route('admin.wifi-terminals.show', $wifiTerminal) }}">{{ $wifiTerminal->name }}</a>

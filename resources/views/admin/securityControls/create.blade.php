@@ -12,6 +12,23 @@
             {{ trans('global.create') }} {{ trans('cruds.securityControl.title_singular') }}
         </div>
         <div class="card-body">
+            @if (auth()->user()->hasMultiplePerimeters())
+                <div class="form-group">
+                    <label for="perimeter_id">{{ trans('cruds.perimeter.title_short') }}</label>
+                    <select class="form-control select2 {{ $errors->has('perimeter_id') ? 'is-invalid' : '' }}"
+                            name="perimeter_id" id="perimeter_id">
+                        @foreach (\App\Models\Perimeter::whereIn('id', auth()->user()->perimeterIds())->orderBy('nom')->get() as $perimeterOption)
+                            <option value="{{ $perimeterOption->id }}"
+                                    {{ (int) old('perimeter_id', auth()->user()->activeOrDefaultPerimeterId()) === $perimeterOption->id ? 'selected' : '' }}>
+                                {{ $perimeterOption->nom }}
+                            </option>
+                        @endforeach
+                    </select>
+                    @if($errors->has('perimeter_id'))
+                        <div class="invalid-feedback">{{ $errors->first('perimeter_id') }}</div>
+                    @endif
+                </div>
+            @endif
             <div class="form-group">
                 <label class="label-required" for="name">{{ trans('cruds.securityControl.fields.name') }}</label>
                 <input class="form-control {{ $errors->has('name') ? 'is-invalid' : '' }}" type="text" name="name" id="name" value="{{ old('name', '') }}" required autofocus/>

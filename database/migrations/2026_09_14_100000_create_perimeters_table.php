@@ -9,7 +9,7 @@ return new class extends Migration
 {
     public function up(): void
     {
-        Schema::create('perimetres', function (Blueprint $table) {
+        Schema::create('perimeters', function (Blueprint $table) {
             $table->increments('id');
             $table->string('nom', 32)->unique();
             $table->timestamps();
@@ -17,7 +17,7 @@ return new class extends Migration
 
         // Périmètre par défaut : première ligne -> id = 1. Nom provisoire,
         // renommé lors de l'activation de la fonctionnalité.
-        DB::table('perimetres')->insert([
+        DB::table('perimeters')->insert([
             'nom' => 'Défaut',
             'created_at' => now(),
             'updated_at' => now(),
@@ -26,6 +26,6 @@ return new class extends Migration
 
     public function down(): void
     {
-        Schema::dropIfExists('perimetres');
+        Schema::dropIfExists('perimeters');
     }
 };

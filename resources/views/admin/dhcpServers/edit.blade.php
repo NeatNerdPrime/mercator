@@ -16,6 +16,37 @@
 
         <div class="card-body">
             <div class="row">
+                @if (auth()->user()->hasMultiplePerimeters())
+                <div class="col-sm-2">
+                    <div class="form-group">
+                        <label for="perimeter_id">{{ trans('cruds.perimeter.title_short') }}</label>
+                        <select class="form-control select2 {{ $errors->has('perimeter_id') ? 'is-invalid' : '' }}"
+                                name="perimeter_id" id="perimeter_id">
+                            @foreach (\App\Models\Perimeter::whereIn('id', auth()->user()->perimeterIds())->orderBy('nom')->get() as $perimeterOption)
+                                <option value="{{ $perimeterOption->id }}"
+                                        {{ (int) old('perimeter_id', $dhcpServer->perimeter_id) === $perimeterOption->id ? 'selected' : '' }}>
+                                    {{ $perimeterOption->nom }}
+                                </option>
+                            @endforeach
+                        </select>
+                        @if($errors->has('perimeter_id'))
+                            <div class="invalid-feedback">{{ $errors->first('perimeter_id') }}</div>
+                        @endif
+                    </div>
+                </div>
+                <div class="col-sm-3">
+                    <div class="form-group">
+                        <label class="label-required" for="name">{{ trans('cruds.dhcpServer.fields.name') }}</label>
+                        <input class="form-control {{ $errors->has('name') ? 'is-invalid' : '' }}" type="text" name="name" id="name" value="{{ old('name', $dhcpServer->name) }}" required autofocus/>
+                        @if($errors->has('name'))
+                            <div class="invalid-feedback">
+                                {{ $errors->first('name') }}
+                            </div>
+                        @endif
+                        <span class="help-block">{{ trans('cruds.dhcpServer.fields.name_helper') }}</span>
+                    </div>
+                </div>
+            @else
                 <div class="col-sm-5">
                     <div class="form-group">
                         <label class="label-required" for="name">{{ trans('cruds.dhcpServer.fields.name') }}</label>
@@ -28,6 +59,7 @@
                         <span class="help-block">{{ trans('cruds.dhcpServer.fields.name_helper') }}</span>
                     </div>
                 </div>
+            @endif
                 <div class="col-sm-2">
                     <div class="form-group">
                         <label for="type">{{ trans('cruds.dhcpServer.fields.type') }}</label>

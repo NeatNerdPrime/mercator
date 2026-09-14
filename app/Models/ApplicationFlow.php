@@ -6,15 +6,17 @@ use App\Contracts\HasPrefix;
 use App\Contracts\HasUniqueIdentifierContract;
 use App\Factories\ApplicationFlowFactory;
 use App\Traits\Auditable;
+use App\Traits\HasCartographers;
+use App\Traits\HasPerimeter;
 use App\Traits\HasUniqueIdentifier;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\Factory;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
-use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
-use App\Traits\HasCartographers;
+use Illuminate\Support\Carbon;
 
 /**
  * Flux Applicatif
@@ -34,14 +36,15 @@ use App\Traits\HasCartographers;
  * @property int|null $database_dest_id
  * @property bool $crypted
  * @property bool $bidirectional
- * @property \Illuminate\Support\Carbon|null $created_at
- * @property \Illuminate\Support\Carbon|null $updated_at
- * @property \Illuminate\Support\Carbon|null $deleted_at
+ * @property Carbon|null $created_at
+ * @property Carbon|null $updated_at
+ * @property Carbon|null $deleted_at
  */
 class ApplicationFlow extends Model implements HasPrefix, HasUniqueIdentifierContract
 {
     use Auditable, HasFactory, HasUniqueIdentifier, SoftDeletes;
     use HasCartographers;
+    use HasPerimeter;
 
     public $table = 'application_flows';
 
@@ -59,6 +62,7 @@ class ApplicationFlow extends Model implements HasPrefix, HasUniqueIdentifierCon
     ];
 
     protected $fillable = [
+        'perimeter_id',
         'ext_refs',
         'name',
         'type',
@@ -120,7 +124,7 @@ class ApplicationFlow extends Model implements HasPrefix, HasUniqueIdentifierCon
     {
         return $this->getEntityUID(self::DEST_RELATIONS);
     }
-    
+
     /** @return BelongsToMany<Information, $this> */
     public function informations(): BelongsToMany
     {

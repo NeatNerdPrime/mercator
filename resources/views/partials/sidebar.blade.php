@@ -1,29 +1,31 @@
 <nav id="sidebar" class="sidebar">
-    @if (\App\Support\PerimetreSettings::isEnabled())
+    @if (\App\Support\PerimeterSettings::isEnabled())
         @php
-            $sidebarPerimetreIds = auth()->user()->perimetreIds();
+            $sidebarPerimeterIds = auth()->user()->perimeterIds();
         @endphp
-        @if (count($sidebarPerimetreIds) >= 2)
-            <div class="perimetre-box px-0 pt-0">
-                <form id="active-perimetre-form" method="POST" action="{{ route('admin.perimetre.active') }}">
+        @if (count($sidebarPerimeterIds) >= 2)
+            <div class="perimeter-box px-0 pt-0">
+                <form id="active-perimeter-form" method="POST" action="{{ route('admin.perimeter.active') }}">
                     @csrf
-                    <select name="perimetre" id="active-perimetre" class="form-control select2">
-                        <option value="0" {{ (int) session('active_perimetre', 0) === 0 ? 'selected' : '' }}></option>
-                        @foreach (\App\Models\Perimetre::whereIn('id', $sidebarPerimetreIds)->orderBy('nom')->get() as $sidebarPerimetre)
-                            <option value="{{ $sidebarPerimetre->id }}"
-                                    {{ (int) session('active_perimetre', 0) === $sidebarPerimetre->id ? 'selected' : '' }}>
-                                {{ $sidebarPerimetre->nom }}
+                    <select name="perimeter" id="active-perimeter" class="form-control select2">
+                        <option value="0" {{ (int) session('active_perimeter', 0) === 0 ? 'selected' : '' }}></option>
+                        @foreach (\App\Models\Perimeter::whereIn('id', $sidebarPerimeterIds)->orderBy('nom')->get() as $sidebarPerimeter)
+                            <option value="{{ $sidebarPerimeter->id }}"
+                                    {{ (int) session('active_perimeter', 0) === $sidebarPerimeter->id ? 'selected' : '' }}>
+                                {{ $sidebarPerimeter->nom }}
                             </option>
                         @endforeach
                     </select>
                 </form>
             </div>
-        @elseif (count($sidebarPerimetreIds) === 1)
-            <div class="perimetre-box px-2 pt-2">
+        {{--
+        @elseif (count($sidebarPerimeterIds) === 1)
+            <div class="perimeter-box px-2 pt-2">
                 <span class="badge bg-secondary">
-                    {{ \App\Models\Perimetre::find($sidebarPerimetreIds[0])->nom ?? '' }}
+                    {{ \App\Models\Perimeter::find($sidebarPerimeterIds[0])->nom ?? '' }}
                 </span>
             </div>
+        --}}
         @endif
     @endif
     <div class="search-box">
@@ -594,13 +596,18 @@
 </nav>
 
 <script>
-(function () {
+document.addEventListener('DOMContentLoaded', function () {
     'use strict';
-    var select = document.getElementById('active-perimetre');
-    var form = document.getElementById('active-perimetre-form');
-    if (!select || !form) return;
-    select.addEventListener('change', function () {
+    var form = document.getElementById('active-perimeter-form');
+    var $select = $('#active-perimeter');
+    if (! form || ! $select.length) return;
+
+    // Le select est initialisé en Select2 (voir app.js) : le changement doit
+    // être écouté via jQuery, pas addEventListener, pour être fiable avec le
+    // widget. Soumission immédiate et inconditionnelle — perte de saisie ou
+    // 403 éventuel sur la page rechargée sont assumés (résolution périmètre).
+    $select.on('change', function () {
         form.submit();
     });
-})();
+});
 </script>

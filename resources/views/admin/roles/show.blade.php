@@ -38,8 +38,8 @@
                 <label>{{ $role->title }}</label>
             </div>
             <div class="col-md-2">
-                <label class="form-check-label"><b>{{ trans('cruds.role.fields.perimetre') }}</b></label>
-                <label>{{ $role->perimetre->nom ?? '' }}</label>
+                <label class="form-check-label"><b>{{ trans('cruds.role.fields.perimeter') }}</b></label>
+                <label>{{ $role->perimeter->nom ?? '' }}</label>
             </div>
         </div>
     </div>

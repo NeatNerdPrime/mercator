@@ -2,6 +2,7 @@
 
 namespace App\Http\Requests;
 
+use Illuminate\Validation\Rule;
 
 class UpdateLogicalFlowRequest extends BaseFormRequest
 {
@@ -15,14 +16,15 @@ class UpdateLogicalFlowRequest extends BaseFormRequest
     public function rules(): array
     {
         return [
+            'perimeter_id' => ['nullable', 'integer', Rule::in(auth()->user()?->perimeterIds() ?? [])],
             'name' => [
                 'min:0',
                 'max:64',
             ],
             'priority' => [
                 'integer',
-                'nullable'
-            ]
+                'nullable',
+            ],
         ];
     }
 }

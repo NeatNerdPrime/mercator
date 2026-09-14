@@ -7,9 +7,10 @@
     <tbody>
     <tr>
         <th width="10%">
-            {{ trans('cruds.cluster.fields.name') }}
+            {{ auth()->user()->hasMultiplePerimeters() ? trans('cruds.perimeter.title_short').' / ' : '' }}{{ trans('cruds.cluster.fields.name') }}
         </th>
         <td width="20%">
+                @if (auth()->user()->hasMultiplePerimeters()){{ $cluster->perimeter->nom }} / @endif
         @if($withLink)
             @canShow($cluster)
             <a href="{{ route('admin.clusters.show', $cluster->id) }}">{{ $cluster->name }}</a>

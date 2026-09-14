@@ -78,13 +78,13 @@ class User extends Authenticatable implements HasIconContract, OAuthenticatable
     }
 
     /**
-     * Ensemble distinct des `perimetre_id` de ses rôles.
+     * Ensemble distinct des `perimeter_id` de ses rôles.
      *
      * @return array<int, int>
      */
-    public function perimetreIds(): array
+    public function perimeterIds(): array
     {
-        return $this->roles()->pluck('perimetre_id')->unique()->values()->all();
+        return $this->roles()->pluck('perimeter_id')->unique()->values()->all();
     }
 
     /**
@@ -92,19 +92,35 @@ class User extends Authenticatable implements HasIconContract, OAuthenticatable
      * Utilisé par le sélecteur de périmètre actif et les colonnes de liste
      * (incréments suivants).
      */
-    public function hasMultiplePerimetres(): bool
+    public function hasMultiplePerimeters(): bool
     {
-        return count($this->perimetreIds()) >= 2;
+        return count($this->perimeterIds()) >= 2;
     }
 
     /**
      * Périmètre de travail courant, mémorisé en session par
-     * EnsureActivePerimetre/PerimetreActiveController. `Perimetre::ALL_ID`
+     * EnsureActivePerimeter/PerimeterActiveController. `Perimeter::ALL_ID`
      * (0) signifie « tous mes périmètres » (aucun filtre).
      */
-    public function activePerimetreId(): int
+    public function activePerimeterId(): int
     {
-        return (int) session('active_perimetre', Perimetre::ALL_ID);
+        return (int) session('active_perimeter', Perimeter::ALL_ID);
+    }
+
+    /**
+     * Périmètre par défaut pour un nouvel objet : le périmètre actif s'il en
+     * est un réel (pas « tous »), sinon le premier périmètre de l'utilisateur,
+     * sinon le périmètre par défaut. Utilisé par le sélecteur de création et
+     * PerimeterAssignmentObserver.
+     */
+    public function activeOrDefaultPerimeterId(): int
+    {
+        $active = $this->activePerimeterId();
+        if ($active !== Perimeter::ALL_ID && in_array($active, $this->perimeterIds(), true)) {
+            return $active;
+        }
+
+        return $this->perimeterIds()[0] ?? Perimeter::DEFAULT_ID;
     }
 
     private ?bool $isAdminCache = null;

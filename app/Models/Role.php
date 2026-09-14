@@ -23,7 +23,7 @@ class Role extends Model
 
     protected $fillable = [
         'title',
-        'perimetre_id',
+        'perimeter_id',
         'created_at',
         'updated_at',
         'deleted_at',
@@ -76,9 +76,9 @@ class Role extends Model
         return $this->hasMany(Cartographer::class, 'role_id');
     }
 
-    /** @return BelongsTo<Perimetre, $this> */
-    public function perimetre(): BelongsTo
+    /** @return BelongsTo<Perimeter, $this> */
+    public function perimeter(): BelongsTo
     {
-        return $this->belongsTo(Perimetre::class);
+        return $this->belongsTo(Perimeter::class);
     }
 }

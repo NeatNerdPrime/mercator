@@ -335,18 +335,18 @@ Route::group(['prefix' => 'admin', 'as' => 'admin.', 'middleware' => ['web.prote
     Route::put('config/parameters', [Admin\ConfigurationController::class, 'saveConfig']);
 
     // Périmètres (cloisonnement multi-établissement)
-    Route::put('config/perimetres/activation', [Admin\PerimetreController::class, 'activation'])
-        ->name('perimetres.activation');
-    Route::post('config/perimetres', [Admin\PerimetreController::class, 'store'])
-        ->name('perimetres.store');
-    Route::put('config/perimetres/{perimetre}', [Admin\PerimetreController::class, 'update'])
-        ->name('perimetres.update');
-    Route::delete('config/perimetres/{perimetre}', [Admin\PerimetreController::class, 'destroy'])
-        ->name('perimetres.destroy');
+    Route::put('config/perimeters/activation', [Admin\PerimeterController::class, 'activation'])
+        ->name('perimeters.activation');
+    Route::post('config/perimeters', [Admin\PerimeterController::class, 'store'])
+        ->name('perimeters.store');
+    Route::put('config/perimeters/{perimeter}', [Admin\PerimeterController::class, 'update'])
+        ->name('perimeters.update');
+    Route::delete('config/perimeters/{perimeter}', [Admin\PerimeterController::class, 'destroy'])
+        ->name('perimeters.destroy');
 
     // Périmètre de travail actif (mémorisé en session)
-    Route::post('perimetre/active', [Admin\PerimetreActiveController::class, 'update'])
-        ->name('perimetre.active');
+    Route::post('perimeter/active', [Admin\PerimeterActiveController::class, 'update'])
+        ->name('perimeter.active');
 
     // Views
     Route::get('report/gdpr', [Report\GDPRView::class, 'generate'])->name('report.gdpr');

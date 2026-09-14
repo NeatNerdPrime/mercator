@@ -2,6 +2,8 @@
 
 namespace App\Http\Requests;
 
+use Illuminate\Validation\Rule;
+
 class UpdatePhysicalLinkRequest extends BaseFormRequest
 {
     public function authorize(): bool
@@ -12,6 +14,7 @@ class UpdatePhysicalLinkRequest extends BaseFormRequest
     public function rules(): array
     {
         return [
+            'perimeter_id' => ['nullable', 'integer', Rule::in(auth()->user()?->perimeterIds() ?? [])],
             'type' => 'nullable|string|max:255',
             'color' => 'nullable|regex:/^#[0-9a-fA-F]{6}$/',
             'attributes' => 'nullable|array',

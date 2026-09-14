@@ -6,11 +6,11 @@ use App\Http\Controllers\Controller;
 use App\Models\Document;
 use App\Models\MonarcSyncItem;
 use App\Models\Parameter;
-use App\Models\Perimetre;
+use App\Models\Perimeter;
 use App\Support\MercatorSettings;
 use App\Support\MonarcSettings;
 use App\Support\MonarcSyncState;
-use App\Support\PerimetreSettings;
+use App\Support\PerimeterSettings;
 use Gate;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
@@ -76,8 +76,8 @@ class ConfigurationController extends Controller
             'count' => Document::query()->count(),
             'sum' => Document::query()->sum('size'),
             // Périmètres
-            'perimetres' => Perimetre::query()->withCount('roles')->orderBy('id')->get(),
-            'perimetres_enabled' => PerimetreSettings::isEnabled(),
+            'perimeters' => Perimeter::query()->withCount('roles')->orderBy('id')->get(),
+            'perimeters_enabled' => PerimeterSettings::isEnabled(),
             // Set the active tab
             'active_tab' => $request->query('tab', 'general'),
             // Last CPE Sync

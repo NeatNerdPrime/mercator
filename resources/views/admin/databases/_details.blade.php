@@ -6,9 +6,10 @@
     <tbody>
         <tr>
             <th style="width: 10%;">
-                {{ trans('cruds.database.fields.name') }}
+                {{ auth()->user()->hasMultiplePerimeters() ? trans('cruds.perimeter.title_short').' / ' : '' }}{{ trans('cruds.database.fields.name') }}
             </th>
             <td style="width: 20%;">
+                @if (auth()->user()->hasMultiplePerimeters()){{ $database->perimeter->nom }} / @endif
             @if ($withLink)
                 @canShow($database)
                 <a href="{{ route('admin.databases.show', $database) }}">

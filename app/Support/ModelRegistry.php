@@ -172,6 +172,18 @@ final class ModelRegistry
         User::class,
     ];
 
+    /**
+     * The 54 models scoped by périmètre: CARTOGRAPHY_MODELS plus the two GDPR
+     * models (DataProcessing, SecurityControl) that HomeController's maturity
+     * counts also cover. Drives the perimeter_id migration, the HasPerimeter
+     * trait rollout, and Cartographer::scopedQuery()'s périmètre filter.
+     */
+    public const array PERIMETER_SCOPED_MODELS = [
+        ...self::CARTOGRAPHY_MODELS,
+        DataProcessing::class,
+        SecurityControl::class,
+    ];
+
     // ─── Derivation engine (pure functions) ────────────────────────────────
 
     /**

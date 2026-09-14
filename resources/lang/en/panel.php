@@ -64,7 +64,7 @@ return [
         'email' => 'Email',
         'roles' => 'Roles',
         'cartographer' => 'Cartographer',
-        'perimetres' => 'Perimeters',
+        'perimeters' => 'Perimeters',
         'db_driver' => 'Database',
         'memory' => 'PHP memory',
         'memory_free' => 'available',

@@ -6,9 +6,10 @@
     <tbody>
         <tr>
             <th width='10%'>
-                {{ trans('cruds.annuaire.fields.name') }}
+                {{ auth()->user()->hasMultiplePerimeters() ? trans('cruds.perimeter.title_short').' / ' : '' }}{{ trans('cruds.annuaire.fields.name') }}
             </th>
             <td width='20%'>
+                @if (auth()->user()->hasMultiplePerimeters()){{ $annuaire->perimeter->nom }} / @endif
             @if ($withLink)
             @canShow($annuaire)
             <a href="{{ route('admin.annuaires.show', $annuaire->id) }}">{{ $annuaire->name }}</a>

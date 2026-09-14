@@ -22,10 +22,10 @@ class UpdateRoleRequest extends BaseFormRequest
                     ->ignore($this->route('role')->id ?? $this->id)
                     ->whereNull('deleted_at'),
             ],
-            'perimetre_id' => [
+            'perimeter_id' => [
                 'required',
                 'integer',
-                'exists:perimetres,id',
+                'exists:perimeters,id',
             ],
             'permissions.*' => [
                 'integer',

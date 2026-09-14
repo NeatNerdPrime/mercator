@@ -6,9 +6,10 @@
     <tbody>
     <tr>
         <th width="10%">
-            {{ trans('cruds.applicationFlow.fields.name') }}
+            {{ auth()->user()->hasMultiplePerimeters() ? trans('cruds.perimeter.title_short').' / ' : '' }}{{ trans('cruds.applicationFlow.fields.name') }}
         </th>
         <td width="30%">
+                @if (auth()->user()->hasMultiplePerimeters()){{ $applicationFlow->perimeter->nom }} / @endif
         @if ($withLink)
         @canShow($flow)
         <a href="{{ route('admin.application-flows.show', $flow->id) }}">{{ $flow->name }}</a>

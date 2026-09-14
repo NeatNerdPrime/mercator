@@ -5,6 +5,7 @@ namespace App\Models;
 use App\Factories\PhysicalLinkFactory;
 use App\Traits\Auditable;
 use App\Traits\HasCartographers;
+use App\Traits\HasPerimeter;
 use Illuminate\Database\Eloquent\Factories\Factory;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
@@ -15,10 +16,12 @@ class PhysicalLink extends Model
 {
     use Auditable, HasFactory, SoftDeletes;
     use HasCartographers;
+    use HasPerimeter;
 
     public $table = 'physical_links';
 
     protected $fillable = [
+        'perimeter_id',
         'ext_refs',
         'type',
         'color',

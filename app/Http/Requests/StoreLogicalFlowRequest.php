@@ -3,11 +3,13 @@
 namespace App\Http\Requests;
 
 use Gate;
+use Illuminate\Validation\Rule;
 use Symfony\Component\HttpFoundation\Response;
 
 class StoreLogicalFlowRequest extends BaseFormRequest
 {
     protected array $htmlFields = ['description'];
+
     public function authorize(): bool
     {
         abort_if(Gate::denies('logical_flow_create'), Response::HTTP_FORBIDDEN, '403 Forbidden');
@@ -18,14 +20,15 @@ class StoreLogicalFlowRequest extends BaseFormRequest
     public function rules(): array
     {
         return [
+            'perimeter_id' => ['nullable', 'integer', Rule::in(auth()->user()?->perimeterIds() ?? [])],
             'name' => [
                 'min:0',
                 'max:64',
             ],
             'priority' => [
                 'integer',
-                'nullable'
-            ]
+                'nullable',
+            ],
         ];
     }
 }

@@ -7,16 +7,17 @@ use App\Contracts\HasPrefix;
 use App\Contracts\HasUniqueIdentifierContract;
 use App\Factories\TaskFactory;
 use App\Traits\Auditable;
+use App\Traits\HasCartographers;
 use App\Traits\HasIcon;
+use App\Traits\HasPerimeter;
 use App\Traits\HasUniqueIdentifier;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\Factory;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
-use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Support\Collection;
-use App\Traits\HasCartographers;
 
 /**
  * App\Task
@@ -26,8 +27,9 @@ use App\Traits\HasCartographers;
  */
 class Task extends Model implements HasIconContract, HasPrefix, HasUniqueIdentifierContract
 {
-    use Auditable, HasIcon, HasUniqueIdentifier, HasFactory, SoftDeletes;
+    use Auditable, HasFactory, HasIcon, HasUniqueIdentifier, SoftDeletes;
     use HasCartographers;
+    use HasPerimeter;
 
     public $table = 'tasks';
 
@@ -36,6 +38,7 @@ class Task extends Model implements HasIconContract, HasPrefix, HasUniqueIdentif
     public static string $icon = '/images/task.png';
 
     protected $fillable = [
+        'perimeter_id',
         'ext_refs',
         'name',
         'type',
@@ -70,8 +73,8 @@ class Task extends Model implements HasIconContract, HasPrefix, HasUniqueIdentif
 
     public function graphs(): Collection
     {
-        return once(fn() => Graph::query()
-            ->select('id','name')
+        return once(fn () => Graph::query()
+            ->select('id', 'name')
             ->where('class', '=', '2')
             ->whereLike('content', '%"#'.$this->getUID().'"%')
             ->get()
@@ -87,5 +90,4 @@ class Task extends Model implements HasIconContract, HasPrefix, HasUniqueIdentif
                 ->from('operation_task')
                 ->whereColumn('operation_task.task_id', 'tasks.id'));
     }
-
 }

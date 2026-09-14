@@ -4,7 +4,9 @@ namespace App\Providers;
 
 use App\Models\Cartographer;
 use App\Observers\CartographerActivityObserver;
+use App\Observers\PerimeterAssignmentObserver;
 use App\Support\MercatorSettings;
+use App\Support\ModelRegistry;
 use App\Support\MonarcSettings;
 use Illuminate\Cache\RateLimiting\Limit;
 use Illuminate\Http\Request;
@@ -89,6 +91,11 @@ class AppServiceProvider extends ServiceProvider
         // Observer: notify cartographers when they modify their own objects
         foreach (array_keys(Cartographer::cartographiableRoutesMap()) as $modelClass) {
             $modelClass::observe(CartographerActivityObserver::class);
+        }
+
+        // Observer: assign perimeter_id at creation when not explicitly submitted
+        foreach (ModelRegistry::PERIMETER_SCOPED_MODELS as $modelClass) {
+            $modelClass::observe(PerimeterAssignmentObserver::class);
         }
 
         // Directives Blade cartographes

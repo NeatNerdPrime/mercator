@@ -9,22 +9,22 @@ return new class extends Migration
     public function up(): void
     {
         Schema::table('roles', function (Blueprint $table) {
-            $table->unsignedInteger('perimetre_id')->after('id')->default(1)->index();
+            $table->unsignedInteger('perimeter_id')->after('id')->default(1)->index();
         });
 
         Schema::table('roles', function (Blueprint $table) {
-            $table->foreign('perimetre_id')->references('id')->on('perimetres')->onUpdate('NO ACTION')->onDelete('restrict');
+            $table->foreign('perimeter_id')->references('id')->on('perimeters')->onUpdate('NO ACTION')->onDelete('restrict');
         });
     }
 
     public function down(): void
     {
         Schema::table('roles', function (Blueprint $table) {
-            $table->dropForeign(['perimetre_id']);
+            $table->dropForeign(['perimeter_id']);
         });
 
         Schema::table('roles', function (Blueprint $table) {
-            $table->dropColumn('perimetre_id');
+            $table->dropColumn('perimeter_id');
         });
     }
 };

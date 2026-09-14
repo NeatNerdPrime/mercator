@@ -578,7 +578,7 @@ return [
             'error_mosp_unreachable' => "La plateforme d'objets MOSP (objects.monarc.lu) n'a pas pu être contactée",
             'link_reset_help' => "Cette action supprime uniquement la liaison locale entre les objets Mercator et les objets de l'analyse de risques Monarc (correspondances suivies par Mercator). Elle ne supprime rien dans Monarc lui-même : l'ANR et son contenu restent intacts.",
         ],
-        'perimetres' => [
+        'perimeters' => [
             'title' => 'Gestion des périmètres',
             'title_short' => 'Périmètres',
             'help' => "Un périmètre permet de cloisonner la cartographie par établissement : chaque objet appartient à un périmètre unique. Cette fonctionnalité est désactivée par défaut ; tant qu'elle n'est pas activée, l'application se comporte comme si un seul périmètre existait.",
@@ -1774,7 +1774,7 @@ return [
             'engine' => 'Moteur',
         ],
     ],
-    'perimetre' => [
+    'perimeter' => [
         'fields' => [
             'id' => '#',
             'nom' => 'Nom',
@@ -1794,8 +1794,8 @@ return [
             'permissions_helper' => '',
             'title' => 'Nom',
             'title_helper' => 'Nom du rôle',
-            'perimetre' => 'Périmètre',
-            'perimetre_helper' => 'Périmètre auquel ce rôle est rattaché',
+            'perimeter' => 'Périmètre',
+            'perimeter_helper' => 'Périmètre auquel ce rôle est rattaché',
         ],
         'title' => 'Rôles',
         'title_short' => 'Rôle',

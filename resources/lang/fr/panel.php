@@ -63,7 +63,7 @@ return [
         'email' => 'Email',
         'roles' => 'Rôles',
         'cartographer' => 'Cartographe',
-        'perimetres' => 'Périmètres',
+        'perimeters' => 'Périmètres',
         'db_driver' => 'Base de données',
         'memory' => 'Mémoire PHP',
         'memory_free' => 'disponible',

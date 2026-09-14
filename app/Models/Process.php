@@ -9,6 +9,7 @@ use App\Factories\ProcessFactory;
 use App\Traits\Auditable;
 use App\Traits\HasCartographers;
 use App\Traits\HasIcon;
+use App\Traits\HasPerimeter;
 use App\Traits\HasUniqueIdentifier;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\Factory;
@@ -28,8 +29,9 @@ use Illuminate\Support\Collection;
  */
 class Process extends Model implements HasIconContract, HasPrefix, HasUniqueIdentifierContract
 {
-    use Auditable, HasFactory, HasUniqueIdentifier, HasIcon, SoftDeletes;
+    use Auditable, HasFactory, HasIcon, HasUniqueIdentifier, SoftDeletes;
     use HasCartographers;
+    use HasPerimeter;
 
     public $table = 'processes';
 
@@ -38,6 +40,7 @@ class Process extends Model implements HasIconContract, HasPrefix, HasUniqueIden
     public static string $icon = '/images/process.png';
 
     protected $fillable = [
+        'perimeter_id',
         'ext_refs',
         'name',
         'type',
@@ -69,7 +72,6 @@ class Process extends Model implements HasIconContract, HasPrefix, HasUniqueIden
         'updated_at',
         'deleted_at',
     ];
-
 
     protected static function newFactory(): Factory
     {
@@ -126,8 +128,8 @@ class Process extends Model implements HasIconContract, HasPrefix, HasUniqueIden
 
     public function graphs(): Collection
     {
-        return once(fn() => Graph::query()
-            ->select('id','name')
+        return once(fn () => Graph::query()
+            ->select('id', 'name')
             ->where('class', '=', '2')
             ->whereLike('content', '%"#'.$this->getUID().'"%')
             ->get()
@@ -154,5 +156,4 @@ class Process extends Model implements HasIconContract, HasPrefix, HasUniqueIden
             ->whereNotNull('security_need_a')
             ->whereNotNull('security_need_t');
     }
-
 }

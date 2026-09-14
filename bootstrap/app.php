@@ -4,7 +4,7 @@ use App\Http\Middleware\Authenticate;
 use App\Http\Middleware\AuthenticateApiOrWeb;
 use App\Http\Middleware\AuthGates;
 use App\Http\Middleware\EncryptCookies;
-use App\Http\Middleware\EnsureActivePerimetre;
+use App\Http\Middleware\EnsureActivePerimeter;
 use App\Http\Middleware\ForceJsonResponse;
 use App\Http\Middleware\ForceXForwardedProto;
 use App\Http\Middleware\LicenseWarning;
@@ -103,7 +103,7 @@ return Application::configure(basePath: dirname(__DIR__))
         $middleware->appendToGroup('web.protected', [
             'auth',
             'gates',
-            EnsureActivePerimetre::class,
+            EnsureActivePerimeter::class,
         ]);
 
         // Configurer les trusted proxies
