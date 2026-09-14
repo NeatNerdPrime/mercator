@@ -6,9 +6,10 @@
     <tbody>
         <tr>
             <th width="10%">
-                {{ trans('cruds.adminUser.fields.user_id') }}
+                {{ auth()->user()->hasMultiplePerimeters() ? trans('cruds.perimeter.title_short').' / ' : '' }}{{ trans('cruds.adminUser.fields.user_id') }}
             </th>
             <td colspan="3">
+            @if (auth()->user()->hasMultiplePerimeters()){{ $adminUser->perimeter->nom }} / @endif
             @if ($withLink)
                 @canShow($adminUser)
                 <a href="{{ route('admin.admin-users.show', $adminUser->id) }}">{{ $adminUser->user_id }}</a>
