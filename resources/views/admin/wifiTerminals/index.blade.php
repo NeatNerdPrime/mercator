@@ -27,6 +27,9 @@
                         <th width="10">
 
                         </th>
+                        @if (auth()->user()->hasMultiplePerimeters())
+                            <th data-column="perimeter">{{ trans('cruds.perimeter.title_short') }}</th>
+                        @endif
                         <th>
                             {{ trans('cruds.wifiTerminal.fields.name') }}
                         </th>
@@ -68,6 +71,9 @@
                             <td>
 
                             </td>
+                            @if (auth()->user()->hasMultiplePerimeters())
+                                <td>{{ $wifiTerminal->perimeter->nom }}</td>
+                            @endif
                             <td>
                                 <x-show-link :model="$wifiTerminal" />
                             </td>
@@ -143,11 +149,12 @@
     <script>
         @include('partials.datatable', array(
             'id' => '#dataTable',
+            'order' => auth()->user()->hasMultiplePerimeters() ? '[[2, "asc"]]' : '[[1, "asc"]]',
             'title' => trans("cruds.wifiTerminal.title_singular"),
             'URL' => route('admin.wifi-terminals.massDestroy'),
             'canDelete' => auth()->user()->can('wifi_terminal_delete') ? true : false,
     'serverSidePagination' => true,
-    'hiddenColumns' => ['attributes', 'description'],
+    'hiddenColumns' => ['perimeter', 'attributes', 'description'],
 ));
     </script>
 @endsection

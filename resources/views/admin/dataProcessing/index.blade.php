@@ -27,6 +27,9 @@
                         <th width="10">
 
                         </th>
+                        @if (auth()->user()->hasMultiplePerimeters())
+                            <th data-column="perimeter">{{ trans('cruds.perimeter.title_short') }}</th>
+                        @endif
                         <th>
                             {{ trans('cruds.dataProcessing.fields.name') }}
                         </th>
@@ -101,6 +104,9 @@
                             <td>
 
                             </td>
+                            @if (auth()->user()->hasMultiplePerimeters())
+                                <td>{{ $processing->perimeter->nom }}</td>
+                            @endif
                             <td nowrap>
                                 <x-show-link :model="$processing" />
                             </td>
@@ -205,11 +211,12 @@
 <script>
 @include('partials.datatable', array(
     'id' => '#dataTable',
+            'order' => auth()->user()->hasMultiplePerimeters() ? '[[2, "asc"]]' : '[[1, "asc"]]',
     'title' => trans("cruds.dataProcessing.title_singular"),
     'URL' => route('admin.data-processings.massDestroy'),
     'canDelete' => auth()->user()->can('data_processing_delete') ? true : false,
     'serverSidePagination' => true,
-    'hiddenColumns' => ['responsible', 'purpose', 'categories', 'recipients', 'transfert', 'retention', 'controls', 'lawfulness', 'data_source', 'data_collection_obligation', 'data_subject_rights', 'automated_decision_making'],
+    'hiddenColumns' => ['perimeter', 'responsible', 'purpose', 'categories', 'recipients', 'transfert', 'retention', 'controls', 'lawfulness', 'data_source', 'data_collection_obligation', 'data_subject_rights', 'automated_decision_making'],
 ));
 </script>
 @endsection

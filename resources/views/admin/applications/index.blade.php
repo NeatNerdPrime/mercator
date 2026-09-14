@@ -26,6 +26,9 @@
                     <tr>
                         <th width="10">
                         </th>
+                        @if (auth()->user()->hasMultiplePerimeters())
+                            <th data-column="perimeter">{{ trans('cruds.perimeter.title_short') }}</th>
+                        @endif
                         <th>
                             {{ trans('cruds.application.fields.name') }}
                         </th>
@@ -86,6 +89,9 @@
                             <td>
 
                             </td>
+                            @if (auth()->user()->hasMultiplePerimeters())
+                                <td>{{ $application->perimeter->nom }}</td>
+                            @endif
                             <td>
                                 <x-show-link :model="$application" />
                             </td>
@@ -157,11 +163,12 @@
 <script>
 @include('partials.datatable', array(
     'id' => '#dataTable',
+            'order' => auth()->user()->hasMultiplePerimeters() ? '[[2, "asc"]]' : '[[1, "asc"]]',
     'title' => trans("cruds.application.title_singular"),
     'URL' => route('admin.applications.massDestroy'),
     'canDelete' => (bool) auth()->user()->can('application_delete'),
     'serverSidePagination' => true,
-    'hiddenColumns' => ['vendor', 'editor', 'functional_referent'],
+    'hiddenColumns' => ['perimeter', 'vendor', 'editor', 'functional_referent'],
     ));
 </script>
 @endsection
