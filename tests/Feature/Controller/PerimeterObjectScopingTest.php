@@ -152,7 +152,7 @@ describe('Admin index controllers (global scope)', function () {
         expect($response->viewData('entities')->total())->toBe(1);
     });
 
-    test('a scoped-out object 404s on show/edit even for admin (route-model binding)', function () {
+    test('a scoped-out object 403s on show/edit even for admin (route-model binding)', function () {
         $perimeterB = Perimeter::factory()->create();
         $entityDefault = Entity::factory()->create(); // périmètre 1 (default)
 
@@ -164,6 +164,15 @@ describe('Admin index controllers (global scope)', function () {
 
         $this->withSession(['active_perimeter' => $perimeterB->id])
             ->get(route('admin.entities.show', $entityDefault))
+            ->assertForbidden();
+    });
+
+    test('a genuinely non-existent object still 404s (route-model binding)', function () {
+        PerimeterSettings::setEnabled(true);
+        $this->actingAs($this->admin);
+
+        $this->withSession(['active_perimeter' => Perimeter::ALL_ID])
+            ->get(route('admin.entities.show', 999999))
             ->assertNotFound();
     });
 });
