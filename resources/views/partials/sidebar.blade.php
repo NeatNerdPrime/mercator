@@ -8,7 +8,7 @@
                 <form id="active-perimeter-form" method="POST" action="{{ route('admin.perimeter.active') }}">
                     @csrf
                     <select name="perimeter" id="active-perimeter" class="form-control select2">
-                        <option value="0" {{ (int) session('active_perimeter', 0) === 0 ? 'selected' : '' }}></option>
+                        <option value="0" {{ (int) session('active_perimeter', 0) === 0 ? 'selected' : '' }}>&nbsp;</option>
                         @foreach (\App\Models\Perimeter::whereIn('id', $sidebarPerimeterIds)->orderBy('nom')->get() as $sidebarPerimeter)
                             <option value="{{ $sidebarPerimeter->id }}"
                                     {{ (int) session('active_perimeter', 0) === $sidebarPerimeter->id ? 'selected' : '' }}>
