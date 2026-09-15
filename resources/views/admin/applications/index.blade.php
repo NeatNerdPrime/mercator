@@ -53,6 +53,9 @@
                         <th data-column="functional_referent">
                             {{ trans('cruds.application.fields.functional_referent') }}
                         </th>
+			<th data-column="status"> 
+			    {{ trans('cruds.application.fields.status') }}
+			</th>
                         <th>
                         </th>
                     </tr>
@@ -120,6 +123,9 @@
                             <td>
                                 {{ $application->functional_referent }}
                             </td>
+			    <td> 
+   				{{ $application->status }}
+			    </td>
                             <td nowrap>
                                 @can('application_show')
                                     <a class="btn btn-xs btn-primary" href="{{ route('admin.applications.show', $application->id) }}">
@@ -161,7 +167,7 @@
     'URL' => route('admin.applications.massDestroy'),
     'canDelete' => (bool) auth()->user()->can('application_delete'),
     'serverSidePagination' => true,
-    'hiddenColumns' => ['vendor', 'editor', 'functional_referent'],
+    'hiddenColumns' => ['vendor', 'editor', 'functional_referent', 'status'],
     ));
 </script>
 @endsection
