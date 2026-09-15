@@ -117,9 +117,8 @@
                 </tbody>
             </table>
         </div>
-        <div class="mt-3">
-            {{ $cartographers->links() }}
-        </div>
+
+    @include('partials.pagination-footer', ['paginator' => $cartographers])
     </div>
 </div>
 @endsection
@@ -132,7 +131,7 @@
     'title'               => trans('cruds.cartographer.title_singular'),
     'URL'                 => route('admin.cartographers.massDestroy'),
     'canDelete'           => (bool) auth()->user()->can('cartographer_delete'),
-    'serverSidePagination' => false,
+    'serverSidePagination' => true,
 ])
 </script>
 @endsection
