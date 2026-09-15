@@ -5,6 +5,7 @@ namespace App\Models;
 use App\Contracts\HasPrefix;
 use App\Contracts\HasUniqueIdentifierContract;
 use App\Factories\ApplicationFlowFactory;
+use App\Scopes\ApplicationFlowPerimeterScope;
 use App\Traits\Auditable;
 use App\Traits\HasCartographers;
 use App\Traits\HasPerimeter;
@@ -103,6 +104,23 @@ class ApplicationFlow extends Model implements HasPrefix, HasUniqueIdentifierCon
     protected static function newFactory(): Factory
     {
         return ApplicationFlowFactory::new();
+    }
+
+    protected static function perimeterScopeClass(): string
+    {
+        return ApplicationFlowPerimeterScope::class;
+    }
+
+    /**
+     * Colonnes source/destination pouvant chacune porter un objet d'un
+     * périmètre différent du flux lui-même. Utilisé par
+     * ApplicationFlowPerimeterScope pour filtrer sur le périmètre actif.
+     *
+     * @return array<string, string> field => relation name
+     */
+    public static function perimeterRelations(): array
+    {
+        return self::SOURCE_RELATIONS + self::DEST_RELATIONS;
     }
 
     /* '*~-.,¸¸.-~·*'¨¯'*~-.,¸¸.-~·*'¨¯ UIDs ¯¨'*·~-.¸¸,.-~*''*~-.,¸¸.-~·*'¨¯ */

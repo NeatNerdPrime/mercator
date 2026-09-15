@@ -6,13 +6,26 @@ use App\Models\Perimeter;
 use App\Scopes\PerimeterScope;
 use App\Support\PerimeterSettings;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Scope;
 use Symfony\Component\HttpFoundation\Response;
 
 trait HasPerimeter
 {
     protected static function bootHasPerimeter(): void
     {
-        static::addGlobalScope(new PerimeterScope);
+        static::addGlobalScope(new (static::perimeterScopeClass()));
+    }
+
+    /**
+     * The Scope class enforcing perimeter filtering for this model. Override
+     * in a model whose visibility depends on more than its own perimeter_id
+     * column (see ApplicationFlow::perimeterScopeClass()).
+     *
+     * @return class-string<Scope>
+     */
+    protected static function perimeterScopeClass(): string
+    {
+        return PerimeterScope::class;
     }
 
     public function perimeter(): BelongsTo
@@ -35,7 +48,7 @@ trait HasPerimeter
             return $model;
         }
 
-        $existsOutsideActivePerimeter = static::withoutGlobalScope(PerimeterScope::class)
+        $existsOutsideActivePerimeter = static::withoutGlobalScope(static::perimeterScopeClass())
             ->where($field ?? $this->getRouteKeyName(), $value)
             ->exists();
 
