@@ -102,8 +102,8 @@
             </div>
             <div class="row">
                 @include('admin.roles.partials._group', ['permission' => $permissions_sorted['security_device'],  'label' => trans('cruds.securityDevice.title')])
-                @include('admin.roles.partials._group', ['permission' => $permissions_sorted['dhcp_server'],      'label' => trans('cruds.dhcpServer.title')])
-                @include('admin.roles.partials._group', ['permission' => $permissions_sorted['dnsserver'],        'label' => trans('cruds.dnsserver.title')])
+                @include('admin.roles.partials._group', ['permission' => $permissions_sorted['dhcp_server'],      'label' => trans('cruds.dhcpServer.title'), 'deprecated' => true])
+                @include('admin.roles.partials._group', ['permission' => $permissions_sorted['dnsserver'],        'label' => trans('cruds.dnsserver.title'), 'deprecated' => true])
                 @include('admin.roles.partials._group', ['permission' => $permissions_sorted['cluster'],          'label' => trans('cruds.cluster.title')])
                 @include('admin.roles.partials._group', ['permission' => $permissions_sorted['logical_server'],   'label' => trans('cruds.logicalServer.title')])
                 @include('admin.roles.partials._group', ['permission' => $permissions_sorted['container'],        'label' => trans('cruds.container.title')])
