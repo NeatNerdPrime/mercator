@@ -101,16 +101,26 @@ class LogicalInfrastructureView extends Controller
                 } else {
                     $root = Subnetwork::query()->find($subnetwork);
                     if ($root !== null) {
-                        $subnetworks = collect();
+                        // Un seul aller-retour DB pour toute l'arborescence (au lieu d'une requête
+                        // `$node->subnetworks` par nœud du frontier), puis parcours en mémoire avec
+                        // un set de visités en O(1) (au lieu du `contains()` en O(n) par nœud) :
+                        // sur une hiérarchie large/profonde, la version précédente pouvait dépasser
+                        // le temps d'exécution max (N+1 + scan quadratique) et provoquer un 500.
+                        $childrenByParentId = Cartographer::scopedQuery(Subnetwork::query())
+                            ->get()
+                            ->groupBy('subnetwork_id');
 
-                        // Get children
+                        $subnetworks = collect();
+                        $visited = [];
                         $frontier = collect([$root]);
+
                         while ($frontier->isNotEmpty()) {
                             $next = collect();
                             foreach ($frontier as $node) {
-                                if (! $subnetworks->contains('id', $node->id)) {
+                                if (! isset($visited[$node->id])) {
+                                    $visited[$node->id] = true;
                                     $subnetworks->push($node);
-                                    $next = $next->merge($node->subnetworks);
+                                    $next = $next->merge($childrenByParentId->get($node->id, collect()));
                                 }
                             }
                             $frontier = $next;
