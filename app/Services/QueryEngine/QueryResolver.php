@@ -11,9 +11,15 @@ class QueryResolver
 {
     protected const ALLOWED_OPERATORS = ['=', '!=', '<', '>', '<=', '>=', 'like', 'not like', 'in', 'not in'];
 
-    protected array $visitedNodes = [];
-    protected array $nodes        = [];
-    protected array $edges        = [];
+    // Plafond de sécurité : un graphe fortement connecté (many-to-many, cycles) peut
+    // sinon être ré-exploré de façon combinatoire et dépasser le temps d'exécution max.
+    protected const MAX_GRAPH_NODES = 500;
+
+    protected array $visitedNodes  = [];
+    protected array $expandedPaths = [];
+    protected array $nodes         = [];
+    protected array $edges         = [];
+    protected bool $truncated      = false;
 
     // ─────────────────────────────────────────────────────────────
     // Point d'entrée
@@ -456,14 +462,19 @@ class QueryResolver
         string     $modelName,
         array      $traverse,
     ): GraphResult {
-        $this->visitedNodes = [];
-        $this->nodes        = [];
-        $this->edges        = [];
+        $this->visitedNodes  = [];
+        $this->expandedPaths = [];
+        $this->nodes         = [];
+        $this->edges         = [];
+        $this->truncated     = false;
 
         // Normaliser une seule fois : chaque item devient [[{name,hidden},...],...]
         $normalizedTraverse = array_map([self::class, 'normalizeSegments'], $traverse);
 
         foreach ($items as $item) {
+            if ($this->truncated) {
+                break;
+            }
             $this->traverseNode($item, $modelName, $normalizedTraverse, null);
         }
 
@@ -472,6 +483,7 @@ class QueryResolver
             edges: collect(array_values($this->edges))
                 ->unique(fn ($e) => $e['from'] . '||' . $e['to'])
                 ->values(),
+            truncated: $this->truncated,
         );
     }
 
@@ -482,6 +494,11 @@ class QueryResolver
         ?string $parentNodeId
     ): void {
         $nodeId = $modelName . '_' . $item->getKey();
+
+        if (! isset($this->visitedNodes[$nodeId]) && count($this->nodes) >= self::MAX_GRAPH_NODES) {
+            $this->truncated = true;
+            return;
+        }
 
         if ($parentNodeId !== null && $parentNodeId !== $nodeId) {
             $this->edges[$parentNodeId . '||' . $nodeId] = ['from' => $parentNodeId, 'to' => $nodeId];
@@ -495,6 +512,15 @@ class QueryResolver
         if (empty($normalizedTraverse)) {
             return;
         }
+
+        // Un nœud déjà développé avec exactement le même sous-chemin de traversée ne l'est
+        // pas une seconde fois : sur un graphe fortement connecté (many-to-many, cycles), le
+        // re-développer à chaque chemin d'accès entraîne une explosion combinatoire.
+        $expansionKey = $nodeId . '#' . md5(serialize($normalizedTraverse));
+        if (isset($this->expandedPaths[$expansionKey])) {
+            return;
+        }
+        $this->expandedPaths[$expansionKey] = true;
 
         // Regrouper par relation de premier niveau
         $relationMap = [];
@@ -550,6 +576,18 @@ class QueryResolver
         if (empty($normalizedTraverse)) {
             return; // no-op : dernier segment masqué
         }
+
+        if ($this->truncated) {
+            return;
+        }
+
+        // Même garde-fou anti-réexploration que traverseNode(), sur (nœud masqué, chemin
+        // restant, ancêtre visible) puisqu'un nœud masqué n'a pas d'identifiant de graphe propre.
+        $skipKey = $modelName . '_' . $item->getKey() . '#skip#' . $visibleAncestorId . '#' . md5(serialize($normalizedTraverse));
+        if (isset($this->expandedPaths[$skipKey])) {
+            return;
+        }
+        $this->expandedPaths[$skipKey] = true;
 
         $relationMap = [];
         foreach ($normalizedTraverse as $segments) {
