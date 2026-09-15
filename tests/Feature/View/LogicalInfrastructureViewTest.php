@@ -24,7 +24,7 @@ beforeEach(function () {
     ]);
 
     // Login as an admin (id=1 seeded by UsersTableSeeder)
-    $this->user = User::query()->where('login','admin@admin.com')->first();
+    $this->user = User::query()->where('login', 'admin@admin.com')->first();
     $this->actingAs($this->user);
 });
 
@@ -74,6 +74,27 @@ describe('Logical Infrastructure View', function () {
         $response->assertViewIs('admin.reports.logical_infrastructure');
         $response->assertViewHas('subnetworks', function ($subnetworks) use ($subnetwork) {
             return $subnetworks->contains('id', $subnetwork->id);
+        });
+    });
+
+    test('can display filtered view for a selected subnetwork including its descendants', function () {
+        $network = Network::factory()->create();
+        $root = Subnetwork::factory()->create(['network_id' => $network->id, 'address' => '10.0.0.0/16']);
+        $child = Subnetwork::factory()->create(['network_id' => $network->id, 'address' => '10.0.1.0/24', 'subnetwork_id' => $root->id]);
+        $grandchild = Subnetwork::factory()->create(['network_id' => $network->id, 'address' => '10.0.1.128/25', 'subnetwork_id' => $child->id]);
+        $unrelated = Subnetwork::factory()->create(['network_id' => $network->id, 'address' => '192.168.0.0/24']);
+
+        $response = $this->get(route('admin.report.view.logical-infrastructure', [
+            'network' => $network->id,
+            'subnetwork' => $root->id,
+        ]));
+
+        $response->assertOk();
+        $response->assertViewHas('subnetworks', function ($subnetworks) use ($root, $child, $grandchild, $unrelated) {
+            return $subnetworks->contains('id', $root->id)
+                && $subnetworks->contains('id', $child->id)
+                && $subnetworks->contains('id', $grandchild->id)
+                && ! $subnetworks->contains('id', $unrelated->id);
         });
     });
 
