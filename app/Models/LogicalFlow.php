@@ -14,6 +14,7 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Support\Carbon;
+use Illuminate\Support\Facades\Log;
 
 /**
  * App\LogicalFlow
@@ -323,7 +324,7 @@ class LogicalFlow extends Model implements HasPrefix, HasUniqueIdentifierContrac
             // Get mask bits
             $parts = explode('/', $cidr);
             if (count($parts) !== 2) {
-                \Log::warning('LogicalFlow: invalid CIDR format', ['cidr' => $cidr, 'id' => $this->id]);
+                Log::warning('LogicalFlow: invalid CIDR format', ['cidr' => $cidr, 'id' => $this->id]);
 
                 return false;
             }

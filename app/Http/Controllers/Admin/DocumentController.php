@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Models\Document;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
+use Illuminate\Support\Facades\Log;
 
 class DocumentController extends Controller
 {
@@ -39,12 +40,12 @@ class DocumentController extends Controller
         $file = $request->file('file');
 
         if (! $file) {
-            \Log::error('DocumentController.store : File not received');
+            Log::error('DocumentController.store : File not received');
 
             return response()->json(['error' => 'Invalid file'], Response::HTTP_BAD_REQUEST);
         }
 
-        \Log::debug('DocumentController.store : Upload info', [
+        Log::debug('DocumentController.store : Upload info', [
             'isValid' => $file->isValid(),
             'originalName' => $file->getClientOriginalName(),
             'mimeType' => $file->getClientMimeType(),
@@ -53,7 +54,7 @@ class DocumentController extends Controller
         ]);
 
         if (! $file->isValid()) {
-            \Log::error('DocumentController.store : Invalid file');
+            Log::error('DocumentController.store : Invalid file');
 
             return response()->json(['error' => 'Invalid file'], Response::HTTP_BAD_REQUEST);
         }

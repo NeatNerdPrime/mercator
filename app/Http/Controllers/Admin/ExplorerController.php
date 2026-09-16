@@ -59,6 +59,7 @@ use Gate;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpFoundation\StreamedResponse;
@@ -1239,7 +1240,7 @@ class ExplorerController extends Controller
             // Guard: skip flow if the Cartesian product would generate an excessive number of edges
             $edgeCount = count($sources) * count($destinations);
             if ($edgeCount > 1000) {
-                \Log::warning('ExplorerController: flow skipped — too many edges would be generated', [
+                Log::warning('ExplorerController: flow skipped — too many edges would be generated', [
                     'flow_id' => $flow->id,
                     'flow_name' => $flow->name,
                     'sources' => count($sources),

@@ -10,6 +10,8 @@ use App\Http\Controllers\Report;
 use App\Http\Controllers\Report\AuditController;
 use App\Http\Middleware\VerifyCsrfToken;
 use App\Support\ReportTemplateSettings;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Log;
 
 Route::redirect('/', '/login');
 

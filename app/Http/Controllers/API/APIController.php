@@ -9,6 +9,7 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\Relation;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
+use Illuminate\Support\Facades\Log;
 use ReflectionClass;
 use ReflectionMethod;
 use ReflectionNamedType;
@@ -67,7 +68,7 @@ abstract class APIController extends Controller
                 }
             }
         } catch (\Throwable $e) {
-            \Log::warning("Failed to auto-detect relations for {$model}: " . $e->getMessage());
+            Log::warning("Failed to auto-detect relations for {$model}: " . $e->getMessage());
         }
 
         return $relations;

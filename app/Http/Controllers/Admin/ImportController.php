@@ -10,6 +10,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Gate;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Str;
 use Illuminate\View\View;
@@ -41,7 +42,7 @@ class ImportController extends Controller
      */
     public function export(Request $request): BinaryFileResponse
     {
-        \Log::info('Export - Start');
+        Log::info('Export - Start');
 
         $request->validate([
             'object' => 'required',
@@ -50,7 +51,7 @@ class ImportController extends Controller
         // Model name from request
         $modelName = $request->get('object');
 
-        \Log::info("Export - {$modelName}");
+        Log::info("Export - {$modelName}");
 
         // Check permission
         abort_if(Gate::denies($this->permission($modelName, 'access')), Response::HTTP_FORBIDDEN, '403 Forbidden');
@@ -61,7 +62,7 @@ class ImportController extends Controller
         // Récupération brute des enregistrements
         $items = $modelClass::all();
 
-        \Log::info("Export - count : {$items->count()}");
+        Log::info("Export - count : {$items->count()}");
 
         $data = [];
         foreach ($items as $item) {
@@ -98,7 +99,7 @@ class ImportController extends Controller
             $data[] = $row;
         }
 
-        \Log::info('Export - Done.');
+        Log::info('Export - Done.');
 
         // Get header
         $header = array_keys($data[0] ?? []);
@@ -271,13 +272,13 @@ class ImportController extends Controller
     {
         $modelClass = 'App\\Models\\'.$modelName;
 
-        \Log::info("Import - {$modelClass}");
+        Log::info("Import - {$modelClass}");
 
         if (! class_exists($modelClass)) {
             abort(404, "Modèle [{$modelName}] introuvable.");
         }
 
-        \Log::info("Import - {$modelClass} found !");
+        Log::info("Import - {$modelClass} found !");
 
         return $modelClass;
     }
