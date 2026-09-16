@@ -32,7 +32,7 @@ class LogicalInfrastructureGraphBuilder
      * graphe devient illisible (et lent à mettre en page côté navigateur) : on n'affiche que les
      * N premiers puis un nœud "..." isolé (sans arête) représentant le reste.
      */
-    private const MAX_ELEMENTS_PER_NODE = 100;
+    private const MAX_ELEMENTS_PER_NODE = 36;
 
     /**
      * @param  array{withHref?: bool, iconResolver?: callable(?int, string): string}  $options
@@ -79,6 +79,7 @@ class LogicalInfrastructureGraphBuilder
         $logicalServerIds = $this->idSet($logicalServers);
         $clusterIds = $this->idSet($clusters);
         $certificateIds = $this->idSet($certificates);
+        $containerIds = $this->idSet($containers);
 
         if (Cartographer::canAccess(Network::class)) {
             foreach ($networks as $network) {
@@ -154,7 +155,9 @@ class LogicalInfrastructureGraphBuilder
                         }
 
                         if ($shown >= self::MAX_ELEMENTS_PER_NODE) {
-                            $lines[] = $this->moreNode('CLUSTER'.$cluster->id.'_MORE');
+                            $moreNodeId = 'CLUSTER'.$cluster->id.'_MORE';
+                            $lines[] = $this->moreNode($moreNodeId);
+                            $lines[] = $moreNodeId.' -> CLUSTER'.$cluster->id;
                             break;
                         }
 
@@ -166,35 +169,73 @@ class LogicalInfrastructureGraphBuilder
         }
 
         if (Cartographer::canAccess(LogicalServer::class)) {
-            $subnetworkEdgeCounts = [];
+            $canAccessCluster = Cartographer::canAccess(Cluster::class);
+            $canAccessSubnetwork = Cartographer::canAccess(Subnetwork::class);
+            $canAccessCertificate = Cartographer::canAccess(Certificate::class);
+            $canAccessContainer = Cartographer::canAccess(Container::class);
+
+            // Pré-calcule pour chaque serveur son éventuel sous-réseau correspondant (au plus un)
+            // et s'il a la moindre relation dessinée ailleurs dans le graphe (cluster, sous-réseau,
+            // certificat, container). Nécessaire pour plafonner les serveurs isolés ("sans parent
+            // ni enfant") sans dupliquer le calcul de correspondance IP dans la boucle plus bas.
+            $matchedSubnetworkByServer = [];
+            $isOrphan = [];
 
             foreach ($logicalServers as $logicalServer) {
+                $matchedSubnetwork = ($canAccessSubnetwork && $logicalServer->address_ip !== null)
+                    ? $this->firstSubnetworkOuterMatch($subnetworks, $logicalServer->address_ip)
+                    : null;
+                $matchedSubnetworkByServer[$logicalServer->id] = $matchedSubnetwork;
+
+                $hasCluster = $canAccessCluster && $logicalServer->clusters->contains(fn ($c) => isset($clusterIds[$c->id]));
+                $hasCertificate = $canAccessCertificate && $logicalServer->certificates->contains(fn ($c) => isset($certificateIds[$c->id]));
+                $hasContainer = $canAccessContainer && $logicalServer->containers->contains(fn ($c) => isset($containerIds[$c->id]));
+
+                $isOrphan[$logicalServer->id] = $matchedSubnetwork === null && ! $hasCluster && ! $hasCertificate && ! $hasContainer;
+            }
+
+            $subnetworkEdgeCounts = [];
+            $shownOrphans = 0;
+            $orphanCapReached = false;
+
+            foreach ($logicalServers as $logicalServer) {
+                if ($isOrphan[$logicalServer->id]) {
+                    if ($shownOrphans >= self::MAX_ELEMENTS_PER_NODE) {
+                        if (! $orphanCapReached) {
+                            $lines[] = $this->moreNode('LOGICAL_SERVER_ORPHANS_MORE');
+                            $orphanCapReached = true;
+                        }
+
+                        continue;
+                    }
+                    $shownOrphans++;
+                }
+
                 $image = $iconResolver($logicalServer->icon_id, '/images/lserver.png');
                 $lines[] = $this->nodeWithIp('LOGICAL_SERVER', $logicalServer->id, $logicalServer->name, $logicalServer->address_ip, $image, $logicalServer->getUID(), $showIp, $withHref);
 
-                if ($logicalServer->address_ip !== null) {
-                    $matchedSubnetwork = $this->firstSubnetworkOuterMatch($subnetworks, $logicalServer->address_ip);
+                $matchedSubnetwork = $matchedSubnetworkByServer[$logicalServer->id];
+                if ($matchedSubnetwork !== null) {
+                    $count = $subnetworkEdgeCounts[$matchedSubnetwork->id] ?? 0;
 
-                    if ($matchedSubnetwork !== null) {
-                        $count = $subnetworkEdgeCounts[$matchedSubnetwork->id] ?? 0;
-
-                        if ($count < self::MAX_ELEMENTS_PER_NODE) {
-                            $lines[] = 'SUBNET'.$matchedSubnetwork->id.' -> LOGICAL_SERVER'.$logicalServer->id;
-                        } elseif ($count === self::MAX_ELEMENTS_PER_NODE) {
-                            $lines[] = $this->moreNode('SUBNET'.$matchedSubnetwork->id.'_MORE');
-                        }
-
-                        $subnetworkEdgeCounts[$matchedSubnetwork->id] = $count + 1;
+                    if ($count < self::MAX_ELEMENTS_PER_NODE) {
+                        $lines[] = 'SUBNET'.$matchedSubnetwork->id.' -> LOGICAL_SERVER'.$logicalServer->id;
+                    } elseif ($count === self::MAX_ELEMENTS_PER_NODE) {
+                        $moreNodeId = 'SUBNET'.$matchedSubnetwork->id.'_MORE';
+                        $lines[] = $this->moreNode($moreNodeId);
+                        $lines[] = 'SUBNET'.$matchedSubnetwork->id.' -> '.$moreNodeId;
                     }
+
+                    $subnetworkEdgeCounts[$matchedSubnetwork->id] = $count + 1;
                 }
 
-                if (Cartographer::canAccess(Cluster::class)) {
+                if ($canAccessCluster) {
                     if ($logicalServer->cluster_id !== null && isset($clusterIds[$logicalServer->cluster_id])) {
                         $lines[] = 'LOGICAL_SERVER'.$logicalServer->id.' -> CLUSTER'.$logicalServer->cluster_id;
                     }
                 }
 
-                if (Cartographer::canAccess(Certificate::class)) {
+                if ($canAccessCertificate) {
                     foreach ($logicalServer->certificates as $certificate) {
                         if (isset($certificateIds[$certificate->id])) {
                             $lines[] = 'LOGICAL_SERVER'.$logicalServer->id.' -> CERT'.$certificate->id;
@@ -450,8 +491,9 @@ class LogicalInfrastructureGraphBuilder
     }
 
     /**
-     * Nœud isolé (sans arête) représentant les éléments au-delà de MAX_ELEMENTS_PER_NODE
-     * rattachés à un même sous-réseau ou cluster.
+     * Nœud "..." représentant les éléments au-delà de MAX_ELEMENTS_PER_NODE rattachés à un même
+     * sous-réseau ou cluster. Le nœud lui-même n'a pas d'icône ; l'appelant ajoute séparément
+     * l'arête qui le relie à son parent (sauf pour les serveurs orphelins, qui n'en ont aucun).
      */
     private function moreNode(string $nodeId): string
     {
