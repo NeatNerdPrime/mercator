@@ -61,6 +61,18 @@ class LogicalInfrastructureGraphBuilder
 
         $lines = ['digraph  {'];
 
+        // Diagnostic 2026-09-16 : sur ~2000 serveurs logiques, `$collection->contains('id', $x)`
+        // (scan linéaire + data_get() par élément) était appelé des milliers de fois dans les
+        // boucles ci-dessous, pour un total de plusieurs millions de comparaisons — à lui seul
+        // ce buildDot() prenait 25s sur une requête de 27s. Remplacé par des lookups O(1).
+        $networkIds = $this->idSet($networks);
+        $gatewayIds = $this->idSet($gateways);
+        $subnetworkIds = $this->idSet($subnetworks);
+        $vlanIds = $this->idSet($vlans);
+        $logicalServerIds = $this->idSet($logicalServers);
+        $clusterIds = $this->idSet($clusters);
+        $certificateIds = $this->idSet($certificates);
+
         if (Cartographer::canAccess(Network::class)) {
             foreach ($networks as $network) {
                 $lines[] = DotNode::withImage('NET'.$network->id, $iconResolver(null, '/images/cloud.png'), [e($network->name)], $this->href($network, $withHref));
@@ -77,14 +89,14 @@ class LogicalInfrastructureGraphBuilder
             foreach ($subnetworks as $subnetwork) {
                 $lines[] = $this->nodeWithIp('SUBNET', $subnetwork->id, $subnetwork->name, $subnetwork->address, $iconResolver(null, '/images/network.png'), $subnetwork->getUID(), $showIp, $withHref);
 
-                if ($subnetwork->vlan_id !== null && $vlans->contains('id', $subnetwork->vlan_id)) {
+                if ($subnetwork->vlan_id !== null && isset($vlanIds[$subnetwork->vlan_id])) {
                     $lines[] = 'SUBNET'.$subnetwork->id.' -> VLAN'.$subnetwork->vlan_id;
                 }
 
                 if ($subnetwork->subnetwork_id !== null) {
-                    if ($subnetworks->contains('id', $subnetwork->subnetwork_id)) {
+                    if (isset($subnetworkIds[$subnetwork->subnetwork_id])) {
                         $lines[] = 'SUBNET'.$subnetwork->subnetwork_id.' -> SUBNET'.$subnetwork->id;
-                    } elseif ($subnetwork->network_id !== null && $networks->contains('id', $subnetwork->network_id)) {
+                    } elseif ($subnetwork->network_id !== null && isset($networkIds[$subnetwork->network_id])) {
                         // Parent subnetwork isn't in scope: fall back to linking to its network
                         // directly, but only if that network is actually drawn — this branch was
                         // missing that check entirely, unlike the sibling elseif below, and could
@@ -93,12 +105,12 @@ class LogicalInfrastructureGraphBuilder
                         $lines[] = 'NET'.$subnetwork->network_id.' -> SUBNET'.$subnetwork->id;
                     }
                 } elseif ($subnetwork->network_id !== null) {
-                    if ($networks->contains('id', $subnetwork->network_id)) {
+                    if (isset($networkIds[$subnetwork->network_id])) {
                         $lines[] = 'NET'.$subnetwork->network_id.' -> SUBNET'.$subnetwork->id;
                     }
                 }
 
-                if ($subnetwork->gateway_id !== null && $gateways->contains('id', $subnetwork->gateway_id)) {
+                if ($subnetwork->gateway_id !== null && isset($gatewayIds[$subnetwork->gateway_id])) {
                     $lines[] = 'SUBNET'.$subnetwork->id.' -> GATEWAY'.$subnetwork->gateway_id;
                 }
             }
@@ -108,7 +120,7 @@ class LogicalInfrastructureGraphBuilder
             foreach ($externalConnectedEntities as $entity) {
                 $lines[] = DotNode::withImage('E'.$entity->id, $iconResolver(null, '/images/entity.png'), [e($entity->name)], $this->href($entity, $withHref));
 
-                if ($entity->network_id !== null && $networks->contains('id', $entity->network_id)) {
+                if ($entity->network_id !== null && isset($networkIds[$entity->network_id])) {
                     $lines[] = 'E'.$entity->id.' -> NET'.$entity->network_id;
                 }
             }
@@ -129,7 +141,7 @@ class LogicalInfrastructureGraphBuilder
 
                 if (Cartographer::canAccess(LogicalServer::class)) {
                     foreach ($cluster->logicalServers as $logicalServer) {
-                        if ($logicalServers->contains('id', $logicalServer->id)) {
+                        if (isset($logicalServerIds[$logicalServer->id])) {
                             $lines[] = 'LOGICAL_SERVER'.$logicalServer->id.' -> CLUSTER'.$cluster->id;
                         }
                     }
@@ -150,14 +162,14 @@ class LogicalInfrastructureGraphBuilder
                 }
 
                 if (Cartographer::canAccess(Cluster::class)) {
-                    if ($logicalServer->cluster_id !== null && $clusters->contains('id', $logicalServer->cluster_id)) {
+                    if ($logicalServer->cluster_id !== null && isset($clusterIds[$logicalServer->cluster_id])) {
                         $lines[] = 'LOGICAL_SERVER'.$logicalServer->id.' -> CLUSTER'.$logicalServer->cluster_id;
                     }
                 }
 
                 if (Cartographer::canAccess(Certificate::class)) {
                     foreach ($logicalServer->certificates as $certificate) {
-                        if ($certificates->contains('id', $certificate->id)) {
+                        if (isset($certificateIds[$certificate->id])) {
                             $lines[] = 'LOGICAL_SERVER'.$logicalServer->id.' -> CERT'.$certificate->id;
                         }
                     }
@@ -210,7 +222,7 @@ class LogicalInfrastructureGraphBuilder
                     $lines[] = DotNode::withImage('CONT'.$container->id, $image, [e($container->name)], $this->href($container, $withHref));
 
                     foreach ($container->logicalServers as $logicalServer) {
-                        if ($logicalServers->contains('id', $logicalServer->id)) {
+                        if (isset($logicalServerIds[$logicalServer->id])) {
                             $lines[] = 'LOGICAL_SERVER'.$logicalServer->id.' -> CONT'.$container->id;
                         }
                     }
@@ -429,5 +441,22 @@ class LogicalInfrastructureGraphBuilder
     private function href(mixed $model, bool $withHref): string
     {
         return $withHref ? ' href="#'.$model->getUID().'"' : '';
+    }
+
+    /**
+     * Ensemble d'ids en O(1) pour remplacer les `Collection::contains('id', $x)` (scan linéaire
+     * + data_get() par élément) par un simple `isset()`, déterminant à l'échelle de milliers
+     * d'objets vu que ces vérifications sont faites dans des boucles imbriquées.
+     *
+     * @return array<int, true>
+     */
+    private function idSet(iterable $items): array
+    {
+        $set = [];
+        foreach ($items as $item) {
+            $set[$item->id] = true;
+        }
+
+        return $set;
     }
 }
