@@ -72,7 +72,6 @@
                 @elsecanShow
                     {{ $server->name }}
                 @endcanShow
-                <br>
             @endforeach
             @foreach($cluster->routers as $router)
                 @canShow($router)
@@ -82,9 +81,6 @@
                 @elsecanShow
                     {{ $router->name }}
                 @endcanShow
-                @if(!$loop->last)
-                    <br>
-                @endif
             @endforeach
         </td>
     </tr>
@@ -103,9 +99,6 @@
                 @elsecanShow
                     {{ $server->name }}
                 @endcanShow
-                @if(!$loop->last)
-                    <br>
-                @endif
             @endforeach
         </td>
     </tr>
