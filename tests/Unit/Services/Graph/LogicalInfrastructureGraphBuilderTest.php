@@ -1,5 +1,6 @@
 <?php
 
+use App\Models\Cluster;
 use App\Models\LogicalServer;
 use App\Models\Network;
 use App\Models\Subnetwork;
@@ -99,6 +100,79 @@ test('buildDot falls back from an out-of-scope parent subnetwork to its network,
     expect($dotWithoutNetwork)
         ->not->toContain('NET'.$network->id.' [shape=none label=<')
         ->not->toContain('NET'.$network->id.' -> SUBNET'.$childSubnetwork->id);
+});
+
+test('buildDot caps a cluster at 100 logical servers and adds an unlinked "..." node for the rest', function () {
+    $cluster = Cluster::factory()->create();
+    $logicalServers = LogicalServer::factory()->count(105)->create();
+    $cluster->logicalServers()->attach($logicalServers->pluck('id'));
+
+    $builder = new LogicalInfrastructureGraphBuilder;
+    $dot = $builder->buildDot(
+        networks: new Collection,
+        subnetworks: new Collection,
+        gateways: new Collection,
+        externalConnectedEntities: new Collection,
+        vlans: new Collection,
+        networkSwitches: new Collection,
+        clusters: Cluster::all(),
+        logicalServers: LogicalServer::all(),
+        dhcpServers: new Collection,
+        dnsservers: new Collection,
+        certificates: new Collection,
+        containers: new Collection,
+        routers: new Collection,
+        securityDevices: new Collection,
+        workstations: new Collection,
+        wifiTerminals: new Collection,
+        phones: new Collection,
+        peripherals: new Collection,
+        physicalSecurityDevices: new Collection,
+        storageDevices: new Collection,
+    );
+
+    $edgeCount = substr_count($dot, '-> CLUSTER'.$cluster->id);
+    expect($edgeCount)->toBe(100);
+    expect($dot)->toContain('CLUSTER'.$cluster->id.'_MORE [shape=plaintext label="..."]');
+    expect($dot)->not->toContain('CLUSTER'.$cluster->id.'_MORE ->');
+    expect($dot)->not->toContain('-> CLUSTER'.$cluster->id.'_MORE');
+});
+
+test('buildDot caps a subnetwork at 100 logical servers and adds an unlinked "..." node for the rest', function () {
+    $subnetwork = Subnetwork::factory()->create(['address' => '10.0.0.0/24']);
+    foreach (range(1, 105) as $i) {
+        LogicalServer::factory()->create(['address_ip' => "10.0.0.{$i}"]);
+    }
+
+    $builder = new LogicalInfrastructureGraphBuilder;
+    $dot = $builder->buildDot(
+        networks: new Collection,
+        subnetworks: Subnetwork::all(),
+        gateways: new Collection,
+        externalConnectedEntities: new Collection,
+        vlans: new Collection,
+        networkSwitches: new Collection,
+        clusters: new Collection,
+        logicalServers: LogicalServer::all(),
+        dhcpServers: new Collection,
+        dnsservers: new Collection,
+        certificates: new Collection,
+        containers: new Collection,
+        routers: new Collection,
+        securityDevices: new Collection,
+        workstations: new Collection,
+        wifiTerminals: new Collection,
+        phones: new Collection,
+        peripherals: new Collection,
+        physicalSecurityDevices: new Collection,
+        storageDevices: new Collection,
+    );
+
+    $edgeCount = substr_count($dot, 'SUBNET'.$subnetwork->id.' -> LOGICAL_SERVER');
+    expect($edgeCount)->toBe(100);
+    expect($dot)->toContain('SUBNET'.$subnetwork->id.'_MORE [shape=plaintext label="..."]');
+    expect($dot)->not->toContain('SUBNET'.$subnetwork->id.'_MORE ->');
+    expect($dot)->not->toContain('-> SUBNET'.$subnetwork->id.'_MORE');
 });
 
 test('nodeWithIp appends the IP as its own label row only when show_ip is enabled', function () {

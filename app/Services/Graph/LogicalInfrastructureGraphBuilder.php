@@ -28,6 +28,13 @@ use Illuminate\Support\Collection;
 class LogicalInfrastructureGraphBuilder
 {
     /**
+     * Au-delà de ce nombre de serveurs logiques rattachés à un même sous-réseau ou cluster, le
+     * graphe devient illisible (et lent à mettre en page côté navigateur) : on n'affiche que les
+     * N premiers puis un nœud "..." isolé (sans arête) représentant le reste.
+     */
+    private const MAX_ELEMENTS_PER_NODE = 100;
+
+    /**
      * @param  array{withHref?: bool, iconResolver?: callable(?int, string): string}  $options
      */
     public function buildDot(
@@ -140,24 +147,44 @@ class LogicalInfrastructureGraphBuilder
                 $lines[] = $this->nodeWithIp('CLUSTER', $cluster->id, $cluster->name, $cluster->address_ip, $iconResolver(null, '/images/cluster.png'), $cluster->getUID(), $showIp, $withHref);
 
                 if (Cartographer::canAccess(LogicalServer::class)) {
+                    $shown = 0;
                     foreach ($cluster->logicalServers as $logicalServer) {
-                        if (isset($logicalServerIds[$logicalServer->id])) {
-                            $lines[] = 'LOGICAL_SERVER'.$logicalServer->id.' -> CLUSTER'.$cluster->id;
+                        if (! isset($logicalServerIds[$logicalServer->id])) {
+                            continue;
                         }
+
+                        if ($shown >= self::MAX_ELEMENTS_PER_NODE) {
+                            $lines[] = $this->moreNode('CLUSTER'.$cluster->id.'_MORE');
+                            break;
+                        }
+
+                        $lines[] = 'LOGICAL_SERVER'.$logicalServer->id.' -> CLUSTER'.$cluster->id;
+                        $shown++;
                     }
                 }
             }
         }
 
         if (Cartographer::canAccess(LogicalServer::class)) {
+            $subnetworkEdgeCounts = [];
+
             foreach ($logicalServers as $logicalServer) {
                 $image = $iconResolver($logicalServer->icon_id, '/images/lserver.png');
                 $lines[] = $this->nodeWithIp('LOGICAL_SERVER', $logicalServer->id, $logicalServer->name, $logicalServer->address_ip, $image, $logicalServer->getUID(), $showIp, $withHref);
 
                 if ($logicalServer->address_ip !== null) {
-                    $edge = $this->firstSubnetworkOuterMatch($subnetworks, $logicalServer->address_ip, 'LOGICAL_SERVER'.$logicalServer->id, true);
-                    if ($edge !== null) {
-                        $lines[] = $edge;
+                    $matchedSubnetwork = $this->firstSubnetworkOuterMatch($subnetworks, $logicalServer->address_ip);
+
+                    if ($matchedSubnetwork !== null) {
+                        $count = $subnetworkEdgeCounts[$matchedSubnetwork->id] ?? 0;
+
+                        if ($count < self::MAX_ELEMENTS_PER_NODE) {
+                            $lines[] = 'SUBNET'.$matchedSubnetwork->id.' -> LOGICAL_SERVER'.$logicalServer->id;
+                        } elseif ($count === self::MAX_ELEMENTS_PER_NODE) {
+                            $lines[] = $this->moreNode('SUBNET'.$matchedSubnetwork->id.'_MORE');
+                        }
+
+                        $subnetworkEdgeCounts[$matchedSubnetwork->id] = $count + 1;
                     }
                 }
 
@@ -409,17 +436,26 @@ class LogicalInfrastructureGraphBuilder
     /**
      * Mirrors the subnetwork-outer / address-inner loop used for LogicalServer in the original template.
      */
-    private function firstSubnetworkOuterMatch(Collection $subnetworks, ?string $addressList, string $nodeId, bool $edgeIntoNode): ?string
+    private function firstSubnetworkOuterMatch(Collection $subnetworks, ?string $addressList): ?Subnetwork
     {
         foreach ($subnetworks as $subnetwork) {
             foreach (explode(',', $addressList ?? '') as $address) {
                 if ($subnetwork->contains($address)) {
-                    return 'SUBNET'.$subnetwork->id.' -> '.$nodeId;
+                    return $subnetwork;
                 }
             }
         }
 
         return null;
+    }
+
+    /**
+     * Nœud isolé (sans arête) représentant les éléments au-delà de MAX_ELEMENTS_PER_NODE
+     * rattachés à un même sous-réseau ou cluster.
+     */
+    private function moreNode(string $nodeId): string
+    {
+        return $nodeId.' [shape=plaintext label="..."]';
     }
 
     /**
