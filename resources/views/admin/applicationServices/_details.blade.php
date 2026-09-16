@@ -52,6 +52,23 @@
                 {{ $applicationService->exposition }}
             </td>
         </tr>
+        <tr>
+            <th>
+                {{ trans('cruds.applicationService.fields.applications') }}
+            </th>
+            <td colspan="5">
+                @foreach($applicationService->applications as $application)
+                    @canShow($application)
+                        <a href="{{ route('admin.applications.show', $application->id) }}">{{ $application->name }}</a>
+                    @elsecanShow
+                        {{ $application->name }}
+                    @endcanShow
+                    @if ($applicationService->applications->last()!=$application)
+                        ,
+                    @endif
+                @endforeach
+            </td>
+        </tr>
         @canAccess(App\Models\ApplicationModule::class)
         <tr>
             <th>
