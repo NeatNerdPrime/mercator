@@ -57,7 +57,6 @@ auth.json
 .php-cs-fixer.cache
 .phpactor.json
 database/data/venv/
-docs/_helm_chart/
 describe
 img.png
 
