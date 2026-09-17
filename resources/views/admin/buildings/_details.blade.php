@@ -6,10 +6,10 @@
     <tbody>
     <tr>
         <th width="10%">
-            {{ auth()->user()->hasMultiplePerimeters() ? trans('cruds.perimeter.title_short').' / ' : '' }}{{ trans('cruds.building.fields.name') }}
+            {{ ($hasMultiplePerimeters ?? auth()->user()->hasMultiplePerimeters()) ? trans('cruds.perimeter.title_short').' / ' : '' }}{{ trans('cruds.building.fields.name') }}
         </th>
         <td width="20%">
-                @if (auth()->user()->hasMultiplePerimeters()){{ $building->perimeter->nom }} / @endif
+                @if (($hasMultiplePerimeters ?? auth()->user()->hasMultiplePerimeters())){{ $building->perimeter->nom }} / @endif
         @if($withLink)
         @canShow($building)
         <a href="{{ route('admin.buildings.show', $building->id) }}">{{ $building->name }}</a>

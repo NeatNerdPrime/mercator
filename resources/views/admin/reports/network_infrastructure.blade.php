@@ -5,6 +5,10 @@
 @endsection
 
 @section('content')
+{{-- Computed once: each _details partial below is included once per row (potentially
+     hundreds of times on this page), and hasMultiplePerimeters() re-queries roles/role_user
+     on every call, so passing it down avoids an N+1 across the whole report. --}}
+@php($hasMultiplePerimeters = auth()->user()->hasMultiplePerimeters())
 <div class="graph-card-sticky">
     <div class="card mb-3">
         <div class="card-header">
@@ -100,6 +104,7 @@
                                 @include('admin.sites._details', [
                                     'site' => $site,
                                     'withLink' => true,
+                                    'hasMultiplePerimeters' => $hasMultiplePerimeters,
                                 ])
                             </div>
                         </div>
@@ -124,6 +129,7 @@
                                @include('admin.buildings._details', [
                                     'building' => $building,
                                     'withLink' => true,
+                                    'hasMultiplePerimeters' => $hasMultiplePerimeters,
                                 ])
                              </div>
                         </div>
@@ -147,6 +153,7 @@
                                @include('admin.bays._details', [
                                     'bay' => $bay,
                                     'withLink' => true,
+                                    'hasMultiplePerimeters' => $hasMultiplePerimeters,
                                 ])
                             </div>
                         </div>
@@ -170,6 +177,7 @@
                                @include('admin.physicalServers._details', [
                                     'physicalServer' => $physicalServer,
                                     'withLink' => true,
+                                    'hasMultiplePerimeters' => $hasMultiplePerimeters,
                                 ])
                             </div>
                         </div>
@@ -193,6 +201,7 @@
                                @include('admin.workstations._details', [
                                     'workstation' => $workstation,
                                     'withLink' => true,
+                                    'hasMultiplePerimeters' => $hasMultiplePerimeters,
                                 ])
                             </div>
                         </div>
@@ -216,6 +225,7 @@
                                @include('admin.storageDevices._details', [
                                     'storageDevice' => $storageDevice,
                                     'withLink' => true,
+                                    'hasMultiplePerimeters' => $hasMultiplePerimeters,
                                 ])
                             </div>
                         </div>
@@ -239,6 +249,7 @@
                                @include('admin.peripherals._details', [
                                     'peripheral' => $peripheral,
                                     'withLink' => true,
+                                    'hasMultiplePerimeters' => $hasMultiplePerimeters,
                                 ])
                             </div>
                         </div>
@@ -262,6 +273,7 @@
                                @include('admin.phones._details', [
                                     'phone' => $phone,
                                     'withLink' => true,
+                                    'hasMultiplePerimeters' => $hasMultiplePerimeters,
                                 ])
                             </div>
                         </div>
@@ -285,6 +297,7 @@
                                @include('admin.physicalSwitches._details', [
                                     'physicalSwitch' => $physicalSwitch,
                                     'withLink' => true,
+                                    'hasMultiplePerimeters' => $hasMultiplePerimeters,
                                 ])
                             </div>
                         </div>
@@ -308,6 +321,7 @@
                                @include('admin.physicalRouters._details', [
                                     'physicalRouter' => $physicalRouter,
                                     'withLink' => true,
+                                    'hasMultiplePerimeters' => $hasMultiplePerimeters,
                                 ])
                             </div>
                         </div>
@@ -331,6 +345,7 @@
                                @include('admin.wifiTerminals._details', [
                                     'wifiTerminal' => $wifiTerminal,
                                     'withLink' => true,
+                                    'hasMultiplePerimeters' => $hasMultiplePerimeters,
                                 ])
                             </div>
                         </div>
@@ -354,6 +369,7 @@
                                @include('admin.physicalSecurityDevices._details', [
                                     'physicalSecurityDevice' => $physicalSecurityDevice,
                                     'withLink' => true,
+                                    'hasMultiplePerimeters' => $hasMultiplePerimeters,
                                 ])
                             </div>
                         </div>
