@@ -3580,7 +3580,7 @@ class ScenarioBuilder
         return match ($this->pickWeighted(['C1' => 10, 'C2' => 30, 'C3' => 60])) {
             'C1' => [3, 4],
             'C2' => [2, 3],
-            default => [1],
+            default => [1, 1],
         };
     }
 
