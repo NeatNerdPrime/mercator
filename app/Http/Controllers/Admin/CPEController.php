@@ -9,7 +9,7 @@ use App\Models\CPEVersion;
 use Illuminate\Http\Client\ConnectionException;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Http;
-use Log;
+use Illuminate\Support\Facades\Log;
 
 class CPEController extends Controller
 {

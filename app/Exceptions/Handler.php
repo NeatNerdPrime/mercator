@@ -3,6 +3,8 @@
 namespace App\Exceptions;
 
 use Illuminate\Foundation\Exceptions\Handler as ExceptionHandler;
+use Illuminate\Support\Facades\Log;
+use Symfony\Component\HttpFoundation\Response;
 use Throwable;
 
 class Handler extends ExceptionHandler
@@ -31,12 +33,12 @@ class Handler extends ExceptionHandler
     public function report(Throwable $e): void
     {
         try {
-            \Log::error($e->getMessage(), [
+            Log::error($e->getMessage(), [
                 'exception' => $e::class,
                 'file' => $e->getFile(),
                 'line' => $e->getLine(),
             ]);
-        } catch (\Throwable $loggingError) {
+        } catch (Throwable $loggingError) {
             error_log('Error trying to log an exception : '.$loggingError->getMessage());
         }
         parent::report($e);
@@ -45,9 +47,9 @@ class Handler extends ExceptionHandler
     /**
      * Render an exception into an HTTP response.
      *
-     * @throws \Throwable
+     * @throws Throwable
      */
-    public function render($request, Throwable $e): \Symfony\Component\HttpFoundation\Response
+    public function render($request, Throwable $e): Response
     {
         return parent::render($request, $e);
     }
