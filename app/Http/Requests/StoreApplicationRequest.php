@@ -82,6 +82,10 @@ class StoreApplicationRequest extends BaseFormRequest
             'urls' => [
                 'nullable',
                 new UrlList,
+	    ],
+	    'documentation' => [
+                'nullable',
+                new UrlList,
             ],
         ];
     }

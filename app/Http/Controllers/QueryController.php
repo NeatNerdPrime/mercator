@@ -165,6 +165,7 @@ class QueryController extends Controller
             'count'  => $result instanceof GraphResult
                 ? $result->nodeCount()
                 : $result->rowCount(),
+            'truncated' => $result instanceof GraphResult && $result->truncated,
         ];
 
         return response()->json($response);

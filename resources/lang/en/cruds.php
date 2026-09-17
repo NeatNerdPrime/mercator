@@ -133,7 +133,7 @@ return [
             'description' => 'Description',
             'description_helper' => '',
             'documentation' => 'Documentation',
-            'documentation_helper' => 'Link to documentation',
+            'documentation_helper' => 'Link(s) to documentation (http(s)://...)',
             'entities' => 'Using entities',
             'entities_helper' => 'List of entities using the application',
             'entity_resp' => 'Operation',

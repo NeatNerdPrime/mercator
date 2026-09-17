@@ -47,20 +47,25 @@
         </div>
 
         {{-- RGPD --}}
+        <div class="perm-section">
         @include('admin.roles.partials._section_header', ['permission' => $permissions_sorted['gdpr'], 'label' => trans('cruds.menu.gdpr.title_short')])
         <div class="card-body"><div class="row">
             @include('admin.roles.partials._group', ['permission' => $permissions_sorted['data_processing'], 'label' => trans('cruds.dataProcessing.title')])
             @include('admin.roles.partials._group', ['permission' => $permissions_sorted['security_control'],  'label' => trans('cruds.securityControl.title')])
         </div></div>
+        </div>
 
         {{-- Ecosystème --}}
+        <div class="perm-section">
         @include('admin.roles.partials._section_header', ['permission' => $permissions_sorted['ecosystem'], 'label' => trans('cruds.menu.ecosystem.title_short')])
         <div class="card-body"><div class="row">
             @include('admin.roles.partials._group', ['permission' => $permissions_sorted['entity'],   'label' => trans('cruds.entity.title')])
             @include('admin.roles.partials._group', ['permission' => $permissions_sorted['relation'],  'label' => trans('cruds.relation.title')])
         </div></div>
+        </div>
 
         {{-- Métier --}}
+        <div class="perm-section">
         @include('admin.roles.partials._section_header', ['permission' => $permissions_sorted['metier'], 'label' => trans('cruds.menu.metier.title_short')])
         <div class="card-body">
             <div class="row">
@@ -74,6 +79,7 @@
                 @include('admin.roles.partials._group', ['permission' => $permissions_sorted['actor'],       'label' => trans('cruds.actor.title')])
                 @include('admin.roles.partials._group', ['permission' => $permissions_sorted['information'], 'label' => trans('cruds.information.title')])
             </div>
+        </div>
         </div>
 
         {{-- Application --}}
@@ -90,6 +96,7 @@
         </div></div>
 
         {{-- Administration --}}
+        <div class="perm-section">
         @include('admin.roles.partials._section_header', ['permission' => $permissions_sorted['administration'], 'label' => trans('cruds.menu.administration.title_short')])
         <div class="card-body"><div class="row">
             @include('admin.roles.partials._group', ['permission' => $permissions_sorted['zone_admin'],  'label' => trans('cruds.zoneAdmin.title')])
@@ -98,8 +105,10 @@
             @include('admin.roles.partials._group', ['permission' => $permissions_sorted['domain'],  'label' => trans('cruds.domain.title')])
             @include('admin.roles.partials._group', ['permission' => $permissions_sorted['admin_user'],  'label' => trans('cruds.adminUser.title')])
         </div></div>
+        </div>
 
         {{-- Infrastructure logique --}}
+        <div class="perm-section">
         @include('admin.roles.partials._section_header', ['permission' => $permissions_sorted['infrastructure'], 'label' => trans('cruds.menu.logical_infrastructure.title_short')])
         <div class="card-body"><div class="row">
             @include('admin.roles.partials._group', ['permission' => $permissions_sorted['network'],                   'label' => trans('cruds.network.title')])
@@ -109,8 +118,8 @@
             @include('admin.roles.partials._group', ['permission' => $permissions_sorted['network_switch'],            'label' => trans('cruds.networkSwitch.title')])
             @include('admin.roles.partials._group', ['permission' => $permissions_sorted['router'],                    'label' => trans('cruds.router.title')])
             @include('admin.roles.partials._group', ['permission' => $permissions_sorted['security_device'],           'label' => trans('cruds.securityDevice.title')])
-            @include('admin.roles.partials._group', ['permission' => $permissions_sorted['dhcp_server'],               'label' => trans('cruds.dhcpServer.title')])
-            @include('admin.roles.partials._group', ['permission' => $permissions_sorted['dnsserver'],                 'label' => trans('cruds.dnsserver.title')])
+            @include('admin.roles.partials._group', ['permission' => $permissions_sorted['dhcp_server'],               'label' => trans('cruds.dhcpServer.title'), 'deprecated' => true])
+            @include('admin.roles.partials._group', ['permission' => $permissions_sorted['dnsserver'],                 'label' => trans('cruds.dnsserver.title'), 'deprecated' => true])
             @include('admin.roles.partials._group', ['permission' => $permissions_sorted['cluster'],                   'label' => trans('cruds.cluster.title')])
             @include('admin.roles.partials._group', ['permission' => $permissions_sorted['logical_server'],            'label' => trans('cruds.logicalServer.title')])
             @include('admin.roles.partials._group', ['permission' => $permissions_sorted['container'],                 'label' => trans('cruds.container.title')])
@@ -119,8 +128,10 @@
             @include('admin.roles.partials._group', ['permission' => $permissions_sorted['certificate'],               'label' => trans('cruds.certificate.title')])
             @include('admin.roles.partials._group', ['permission' => $permissions_sorted['backup'],                    'label' => trans('cruds.backup.title')])
         </div></div>
+        </div>
 
         {{-- Infrastructure physique --}}
+        <div class="perm-section">
         @include('admin.roles.partials._section_header', ['permission' => $permissions_sorted['physicalinfrastructure'], 'label' => trans('cruds.menu.physical_infrastructure.title_short')])
         <div class="card-body"><div class="row">
             @include('admin.roles.partials._group', ['permission' => $permissions_sorted['site'],                     'label' => trans('cruds.site.title')])
@@ -141,8 +152,10 @@
             @include('admin.roles.partials._group', ['permission' => $permissions_sorted['man'],                      'label' => trans('cruds.man.title')])
             @include('admin.roles.partials._group', ['permission' => $permissions_sorted['lan'],                      'label' => trans('cruds.lan.title')])
         </div></div>
+        </div>
 
         {{-- Outils --}}
+        <div class="perm-section">
         @include('admin.roles.partials._section_header', ['permission' => $permissions_sorted['tools'], 'label' => trans('panel.menu.tools')])
         <div class="card-body"><div class="row">
             @include('admin.roles.partials._group', ['permission' => $permissions_sorted['graph'], 'label' => (trans('cruds.bpmn.title') . ' / ' .  trans('cruds.graph.title'))])
@@ -157,8 +170,10 @@
                 @include('admin.roles.partials._checkbox', ['action' => [$permission['actions'][0][0], trans('panel.menu.reports')]])
             </div>
         </div></div>
+        </div>
 
         {{-- Configuration --}}
+        <div class="perm-section">
         @include('admin.roles.partials._section_header', ['permission' => $permissions_sorted['configure'], 'label' => trans('cruds.menu.configuration.title')])
         <div class="card-body">
             <div class="row">
@@ -167,7 +182,7 @@
                         <label>Password</label>
                         <div class="form-switch{{ $disabled ? '' : ' form-switch-lg' }}">
                             <input class="form-check-input" type="checkbox" name="permissions[]"
-                                data-check="profile_password_edit" id="profile_password_edit"
+                                data-check="profile_password_edit" data-action="edit" id="profile_password_edit"
                                 value="256" @disabled($disabled) @checked(in_array('profile_password_edit', old('permissions', [])) || ($role && $role->permissions->contains(256)))>
                             <label class="form-check-label" for="for_profile_password_edit }}">edit</label>
                         </div>
@@ -181,6 +196,7 @@
                 @include('admin.roles.partials._group', ['permission' => $permissions_sorted['document'],  'label' => trans('cruds.configuration.documents.title')])
                 @include('admin.roles.partials._group', ['permission' => $permissions_sorted['audit_log'], 'label' => trans('cruds.auditLog.title'),  'indices' => [0, 1]])
             </div>
+        </div>
         </div>
     </div>
 

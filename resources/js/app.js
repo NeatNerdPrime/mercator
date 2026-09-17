@@ -147,6 +147,29 @@ document.addEventListener("DOMContentLoaded", function () {
         $select2.trigger('change')
     })
 
+    // Role permissions: per-section "All / list / show / create / edit / delete" toggle buttons
+    // DNSServer and DHCPServer are deprecated: their permissions are left untouched by these buttons.
+    const PERM_TOOLBAR_EXCLUDED_GROUPS = ['dnsserver', 'dhcp_server']
+    $(document).on('click', '.perm-toolbar-btn', function () {
+        const scope = $(this).data('scope')
+        const $section = $(this).closest('.perm-section')
+        if ($section.length === 0) return
+
+        let $checkboxes = $section.find('.card-body input[type="checkbox"]:not(:disabled)')
+        $checkboxes = $checkboxes.filter(function () {
+            return PERM_TOOLBAR_EXCLUDED_GROUPS.indexOf($(this).data('check')) === -1
+        })
+        if (scope !== 'all') {
+            $checkboxes = $checkboxes.filter(function () {
+                return $(this).data('action') === scope
+            })
+        }
+        if ($checkboxes.length === 0) return
+
+        const shouldCheck = !$checkboxes.first().prop('checked')
+        $checkboxes.prop('checked', shouldCheck)
+    })
+
     // Risk style on select2 options
     $('.risk').select2({
         templateSelection: function (data) {
