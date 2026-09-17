@@ -135,7 +135,7 @@ return [
             'description' => 'Description',
             'description_helper' => '',
             'documentation' => 'Documentation',
-            'documentation_helper' => 'Lien vers la documentation',
+            'documentation_helper' => 'Lien(s) vers la documentation (http(s)://...)',
             'entities' => 'Entités utilisatrices',
             'entities_helper' => "Liste des entités utilisatrices de l'application",
             'entity_resp' => 'Exploitation',
