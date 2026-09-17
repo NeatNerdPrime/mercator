@@ -17,6 +17,7 @@ pest()->extend(Tests\TestCase::class)
     ->in('Feature', 'Feature/Api', 'Feature/Controller', 'Unit');
 */
 
+use Database\Seeders\PerimetersTableSeeder;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
 
@@ -24,6 +25,22 @@ uses(TestCase::class, RefreshDatabase::class)
     ->in('Feature/Api', 'Feature/Controller', 'Feature/View', 'Feature/Security', 'Feature/Cartographer', 'Feature/Report');
 
 uses(TestCase::class, RefreshDatabase::class)->in('Unit');
+
+/*
+ * Le dump de schéma (database/schema/mysql-schema.sql) marque les migrations
+ * "perimeter" comme déjà appliquées, donc leur up() (qui insère le périmètre
+ * par défaut id=1) ne s'exécute jamais via RefreshDatabase. On garantit ici
+ * son existence avant chaque test, indépendamment de la liste de seeders que
+ * le test appelle lui-même via $this->seed([...]). Ce hook est déclaré
+ * séparément (sans lier de TestCase) pour s'appliquer aussi aux fichiers qui
+ * font leur propre uses(TestCase::class, RefreshDatabase::class) localement
+ * (ex: tests/Feature/*.php à la racine, tests/Feature/Console).
+ */
+uses()
+    ->beforeEach(function () {
+        (new PerimetersTableSeeder)->run();
+    })
+    ->in('Feature', 'Unit');
 
 // Grouper automatiquement certains dossiers
 uses()->group('api')->in('Feature/Api');
