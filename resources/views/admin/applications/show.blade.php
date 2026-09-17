@@ -205,11 +205,9 @@
                         {{ trans('cruds.application.fields.documentation') }}
                     </th>
                     <td colspan="5">
-                        @if (filter_var($application->documentation, FILTER_VALIDATE_URL))
-                            <a href="{{ $application->documentation }}">{{ $application->documentation }}</a>
-                        @else
-                            {{ $application->documentation }}
-                        @endif
+                        @foreach(array_filter(array_map('trim', explode(',', $application->documentation ?? ''))) as $doc)
+                            <a href="{{ $doc }}" target="_blank" rel="noopener noreferrer">{{ $doc }}</a>@if(!$loop->last), @endif
+                        @endforeach
                     </td>
                 </tr>
                 <tr>
