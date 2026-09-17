@@ -78,13 +78,39 @@ class User extends Authenticatable implements HasIconContract, OAuthenticatable
     }
 
     /**
+     * @var array<int, int>|null
+     */
+    private ?array $perimeterIdsCache = null;
+
+    /**
      * Ensemble distinct des `perimeter_id` de ses rôles.
+     *
+     * Mémorisé sur l'instance : `hasMultiplePerimeters()` est appelé (souvent deux fois) par
+     * quasiment chaque partial `_details.blade.php` de l'appli — sans ce cache, une vue listant
+     * N objets ré-exécute la requête `roles()->pluck('perimeter_id')` N fois pour le même
+     * utilisateur (auth()->user() renvoie la même instance tout au long de la requête).
+     * `EnsureActivePerimeter` invalide ce cache en tout début de requête via
+     * resetPerimeterCache(), donc la mémorisation ne survit jamais à un changement de rôles
+     * entre deux requêtes (y compris dans les tests qui réutilisent le même User via actingAs).
      *
      * @return array<int, int>
      */
     public function perimeterIds(): array
     {
-        return $this->roles()->pluck('perimeter_id')->unique()->values()->all();
+        if ($this->perimeterIdsCache === null) {
+            $this->perimeterIdsCache = $this->roles()->pluck('perimeter_id')->unique()->values()->all();
+        }
+
+        return $this->perimeterIdsCache;
+    }
+
+    /**
+     * Invalide le cache de perimeterIds(). Appelé par EnsureActivePerimeter en tout début de
+     * requête pour borner la mémorisation à la durée d'une seule requête.
+     */
+    public function resetPerimeterCache(): void
+    {
+        $this->perimeterIdsCache = null;
     }
 
     /**

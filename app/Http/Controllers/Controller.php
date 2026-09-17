@@ -15,7 +15,7 @@ class Controller extends BaseController
      * Resolve the page size for a server-side paginated list, remembering the
      * user's choice in session (per route) so it survives future visits.
      */
-    protected function resolvePerPage(int $default = 50, int $min = 10, int $max = 500): int
+    protected function resolvePerPage(int $default = 25, int $min = 10, int $max = 500): int
     {
         $key = $this->perPageSessionKey();
 

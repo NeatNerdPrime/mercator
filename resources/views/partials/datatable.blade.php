@@ -51,7 +51,7 @@ table = $('{{ $id }}').DataTable({
                 @php
                     $opts = $perPageOptions ?? [10, 25, 50, 100, 250];
                     $perPageSessionKey = 'per_page.'.(request()->route()?->getName() ?? request()->path());
-                    $cur  = (int) request('per_page', session($perPageSessionKey, 50));
+                    $cur  = (int) request('per_page', session($perPageSessionKey, 25));
                 @endphp
                 var wrap = document.createElement('div');
                 wrap.style.cssText = 'display:flex;align-items:center;gap:0.4rem;font-size:0.75rem';
