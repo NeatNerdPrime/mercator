@@ -6,9 +6,10 @@
     <tbody>
         <tr>
             <th width="10%">
-                {{ trans('cruds.storageDevice.fields.name') }}
+                {{ ($hasMultiplePerimeters ?? auth()->user()->hasMultiplePerimeters()) ? trans('cruds.perimeter.title_short').' / ' : '' }}{{ trans('cruds.storageDevice.fields.name') }}
             </th>
             <td width="20%">
+                @if (($hasMultiplePerimeters ?? auth()->user()->hasMultiplePerimeters())){{ $storageDevice->perimeter->nom }} / @endif
             @if ($withLink)
                 @canShow($storageDevice)
                 <a href="{{ route('admin.storage-devices.show', $storageDevice->id) }}">{{ $storageDevice->name }}</a>

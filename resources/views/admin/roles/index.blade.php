@@ -30,6 +30,9 @@
                         <th>
                             {{ trans('cruds.role.fields.title') }}
                         </th>
+                        <th>
+                            {{ trans('cruds.role.fields.perimeter') }}
+                        </th>
                         <th title="{{ trans('cruds.user.title') }}">#</th>
                         <th>{{ trans('cruds.cartographer.title') }}</th>
                         <th>&nbsp;</th>
@@ -44,6 +47,7 @@
                             <td>
                                 <x-show-link :model="$role" :label="$role->title ?? ''" />
                             </td>
+                            <td>{{ $role->perimeter->nom ?? '' }}</td>
                             <td>{{ $role->users_count }}</td>
 <td>@php
       $cells = [];

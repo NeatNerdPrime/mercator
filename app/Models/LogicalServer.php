@@ -7,24 +7,27 @@ use App\Contracts\HasPrefix;
 use App\Contracts\HasUniqueIdentifierContract;
 use App\Factories\LogicalServerFactory;
 use App\Traits\Auditable;
+use App\Traits\HasCartographers;
 use App\Traits\HasIcon;
+use App\Traits\HasPerimeter;
 use App\Traits\HasUniqueIdentifier;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\Factory;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
-use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
-use App\Traits\HasCartographers;
+use Illuminate\Support\Collection;
 
 /**
  * App\LogicalServer
  */
 class LogicalServer extends Model implements HasIconContract, HasPrefix, HasUniqueIdentifierContract
 {
-    use Auditable, HasIcon, HasUniqueIdentifier, HasFactory, SoftDeletes;
+    use Auditable, HasFactory, HasIcon, HasUniqueIdentifier, SoftDeletes;
     use HasCartographers;
+    use HasPerimeter;
 
     public $table = 'logical_servers';
 
@@ -48,6 +51,7 @@ class LogicalServer extends Model implements HasIconContract, HasPrefix, HasUniq
     ];
 
     protected $fillable = [
+        'perimeter_id',
         'ext_refs',
         'name',
         'type',
@@ -76,9 +80,9 @@ class LogicalServer extends Model implements HasIconContract, HasPrefix, HasUniq
 
     protected $casts = [
         'patching_frequency' => 'integer',
-        'install_date'       => 'date',
-        'update_date'        => 'date',
-        'next_update'        => 'date',
+        'install_date' => 'date',
+        'update_date' => 'date',
+        'next_update' => 'date',
     ];
 
     protected static function newFactory(): Factory
@@ -98,8 +102,8 @@ class LogicalServer extends Model implements HasIconContract, HasPrefix, HasUniq
         return $this->belongsToMany(PhysicalServer::class)->orderBy('name');
     }
 
-    /** @return \Illuminate\Support\Collection<int, int> */
-    public function serverIds(): \Illuminate\Support\Collection
+    /** @return Collection<int, int> */
+    public function serverIds(): Collection
     {
         return $this->belongsToMany(PhysicalServer::class)->pluck('id');
     }
@@ -140,8 +144,8 @@ class LogicalServer extends Model implements HasIconContract, HasPrefix, HasUniq
         return $this->belongsToMany(Container::class)->orderBy('name');
     }
 
-    /** @return \Illuminate\Database\Eloquent\Relations\BelongsToMany<Backup, $this> */
-    public function backups(): \Illuminate\Database\Eloquent\Relations\BelongsToMany
+    /** @return BelongsToMany<Backup, $this> */
+    public function backups(): BelongsToMany
     {
         return $this->belongsToMany(Backup::class, 'backup_logical_server');
     }

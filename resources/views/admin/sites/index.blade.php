@@ -26,6 +26,9 @@
                     <tr>
                         <th width="10">
                         </th>
+                        @if (auth()->user()->hasMultiplePerimeters())
+                            <th data-column="perimeter">{{ trans('cruds.perimeter.title_short') }}</th>
+                        @endif
                         <th>
                             {{ trans('cruds.site.fields.name') }}
                         </th>
@@ -58,6 +61,9 @@
                             <td>
 
                             </td>
+                            @if (auth()->user()->hasMultiplePerimeters())
+                                <td>{{ $site->perimeter->nom }}</td>
+                            @endif
                             <td>
                                 <x-show-link :model="$site" />
                             </td>
@@ -123,11 +129,12 @@
 <script>
 @include('partials.datatable', array(
     'id' => '#dataTable',
+            'order' => auth()->user()->hasMultiplePerimeters() ? '[[2, "asc"]]' : '[[1, "asc"]]',
     'title' => trans("cruds.site.title_singular"),
     'URL' => route('admin.sites.massDestroy'),
     'canDelete' => auth()->user()->can('site_delete') ? true : false,
     'serverSidePagination' => true,
-    'hiddenColumns' => ['type', 'attributes'],
+    'hiddenColumns' => ['perimeter', 'type', 'attributes'],
 ));
 </script>
 @endsection

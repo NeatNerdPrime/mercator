@@ -4,6 +4,7 @@ namespace App\Factories;
 
 use App\Models\Bay;
 use App\Models\Building;
+use App\Support\FakerPatterns;
 use Illuminate\Database\Eloquent\Factories\Factory;
 use Illuminate\Support\Carbon;
 
@@ -14,7 +15,7 @@ class BayFactory extends Factory
     public function definition(): array
     {
         return [
-            'name' => $this->faker->name(),
+            'name' => $this->faker->regexify(FakerPatterns::BAY_NAME),
             'description' => $this->faker->text(),
             'created_at' => Carbon::now(),
             'updated_at' => Carbon::now(),

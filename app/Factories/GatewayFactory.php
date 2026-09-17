@@ -3,6 +3,7 @@
 namespace App\Factories;
 
 use App\Models\Gateway;
+use App\Support\FakerPatterns;
 use Illuminate\Database\Eloquent\Factories\Factory;
 use Illuminate\Support\Carbon;
 
@@ -13,7 +14,7 @@ class GatewayFactory extends Factory
     public function definition(): array
     {
         return [
-            'name' => $this->faker->name(),
+            'name' => $this->faker->regexify(FakerPatterns::HOSTNAME),
             'description' => $this->faker->text(),
             'ip' => $this->faker->ipv4(),
             'authentification' => $this->faker->word(),

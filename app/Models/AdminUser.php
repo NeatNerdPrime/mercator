@@ -8,6 +8,7 @@ use App\Contracts\HasUniqueIdentifierContract;
 use App\Factories\AdminUserFactory;
 use App\Traits\Auditable;
 use App\Traits\HasIcon;
+use App\Traits\HasPerimeter;
 use App\Traits\HasUniqueIdentifier;
 use Illuminate\Database\Eloquent\Factories\Factory;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -19,9 +20,10 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 /**
  * App\AdminUser
  */
-class AdminUser extends Model implements HasPrefix, HasIconContract, HasUniqueIdentifierContract
+class AdminUser extends Model implements HasIconContract, HasPrefix, HasUniqueIdentifierContract
 {
-    use Auditable, HasFactory, HasUniqueIdentifier, SoftDeletes, HasIcon;
+    use Auditable, HasFactory, HasIcon, HasUniqueIdentifier, SoftDeletes;
+    use HasPerimeter;
 
     public $table = 'admin_users';
 
@@ -45,6 +47,7 @@ class AdminUser extends Model implements HasPrefix, HasIconContract, HasUniqueId
 
     protected $fillable = [
         'ext_refs',
+        'perimeter_id',
         'user_id',
         'type',
         'attributes',

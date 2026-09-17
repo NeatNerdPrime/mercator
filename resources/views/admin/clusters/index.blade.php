@@ -27,6 +27,9 @@
                         <th width="10">
 
                         </th>
+                        @if (auth()->user()->hasMultiplePerimeters())
+                            <th data-column="perimeter">{{ trans('cruds.perimeter.title_short') }}</th>
+                        @endif
                         <th>
                             {{ trans('cruds.cluster.fields.name') }}
                         </th>
@@ -65,6 +68,9 @@
                             <td>
 
                             </td>
+                            @if (auth()->user()->hasMultiplePerimeters())
+                                <td>{{ $cluster->perimeter->nom }}</td>
+                            @endif
                             <td>
                                 <x-show-link :model="$cluster" />
                             </td>
@@ -151,11 +157,12 @@
     <script>
         @include('partials.datatable', array(
             'id' => '#dataTable',
+            'order' => auth()->user()->hasMultiplePerimeters() ? '[[2, "asc"]]' : '[[1, "asc"]]',
             'title' => trans("cruds.cluster.title_singular"),
             'URL' => route('admin.clusters.massDestroy'),
             'canDelete' => auth()->user()->can('cluster_delete') ? true : false,
     'serverSidePagination' => true,
-    'hiddenColumns' => ['description', 'address_ip'],
+    'hiddenColumns' => ['perimeter', 'description', 'address_ip'],
 ));
     </script>
 @endsection

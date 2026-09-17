@@ -9,6 +9,7 @@ use App\Factories\SiteFactory;
 use App\Traits\Auditable;
 use App\Traits\HasCartographers;
 use App\Traits\HasIcon;
+use App\Traits\HasPerimeter;
 use App\Traits\HasUniqueIdentifier;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\Factory;
@@ -35,6 +36,7 @@ class Site extends Model implements HasIconContract, HasPrefix, HasUniqueIdentif
 {
     use Auditable, HasFactory, HasIcon, HasUniqueIdentifier, SoftDeletes;
     use HasCartographers;
+    use HasPerimeter;
 
     public $table = 'sites';
 
@@ -43,6 +45,7 @@ class Site extends Model implements HasIconContract, HasPrefix, HasUniqueIdentif
     public static string $icon = '/images/site.png';
 
     protected $fillable = [
+        'perimeter_id',
         'ext_refs',
         'name',
         'type',

@@ -13,6 +13,38 @@
         </div>
         <div class="card-body">
             <div class="row">
+                @if (auth()->user()->hasMultiplePerimeters())
+                <div class="col-2">
+                    <div class="form-group">
+                        <label for="perimeter_id">{{ trans('cruds.perimeter.title_short') }}</label>
+                        <select class="form-control select2 {{ $errors->has('perimeter_id') ? 'is-invalid' : '' }}"
+                                name="perimeter_id" id="perimeter_id">
+                            @foreach (\App\Models\Perimeter::whereIn('id', auth()->user()->perimeterIds())->orderBy('nom')->get() as $perimeterOption)
+                                <option value="{{ $perimeterOption->id }}"
+                                        {{ (int) old('perimeter_id', auth()->user()->activeOrDefaultPerimeterId()) === $perimeterOption->id ? 'selected' : '' }}>
+                                    {{ $perimeterOption->nom }}
+                                </option>
+                            @endforeach
+                        </select>
+                        @if($errors->has('perimeter_id'))
+                            <div class="invalid-feedback">{{ $errors->first('perimeter_id') }}</div>
+                        @endif
+                    </div>
+                </div>
+                <div class="col-3">
+                    <div class="form-group">
+                        <label class="label-required" for="name">{{ trans('cruds.information.fields.name') }}</label>
+                        <input class="form-control {{ $errors->has('name') ? 'is-invalid' : '' }}" type="text" name="name"
+                               id="name" value="{{ old('name', '') }}" required maxlength="64" autofocus/>
+                        @if($errors->has('name'))
+                            <div class="invalid-feedback">
+                                {{ $errors->first('name') }}
+                            </div>
+                        @endif
+                        <span class="help-block">{{ trans('cruds.information.fields.name_helper') }}</span>
+                    </div>
+                </div>
+            @else
                 <div class="col-5">
                     <div class="form-group">
                         <label class="label-required" for="name">{{ trans('cruds.information.fields.name') }}</label>
@@ -26,6 +58,7 @@
                         <span class="help-block">{{ trans('cruds.information.fields.name_helper') }}</span>
                     </div>
                 </div>
+            @endif
                 <div class="col-2">
                     <div class="form-group">
                         <label for="type">{{ trans('cruds.information.fields.type') }}</label>

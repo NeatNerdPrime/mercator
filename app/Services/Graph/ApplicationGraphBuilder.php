@@ -38,6 +38,14 @@ class ApplicationGraphBuilder
 
         $lines = ['digraph  {'];
 
+        // Pre-index the ids of each collection once (O(1) isset lookups below) instead of
+        // calling Collection::contains('id', ...) — an O(n) linear scan — inside the loops
+        // over applications/services, which made graph building O(n*m).
+        $applicationBlockIds = $applicationBlocks->pluck('id')->flip();
+        $applicationServiceIds = $applicationServices->pluck('id')->flip();
+        $applicationModuleIds = $applicationModules->pluck('id')->flip();
+        $databaseIds = $databases->pluck('id')->flip();
+
         foreach ($applicationBlocks as $ab) {
             $lines[] = DotNode::withImage('AB'.$ab->id, $iconResolver(null, '/images/applicationblock.png'), [e($ab->name)], $this->href($ab, $withHref));
         }
@@ -47,18 +55,18 @@ class ApplicationGraphBuilder
             $lines[] = DotNode::withImage('A'.$application->id, $image, [e($application->name)], $this->href($application, $withHref));
 
             foreach ($application->services as $service) {
-                if ($applicationServices->contains('id', $service->id)) {
+                if ($applicationServiceIds->has($service->id)) {
                     $lines[] = 'A'.$application->id.' -> AS'.$service->id;
                 }
             }
 
             foreach ($application->databases as $database) {
-                if ($databases->contains('id', $database->id)) {
+                if ($databaseIds->has($database->id)) {
                     $lines[] = 'A'.$application->id.' -> DB'.$database->id;
                 }
             }
 
-            if ($application->application_block_id !== null && $applicationBlocks->contains('id', $application->application_block_id)) {
+            if ($application->application_block_id !== null && $applicationBlockIds->has($application->application_block_id)) {
                 $lines[] = 'AB'.$application->application_block_id.' -> A'.$application->id;
             }
         }
@@ -67,7 +75,7 @@ class ApplicationGraphBuilder
             $lines[] = DotNode::withImage('AS'.$service->id, $iconResolver(null, '/images/applicationservice.png'), [e($service->name)], $this->href($service, $withHref));
 
             foreach ($service->modules as $module) {
-                if ($applicationModules->contains('id', $module->id)) {
+                if ($applicationModuleIds->has($module->id)) {
                     $lines[] = 'AS'.$service->id.' -> M'.$module->id;
                 }
             }

@@ -8,7 +8,6 @@ use Symfony\Component\HttpFoundation\Response;
 
 class StoreAdminUserRequest extends BaseFormRequest
 {
-
     protected array $htmlFields = ['description'];
 
     public function authorize(): bool
@@ -21,6 +20,7 @@ class StoreAdminUserRequest extends BaseFormRequest
     public function rules(): array
     {
         return [
+            'perimeter_id' => ['nullable', 'integer', Rule::in(auth()->user()?->perimeterIds() ?? [])],
             'user_id' => [
                 'min:3',
                 'max:32',

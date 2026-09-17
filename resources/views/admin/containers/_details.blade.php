@@ -2,9 +2,10 @@
     <tbody>
         <tr>
             <th width="10%">
-                {{ trans('cruds.container.fields.name') }}
+                {{ auth()->user()->hasMultiplePerimeters() ? trans('cruds.perimeter.title_short').' / ' : '' }}{{ trans('cruds.container.fields.name') }}
             </th>
             <td width="20%">
+                @if (auth()->user()->hasMultiplePerimeters()){{ $container->perimeter->nom }} / @endif
                 {{ $container->name }}
             </td>
             <th width="10%">

@@ -7,9 +7,10 @@
     <tbody>
         <tr>
             <th width="10%">
-                {{ trans('cruds.task.fields.name') }}
+                {{ auth()->user()->hasMultiplePerimeters() ? trans('cruds.perimeter.title_short').' / ' : '' }}{{ trans('cruds.task.fields.name') }}
             </th>
             <td width="20%">
+                @if (auth()->user()->hasMultiplePerimeters()){{ $task->perimeter->nom }} / @endif
             @if($withLink)
                 @canShow($task)
                 <a href="{{ route('admin.tasks.show', $task) }}">{{ $task->name }}</a>

@@ -8,6 +8,7 @@ use App\Models\Domain;
 use App\Models\Entity;
 use App\Models\Peripheral;
 use App\Models\Site;
+use App\Support\FakerPatterns;
 use Illuminate\Database\Eloquent\Factories\Factory;
 use Illuminate\Support\Carbon;
 
@@ -18,13 +19,13 @@ class PeripheralFactory extends Factory
     public function definition(): array
     {
         return [
-            'name' => $this->faker->name(),
+            'name' => $this->faker->regexify(FakerPatterns::HOSTNAME),
             'type' => $this->faker->word(),
             'icon_id' => null,
             'description' => $this->faker->text(),
             'vendor' => $this->faker->word(),
             'product' => $this->faker->word(),
-            'version' => $this->faker->word(),
+            'version' => $this->faker->regexify(FakerPatterns::SEMVER),
             'responsible' => $this->faker->word(),
             'address_ip' => $this->faker->ipv4(),
             'created_at' => Carbon::now(),

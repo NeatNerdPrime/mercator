@@ -5,8 +5,9 @@
 <table class="table table-bordered table-striped table-report" id="{{ $zone->getUID() }}">
     <tbody>
     <tr>
-        <th width="10%">{{ trans('cruds.zone.fields.name') }}</th>
+        <th width="10%">{{ auth()->user()->hasMultiplePerimeters() ? trans('cruds.perimeter.title_short').' / ' : '' }}{{ trans('cruds.zone.fields.name') }}</th>
         <td width="20%">
+                @if (auth()->user()->hasMultiplePerimeters()){{ $zone->perimeter->nom }} / @endif
         @if($withLink)
         @canShow($zone)
         <a href="{{ route('admin.zones.show', $zone->id) }}">{{ $zone->name }}</a>

@@ -9,19 +9,22 @@ class UpdateBuildingRequest extends BaseFormRequest
 {
     protected array $htmlFields = ['description'];
 
-    public function authorize() : bool
+    public function authorize(): bool
     {
         return $this->authorizeEdit();
     }
 
-    public function rules() : array
+    public function rules(): array
     {
+        $perimeterId = $this->input('perimeter_id') ?: $this->route('building')?->perimeter_id;
+
         return [
+            'perimeter_id' => ['nullable', 'integer', Rule::in(auth()->user()?->perimeterIds() ?? [])],
             'name' => [
                 'min:2',
                 'max:32',
                 'required',
-                Rule::unique('buildings')
+                Rule::unique('buildings')->where('perimeter_id', $perimeterId)
                     ->ignore($this->route('building')->id ?? $this->id)
                     ->whereNull('deleted_at'),
             ],

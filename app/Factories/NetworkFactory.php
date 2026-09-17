@@ -3,6 +3,7 @@
 namespace App\Factories;
 
 use App\Models\Network;
+use App\Support\FakerPatterns;
 use Illuminate\Database\Eloquent\Factories\Factory;
 use Illuminate\Support\Carbon;
 
@@ -13,7 +14,7 @@ class NetworkFactory extends Factory
     public function definition(): array
     {
         return [
-            'name' => $this->faker->name(),
+            'name' => $this->faker->regexify(FakerPatterns::NETWORK_SEGMENT),
             'description' => $this->faker->text(),
             'protocol_type' => $this->faker->word(),
             'responsible' => $this->faker->word(),

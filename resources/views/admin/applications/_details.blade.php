@@ -1,12 +1,15 @@
 @props([
     'application',
     'withLink' => false,
+    'hasMultiplePerimeters' => null,
 ])
+@php($hasMultiplePerimeters ??= auth()->user()->hasMultiplePerimeters())
 <table class="table table-bordered table-striped table-report" id="{{ $application->getUID() }}">
     <tbody>
     <tr>
-        <th width="10%">{{ trans('cruds.application.fields.name') }}</th>
+        <th width="10%">{{ $hasMultiplePerimeters ? trans('cruds.perimeter.title_short').' / ' : '' }}{{ trans('cruds.application.fields.name') }}</th>
         <td width="20%">
+                @if ($hasMultiplePerimeters){{ $application->perimeter->nom }} / @endif
         @if ($withLink)
             @canShow($application)
             <a href='{{ route("admin.applications.show", $application->id) }}'>{{ $application->name }}</a>

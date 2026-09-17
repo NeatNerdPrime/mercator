@@ -3,6 +3,7 @@
 namespace App\Factories;
 
 use App\Models\CPEVendor;
+use App\Support\FakerPatterns;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
 class CPEVendorFactory extends Factory
@@ -13,7 +14,7 @@ class CPEVendorFactory extends Factory
     {
         return [
             'part' => $this->faker->word(),
-            'name' => $this->faker->name(),
+            'name' => $this->faker->regexify(FakerPatterns::ORG_NAME),
         ];
     }
 }

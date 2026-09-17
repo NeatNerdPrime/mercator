@@ -6,9 +6,10 @@
     <tbody>
     <tr>
         <th width="10%">
-            {{ trans('cruds.physicalServer.fields.name') }}
+            {{ ($hasMultiplePerimeters ?? auth()->user()->hasMultiplePerimeters()) ? trans('cruds.perimeter.title_short').' / ' : '' }}{{ trans('cruds.physicalServer.fields.name') }}
         </th>
         <td width="20%">
+                @if (($hasMultiplePerimeters ?? auth()->user()->hasMultiplePerimeters())){{ $physicalServer->perimeter->nom }} / @endif
         @if($withLink)
             @canShow($physicalServer)
                 <a href="{{ route('admin.physical-servers.show', $physicalServer) }}">{{ $physicalServer->name }}</a>

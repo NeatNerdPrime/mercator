@@ -27,6 +27,9 @@
                         <th width="10">
 
                         </th>
+                        @if (auth()->user()->hasMultiplePerimeters())
+                            <th data-column="perimeter">{{ trans('cruds.perimeter.title_short') }}</th>
+                        @endif
                         <th>
                             {{ trans('cruds.workstation.fields.name') }}
                         </th>
@@ -81,6 +84,9 @@
                             <td>
 
                             </td>
+                            @if (auth()->user()->hasMultiplePerimeters())
+                                <td>{{ $workstation->perimeter->nom }}</td>
+                            @endif
                             <td>
                                 <x-show-link :model="$workstation" />
                             </td>
@@ -171,11 +177,12 @@
     <script>
         @include('partials.datatable', array(
             'id' => '#dataTable',
+            'order' => auth()->user()->hasMultiplePerimeters() ? '[[2, "asc"]]' : '[[1, "asc"]]',
             'title' => trans("cruds.workstation.title_singular"),
             'URL' => route('admin.workstations.massDestroy'),
             'canDelete' => auth()->user()->can('workstation_delete') ? true : false,
     'serverSidePagination' => true,
-    'hiddenColumns' => ['type', 'attributes', 'description', 'manufacturer', 'model', 'address_ip'],
+    'hiddenColumns' => ['perimeter', 'type', 'attributes', 'description', 'manufacturer', 'model', 'address_ip'],
 ));
     </script>
 @endsection

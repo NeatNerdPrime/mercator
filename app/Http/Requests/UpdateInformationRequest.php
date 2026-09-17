@@ -7,19 +7,23 @@ use Illuminate\Validation\Rule;
 class UpdateInformationRequest extends BaseFormRequest
 {
     protected array $htmlFields = ['description', 'constraints'];
-    public function authorize() : bool
+
+    public function authorize(): bool
     {
         return $this->authorizeEdit();
     }
 
-    public function rules() : array
+    public function rules(): array
     {
+        $perimeterId = $this->input('perimeter_id') ?: $this->route('information')?->perimeter_id;
+
         return [
+            'perimeter_id' => ['nullable', 'integer', Rule::in(auth()->user()?->perimeterIds() ?? [])],
             'name' => [
                 'min:3',
                 'max:64',
                 'required',
-                Rule::unique('information')
+                Rule::unique('information')->where('perimeter_id', $perimeterId)
                     ->ignore($this->route('information')->id ?? $this->id)
                     ->whereNull('deleted_at'),
             ],

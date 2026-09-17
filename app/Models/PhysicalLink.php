@@ -3,8 +3,10 @@
 namespace App\Models;
 
 use App\Factories\PhysicalLinkFactory;
+use App\Scopes\PhysicalLinkPerimeterScope;
 use App\Traits\Auditable;
 use App\Traits\HasCartographers;
+use App\Traits\HasPerimeter;
 use Illuminate\Database\Eloquent\Factories\Factory;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
@@ -15,10 +17,12 @@ class PhysicalLink extends Model
 {
     use Auditable, HasFactory, SoftDeletes;
     use HasCartographers;
+    use HasPerimeter;
 
     public $table = 'physical_links';
 
     protected $fillable = [
+        'perimeter_id',
         'ext_refs',
         'type',
         'color',
@@ -44,9 +48,62 @@ class PhysicalLink extends Model
         'deleted_at',
     ];
 
+    /**
+     * Mapping des champs ID vers les noms de relations pour les sources
+     */
+    private const SOURCE_RELATIONS = [
+        'peripheral_src_id' => 'peripheralSrc',
+        'phone_src_id' => 'phoneSrc',
+        'physical_router_src_id' => 'physicalRouterSrc',
+        'physical_security_device_src_id' => 'physicalSecurityDeviceSrc',
+        'physical_server_src_id' => 'physicalServerSrc',
+        'physical_switch_src_id' => 'physicalSwitchSrc',
+        'storage_device_src_id' => 'storageDeviceSrc',
+        'wifi_terminal_src_id' => 'wifiTerminalSrc',
+        'workstation_src_id' => 'workstationSrc',
+        'logical_server_src_id' => 'logicalServerSrc',
+        'network_switch_src_id' => 'networkSwitchSrc',
+        'router_src_id' => 'routerSrc',
+    ];
+
+    /**
+     * Mapping des champs ID vers les noms de relations pour les destinations
+     */
+    private const DEST_RELATIONS = [
+        'peripheral_dest_id' => 'peripheralDest',
+        'phone_dest_id' => 'phoneDest',
+        'physical_router_dest_id' => 'physicalRouterDest',
+        'physical_security_device_dest_id' => 'physicalSecurityDeviceDest',
+        'physical_server_dest_id' => 'physicalServerDest',
+        'physical_switch_dest_id' => 'physicalSwitchDest',
+        'storage_device_dest_id' => 'storageDeviceDest',
+        'wifi_terminal_dest_id' => 'wifiTerminalDest',
+        'workstation_dest_id' => 'workstationDest',
+        'logical_server_dest_id' => 'logicalServerDest',
+        'network_switch_dest_id' => 'networkSwitchDest',
+        'router_dest_id' => 'routerDest',
+    ];
+
     protected static function newFactory(): Factory
     {
         return PhysicalLinkFactory::new();
+    }
+
+    protected static function perimeterScopeClass(): string
+    {
+        return PhysicalLinkPerimeterScope::class;
+    }
+
+    /**
+     * Colonnes source/destination pouvant chacune porter un équipement d'un
+     * périmètre différent du lien lui-même. Utilisé par
+     * PhysicalLinkPerimeterScope pour filtrer sur le périmètre actif.
+     *
+     * @return array<string, string> field => relation name
+     */
+    public static function perimeterRelations(): array
+    {
+        return self::SOURCE_RELATIONS + self::DEST_RELATIONS;
     }
 
     /* ⋅.˳˳.⋅ॱ˙˙ॱ⋅.˳˳.⋅ॱ˙˙ॱᐧ.˳˳.⋅  Sources  ⋅.˳˳.⋅ॱ˙˙ॱ⋅.˳˳.⋅ॱ˙˙ॱᐧ.˳˳.⋅ */

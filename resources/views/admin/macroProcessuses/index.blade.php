@@ -26,6 +26,9 @@
                     <tr>
                         <th width="10">
                         </th>
+                        @if (auth()->user()->hasMultiplePerimeters())
+                            <th data-column="perimeter">{{ trans('cruds.perimeter.title_short') }}</th>
+                        @endif
                         <th>
                             {{ trans('cruds.macroProcessus.fields.name') }}
                         </th>
@@ -76,6 +79,9 @@
                             <td>
 
                             </td>
+                            @if (auth()->user()->hasMultiplePerimeters())
+                                <td>{{ $macroProcessus->perimeter->nom }}</td>
+                            @endif
                             <td>
                                 <x-show-link :model="$macroProcessus" />
                             </td>
@@ -152,11 +158,12 @@
 <script>
 @include('partials.datatable', array(
     'id' => '#dataTable',
+            'order' => auth()->user()->hasMultiplePerimeters() ? '[[2, "asc"]]' : '[[1, "asc"]]',
     'title' => trans("cruds.macroProcessus.title_singular"),
     'URL' => route('admin.macro-processuses.massDestroy'),
     'canDelete' => auth()->user()->can('site_delete') ? true : false,
     'serverSidePagination' => true,
-    'hiddenColumns' => ['type', 'attributes', 'io_elements'],
+    'hiddenColumns' => ['perimeter', 'type', 'attributes', 'io_elements'],
 ));
 </script>
 @endsection

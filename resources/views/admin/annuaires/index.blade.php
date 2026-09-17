@@ -27,6 +27,9 @@
                         <th width="10">
 
                         </th>
+                        @if (auth()->user()->hasMultiplePerimeters())
+                            <th data-column="perimeter">{{ trans('cruds.perimeter.title_short') }}</th>
+                        @endif
                         <th>
                             {{ trans('cruds.annuaire.fields.name') }}
                         </th>
@@ -70,6 +73,9 @@
                             <td>
 
                             </td>
+                            @if (auth()->user()->hasMultiplePerimeters())
+                                <td>{{ $annuaire->perimeter->nom }}</td>
+                            @endif
                             <td>
                                 <x-show-link :model="$annuaire" />
                             </td>
@@ -145,11 +151,12 @@
     <script>
         @include('partials.datatable', array(
             'id' => '#dataTable',
+            'order' => auth()->user()->hasMultiplePerimeters() ? '[[2, "asc"]]' : '[[1, "asc"]]',
             'title' => trans("cruds.annuaire.title_singular"),
             'URL' => route('admin.annuaires.massDestroy'),
             'canDelete' => auth()->user()->can('annuaire_delete') ? true : false,
     'serverSidePagination' => true,
-    'hiddenColumns' => ['type', 'attributes', 'description'],
+    'hiddenColumns' => ['perimeter', 'type', 'attributes', 'description'],
 ));
     </script>
 @endsection

@@ -18,18 +18,21 @@ class StoreZoneRequest extends FormRequest
 
     public function rules(): array
     {
+        $perimeterId = $this->input('perimeter_id') ?: auth()->user()?->activeOrDefaultPerimeterId();
+
         return [
-            'name'        => ['required', 'string', 'max:255', Rule::unique('zones', 'name')->whereNull('deleted_at')],
-            'type'        => 'nullable|string|max:255',
-            'attributes'  => 'nullable',
+            'perimeter_id' => ['nullable', 'integer', Rule::in(auth()->user()?->perimeterIds() ?? [])],
+            'name' => ['required', 'string', 'max:255', Rule::unique('zones', 'name')->where('perimeter_id', $perimeterId)->whereNull('deleted_at')],
+            'type' => 'nullable|string|max:255',
+            'attributes' => 'nullable',
             'description' => 'nullable|string',
             'parentZones' => 'nullable|array',
             'parentZones.*' => 'exists:zones,id',
-            'childZones'  => 'nullable|array',
+            'childZones' => 'nullable|array',
             'childZones.*' => 'exists:zones,id',
-            'buildings'   => 'nullable|array',
+            'buildings' => 'nullable|array',
             'buildings.*' => 'exists:buildings,id',
-            'adminUsers'  => 'nullable|array',
+            'adminUsers' => 'nullable|array',
             'adminUsers.*' => 'exists:admin_users,id',
         ];
     }

@@ -20,12 +20,15 @@ class StoreRouterRequest extends BaseFormRequest
 
     public function rules()
     {
+        $perimeterId = $this->input('perimeter_id') ?: auth()->user()?->activeOrDefaultPerimeterId();
+
         return [
+            'perimeter_id' => ['nullable', 'integer', Rule::in(auth()->user()?->perimeterIds() ?? [])],
             'name' => [
                 'min:3',
                 'max:32',
                 'required',
-                Rule::unique('routers')->whereNull('deleted_at'),
+                Rule::unique('routers')->where('perimeter_id', $perimeterId)->whereNull('deleted_at'),
             ],
             'physicalRouters.*' => [
                 'integer',

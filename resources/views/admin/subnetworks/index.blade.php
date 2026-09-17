@@ -27,6 +27,9 @@
                         <th width="10">
 
                         </th>
+                        @if (auth()->user()->hasMultiplePerimeters())
+                            <th data-column="perimeter">{{ trans('cruds.perimeter.title_short') }}</th>
+                        @endif
                         <th>
                             {{ trans('cruds.subnetwork.fields.name') }}
                         </th>
@@ -89,6 +92,9 @@
                             <td>
 
                             </td>
+                            @if (auth()->user()->hasMultiplePerimeters())
+                                <td>{{ $subnetwork->perimeter->nom }}</td>
+                            @endif
                             <td>
                                 <x-show-link :model="$subnetwork" />
                             </td>
@@ -184,11 +190,12 @@
     <script>
         @include('partials.datatable', array(
             'id' => '#dataTable',
+            'order' => auth()->user()->hasMultiplePerimeters() ? '[[2, "asc"]]' : '[[1, "asc"]]',
             'title' => trans("cruds.subnetwork.title_singular"),
             'URL' => route('admin.subnetworks.massDestroy'),
             'canDelete' => auth()->user()->can('subnetwork_delete') ? true : false,
     'serverSidePagination' => true,
-    'hiddenColumns' => ['responsible_exp'],
+    'hiddenColumns' => ['perimeter', 'responsible_exp'],
 ));
     </script>
 @endsection

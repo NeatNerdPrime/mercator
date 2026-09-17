@@ -578,6 +578,12 @@ return [
             'error_mosp_unreachable' => "La plateforme d'objets MOSP (objects.monarc.lu) n'a pas pu être contactée",
             'link_reset_help' => "Cette action supprime uniquement la liaison locale entre les objets Mercator et les objets de l'analyse de risques Monarc (correspondances suivies par Mercator). Elle ne supprime rien dans Monarc lui-même : l'ANR et son contenu restent intacts.",
         ],
+        'perimeters' => [
+            'title' => 'Gestion des périmètres',
+            'title_short' => 'Périmètres',
+            'help' => "Un périmètre permet de cloisonner la cartographie par établissement : chaque objet appartient à un périmètre unique. Cette fonctionnalité est désactivée par défaut ; tant qu'elle n'est pas activée, l'application se comporte comme si un seul périmètre existait.",
+            'enabled' => 'Activer les périmètres',
+        ],
         'parameters' => [
             'title' => 'Gestion des paramètres de customisation',
             'title_short' => 'Paramètres',
@@ -1768,12 +1774,28 @@ return [
             'engine' => 'Moteur',
         ],
     ],
+    'perimeter' => [
+        'fields' => [
+            'id' => '#',
+            'nom' => 'Nom',
+            'nom_helper' => 'Nom du périmètre',
+        ],
+        'title' => 'Périmètres',
+        'title_short' => 'Périmètre',
+        'title_singular' => 'Périmètre',
+        'errors' => [
+            'default_not_deletable' => 'Le périmètre par défaut ne peut pas être supprimé.',
+            'in_use' => 'Ce périmètre est rattaché à au moins un rôle et ne peut pas être supprimé.',
+        ],
+    ],
     'role' => [
         'fields' => [
             'permissions' => 'Permissions',
             'permissions_helper' => '',
             'title' => 'Nom',
             'title_helper' => 'Nom du rôle',
+            'perimeter' => 'Périmètre',
+            'perimeter_helper' => 'Périmètre auquel ce rôle est rattaché',
         ],
         'title' => 'Rôles',
         'title_short' => 'Rôle',

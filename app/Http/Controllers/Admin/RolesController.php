@@ -7,6 +7,7 @@ use App\Http\Requests\MassDestroyRoleRequest;
 use App\Http\Requests\StoreRoleRequest;
 use App\Http\Requests\UpdateRoleRequest;
 use App\Models\Cartographer;
+use App\Models\Perimeter;
 use App\Models\Permission;
 use App\Models\Role;
 use Gate;
@@ -53,7 +54,7 @@ class RolesController extends Controller
         abort_if(Gate::denies('role_access'), Response::HTTP_FORBIDDEN, '403 Forbidden');
 
         $roles = Role::withCount('users')
-            ->with('cartographerEntries.cartographiable')
+            ->with(['cartographerEntries.cartographiable', 'perimeter'])
             ->orderBy('id')
             ->get();
         $routes = Cartographer::cartographiableRoutesMap();
@@ -71,12 +72,13 @@ class RolesController extends Controller
 
         $permissions = Permission::all()->sortBy('title')->pluck('title', 'id');
         $permissions_sorted = $this->getSortedPerms($permissions);
+        $perimeters = Perimeter::query()->orderBy('id')->get();
 
         $request->merge($role->only($role->getFillable()));
         $request->merge(['permissions' => $role->permissions()->pluck('id')->toArray()]);
         $request->flash();
 
-        return view('admin.roles.create', compact('permissions_sorted'));
+        return view('admin.roles.create', compact('permissions_sorted', 'perimeters'));
     }
 
     public function create()
@@ -86,8 +88,9 @@ class RolesController extends Controller
         // Chargement de toutes les permissions et triage
         $permissions = Permission::all()->sortBy('title')->pluck('title', 'id');
         $permissions_sorted = $this->getSortedPerms($permissions);
+        $perimeters = Perimeter::query()->orderBy('id')->get();
 
-        return view('admin.roles.create', compact('permissions_sorted'));
+        return view('admin.roles.create', compact('permissions_sorted', 'perimeters'));
     }
 
     public function store(StoreRoleRequest $request)
@@ -110,12 +113,13 @@ class RolesController extends Controller
         // Chargement de toutes les permissions et triage
         $permissions = Permission::all()->sortBy('title')->pluck('title', 'id');
         $permissions_sorted = $this->getSortedPerms($permissions);
+        $perimeters = Perimeter::query()->orderBy('id')->get();
 
-        $role->load('permissions');
+        $role->load(['permissions', 'perimeter']);
         $cartographers = $role->cartographerEntries()->with('cartographiable')->orderBy('cartographiable_type')->get();
         $cartographiableModels = Cartographer::cartographiableModelsList();
 
-        return view('admin.roles.edit', compact('permissions_sorted', 'role', 'cartographers', 'cartographiableModels'));
+        return view('admin.roles.edit', compact('permissions_sorted', 'role', 'cartographers', 'cartographiableModels', 'perimeters'));
     }
 
     public function update(UpdateRoleRequest $request, Role $role)
@@ -138,7 +142,7 @@ class RolesController extends Controller
 
         $permissions = Permission::all()->sortBy('title')->pluck('title', 'id');
         $permissions_sorted = $this->getSortedPerms($permissions);
-        $role->load('permissions');
+        $role->load(['permissions', 'perimeter']);
         $cartographers = $role->cartographerEntries()->with('cartographiable')->orderBy('cartographiable_type')->get();
         $cartographiableModels = Cartographer::cartographiableModelsList();
 

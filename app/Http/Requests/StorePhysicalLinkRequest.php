@@ -4,6 +4,7 @@ namespace App\Http\Requests;
 
 use Gate;
 use Illuminate\Foundation\Http\FormRequest;
+use Illuminate\Validation\Rule;
 use Symfony\Component\HttpFoundation\Response;
 
 class StorePhysicalLinkRequest extends FormRequest
@@ -18,6 +19,7 @@ class StorePhysicalLinkRequest extends FormRequest
     public function rules(): array
     {
         return [
+            'perimeter_id' => ['nullable', 'integer', Rule::in(auth()->user()?->perimeterIds() ?? [])],
             'type' => 'nullable|string|max:255',
             'color' => 'nullable|regex:/^#[0-9a-fA-F]{6}$/',
             'attributes' => 'nullable|array',

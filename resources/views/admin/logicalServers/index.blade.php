@@ -27,6 +27,9 @@
                         <th width="10">
 
                         </th>
+                        @if (auth()->user()->hasMultiplePerimeters())
+                            <th data-column="perimeter">{{ trans('cruds.perimeter.title_short') }}</th>
+                        @endif
                         <th>
                             {{ trans('cruds.logicalServer.fields.name') }}
                         </th>
@@ -78,6 +81,9 @@
                                 @endif
                         >
                             <td></td>
+                            @if (auth()->user()->hasMultiplePerimeters())
+                                <td>{{ $logicalServer->perimeter->nom }}</td>
+                            @endif
                             <td>
                                 <x-show-link :model="$logicalServer" />
                             </td>
@@ -153,11 +159,12 @@
     <script>
         @include('partials.datatable', array(
             'id' => '#dataTable',
+            'order' => auth()->user()->hasMultiplePerimeters() ? '[[2, "asc"]]' : '[[1, "asc"]]',
             'title' => trans("cruds.logicalServer.title_singular"),
             'URL' => route('admin.logical-servers.massDestroy'),
             'canDelete' => auth()->user()->can('logical_server_delete') ? true : false,
     'serverSidePagination' => true,
-    'hiddenColumns' => ['net_services', 'address_ip'],
+    'hiddenColumns' => ['perimeter', 'net_services', 'address_ip'],
 ));
     </script>
 @endsection
