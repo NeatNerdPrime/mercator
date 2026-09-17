@@ -3,6 +3,7 @@
 namespace App\Factories;
 
 use App\Models\Actor;
+use App\Support\FakerPatterns;
 use Illuminate\Database\Eloquent\Factories\Factory;
 use Illuminate\Support\Carbon;
 
@@ -13,7 +14,7 @@ class ActorFactory extends Factory
     public function definition(): array
     {
         return [
-            'name' => $this->faker->name(),
+            'name' => $this->faker->regexify(FakerPatterns::ORG_NAME),
             'nature' => $this->faker->word(),
             'type' => $this->faker->word(),
             'contact' => $this->faker->word(),

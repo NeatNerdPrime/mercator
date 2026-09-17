@@ -86,6 +86,7 @@ plugins:
             OPERATIONS: OPÉRATIONS
             -- Administration: -- Administration
             -- Configuration: -- Configuration
+            -- Test Data Generation: -- Génération de données de test
             -- References: -- Références
       reconfigure_material: true
 
@@ -127,4 +128,5 @@ nav:
   - OPERATIONS:
       - -- Administration: admin.md
       - -- Configuration: config.md
+      - -- Test Data Generation: generate-test-data.md
       - -- References: references.md

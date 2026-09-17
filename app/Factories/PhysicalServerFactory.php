@@ -6,6 +6,7 @@ use App\Models\Bay;
 use App\Models\Building;
 use App\Models\PhysicalServer;
 use App\Models\Site;
+use App\Support\FakerPatterns;
 use Illuminate\Database\Eloquent\Factories\Factory;
 use Illuminate\Support\Carbon;
 
@@ -16,13 +17,13 @@ class PhysicalServerFactory extends Factory
     public function definition(): array
     {
         return [
-            'name' => $this->faker->name(),
+            'name' => $this->faker->regexify(FakerPatterns::HOSTNAME),
             'type' => $this->faker->word(),
             'icon_id' => null,
             'description' => $this->faker->text(),
             'vendor' => $this->faker->word(),
             'product' => $this->faker->word(),
-            'version' => $this->faker->word(),
+            'version' => $this->faker->regexify(FakerPatterns::SEMVER),
             'responsible' => $this->faker->word(),
             'configuration' => $this->faker->word(),
             'physical_switch_id' => null,

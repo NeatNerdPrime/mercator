@@ -3,6 +3,7 @@
 namespace App\Factories;
 
 use App\Models\Task;
+use App\Support\FakerPatterns;
 use Illuminate\Database\Eloquent\Factories\Factory;
 use Illuminate\Support\Carbon;
 
@@ -14,7 +15,7 @@ class TaskFactory extends Factory
      * Define the default attributes for a Task model factory.
      *
      * Provides an associative array with:
-     * - `name`: a fake full name,
+     * - `name`: a plausible organizational name,
      * - `description`: fake text,
      * - `created_at` and `updated_at`: Carbon timestamps set to now.
      *
@@ -23,7 +24,7 @@ class TaskFactory extends Factory
     public function definition(): array
     {
         return [
-            'name' => $this->faker->name(),
+            'name' => $this->faker->regexify(FakerPatterns::ORG_NAME),
             'description' => $this->faker->text(),
             'created_at' => Carbon::now(),
             'updated_at' => Carbon::now(),

@@ -3,6 +3,7 @@
 namespace App\Factories;
 
 use App\Models\Graph;
+use App\Support\FakerPatterns;
 use Illuminate\Database\Eloquent\Factories\Factory;
 use Illuminate\Support\Carbon;
 
@@ -13,7 +14,7 @@ class GraphFactory extends Factory
     public function definition(): array
     {
         return [
-            'name' => $this->faker->name(),
+            'name' => $this->faker->regexify(FakerPatterns::ORG_NAME),
             'type' => $this->faker->word(),
             'content' => $this->faker->word(),
             'created_at' => Carbon::now(),

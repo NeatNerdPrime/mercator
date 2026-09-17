@@ -3,6 +3,7 @@
 namespace App\Factories;
 
 use App\Models\Entity;
+use App\Support\FakerPatterns;
 use Illuminate\Database\Eloquent\Factories\Factory;
 use Illuminate\Support\Carbon;
 
@@ -13,7 +14,7 @@ class EntityFactory extends Factory
     public function definition(): array
     {
         return [
-            'name' => $this->faker->name(),
+            'name' => $this->faker->regexify(FakerPatterns::ORG_NAME),
             'icon_id' => null,
             'security_level' => $this->faker->word(),
             'contact_point' => $this->faker->word(),

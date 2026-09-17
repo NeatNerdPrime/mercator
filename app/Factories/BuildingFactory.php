@@ -4,6 +4,7 @@ namespace App\Factories;
 
 use App\Models\Building;
 use App\Models\Site;
+use App\Support\FakerPatterns;
 use Illuminate\Database\Eloquent\Factories\Factory;
 use Illuminate\Support\Carbon;
 
@@ -14,7 +15,7 @@ class BuildingFactory extends Factory
     public function definition(): array
     {
         return [
-            'name' => $this->faker->name(),
+            'name' => $this->faker->regexify(FakerPatterns::BUILDING_NAME),
             'type' => $this->faker->word(),
             'attributes' => $this->faker->word(),
             'description' => $this->faker->text(),
