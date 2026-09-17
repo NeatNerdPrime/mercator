@@ -17,6 +17,11 @@ class EnsureActivePerimeter
 {
     public function handle(Request $request, Closure $next)
     {
+        // Borne la mémorisation de User::perimeterIds() à cette requête : sans ce reset, un
+        // changement de rôles resterait invisible pour le reste du process (cas des tests qui
+        // réutilisent le même User via actingAs() à travers plusieurs requêtes simulées).
+        $request->user()?->resetPerimeterCache();
+
         if (! PerimeterSettings::isEnabled()) {
             return $next($request);
         }
