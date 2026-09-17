@@ -10,8 +10,11 @@ DROP TABLE IF EXISTS `activities`;
 /*!40101 SET character_set_client = utf8mb4 */;
 CREATE TABLE `activities` (
   `id` int(10) unsigned NOT NULL AUTO_INCREMENT,
+  `perimeter_id` int(10) unsigned NOT NULL DEFAULT 1,
   `ext_refs` varchar(255) DEFAULT NULL,
   `name` varchar(255) NOT NULL,
+  `type` varchar(255) DEFAULT NULL,
+  `attributes` varchar(255) DEFAULT NULL,
   `description` longtext DEFAULT NULL,
   `recovery_time_objective` int(11) DEFAULT NULL,
   `maximum_tolerable_downtime` int(11) DEFAULT NULL,
@@ -22,9 +25,10 @@ CREATE TABLE `activities` (
   `created_at` timestamp NULL DEFAULT NULL,
   `updated_at` timestamp NULL DEFAULT NULL,
   `deleted_at` timestamp NULL DEFAULT NULL,
-  `type` varchar(255) DEFAULT NULL,
-  `attributes` varchar(255) DEFAULT NULL,
-  PRIMARY KEY (`id`)
+  PRIMARY KEY (`id`),
+  KEY `activities_perimeter_id_index` (`perimeter_id`),
+  KEY `activities_name_index` (`name`),
+  CONSTRAINT `activities_perimeter_id_foreign` FOREIGN KEY (`perimeter_id`) REFERENCES `perimeters` (`id`) ON UPDATE NO ACTION
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 DROP TABLE IF EXISTS `activity_application`;
@@ -107,16 +111,20 @@ DROP TABLE IF EXISTS `actors`;
 /*!40101 SET character_set_client = utf8mb4 */;
 CREATE TABLE `actors` (
   `id` int(10) unsigned NOT NULL AUTO_INCREMENT,
+  `perimeter_id` int(10) unsigned NOT NULL DEFAULT 1,
   `ext_refs` varchar(255) DEFAULT NULL,
   `name` varchar(255) NOT NULL,
   `nature` varchar(255) DEFAULT NULL,
   `type` varchar(255) DEFAULT NULL,
+  `attributes` varchar(255) DEFAULT NULL,
   `contact` varchar(255) DEFAULT NULL,
   `created_at` timestamp NULL DEFAULT NULL,
   `updated_at` timestamp NULL DEFAULT NULL,
   `deleted_at` timestamp NULL DEFAULT NULL,
-  `attributes` varchar(255) DEFAULT NULL,
-  PRIMARY KEY (`id`)
+  PRIMARY KEY (`id`),
+  KEY `actors_perimeter_id_index` (`perimeter_id`),
+  KEY `actors_name_index` (`name`),
+  CONSTRAINT `actors_perimeter_id_foreign` FOREIGN KEY (`perimeter_id`) REFERENCES `perimeters` (`id`) ON UPDATE NO ACTION
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 DROP TABLE IF EXISTS `admin_user_application`;
@@ -148,6 +156,7 @@ DROP TABLE IF EXISTS `admin_users`;
 /*!40101 SET character_set_client = utf8mb4 */;
 CREATE TABLE `admin_users` (
   `id` int(10) unsigned NOT NULL AUTO_INCREMENT,
+  `perimeter_id` int(10) unsigned NOT NULL DEFAULT 1,
   `ext_refs` varchar(255) DEFAULT NULL,
   `user_id` varchar(255) NOT NULL,
   `firstname` varchar(255) DEFAULT NULL,
@@ -164,6 +173,8 @@ CREATE TABLE `admin_users` (
   UNIQUE KEY `domain_id_user_id_unique` (`domain_id`,`user_id`,`deleted_at`),
   KEY `domain_id_fk_69385935` (`domain_id`),
   KEY `document_id_fk_129487` (`icon_id`),
+  KEY `admin_users_perimeter_id_index` (`perimeter_id`),
+  CONSTRAINT `admin_users_perimeter_id_foreign` FOREIGN KEY (`perimeter_id`) REFERENCES `perimeters` (`id`) ON UPDATE NO ACTION,
   CONSTRAINT `document_id_fk_129487` FOREIGN KEY (`icon_id`) REFERENCES `documents` (`id`) ON UPDATE NO ACTION,
   CONSTRAINT `domain_id_fk_69385935` FOREIGN KEY (`domain_id`) REFERENCES `domains` (`id`) ON DELETE CASCADE ON UPDATE NO ACTION
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
@@ -173,8 +184,11 @@ DROP TABLE IF EXISTS `annuaires`;
 /*!40101 SET character_set_client = utf8mb4 */;
 CREATE TABLE `annuaires` (
   `id` int(10) unsigned NOT NULL AUTO_INCREMENT,
+  `perimeter_id` int(10) unsigned NOT NULL DEFAULT 1,
   `ext_refs` varchar(255) DEFAULT NULL,
   `name` varchar(255) NOT NULL,
+  `type` varchar(255) DEFAULT NULL,
+  `attributes` varchar(255) DEFAULT NULL,
   `description` longtext DEFAULT NULL,
   `solution` varchar(255) DEFAULT NULL,
   `zone_admin_id` int(10) unsigned DEFAULT NULL,
@@ -182,12 +196,13 @@ CREATE TABLE `annuaires` (
   `updated_at` timestamp NULL DEFAULT NULL,
   `deleted_at` timestamp NULL DEFAULT NULL,
   `application_id` int(10) unsigned DEFAULT NULL,
-  `type` varchar(255) DEFAULT NULL,
-  `attributes` varchar(255) DEFAULT NULL,
   PRIMARY KEY (`id`),
   KEY `zone_admin_fk_1482666` (`zone_admin_id`),
   KEY `annuaires_application_id_foreign` (`application_id`),
+  KEY `annuaires_perimeter_id_index` (`perimeter_id`),
+  KEY `annuaires_name_index` (`name`),
   CONSTRAINT `annuaires_application_id_foreign` FOREIGN KEY (`application_id`) REFERENCES `applications` (`id`),
+  CONSTRAINT `annuaires_perimeter_id_foreign` FOREIGN KEY (`perimeter_id`) REFERENCES `perimeters` (`id`) ON UPDATE NO ACTION,
   CONSTRAINT `zone_admin_fk_1482666` FOREIGN KEY (`zone_admin_id`) REFERENCES `zone_admins` (`id`) ON DELETE NO ACTION ON UPDATE NO ACTION
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
@@ -208,16 +223,20 @@ DROP TABLE IF EXISTS `application_blocks`;
 /*!40101 SET character_set_client = utf8mb4 */;
 CREATE TABLE `application_blocks` (
   `id` int(10) unsigned NOT NULL AUTO_INCREMENT,
+  `perimeter_id` int(10) unsigned NOT NULL DEFAULT 1,
   `ext_refs` varchar(255) DEFAULT NULL,
   `name` varchar(255) NOT NULL,
+  `type` varchar(255) DEFAULT NULL,
+  `attributes` varchar(255) DEFAULT NULL,
   `description` longtext DEFAULT NULL,
   `responsible` varchar(255) DEFAULT NULL,
   `created_at` timestamp NULL DEFAULT NULL,
   `updated_at` timestamp NULL DEFAULT NULL,
   `deleted_at` timestamp NULL DEFAULT NULL,
-  `type` varchar(255) DEFAULT NULL,
-  `attributes` varchar(255) DEFAULT NULL,
-  PRIMARY KEY (`id`)
+  PRIMARY KEY (`id`),
+  KEY `application_blocks_perimeter_id_index` (`perimeter_id`),
+  KEY `application_blocks_name_index` (`name`),
+  CONSTRAINT `application_blocks_perimeter_id_foreign` FOREIGN KEY (`perimeter_id`) REFERENCES `perimeters` (`id`) ON UPDATE NO ACTION
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 DROP TABLE IF EXISTS `application_certificate`;
@@ -331,6 +350,7 @@ DROP TABLE IF EXISTS `application_flows`;
 /*!40101 SET character_set_client = utf8mb4 */;
 CREATE TABLE `application_flows` (
   `id` int(10) unsigned NOT NULL AUTO_INCREMENT,
+  `perimeter_id` int(10) unsigned NOT NULL DEFAULT 1,
   `ext_refs` varchar(255) DEFAULT NULL,
   `name` varchar(255) NOT NULL,
   `type` varchar(255) DEFAULT NULL,
@@ -358,7 +378,10 @@ CREATE TABLE `application_flows` (
   KEY `service_dest_fk_1485550` (`service_dest_id`),
   KEY `module_dest_fk_1485551` (`module_dest_id`),
   KEY `database_dest_fk_1485552` (`database_dest_id`),
+  KEY `application_flows_perimeter_id_index` (`perimeter_id`),
+  KEY `application_flows_name_index` (`name`),
   CONSTRAINT `application_dest_fk_1485549` FOREIGN KEY (`application_dest_id`) REFERENCES `applications` (`id`),
+  CONSTRAINT `application_flows_perimeter_id_foreign` FOREIGN KEY (`perimeter_id`) REFERENCES `perimeters` (`id`) ON UPDATE NO ACTION,
   CONSTRAINT `application_source_fk_1485545` FOREIGN KEY (`application_source_id`) REFERENCES `applications` (`id`),
   CONSTRAINT `database_dest_fk_1485552` FOREIGN KEY (`database_dest_id`) REFERENCES `databases` (`id`) ON DELETE NO ACTION ON UPDATE NO ACTION,
   CONSTRAINT `database_source_fk_1485548` FOREIGN KEY (`database_source_id`) REFERENCES `databases` (`id`) ON DELETE NO ACTION ON UPDATE NO ACTION,
@@ -409,8 +432,11 @@ DROP TABLE IF EXISTS `application_modules`;
 /*!40101 SET character_set_client = utf8mb4 */;
 CREATE TABLE `application_modules` (
   `id` int(10) unsigned NOT NULL AUTO_INCREMENT,
+  `perimeter_id` int(10) unsigned NOT NULL DEFAULT 1,
   `ext_refs` varchar(255) DEFAULT NULL,
   `name` varchar(255) NOT NULL,
+  `type` varchar(255) DEFAULT NULL,
+  `attributes` varchar(255) DEFAULT NULL,
   `description` longtext DEFAULT NULL,
   `vendor` varchar(255) DEFAULT NULL,
   `product` varchar(255) DEFAULT NULL,
@@ -418,9 +444,10 @@ CREATE TABLE `application_modules` (
   `created_at` timestamp NULL DEFAULT NULL,
   `updated_at` timestamp NULL DEFAULT NULL,
   `deleted_at` timestamp NULL DEFAULT NULL,
-  `type` varchar(255) DEFAULT NULL,
-  `attributes` varchar(255) DEFAULT NULL,
-  PRIMARY KEY (`id`)
+  PRIMARY KEY (`id`),
+  KEY `application_modules_perimeter_id_index` (`perimeter_id`),
+  KEY `application_modules_name_index` (`name`),
+  CONSTRAINT `application_modules_perimeter_id_foreign` FOREIGN KEY (`perimeter_id`) REFERENCES `perimeters` (`id`) ON UPDATE NO ACTION
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 DROP TABLE IF EXISTS `application_peripheral`;
@@ -488,16 +515,20 @@ DROP TABLE IF EXISTS `application_services`;
 /*!40101 SET character_set_client = utf8mb4 */;
 CREATE TABLE `application_services` (
   `id` int(10) unsigned NOT NULL AUTO_INCREMENT,
+  `perimeter_id` int(10) unsigned NOT NULL DEFAULT 1,
   `ext_refs` varchar(255) DEFAULT NULL,
   `description` longtext DEFAULT NULL,
   `exposition` varchar(255) DEFAULT NULL,
   `name` varchar(255) NOT NULL,
+  `type` varchar(255) DEFAULT NULL,
+  `attributes` varchar(255) DEFAULT NULL,
   `created_at` timestamp NULL DEFAULT NULL,
   `updated_at` timestamp NULL DEFAULT NULL,
   `deleted_at` timestamp NULL DEFAULT NULL,
-  `type` varchar(255) DEFAULT NULL,
-  `attributes` varchar(255) DEFAULT NULL,
-  PRIMARY KEY (`id`)
+  PRIMARY KEY (`id`),
+  KEY `application_services_perimeter_id_index` (`perimeter_id`),
+  KEY `application_services_name_index` (`name`),
+  CONSTRAINT `application_services_perimeter_id_foreign` FOREIGN KEY (`perimeter_id`) REFERENCES `perimeters` (`id`) ON UPDATE NO ACTION
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 DROP TABLE IF EXISTS `application_workstation`;
@@ -517,6 +548,7 @@ DROP TABLE IF EXISTS `applications`;
 /*!40101 SET character_set_client = utf8mb4 */;
 CREATE TABLE `applications` (
   `id` int(10) unsigned NOT NULL AUTO_INCREMENT,
+  `perimeter_id` int(10) unsigned NOT NULL DEFAULT 1,
   `ext_refs` varchar(255) DEFAULT NULL,
   `name` varchar(255) NOT NULL,
   `description` longtext DEFAULT NULL,
@@ -557,7 +589,10 @@ CREATE TABLE `applications` (
   KEY `entity_resp_fk_1488612` (`entity_resp_id`),
   KEY `application_block_fk_1644592` (`application_block_id`),
   KEY `document_id_fk_4394343` (`icon_id`),
+  KEY `applications_perimeter_id_index` (`perimeter_id`),
+  KEY `applications_name_index` (`name`),
   CONSTRAINT `application_block_fk_1644592` FOREIGN KEY (`application_block_id`) REFERENCES `application_blocks` (`id`) ON DELETE NO ACTION ON UPDATE NO ACTION,
+  CONSTRAINT `applications_perimeter_id_foreign` FOREIGN KEY (`perimeter_id`) REFERENCES `perimeters` (`id`) ON UPDATE NO ACTION,
   CONSTRAINT `document_id_fk_4394343` FOREIGN KEY (`icon_id`) REFERENCES `documents` (`id`) ON UPDATE NO ACTION,
   CONSTRAINT `entity_resp_fk_1488612` FOREIGN KEY (`entity_resp_id`) REFERENCES `entities` (`id`) ON DELETE NO ACTION ON UPDATE NO ACTION
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
@@ -607,6 +642,7 @@ DROP TABLE IF EXISTS `backups`;
 /*!40101 SET character_set_client = utf8mb4 */;
 CREATE TABLE `backups` (
   `id` int(10) unsigned NOT NULL AUTO_INCREMENT,
+  `perimeter_id` int(10) unsigned NOT NULL DEFAULT 1,
   `ext_refs` varchar(255) DEFAULT NULL,
   `name` varchar(255) DEFAULT NULL,
   `type` varchar(100) DEFAULT NULL,
@@ -618,7 +654,10 @@ CREATE TABLE `backups` (
   `created_at` timestamp NULL DEFAULT NULL,
   `updated_at` timestamp NULL DEFAULT NULL,
   `deleted_at` timestamp NULL DEFAULT NULL,
-  PRIMARY KEY (`id`)
+  PRIMARY KEY (`id`),
+  KEY `backups_perimeter_id_index` (`perimeter_id`),
+  KEY `backups_name_index` (`name`),
+  CONSTRAINT `backups_perimeter_id_foreign` FOREIGN KEY (`perimeter_id`) REFERENCES `perimeters` (`id`) ON UPDATE NO ACTION
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 DROP TABLE IF EXISTS `bay_wifi_terminal`;
@@ -638,19 +677,23 @@ DROP TABLE IF EXISTS `bays`;
 /*!40101 SET character_set_client = utf8mb4 */;
 CREATE TABLE `bays` (
   `id` int(10) unsigned NOT NULL AUTO_INCREMENT,
+  `perimeter_id` int(10) unsigned NOT NULL DEFAULT 1,
   `ext_refs` varchar(255) DEFAULT NULL,
   `name` varchar(255) NOT NULL,
+  `type` varchar(255) DEFAULT NULL,
+  `attributes` varchar(255) DEFAULT NULL,
   `description` longtext DEFAULT NULL,
   `building_id` int(10) unsigned DEFAULT NULL,
   `site_id` int(10) unsigned DEFAULT NULL,
   `created_at` timestamp NULL DEFAULT NULL,
   `updated_at` timestamp NULL DEFAULT NULL,
   `deleted_at` timestamp NULL DEFAULT NULL,
-  `type` varchar(255) DEFAULT NULL,
-  `attributes` varchar(255) DEFAULT NULL,
   PRIMARY KEY (`id`),
   KEY `room_fk_1483441` (`building_id`),
   KEY `site_id_fk_1483442` (`site_id`),
+  KEY `bays_perimeter_id_index` (`perimeter_id`),
+  KEY `bays_name_index` (`name`),
+  CONSTRAINT `bays_perimeter_id_foreign` FOREIGN KEY (`perimeter_id`) REFERENCES `perimeters` (`id`) ON UPDATE NO ACTION,
   CONSTRAINT `building_fk_1483441` FOREIGN KEY (`building_id`) REFERENCES `buildings` (`id`) ON DELETE NO ACTION ON UPDATE NO ACTION,
   CONSTRAINT `site_id_fk_1483442` FOREIGN KEY (`site_id`) REFERENCES `sites` (`id`) ON DELETE NO ACTION ON UPDATE NO ACTION
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
@@ -672,6 +715,7 @@ DROP TABLE IF EXISTS `buildings`;
 /*!40101 SET character_set_client = utf8mb4 */;
 CREATE TABLE `buildings` (
   `id` int(10) unsigned NOT NULL AUTO_INCREMENT,
+  `perimeter_id` int(10) unsigned NOT NULL DEFAULT 1,
   `ext_refs` varchar(255) DEFAULT NULL,
   `name` varchar(255) NOT NULL,
   `type` varchar(255) DEFAULT NULL,
@@ -687,7 +731,10 @@ CREATE TABLE `buildings` (
   KEY `site_fk_1483431` (`site_id`),
   KEY `building_id_fk_94821232` (`building_id`),
   KEY `document_id_fk_49574431` (`icon_id`),
+  KEY `buildings_perimeter_id_index` (`perimeter_id`),
+  KEY `buildings_name_index` (`name`),
   CONSTRAINT `building_id_fk_94821232` FOREIGN KEY (`building_id`) REFERENCES `buildings` (`id`) ON DELETE SET NULL,
+  CONSTRAINT `buildings_perimeter_id_foreign` FOREIGN KEY (`perimeter_id`) REFERENCES `perimeters` (`id`) ON UPDATE NO ACTION,
   CONSTRAINT `document_id_fk_49574431` FOREIGN KEY (`icon_id`) REFERENCES `documents` (`id`),
   CONSTRAINT `site_fk_1483431` FOREIGN KEY (`site_id`) REFERENCES `sites` (`id`) ON DELETE NO ACTION ON UPDATE NO ACTION
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
@@ -729,9 +776,11 @@ DROP TABLE IF EXISTS `certificates`;
 /*!40101 SET character_set_client = utf8mb4 */;
 CREATE TABLE `certificates` (
   `id` int(10) unsigned NOT NULL AUTO_INCREMENT,
+  `perimeter_id` int(10) unsigned NOT NULL DEFAULT 1,
   `ext_refs` varchar(255) DEFAULT NULL,
   `name` varchar(255) NOT NULL,
   `type` varchar(255) DEFAULT NULL,
+  `attributes` varchar(255) DEFAULT NULL,
   `description` longtext DEFAULT NULL,
   `status` int(11) DEFAULT NULL,
   `start_validity` date DEFAULT NULL,
@@ -740,8 +789,10 @@ CREATE TABLE `certificates` (
   `created_at` timestamp NULL DEFAULT NULL,
   `updated_at` timestamp NULL DEFAULT NULL,
   `deleted_at` timestamp NULL DEFAULT NULL,
-  `attributes` varchar(255) DEFAULT NULL,
-  PRIMARY KEY (`id`)
+  PRIMARY KEY (`id`),
+  KEY `certificates_perimeter_id_index` (`perimeter_id`),
+  KEY `certificates_name_index` (`name`),
+  CONSTRAINT `certificates_perimeter_id_foreign` FOREIGN KEY (`perimeter_id`) REFERENCES `perimeters` (`id`) ON UPDATE NO ACTION
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 DROP TABLE IF EXISTS `cluster_logical_server`;
@@ -785,6 +836,7 @@ DROP TABLE IF EXISTS `clusters`;
 /*!40101 SET character_set_client = utf8mb4 */;
 CREATE TABLE `clusters` (
   `id` int(10) unsigned NOT NULL AUTO_INCREMENT,
+  `perimeter_id` int(10) unsigned NOT NULL DEFAULT 1,
   `ext_refs` varchar(255) DEFAULT NULL,
   `name` varchar(255) NOT NULL,
   `type` varchar(255) DEFAULT NULL,
@@ -797,6 +849,9 @@ CREATE TABLE `clusters` (
   `deleted_at` timestamp NULL DEFAULT NULL,
   PRIMARY KEY (`id`),
   KEY `document_id_fk_495432841` (`icon_id`),
+  KEY `clusters_perimeter_id_index` (`perimeter_id`),
+  KEY `clusters_name_index` (`name`),
+  CONSTRAINT `clusters_perimeter_id_foreign` FOREIGN KEY (`perimeter_id`) REFERENCES `perimeters` (`id`) ON UPDATE NO ACTION,
   CONSTRAINT `document_id_fk_495432841` FOREIGN KEY (`icon_id`) REFERENCES `documents` (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
@@ -829,18 +884,20 @@ DROP TABLE IF EXISTS `containers`;
 /*!40101 SET character_set_client = utf8mb4 */;
 CREATE TABLE `containers` (
   `id` int(10) unsigned NOT NULL AUTO_INCREMENT,
+  `perimeter_id` int(10) unsigned NOT NULL DEFAULT 1,
   `ext_refs` varchar(255) DEFAULT NULL,
   `name` varchar(255) NOT NULL,
   `type` varchar(255) DEFAULT NULL,
+  `attributes` varchar(255) DEFAULT NULL,
   `description` longtext DEFAULT NULL,
   `icon_id` int(10) unsigned DEFAULT NULL,
   `created_at` timestamp NULL DEFAULT NULL,
   `updated_at` timestamp NULL DEFAULT NULL,
   `deleted_at` timestamp NULL DEFAULT NULL,
-  `attributes` varchar(255) DEFAULT NULL,
   PRIMARY KEY (`id`),
-  UNIQUE KEY `container_name_unique` (`name`,`deleted_at`),
   KEY `document_id_fk_43948593` (`icon_id`),
+  KEY `containers_perimeter_id_index` (`perimeter_id`),
+  CONSTRAINT `containers_perimeter_id_foreign` FOREIGN KEY (`perimeter_id`) REFERENCES `perimeters` (`id`) ON UPDATE NO ACTION,
   CONSTRAINT `document_id_fk_434833774` FOREIGN KEY (`icon_id`) REFERENCES `documents` (`id`) ON UPDATE NO ACTION
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
@@ -886,6 +943,7 @@ DROP TABLE IF EXISTS `data_processing`;
 /*!40101 SET character_set_client = utf8mb4 */;
 CREATE TABLE `data_processing` (
   `id` int(10) unsigned NOT NULL AUTO_INCREMENT,
+  `perimeter_id` int(10) unsigned NOT NULL DEFAULT 1,
   `ext_refs` varchar(255) DEFAULT NULL,
   `name` varchar(255) NOT NULL,
   `legal_basis` varchar(255) DEFAULT NULL,
@@ -912,7 +970,10 @@ CREATE TABLE `data_processing` (
   `created_at` timestamp NULL DEFAULT NULL,
   `updated_at` timestamp NULL DEFAULT NULL,
   `deleted_at` timestamp NULL DEFAULT NULL,
-  PRIMARY KEY (`id`)
+  PRIMARY KEY (`id`),
+  KEY `data_processing_perimeter_id_index` (`perimeter_id`),
+  KEY `data_processing_name_index` (`name`),
+  CONSTRAINT `data_processing_perimeter_id_foreign` FOREIGN KEY (`perimeter_id`) REFERENCES `perimeters` (`id`) ON UPDATE NO ACTION
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 DROP TABLE IF EXISTS `data_processing_document`;
@@ -990,9 +1051,11 @@ DROP TABLE IF EXISTS `databases`;
 /*!40101 SET character_set_client = utf8mb4 */;
 CREATE TABLE `databases` (
   `id` int(10) unsigned NOT NULL AUTO_INCREMENT,
+  `perimeter_id` int(10) unsigned NOT NULL DEFAULT 1,
   `ext_refs` varchar(255) DEFAULT NULL,
   `name` varchar(255) NOT NULL,
   `type` varchar(255) DEFAULT NULL,
+  `attributes` varchar(255) DEFAULT NULL,
   `icon_id` int(10) unsigned DEFAULT NULL,
   `description` longtext DEFAULT NULL,
   `responsible` varchar(255) DEFAULT NULL,
@@ -1006,11 +1069,13 @@ CREATE TABLE `databases` (
   `created_at` timestamp NULL DEFAULT NULL,
   `updated_at` timestamp NULL DEFAULT NULL,
   `deleted_at` timestamp NULL DEFAULT NULL,
-  `attributes` varchar(255) DEFAULT NULL,
   PRIMARY KEY (`id`),
   KEY `entity_resp_fk_1485569` (`entity_resp_id`),
   KEY `databases_icon_id_foreign` (`icon_id`),
+  KEY `databases_perimeter_id_index` (`perimeter_id`),
+  KEY `databases_name_index` (`name`),
   CONSTRAINT `databases_icon_id_foreign` FOREIGN KEY (`icon_id`) REFERENCES `documents` (`id`),
+  CONSTRAINT `databases_perimeter_id_foreign` FOREIGN KEY (`perimeter_id`) REFERENCES `perimeters` (`id`) ON UPDATE NO ACTION,
   CONSTRAINT `entity_resp_fk_1485569` FOREIGN KEY (`entity_resp_id`) REFERENCES `entities` (`id`) ON DELETE NO ACTION ON UPDATE NO ACTION
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
@@ -1019,16 +1084,20 @@ DROP TABLE IF EXISTS `dhcp_servers`;
 /*!40101 SET character_set_client = utf8mb4 */;
 CREATE TABLE `dhcp_servers` (
   `id` int(10) unsigned NOT NULL AUTO_INCREMENT,
+  `perimeter_id` int(10) unsigned NOT NULL DEFAULT 1,
   `ext_refs` varchar(255) DEFAULT NULL,
   `name` varchar(255) NOT NULL,
+  `type` varchar(255) DEFAULT NULL,
+  `attributes` varchar(255) DEFAULT NULL,
   `description` longtext DEFAULT NULL,
   `address_ip` varchar(255) DEFAULT NULL,
   `created_at` timestamp NULL DEFAULT NULL,
   `updated_at` timestamp NULL DEFAULT NULL,
   `deleted_at` timestamp NULL DEFAULT NULL,
-  `type` varchar(255) DEFAULT NULL,
-  `attributes` varchar(255) DEFAULT NULL,
-  PRIMARY KEY (`id`)
+  PRIMARY KEY (`id`),
+  KEY `dhcp_servers_perimeter_id_index` (`perimeter_id`),
+  KEY `dhcp_servers_name_index` (`name`),
+  CONSTRAINT `dhcp_servers_perimeter_id_foreign` FOREIGN KEY (`perimeter_id`) REFERENCES `perimeters` (`id`) ON UPDATE NO ACTION
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 DROP TABLE IF EXISTS `dnsservers`;
@@ -1036,16 +1105,20 @@ DROP TABLE IF EXISTS `dnsservers`;
 /*!40101 SET character_set_client = utf8mb4 */;
 CREATE TABLE `dnsservers` (
   `id` int(10) unsigned NOT NULL AUTO_INCREMENT,
+  `perimeter_id` int(10) unsigned NOT NULL DEFAULT 1,
   `ext_refs` varchar(255) DEFAULT NULL,
   `name` varchar(255) NOT NULL,
+  `type` varchar(255) DEFAULT NULL,
+  `attributes` varchar(255) DEFAULT NULL,
   `description` longtext DEFAULT NULL,
   `address_ip` varchar(255) DEFAULT NULL,
   `created_at` timestamp NULL DEFAULT NULL,
   `updated_at` timestamp NULL DEFAULT NULL,
   `deleted_at` timestamp NULL DEFAULT NULL,
-  `type` varchar(255) DEFAULT NULL,
-  `attributes` varchar(255) DEFAULT NULL,
-  PRIMARY KEY (`id`)
+  PRIMARY KEY (`id`),
+  KEY `dnsservers_perimeter_id_index` (`perimeter_id`),
+  KEY `dnsservers_name_index` (`name`),
+  CONSTRAINT `dnsservers_perimeter_id_foreign` FOREIGN KEY (`perimeter_id`) REFERENCES `perimeters` (`id`) ON UPDATE NO ACTION
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 DROP TABLE IF EXISTS `document_external_connected_entity`;
@@ -1117,8 +1190,11 @@ DROP TABLE IF EXISTS `domains`;
 /*!40101 SET character_set_client = utf8mb4 */;
 CREATE TABLE `domains` (
   `id` int(10) unsigned NOT NULL AUTO_INCREMENT,
+  `perimeter_id` int(10) unsigned NOT NULL DEFAULT 1,
   `ext_refs` varchar(255) DEFAULT NULL,
   `name` varchar(255) NOT NULL,
+  `type` varchar(255) DEFAULT NULL,
+  `attributes` varchar(255) DEFAULT NULL,
   `description` longtext DEFAULT NULL,
   `domain_ctrl_cnt` int(11) DEFAULT NULL,
   `user_count` int(11) DEFAULT NULL,
@@ -1127,9 +1203,10 @@ CREATE TABLE `domains` (
   `created_at` timestamp NULL DEFAULT NULL,
   `updated_at` timestamp NULL DEFAULT NULL,
   `deleted_at` timestamp NULL DEFAULT NULL,
-  `type` varchar(255) DEFAULT NULL,
-  `attributes` varchar(255) DEFAULT NULL,
-  PRIMARY KEY (`id`)
+  PRIMARY KEY (`id`),
+  KEY `domains_perimeter_id_index` (`perimeter_id`),
+  KEY `domains_name_index` (`name`),
+  CONSTRAINT `domains_perimeter_id_foreign` FOREIGN KEY (`perimeter_id`) REFERENCES `perimeters` (`id`) ON UPDATE NO ACTION
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 DROP TABLE IF EXISTS `entities`;
@@ -1137,6 +1214,7 @@ DROP TABLE IF EXISTS `entities`;
 /*!40101 SET character_set_client = utf8mb4 */;
 CREATE TABLE `entities` (
   `id` int(10) unsigned NOT NULL AUTO_INCREMENT,
+  `perimeter_id` int(10) unsigned NOT NULL DEFAULT 1,
   `ext_refs` varchar(255) DEFAULT NULL,
   `name` varchar(255) NOT NULL,
   `icon_id` int(10) unsigned DEFAULT NULL,
@@ -1155,7 +1233,10 @@ CREATE TABLE `entities` (
   KEY `type` (`type`),
   KEY `entity_id_fk_4398013` (`parent_entity_id`),
   KEY `document_id_fk_129486` (`icon_id`),
+  KEY `entities_perimeter_id_index` (`perimeter_id`),
+  KEY `entities_name_index` (`name`),
   CONSTRAINT `document_id_fk_129486` FOREIGN KEY (`icon_id`) REFERENCES `documents` (`id`) ON UPDATE NO ACTION,
+  CONSTRAINT `entities_perimeter_id_foreign` FOREIGN KEY (`perimeter_id`) REFERENCES `perimeters` (`id`) ON UPDATE NO ACTION,
   CONSTRAINT `entity_id_fk_4398013` FOREIGN KEY (`parent_entity_id`) REFERENCES `entities` (`id`) ON DELETE SET NULL ON UPDATE NO ACTION
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
@@ -1188,11 +1269,13 @@ DROP TABLE IF EXISTS `external_connected_entities`;
 /*!40101 SET character_set_client = utf8mb4 */;
 CREATE TABLE `external_connected_entities` (
   `id` int(10) unsigned NOT NULL AUTO_INCREMENT,
+  `perimeter_id` int(10) unsigned NOT NULL DEFAULT 1,
   `ext_refs` varchar(255) DEFAULT NULL,
   `name` varchar(255) NOT NULL,
   `description` longtext DEFAULT NULL,
   `security` text DEFAULT NULL,
   `type` varchar(255) DEFAULT NULL,
+  `attributes` varchar(255) DEFAULT NULL,
   `entity_id` int(10) unsigned DEFAULT NULL,
   `network_id` int(10) unsigned DEFAULT NULL,
   `src` varchar(255) DEFAULT NULL,
@@ -1203,11 +1286,13 @@ CREATE TABLE `external_connected_entities` (
   `created_at` timestamp NULL DEFAULT NULL,
   `updated_at` timestamp NULL DEFAULT NULL,
   `deleted_at` timestamp NULL DEFAULT NULL,
-  `attributes` varchar(255) DEFAULT NULL,
   PRIMARY KEY (`id`),
   KEY `entity_id_fk_1295034` (`entity_id`),
   KEY `network_id_fk_8596554` (`network_id`),
+  KEY `external_connected_entities_perimeter_id_index` (`perimeter_id`),
+  KEY `external_connected_entities_name_index` (`name`),
   CONSTRAINT `entity_id_fk_1295034` FOREIGN KEY (`entity_id`) REFERENCES `entities` (`id`) ON DELETE CASCADE ON UPDATE NO ACTION,
+  CONSTRAINT `external_connected_entities_perimeter_id_foreign` FOREIGN KEY (`perimeter_id`) REFERENCES `perimeters` (`id`) ON UPDATE NO ACTION,
   CONSTRAINT `network_id_fk_8596554` FOREIGN KEY (`network_id`) REFERENCES `networks` (`id`) ON DELETE CASCADE ON UPDATE NO ACTION
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
@@ -1228,17 +1313,21 @@ DROP TABLE IF EXISTS `forest_ads`;
 /*!40101 SET character_set_client = utf8mb4 */;
 CREATE TABLE `forest_ads` (
   `id` int(10) unsigned NOT NULL AUTO_INCREMENT,
+  `perimeter_id` int(10) unsigned NOT NULL DEFAULT 1,
   `ext_refs` varchar(255) DEFAULT NULL,
   `name` varchar(255) NOT NULL,
+  `type` varchar(255) DEFAULT NULL,
+  `attributes` varchar(255) DEFAULT NULL,
   `description` longtext DEFAULT NULL,
   `zone_admin_id` int(10) unsigned DEFAULT NULL,
   `created_at` timestamp NULL DEFAULT NULL,
   `updated_at` timestamp NULL DEFAULT NULL,
   `deleted_at` timestamp NULL DEFAULT NULL,
-  `type` varchar(255) DEFAULT NULL,
-  `attributes` varchar(255) DEFAULT NULL,
   PRIMARY KEY (`id`),
   KEY `zone_admin_fk_1482667` (`zone_admin_id`),
+  KEY `forest_ads_perimeter_id_index` (`perimeter_id`),
+  KEY `forest_ads_name_index` (`name`),
+  CONSTRAINT `forest_ads_perimeter_id_foreign` FOREIGN KEY (`perimeter_id`) REFERENCES `perimeters` (`id`) ON UPDATE NO ACTION,
   CONSTRAINT `zone_admin_fk_1482667` FOREIGN KEY (`zone_admin_id`) REFERENCES `zone_admins` (`id`) ON DELETE NO ACTION ON UPDATE NO ACTION
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
@@ -1247,17 +1336,21 @@ DROP TABLE IF EXISTS `gateways`;
 /*!40101 SET character_set_client = utf8mb4 */;
 CREATE TABLE `gateways` (
   `id` int(10) unsigned NOT NULL AUTO_INCREMENT,
+  `perimeter_id` int(10) unsigned NOT NULL DEFAULT 1,
   `ext_refs` varchar(255) DEFAULT NULL,
   `name` varchar(255) NOT NULL,
+  `type` varchar(255) DEFAULT NULL,
+  `attributes` varchar(255) DEFAULT NULL,
   `description` longtext DEFAULT NULL,
   `ip` varchar(255) DEFAULT NULL,
   `authentification` varchar(255) DEFAULT NULL,
   `created_at` timestamp NULL DEFAULT NULL,
   `updated_at` timestamp NULL DEFAULT NULL,
   `deleted_at` timestamp NULL DEFAULT NULL,
-  `type` varchar(255) DEFAULT NULL,
-  `attributes` varchar(255) DEFAULT NULL,
-  PRIMARY KEY (`id`)
+  PRIMARY KEY (`id`),
+  KEY `gateways_perimeter_id_index` (`perimeter_id`),
+  KEY `gateways_name_index` (`name`),
+  CONSTRAINT `gateways_perimeter_id_foreign` FOREIGN KEY (`perimeter_id`) REFERENCES `perimeters` (`id`) ON UPDATE NO ACTION
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 DROP TABLE IF EXISTS `graphs`;
@@ -1272,7 +1365,8 @@ CREATE TABLE `graphs` (
   `created_at` timestamp NULL DEFAULT NULL,
   `updated_at` timestamp NULL DEFAULT NULL,
   `deleted_at` timestamp NULL DEFAULT NULL,
-  PRIMARY KEY (`id`)
+  PRIMARY KEY (`id`),
+  KEY `graphs_name_index` (`name`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 DROP TABLE IF EXISTS `information`;
@@ -1280,6 +1374,7 @@ DROP TABLE IF EXISTS `information`;
 /*!40101 SET character_set_client = utf8mb4 */;
 CREATE TABLE `information` (
   `id` int(10) unsigned NOT NULL AUTO_INCREMENT,
+  `perimeter_id` int(10) unsigned NOT NULL DEFAULT 1,
   `ext_refs` varchar(255) DEFAULT NULL,
   `name` varchar(255) NOT NULL,
   `type` varchar(255) DEFAULT NULL,
@@ -1299,7 +1394,10 @@ CREATE TABLE `information` (
   `created_at` timestamp NULL DEFAULT NULL,
   `updated_at` timestamp NULL DEFAULT NULL,
   `deleted_at` timestamp NULL DEFAULT NULL,
-  PRIMARY KEY (`id`)
+  PRIMARY KEY (`id`),
+  KEY `information_perimeter_id_index` (`perimeter_id`),
+  KEY `information_name_index` (`name`),
+  CONSTRAINT `information_perimeter_id_foreign` FOREIGN KEY (`perimeter_id`) REFERENCES `perimeters` (`id`) ON UPDATE NO ACTION
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 DROP TABLE IF EXISTS `information_information`;
@@ -1370,15 +1468,19 @@ DROP TABLE IF EXISTS `lans`;
 /*!40101 SET character_set_client = utf8mb4 */;
 CREATE TABLE `lans` (
   `id` int(10) unsigned NOT NULL AUTO_INCREMENT,
+  `perimeter_id` int(10) unsigned NOT NULL DEFAULT 1,
   `ext_refs` varchar(255) DEFAULT NULL,
   `name` varchar(255) NOT NULL,
+  `type` varchar(255) DEFAULT NULL,
+  `attributes` varchar(255) DEFAULT NULL,
   `description` varchar(255) DEFAULT NULL,
   `created_at` timestamp NULL DEFAULT NULL,
   `updated_at` timestamp NULL DEFAULT NULL,
   `deleted_at` timestamp NULL DEFAULT NULL,
-  `type` varchar(255) DEFAULT NULL,
-  `attributes` varchar(255) DEFAULT NULL,
-  PRIMARY KEY (`id`)
+  PRIMARY KEY (`id`),
+  KEY `lans_perimeter_id_index` (`perimeter_id`),
+  KEY `lans_name_index` (`name`),
+  CONSTRAINT `lans_perimeter_id_foreign` FOREIGN KEY (`perimeter_id`) REFERENCES `perimeters` (`id`) ON UPDATE NO ACTION
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 DROP TABLE IF EXISTS `logical_flows`;
@@ -1386,6 +1488,7 @@ DROP TABLE IF EXISTS `logical_flows`;
 /*!40101 SET character_set_client = utf8mb4 */;
 CREATE TABLE `logical_flows` (
   `id` int(10) unsigned NOT NULL AUTO_INCREMENT,
+  `perimeter_id` int(10) unsigned NOT NULL DEFAULT 1,
   `ext_refs` varchar(255) DEFAULT NULL,
   `name` varchar(255) DEFAULT NULL,
   `type` varchar(255) DEFAULT NULL,
@@ -1444,10 +1547,13 @@ CREATE TABLE `logical_flows` (
   KEY `logical_flows_security_device_dest_id_foreign` (`security_device_dest_id`),
   KEY `logical_flows_cluster_source_id_foreign` (`cluster_source_id`),
   KEY `logical_flows_cluster_dest_id_foreign` (`cluster_dest_id`),
+  KEY `logical_flows_perimeter_id_index` (`perimeter_id`),
+  KEY `logical_flows_name_index` (`name`),
   CONSTRAINT `logical_flows_cluster_dest_id_foreign` FOREIGN KEY (`cluster_dest_id`) REFERENCES `clusters` (`id`) ON DELETE SET NULL,
   CONSTRAINT `logical_flows_cluster_source_id_foreign` FOREIGN KEY (`cluster_source_id`) REFERENCES `clusters` (`id`) ON DELETE SET NULL,
   CONSTRAINT `logical_flows_logical_server_dest_id_foreign` FOREIGN KEY (`logical_server_dest_id`) REFERENCES `logical_servers` (`id`) ON DELETE CASCADE,
   CONSTRAINT `logical_flows_logical_server_source_id_foreign` FOREIGN KEY (`logical_server_source_id`) REFERENCES `logical_servers` (`id`) ON DELETE CASCADE,
+  CONSTRAINT `logical_flows_perimeter_id_foreign` FOREIGN KEY (`perimeter_id`) REFERENCES `perimeters` (`id`) ON UPDATE NO ACTION,
   CONSTRAINT `logical_flows_peripheral_dest_id_foreign` FOREIGN KEY (`peripheral_dest_id`) REFERENCES `peripherals` (`id`) ON DELETE CASCADE,
   CONSTRAINT `logical_flows_peripheral_source_id_foreign` FOREIGN KEY (`peripheral_source_id`) REFERENCES `peripherals` (`id`) ON DELETE CASCADE,
   CONSTRAINT `logical_flows_physical_security_device_dest_id_foreign` FOREIGN KEY (`physical_security_device_dest_id`) REFERENCES `physical_security_devices` (`id`) ON DELETE CASCADE,
@@ -1482,6 +1588,7 @@ DROP TABLE IF EXISTS `logical_servers`;
 /*!40101 SET character_set_client = utf8mb4 */;
 CREATE TABLE `logical_servers` (
   `id` int(10) unsigned NOT NULL AUTO_INCREMENT,
+  `perimeter_id` int(10) unsigned NOT NULL DEFAULT 1,
   `ext_refs` varchar(255) DEFAULT NULL,
   `name` varchar(255) NOT NULL,
   `icon_id` int(10) unsigned DEFAULT NULL,
@@ -1510,8 +1617,11 @@ CREATE TABLE `logical_servers` (
   KEY `domain_id_fk_493844` (`domain_id`),
   KEY `logical_servers_active` (`active`),
   KEY `document_id_fk_51303394` (`icon_id`),
+  KEY `logical_servers_perimeter_id_index` (`perimeter_id`),
+  KEY `logical_servers_name_index` (`name`),
   CONSTRAINT `document_id_fk_51303394` FOREIGN KEY (`icon_id`) REFERENCES `documents` (`id`),
-  CONSTRAINT `domain_id_fk_493844` FOREIGN KEY (`domain_id`) REFERENCES `domains` (`id`) ON DELETE SET NULL ON UPDATE NO ACTION
+  CONSTRAINT `domain_id_fk_493844` FOREIGN KEY (`domain_id`) REFERENCES `domains` (`id`) ON DELETE SET NULL ON UPDATE NO ACTION,
+  CONSTRAINT `logical_servers_perimeter_id_foreign` FOREIGN KEY (`perimeter_id`) REFERENCES `perimeters` (`id`) ON UPDATE NO ACTION
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 DROP TABLE IF EXISTS `macro_processuses`;
@@ -1519,8 +1629,11 @@ DROP TABLE IF EXISTS `macro_processuses`;
 /*!40101 SET character_set_client = utf8mb4 */;
 CREATE TABLE `macro_processuses` (
   `id` int(10) unsigned NOT NULL AUTO_INCREMENT,
+  `perimeter_id` int(10) unsigned NOT NULL DEFAULT 1,
   `ext_refs` varchar(255) DEFAULT NULL,
   `name` varchar(255) NOT NULL,
+  `type` varchar(255) DEFAULT NULL,
+  `attributes` varchar(255) DEFAULT NULL,
   `description` longtext DEFAULT NULL,
   `io_elements` longtext DEFAULT NULL,
   `security_need_c` int(11) DEFAULT NULL,
@@ -1532,9 +1645,10 @@ CREATE TABLE `macro_processuses` (
   `created_at` timestamp NULL DEFAULT NULL,
   `updated_at` timestamp NULL DEFAULT NULL,
   `deleted_at` timestamp NULL DEFAULT NULL,
-  `type` varchar(255) DEFAULT NULL,
-  `attributes` varchar(255) DEFAULT NULL,
-  PRIMARY KEY (`id`)
+  PRIMARY KEY (`id`),
+  KEY `macro_processuses_perimeter_id_index` (`perimeter_id`),
+  KEY `macro_processuses_name_index` (`name`),
+  CONSTRAINT `macro_processuses_perimeter_id_foreign` FOREIGN KEY (`perimeter_id`) REFERENCES `perimeters` (`id`) ON UPDATE NO ACTION
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 DROP TABLE IF EXISTS `man_wan`;
@@ -1554,18 +1668,22 @@ DROP TABLE IF EXISTS `mans`;
 /*!40101 SET character_set_client = utf8mb4 */;
 CREATE TABLE `mans` (
   `id` int(10) unsigned NOT NULL AUTO_INCREMENT,
+  `perimeter_id` int(10) unsigned NOT NULL DEFAULT 1,
   `ext_refs` varchar(255) DEFAULT NULL,
   `name` varchar(255) NOT NULL,
+  `type` varchar(255) DEFAULT NULL,
+  `attributes` varchar(255) DEFAULT NULL,
   `description` longtext DEFAULT NULL,
   `parent_man_id` int(10) unsigned DEFAULT NULL,
   `created_at` timestamp NULL DEFAULT NULL,
   `updated_at` timestamp NULL DEFAULT NULL,
   `deleted_at` timestamp NULL DEFAULT NULL,
-  `type` varchar(255) DEFAULT NULL,
-  `attributes` varchar(255) DEFAULT NULL,
   PRIMARY KEY (`id`),
   KEY `man_id_fk_4385454` (`parent_man_id`),
-  CONSTRAINT `man_id_fk_4385454` FOREIGN KEY (`parent_man_id`) REFERENCES `mans` (`id`) ON DELETE SET NULL ON UPDATE NO ACTION
+  KEY `mans_perimeter_id_index` (`perimeter_id`),
+  KEY `mans_name_index` (`name`),
+  CONSTRAINT `man_id_fk_4385454` FOREIGN KEY (`parent_man_id`) REFERENCES `mans` (`id`) ON DELETE SET NULL ON UPDATE NO ACTION,
+  CONSTRAINT `mans_perimeter_id_foreign` FOREIGN KEY (`perimeter_id`) REFERENCES `perimeters` (`id`) ON UPDATE NO ACTION
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 DROP TABLE IF EXISTS `media`;
@@ -1660,16 +1778,20 @@ DROP TABLE IF EXISTS `network_switches`;
 /*!40101 SET character_set_client = utf8mb4 */;
 CREATE TABLE `network_switches` (
   `id` int(10) unsigned NOT NULL AUTO_INCREMENT,
+  `perimeter_id` int(10) unsigned NOT NULL DEFAULT 1,
   `ext_refs` varchar(255) DEFAULT NULL,
   `name` varchar(255) NOT NULL,
+  `type` varchar(255) DEFAULT NULL,
+  `attributes` varchar(255) DEFAULT NULL,
   `ip` varchar(255) DEFAULT NULL,
   `description` longtext DEFAULT NULL,
   `created_at` timestamp NULL DEFAULT NULL,
   `updated_at` timestamp NULL DEFAULT NULL,
   `deleted_at` timestamp NULL DEFAULT NULL,
-  `type` varchar(255) DEFAULT NULL,
-  `attributes` varchar(255) DEFAULT NULL,
-  PRIMARY KEY (`id`)
+  PRIMARY KEY (`id`),
+  KEY `network_switches_perimeter_id_index` (`perimeter_id`),
+  KEY `network_switches_name_index` (`name`),
+  CONSTRAINT `network_switches_perimeter_id_foreign` FOREIGN KEY (`perimeter_id`) REFERENCES `perimeters` (`id`) ON UPDATE NO ACTION
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 DROP TABLE IF EXISTS `networks`;
@@ -1677,6 +1799,7 @@ DROP TABLE IF EXISTS `networks`;
 /*!40101 SET character_set_client = utf8mb4 */;
 CREATE TABLE `networks` (
   `id` int(10) unsigned NOT NULL AUTO_INCREMENT,
+  `perimeter_id` int(10) unsigned NOT NULL DEFAULT 1,
   `ext_refs` varchar(255) DEFAULT NULL,
   `name` varchar(255) NOT NULL,
   `type` varchar(255) DEFAULT NULL,
@@ -1693,7 +1816,10 @@ CREATE TABLE `networks` (
   `created_at` timestamp NULL DEFAULT NULL,
   `updated_at` timestamp NULL DEFAULT NULL,
   `deleted_at` timestamp NULL DEFAULT NULL,
-  PRIMARY KEY (`id`)
+  PRIMARY KEY (`id`),
+  KEY `networks_perimeter_id_index` (`perimeter_id`),
+  KEY `networks_name_index` (`name`),
+  CONSTRAINT `networks_perimeter_id_foreign` FOREIGN KEY (`perimeter_id`) REFERENCES `perimeters` (`id`) ON UPDATE NO ACTION
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 DROP TABLE IF EXISTS `oauth_access_tokens`;
@@ -1805,17 +1931,21 @@ DROP TABLE IF EXISTS `operations`;
 /*!40101 SET character_set_client = utf8mb4 */;
 CREATE TABLE `operations` (
   `id` int(10) unsigned NOT NULL AUTO_INCREMENT,
+  `perimeter_id` int(10) unsigned NOT NULL DEFAULT 1,
   `ext_refs` varchar(255) DEFAULT NULL,
   `name` varchar(255) NOT NULL,
+  `type` varchar(255) DEFAULT NULL,
+  `attributes` varchar(255) DEFAULT NULL,
   `description` longtext DEFAULT NULL,
   `process_id` int(10) unsigned DEFAULT NULL,
   `created_at` timestamp NULL DEFAULT NULL,
   `updated_at` timestamp NULL DEFAULT NULL,
   `deleted_at` timestamp NULL DEFAULT NULL,
-  `type` varchar(255) DEFAULT NULL,
-  `attributes` varchar(255) DEFAULT NULL,
   PRIMARY KEY (`id`),
   KEY `process_id_fk_7945129` (`process_id`),
+  KEY `operations_perimeter_id_index` (`perimeter_id`),
+  KEY `operations_name_index` (`name`),
+  CONSTRAINT `operations_perimeter_id_foreign` FOREIGN KEY (`perimeter_id`) REFERENCES `perimeters` (`id`) ON UPDATE NO ACTION,
   CONSTRAINT `process_id_fk_7945129` FOREIGN KEY (`process_id`) REFERENCES `processes` (`id`) ON DELETE CASCADE ON UPDATE NO ACTION
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
@@ -1842,14 +1972,28 @@ CREATE TABLE `password_resets` (
   KEY `password_resets_email_index` (`email`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
+DROP TABLE IF EXISTS `perimeters`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8mb4 */;
+CREATE TABLE `perimeters` (
+  `id` int(10) unsigned NOT NULL AUTO_INCREMENT,
+  `nom` varchar(32) NOT NULL,
+  `created_at` timestamp NULL DEFAULT NULL,
+  `updated_at` timestamp NULL DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `perimeters_nom_unique` (`nom`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+/*!40101 SET character_set_client = @saved_cs_client */;
 DROP TABLE IF EXISTS `peripherals`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!40101 SET character_set_client = utf8mb4 */;
 CREATE TABLE `peripherals` (
   `id` int(10) unsigned NOT NULL AUTO_INCREMENT,
+  `perimeter_id` int(10) unsigned NOT NULL DEFAULT 1,
   `ext_refs` varchar(255) DEFAULT NULL,
   `name` varchar(255) NOT NULL,
   `type` varchar(255) DEFAULT NULL,
+  `attributes` varchar(255) DEFAULT NULL,
   `icon_id` int(10) unsigned DEFAULT NULL,
   `description` longtext DEFAULT NULL,
   `vendor` varchar(255) DEFAULT NULL,
@@ -1865,7 +2009,6 @@ CREATE TABLE `peripherals` (
   `updated_at` timestamp NULL DEFAULT NULL,
   `deleted_at` timestamp NULL DEFAULT NULL,
   `domain_id` int(10) unsigned DEFAULT NULL,
-  `attributes` varchar(255) DEFAULT NULL,
   PRIMARY KEY (`id`),
   KEY `site_fk_1485449` (`site_id`),
   KEY `building_fk_1485450` (`building_id`),
@@ -1873,11 +2016,14 @@ CREATE TABLE `peripherals` (
   KEY `entity_id_fk_4383234` (`provider_id`),
   KEY `document_id_fk_129484` (`icon_id`),
   KEY `peripherals_domain_id_foreign` (`domain_id`),
+  KEY `peripherals_perimeter_id_index` (`perimeter_id`),
+  KEY `peripherals_name_index` (`name`),
   CONSTRAINT `bay_fk_1485451` FOREIGN KEY (`bay_id`) REFERENCES `bays` (`id`) ON DELETE NO ACTION ON UPDATE NO ACTION,
   CONSTRAINT `building_fk_1485450` FOREIGN KEY (`building_id`) REFERENCES `buildings` (`id`) ON DELETE NO ACTION ON UPDATE NO ACTION,
   CONSTRAINT `document_id_fk_129484` FOREIGN KEY (`icon_id`) REFERENCES `documents` (`id`) ON UPDATE NO ACTION,
   CONSTRAINT `entity_id_fk_4383234` FOREIGN KEY (`provider_id`) REFERENCES `entities` (`id`) ON DELETE NO ACTION ON UPDATE NO ACTION,
   CONSTRAINT `peripherals_domain_id_foreign` FOREIGN KEY (`domain_id`) REFERENCES `domains` (`id`),
+  CONSTRAINT `peripherals_perimeter_id_foreign` FOREIGN KEY (`perimeter_id`) REFERENCES `perimeters` (`id`) ON UPDATE NO ACTION,
   CONSTRAINT `site_fk_1485449` FOREIGN KEY (`site_id`) REFERENCES `sites` (`id`) ON DELETE NO ACTION ON UPDATE NO ACTION
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
@@ -1930,9 +2076,11 @@ DROP TABLE IF EXISTS `phones`;
 /*!40101 SET character_set_client = utf8mb4 */;
 CREATE TABLE `phones` (
   `id` int(10) unsigned NOT NULL AUTO_INCREMENT,
+  `perimeter_id` int(10) unsigned NOT NULL DEFAULT 1,
   `ext_refs` varchar(255) DEFAULT NULL,
   `name` varchar(255) NOT NULL,
   `type` varchar(255) DEFAULT NULL,
+  `attributes` varchar(255) DEFAULT NULL,
   `description` longtext DEFAULT NULL,
   `vendor` varchar(255) DEFAULT NULL,
   `product` varchar(255) DEFAULT NULL,
@@ -1944,12 +2092,14 @@ CREATE TABLE `phones` (
   `created_at` timestamp NULL DEFAULT NULL,
   `updated_at` timestamp NULL DEFAULT NULL,
   `deleted_at` timestamp NULL DEFAULT NULL,
-  `attributes` varchar(255) DEFAULT NULL,
   PRIMARY KEY (`id`),
   KEY `site_fk_1485479` (`site_id`),
   KEY `building_fk_1485480` (`building_id`),
   KEY `physical_switch_fk_5738332` (`physical_switch_id`),
+  KEY `phones_perimeter_id_index` (`perimeter_id`),
+  KEY `phones_name_index` (`name`),
   CONSTRAINT `building_fk_1485480` FOREIGN KEY (`building_id`) REFERENCES `buildings` (`id`) ON DELETE NO ACTION ON UPDATE NO ACTION,
+  CONSTRAINT `phones_perimeter_id_foreign` FOREIGN KEY (`perimeter_id`) REFERENCES `perimeters` (`id`) ON UPDATE NO ACTION,
   CONSTRAINT `physical_switch_fk_5738332` FOREIGN KEY (`physical_switch_id`) REFERENCES `physical_switches` (`id`) ON DELETE NO ACTION ON UPDATE NO ACTION,
   CONSTRAINT `site_fk_1485479` FOREIGN KEY (`site_id`) REFERENCES `sites` (`id`) ON DELETE NO ACTION ON UPDATE NO ACTION
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
@@ -1959,6 +2109,7 @@ DROP TABLE IF EXISTS `physical_links`;
 /*!40101 SET character_set_client = utf8mb4 */;
 CREATE TABLE `physical_links` (
   `id` int(10) unsigned NOT NULL AUTO_INCREMENT,
+  `perimeter_id` int(10) unsigned NOT NULL DEFAULT 1,
   `ext_refs` varchar(255) DEFAULT NULL,
   `type` varchar(255) DEFAULT NULL,
   `color` varchar(255) DEFAULT NULL,
@@ -2018,6 +2169,7 @@ CREATE TABLE `physical_links` (
   KEY `network_switches_dest_id_fk` (`network_switch_dest_id`),
   KEY `logical_server_src_id_fk` (`logical_server_src_id`),
   KEY `logical_server_dest_id_fk` (`logical_server_dest_id`),
+  KEY `physical_links_perimeter_id_index` (`perimeter_id`),
   CONSTRAINT `logical_server_dest_id_fk` FOREIGN KEY (`logical_server_dest_id`) REFERENCES `logical_servers` (`id`) ON DELETE CASCADE ON UPDATE NO ACTION,
   CONSTRAINT `logical_server_src_id_fk` FOREIGN KEY (`logical_server_src_id`) REFERENCES `logical_servers` (`id`) ON DELETE CASCADE ON UPDATE NO ACTION,
   CONSTRAINT `network_switch_dest_id_fk` FOREIGN KEY (`network_switch_dest_id`) REFERENCES `network_switches` (`id`) ON DELETE CASCADE ON UPDATE NO ACTION,
@@ -2026,6 +2178,7 @@ CREATE TABLE `physical_links` (
   CONSTRAINT `peripheral_src_id_fk` FOREIGN KEY (`peripheral_src_id`) REFERENCES `peripherals` (`id`) ON DELETE CASCADE ON UPDATE NO ACTION,
   CONSTRAINT `phone_dest_id_fk` FOREIGN KEY (`phone_dest_id`) REFERENCES `phones` (`id`) ON DELETE CASCADE ON UPDATE NO ACTION,
   CONSTRAINT `phone_src_id_fk` FOREIGN KEY (`phone_src_id`) REFERENCES `phones` (`id`) ON DELETE CASCADE ON UPDATE NO ACTION,
+  CONSTRAINT `physical_links_perimeter_id_foreign` FOREIGN KEY (`perimeter_id`) REFERENCES `perimeters` (`id`) ON UPDATE NO ACTION,
   CONSTRAINT `physical_router_dest_id_fk` FOREIGN KEY (`physical_router_dest_id`) REFERENCES `physical_routers` (`id`) ON DELETE CASCADE ON UPDATE NO ACTION,
   CONSTRAINT `physical_router_src_id_fk` FOREIGN KEY (`physical_router_src_id`) REFERENCES `physical_routers` (`id`) ON DELETE CASCADE ON UPDATE NO ACTION,
   CONSTRAINT `physical_security_device_dest_id_fk` FOREIGN KEY (`physical_security_device_dest_id`) REFERENCES `physical_security_devices` (`id`) ON DELETE CASCADE ON UPDATE NO ACTION,
@@ -2073,6 +2226,7 @@ DROP TABLE IF EXISTS `physical_routers`;
 /*!40101 SET character_set_client = utf8mb4 */;
 CREATE TABLE `physical_routers` (
   `id` int(10) unsigned NOT NULL AUTO_INCREMENT,
+  `perimeter_id` int(10) unsigned NOT NULL DEFAULT 1,
   `ext_refs` varchar(255) DEFAULT NULL,
   `name` varchar(255) NOT NULL,
   `description` longtext DEFAULT NULL,
@@ -2080,19 +2234,22 @@ CREATE TABLE `physical_routers` (
   `product` varchar(255) DEFAULT NULL,
   `version` varchar(255) DEFAULT NULL,
   `type` varchar(255) DEFAULT NULL,
+  `attributes` varchar(255) DEFAULT NULL,
   `site_id` int(10) unsigned DEFAULT NULL,
   `building_id` int(10) unsigned DEFAULT NULL,
   `bay_id` int(10) unsigned DEFAULT NULL,
   `created_at` timestamp NULL DEFAULT NULL,
   `updated_at` timestamp NULL DEFAULT NULL,
   `deleted_at` timestamp NULL DEFAULT NULL,
-  `attributes` varchar(255) DEFAULT NULL,
   PRIMARY KEY (`id`),
   KEY `site_fk_1485497` (`site_id`),
   KEY `building_fk_1485498` (`building_id`),
   KEY `bay_fk_1485499` (`bay_id`),
+  KEY `physical_routers_perimeter_id_index` (`perimeter_id`),
+  KEY `physical_routers_name_index` (`name`),
   CONSTRAINT `bay_fk_1485499` FOREIGN KEY (`bay_id`) REFERENCES `bays` (`id`) ON DELETE NO ACTION ON UPDATE NO ACTION,
   CONSTRAINT `building_fk_1485498` FOREIGN KEY (`building_id`) REFERENCES `buildings` (`id`) ON DELETE NO ACTION ON UPDATE NO ACTION,
+  CONSTRAINT `physical_routers_perimeter_id_foreign` FOREIGN KEY (`perimeter_id`) REFERENCES `perimeters` (`id`) ON UPDATE NO ACTION,
   CONSTRAINT `site_fk_1485497` FOREIGN KEY (`site_id`) REFERENCES `sites` (`id`) ON DELETE NO ACTION ON UPDATE NO ACTION
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
@@ -2113,6 +2270,7 @@ DROP TABLE IF EXISTS `physical_security_devices`;
 /*!40101 SET character_set_client = utf8mb4 */;
 CREATE TABLE `physical_security_devices` (
   `id` int(10) unsigned NOT NULL AUTO_INCREMENT,
+  `perimeter_id` int(10) unsigned NOT NULL DEFAULT 1,
   `ext_refs` varchar(255) DEFAULT NULL,
   `name` varchar(255) NOT NULL,
   `type` varchar(255) DEFAULT NULL,
@@ -2131,9 +2289,12 @@ CREATE TABLE `physical_security_devices` (
   KEY `building_fk_1485518` (`building_id`),
   KEY `bay_fk_1485519` (`bay_id`),
   KEY `document_id_fk_493827312` (`icon_id`),
+  KEY `physical_security_devices_perimeter_id_index` (`perimeter_id`),
+  KEY `physical_security_devices_name_index` (`name`),
   CONSTRAINT `bay_fk_1485519` FOREIGN KEY (`bay_id`) REFERENCES `bays` (`id`) ON DELETE NO ACTION ON UPDATE NO ACTION,
   CONSTRAINT `building_fk_1485518` FOREIGN KEY (`building_id`) REFERENCES `buildings` (`id`) ON DELETE NO ACTION ON UPDATE NO ACTION,
   CONSTRAINT `document_id_fk_493827312` FOREIGN KEY (`icon_id`) REFERENCES `documents` (`id`),
+  CONSTRAINT `physical_security_devices_perimeter_id_foreign` FOREIGN KEY (`perimeter_id`) REFERENCES `perimeters` (`id`) ON UPDATE NO ACTION,
   CONSTRAINT `site_fk_1485517` FOREIGN KEY (`site_id`) REFERENCES `sites` (`id`) ON DELETE NO ACTION ON UPDATE NO ACTION
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
@@ -2142,9 +2303,11 @@ DROP TABLE IF EXISTS `physical_servers`;
 /*!40101 SET character_set_client = utf8mb4 */;
 CREATE TABLE `physical_servers` (
   `id` int(10) unsigned NOT NULL AUTO_INCREMENT,
+  `perimeter_id` int(10) unsigned NOT NULL DEFAULT 1,
   `ext_refs` varchar(255) DEFAULT NULL,
   `name` varchar(255) NOT NULL,
   `type` varchar(255) DEFAULT NULL,
+  `attributes` varchar(255) DEFAULT NULL,
   `icon_id` int(10) unsigned DEFAULT NULL,
   `description` longtext DEFAULT NULL,
   `vendor` varchar(255) DEFAULT NULL,
@@ -2170,16 +2333,18 @@ CREATE TABLE `physical_servers` (
   `created_at` timestamp NULL DEFAULT NULL,
   `updated_at` timestamp NULL DEFAULT NULL,
   `deleted_at` timestamp NULL DEFAULT NULL,
-  `attributes` varchar(255) DEFAULT NULL,
   PRIMARY KEY (`id`),
   KEY `site_fk_1485322` (`site_id`),
   KEY `building_fk_1485323` (`building_id`),
   KEY `bay_fk_1485324` (`bay_id`),
   KEY `physical_switch_fk_8732342` (`physical_switch_id`),
   KEY `document_id_fk_5328384` (`icon_id`),
+  KEY `physical_servers_perimeter_id_index` (`perimeter_id`),
+  KEY `physical_servers_name_index` (`name`),
   CONSTRAINT `bay_fk_1485324` FOREIGN KEY (`bay_id`) REFERENCES `bays` (`id`) ON DELETE NO ACTION ON UPDATE NO ACTION,
   CONSTRAINT `building_fk_1485323` FOREIGN KEY (`building_id`) REFERENCES `buildings` (`id`) ON DELETE NO ACTION ON UPDATE NO ACTION,
   CONSTRAINT `document_id_fk_5328384` FOREIGN KEY (`icon_id`) REFERENCES `documents` (`id`),
+  CONSTRAINT `physical_servers_perimeter_id_foreign` FOREIGN KEY (`perimeter_id`) REFERENCES `perimeters` (`id`) ON UPDATE NO ACTION,
   CONSTRAINT `physical_switch_fk_8732342` FOREIGN KEY (`physical_switch_id`) REFERENCES `physical_switches` (`id`) ON DELETE NO ACTION ON UPDATE NO ACTION,
   CONSTRAINT `site_fk_1485322` FOREIGN KEY (`site_id`) REFERENCES `sites` (`id`) ON DELETE NO ACTION ON UPDATE NO ACTION
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
@@ -2189,9 +2354,11 @@ DROP TABLE IF EXISTS `physical_switches`;
 /*!40101 SET character_set_client = utf8mb4 */;
 CREATE TABLE `physical_switches` (
   `id` int(10) unsigned NOT NULL AUTO_INCREMENT,
+  `perimeter_id` int(10) unsigned NOT NULL DEFAULT 1,
   `ext_refs` varchar(255) DEFAULT NULL,
   `name` varchar(255) NOT NULL,
   `type` varchar(255) DEFAULT NULL,
+  `attributes` varchar(255) DEFAULT NULL,
   `icon_id` int(10) unsigned DEFAULT NULL,
   `description` longtext DEFAULT NULL,
   `vendor` varchar(255) DEFAULT NULL,
@@ -2203,15 +2370,17 @@ CREATE TABLE `physical_switches` (
   `created_at` timestamp NULL DEFAULT NULL,
   `updated_at` timestamp NULL DEFAULT NULL,
   `deleted_at` timestamp NULL DEFAULT NULL,
-  `attributes` varchar(255) DEFAULT NULL,
   PRIMARY KEY (`id`),
   KEY `site_fk_1485488` (`site_id`),
   KEY `building_fk_1485489` (`building_id`),
   KEY `bay_fk_1485493` (`bay_id`),
   KEY `physical_switches_icon_id_foreign` (`icon_id`),
+  KEY `physical_switches_perimeter_id_index` (`perimeter_id`),
+  KEY `physical_switches_name_index` (`name`),
   CONSTRAINT `bay_fk_1485493` FOREIGN KEY (`bay_id`) REFERENCES `bays` (`id`) ON DELETE NO ACTION ON UPDATE NO ACTION,
   CONSTRAINT `building_fk_1485489` FOREIGN KEY (`building_id`) REFERENCES `buildings` (`id`) ON DELETE NO ACTION ON UPDATE NO ACTION,
   CONSTRAINT `physical_switches_icon_id_foreign` FOREIGN KEY (`icon_id`) REFERENCES `documents` (`id`),
+  CONSTRAINT `physical_switches_perimeter_id_foreign` FOREIGN KEY (`perimeter_id`) REFERENCES `perimeters` (`id`) ON UPDATE NO ACTION,
   CONSTRAINT `site_fk_1485488` FOREIGN KEY (`site_id`) REFERENCES `sites` (`id`) ON DELETE NO ACTION ON UPDATE NO ACTION
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
@@ -2220,8 +2389,11 @@ DROP TABLE IF EXISTS `processes`;
 /*!40101 SET character_set_client = utf8mb4 */;
 CREATE TABLE `processes` (
   `id` int(10) unsigned NOT NULL AUTO_INCREMENT,
+  `perimeter_id` int(10) unsigned NOT NULL DEFAULT 1,
   `ext_refs` varchar(255) DEFAULT NULL,
   `name` varchar(255) NOT NULL,
+  `type` varchar(255) DEFAULT NULL,
+  `attributes` varchar(255) DEFAULT NULL,
   `icon_id` int(10) unsigned DEFAULT NULL,
   `description` longtext DEFAULT NULL,
   `owner` varchar(255) DEFAULT NULL,
@@ -2235,13 +2407,14 @@ CREATE TABLE `processes` (
   `created_at` timestamp NULL DEFAULT NULL,
   `updated_at` timestamp NULL DEFAULT NULL,
   `deleted_at` timestamp NULL DEFAULT NULL,
-  `type` varchar(255) DEFAULT NULL,
-  `attributes` varchar(255) DEFAULT NULL,
   PRIMARY KEY (`id`),
   KEY `process_fk_4342342` (`macroprocess_id`),
   KEY `document_id_fk_5938654` (`icon_id`),
+  KEY `processes_perimeter_id_index` (`perimeter_id`),
+  KEY `processes_name_index` (`name`),
   CONSTRAINT `document_id_fk_5938654` FOREIGN KEY (`icon_id`) REFERENCES `documents` (`id`) ON UPDATE NO ACTION,
-  CONSTRAINT `processes_ibfk_1` FOREIGN KEY (`macroprocess_id`) REFERENCES `macro_processuses` (`id`) ON DELETE NO ACTION ON UPDATE NO ACTION
+  CONSTRAINT `processes_ibfk_1` FOREIGN KEY (`macroprocess_id`) REFERENCES `macro_processuses` (`id`) ON DELETE NO ACTION ON UPDATE NO ACTION,
+  CONSTRAINT `processes_perimeter_id_foreign` FOREIGN KEY (`perimeter_id`) REFERENCES `perimeters` (`id`) ON UPDATE NO ACTION
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 DROP TABLE IF EXISTS `relation_values`;
@@ -2262,6 +2435,7 @@ DROP TABLE IF EXISTS `relations`;
 /*!40101 SET character_set_client = utf8mb4 */;
 CREATE TABLE `relations` (
   `id` int(10) unsigned NOT NULL AUTO_INCREMENT,
+  `perimeter_id` int(10) unsigned NOT NULL DEFAULT 1,
   `ext_refs` varchar(255) DEFAULT NULL,
   `importance` int(11) DEFAULT NULL,
   `name` varchar(255) NOT NULL,
@@ -2288,7 +2462,10 @@ CREATE TABLE `relations` (
   PRIMARY KEY (`id`),
   KEY `source_fk_1494372` (`source_id`),
   KEY `destination_fk_1494373` (`destination_id`),
+  KEY `relations_perimeter_id_index` (`perimeter_id`),
+  KEY `relations_name_index` (`name`),
   CONSTRAINT `destination_fk_1494373` FOREIGN KEY (`destination_id`) REFERENCES `entities` (`id`) ON DELETE NO ACTION ON UPDATE NO ACTION,
+  CONSTRAINT `relations_perimeter_id_foreign` FOREIGN KEY (`perimeter_id`) REFERENCES `perimeters` (`id`) ON UPDATE NO ACTION,
   CONSTRAINT `source_fk_1494372` FOREIGN KEY (`source_id`) REFERENCES `entities` (`id`) ON DELETE NO ACTION ON UPDATE NO ACTION
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
@@ -2309,11 +2486,14 @@ DROP TABLE IF EXISTS `roles`;
 /*!40101 SET character_set_client = utf8mb4 */;
 CREATE TABLE `roles` (
   `id` int(10) unsigned NOT NULL AUTO_INCREMENT,
+  `perimeter_id` int(10) unsigned NOT NULL DEFAULT 1,
   `title` varchar(255) DEFAULT NULL,
   `created_at` timestamp NULL DEFAULT NULL,
   `updated_at` timestamp NULL DEFAULT NULL,
   `deleted_at` timestamp NULL DEFAULT NULL,
-  PRIMARY KEY (`id`)
+  PRIMARY KEY (`id`),
+  KEY `roles_perimeter_id_index` (`perimeter_id`),
+  CONSTRAINT `roles_perimeter_id_foreign` FOREIGN KEY (`perimeter_id`) REFERENCES `perimeters` (`id`) ON UPDATE NO ACTION
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 DROP TABLE IF EXISTS `routers`;
@@ -2321,17 +2501,21 @@ DROP TABLE IF EXISTS `routers`;
 /*!40101 SET character_set_client = utf8mb4 */;
 CREATE TABLE `routers` (
   `id` int(10) unsigned NOT NULL AUTO_INCREMENT,
+  `perimeter_id` int(10) unsigned NOT NULL DEFAULT 1,
   `ext_refs` varchar(255) DEFAULT NULL,
   `name` varchar(255) NOT NULL,
   `type` varchar(255) DEFAULT NULL,
+  `attributes` varchar(255) DEFAULT NULL,
   `description` longtext DEFAULT NULL,
   `rules` longtext DEFAULT NULL,
   `ip_addresses` text DEFAULT NULL,
   `created_at` timestamp NULL DEFAULT NULL,
   `updated_at` timestamp NULL DEFAULT NULL,
   `deleted_at` timestamp NULL DEFAULT NULL,
-  `attributes` varchar(255) DEFAULT NULL,
-  PRIMARY KEY (`id`)
+  PRIMARY KEY (`id`),
+  KEY `routers_perimeter_id_index` (`perimeter_id`),
+  KEY `routers_name_index` (`name`),
+  CONSTRAINT `routers_perimeter_id_foreign` FOREIGN KEY (`perimeter_id`) REFERENCES `perimeters` (`id`) ON UPDATE NO ACTION
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 DROP TABLE IF EXISTS `saved_queries`;
@@ -2348,6 +2532,7 @@ CREATE TABLE `saved_queries` (
   `updated_at` timestamp NULL DEFAULT NULL,
   PRIMARY KEY (`id`),
   KEY `saved_queries_user_id_is_public_index` (`user_id`,`is_public`),
+  KEY `saved_queries_name_index` (`name`),
   CONSTRAINT `saved_queries_user_id_foreign` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE SET NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
@@ -2368,13 +2553,17 @@ DROP TABLE IF EXISTS `security_controls`;
 /*!40101 SET character_set_client = utf8mb4 */;
 CREATE TABLE `security_controls` (
   `id` int(10) unsigned NOT NULL AUTO_INCREMENT,
+  `perimeter_id` int(10) unsigned NOT NULL DEFAULT 1,
   `ext_refs` varchar(255) DEFAULT NULL,
   `name` varchar(255) NOT NULL,
   `description` longtext DEFAULT NULL,
   `created_at` timestamp NULL DEFAULT NULL,
   `updated_at` timestamp NULL DEFAULT NULL,
   `deleted_at` timestamp NULL DEFAULT NULL,
-  PRIMARY KEY (`id`)
+  PRIMARY KEY (`id`),
+  KEY `security_controls_perimeter_id_index` (`perimeter_id`),
+  KEY `security_controls_name_index` (`name`),
+  CONSTRAINT `security_controls_perimeter_id_foreign` FOREIGN KEY (`perimeter_id`) REFERENCES `perimeters` (`id`) ON UPDATE NO ACTION
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 DROP TABLE IF EXISTS `security_devices`;
@@ -2382,6 +2571,7 @@ DROP TABLE IF EXISTS `security_devices`;
 /*!40101 SET character_set_client = utf8mb4 */;
 CREATE TABLE `security_devices` (
   `id` int(10) unsigned NOT NULL AUTO_INCREMENT,
+  `perimeter_id` int(10) unsigned NOT NULL DEFAULT 1,
   `ext_refs` varchar(255) DEFAULT NULL,
   `name` varchar(255) NOT NULL,
   `type` varchar(255) DEFAULT NULL,
@@ -2397,7 +2587,10 @@ CREATE TABLE `security_devices` (
   `address_ip` varchar(255) DEFAULT NULL,
   PRIMARY KEY (`id`),
   KEY `document_id_fk_432938439` (`icon_id`),
-  CONSTRAINT `document_id_fk_43948313` FOREIGN KEY (`icon_id`) REFERENCES `documents` (`id`)
+  KEY `security_devices_perimeter_id_index` (`perimeter_id`),
+  KEY `security_devices_name_index` (`name`),
+  CONSTRAINT `document_id_fk_43948313` FOREIGN KEY (`icon_id`) REFERENCES `documents` (`id`),
+  CONSTRAINT `security_devices_perimeter_id_foreign` FOREIGN KEY (`perimeter_id`) REFERENCES `perimeters` (`id`) ON UPDATE NO ACTION
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 DROP TABLE IF EXISTS `sites`;
@@ -2405,6 +2598,7 @@ DROP TABLE IF EXISTS `sites`;
 /*!40101 SET character_set_client = utf8mb4 */;
 CREATE TABLE `sites` (
   `id` int(10) unsigned NOT NULL AUTO_INCREMENT,
+  `perimeter_id` int(10) unsigned NOT NULL DEFAULT 1,
   `ext_refs` varchar(255) DEFAULT NULL,
   `name` varchar(255) NOT NULL,
   `type` varchar(255) DEFAULT NULL,
@@ -2416,7 +2610,10 @@ CREATE TABLE `sites` (
   `deleted_at` timestamp NULL DEFAULT NULL,
   PRIMARY KEY (`id`),
   KEY `document_id_fk_129485` (`icon_id`),
-  CONSTRAINT `document_id_fk_129485` FOREIGN KEY (`icon_id`) REFERENCES `documents` (`id`) ON UPDATE NO ACTION
+  KEY `sites_perimeter_id_index` (`perimeter_id`),
+  KEY `sites_name_index` (`name`),
+  CONSTRAINT `document_id_fk_129485` FOREIGN KEY (`icon_id`) REFERENCES `documents` (`id`) ON UPDATE NO ACTION,
+  CONSTRAINT `sites_perimeter_id_foreign` FOREIGN KEY (`perimeter_id`) REFERENCES `perimeters` (`id`) ON UPDATE NO ACTION
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 DROP TABLE IF EXISTS `storage_devices`;
@@ -2424,10 +2621,12 @@ DROP TABLE IF EXISTS `storage_devices`;
 /*!40101 SET character_set_client = utf8mb4 */;
 CREATE TABLE `storage_devices` (
   `id` int(10) unsigned NOT NULL AUTO_INCREMENT,
+  `perimeter_id` int(10) unsigned NOT NULL DEFAULT 1,
   `ext_refs` varchar(255) DEFAULT NULL,
   `name` varchar(255) NOT NULL,
   `icon_id` int(10) unsigned DEFAULT NULL,
   `type` varchar(255) DEFAULT NULL,
+  `attributes` varchar(255) DEFAULT NULL,
   `description` longtext DEFAULT NULL,
   `vendor` varchar(255) DEFAULT NULL,
   `product` varchar(255) DEFAULT NULL,
@@ -2439,16 +2638,18 @@ CREATE TABLE `storage_devices` (
   `created_at` timestamp NULL DEFAULT NULL,
   `updated_at` timestamp NULL DEFAULT NULL,
   `deleted_at` timestamp NULL DEFAULT NULL,
-  `attributes` varchar(255) DEFAULT NULL,
   PRIMARY KEY (`id`),
   KEY `site_fk_1485361` (`site_id`),
   KEY `building_fk_1485362` (`building_id`),
   KEY `bay_fk_1485363` (`bay_id`),
   KEY `document_id_fk_53812733` (`icon_id`),
+  KEY `storage_devices_perimeter_id_index` (`perimeter_id`),
+  KEY `storage_devices_name_index` (`name`),
   CONSTRAINT `bay_fk_1485363` FOREIGN KEY (`bay_id`) REFERENCES `bays` (`id`) ON DELETE NO ACTION ON UPDATE NO ACTION,
   CONSTRAINT `building_fk_1485362` FOREIGN KEY (`building_id`) REFERENCES `buildings` (`id`) ON DELETE NO ACTION ON UPDATE NO ACTION,
   CONSTRAINT `document_id_fk_53812733` FOREIGN KEY (`icon_id`) REFERENCES `documents` (`id`),
-  CONSTRAINT `site_fk_1485361` FOREIGN KEY (`site_id`) REFERENCES `sites` (`id`) ON DELETE NO ACTION ON UPDATE NO ACTION
+  CONSTRAINT `site_fk_1485361` FOREIGN KEY (`site_id`) REFERENCES `sites` (`id`) ON DELETE NO ACTION ON UPDATE NO ACTION,
+  CONSTRAINT `storage_devices_perimeter_id_foreign` FOREIGN KEY (`perimeter_id`) REFERENCES `perimeters` (`id`) ON UPDATE NO ACTION
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 DROP TABLE IF EXISTS `subnetworks`;
@@ -2456,6 +2657,7 @@ DROP TABLE IF EXISTS `subnetworks`;
 /*!40101 SET character_set_client = utf8mb4 */;
 CREATE TABLE `subnetworks` (
   `id` int(10) unsigned NOT NULL AUTO_INCREMENT,
+  `perimeter_id` int(10) unsigned NOT NULL DEFAULT 1,
   `ext_refs` varchar(255) DEFAULT NULL,
   `name` varchar(255) NOT NULL,
   `type` varchar(255) DEFAULT NULL,
@@ -2482,9 +2684,12 @@ CREATE TABLE `subnetworks` (
   KEY `vlan_fk_6844934` (`vlan_id`),
   KEY `network_fk_5476544` (`network_id`),
   KEY `subnetworks_subnetwork_id_index` (`subnetwork_id`),
+  KEY `subnetworks_perimeter_id_index` (`perimeter_id`),
+  KEY `subnetworks_name_index` (`name`),
   CONSTRAINT `connected_subnets_fk_1483256` FOREIGN KEY (`connected_subnets_id`) REFERENCES `subnetworks` (`id`) ON DELETE NO ACTION ON UPDATE NO ACTION,
   CONSTRAINT `gateway_fk_1492376` FOREIGN KEY (`gateway_id`) REFERENCES `gateways` (`id`) ON DELETE NO ACTION ON UPDATE NO ACTION,
   CONSTRAINT `network_fk_5476544` FOREIGN KEY (`network_id`) REFERENCES `networks` (`id`) ON DELETE NO ACTION ON UPDATE NO ACTION,
+  CONSTRAINT `subnetworks_perimeter_id_foreign` FOREIGN KEY (`perimeter_id`) REFERENCES `perimeters` (`id`) ON UPDATE NO ACTION,
   CONSTRAINT `subnetworks_subnetwork_id_foreign` FOREIGN KEY (`subnetwork_id`) REFERENCES `subnetworks` (`id`) ON DELETE SET NULL,
   CONSTRAINT `vlan_fk_6844934` FOREIGN KEY (`vlan_id`) REFERENCES `vlans` (`id`) ON DELETE NO ACTION ON UPDATE NO ACTION
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
@@ -2494,15 +2699,19 @@ DROP TABLE IF EXISTS `tasks`;
 /*!40101 SET character_set_client = utf8mb4 */;
 CREATE TABLE `tasks` (
   `id` int(10) unsigned NOT NULL AUTO_INCREMENT,
+  `perimeter_id` int(10) unsigned NOT NULL DEFAULT 1,
   `ext_refs` varchar(255) DEFAULT NULL,
   `name` varchar(255) NOT NULL,
+  `type` varchar(255) DEFAULT NULL,
+  `attributes` varchar(255) DEFAULT NULL,
   `description` longtext DEFAULT NULL,
   `created_at` timestamp NULL DEFAULT NULL,
   `updated_at` timestamp NULL DEFAULT NULL,
   `deleted_at` timestamp NULL DEFAULT NULL,
-  `type` varchar(255) DEFAULT NULL,
-  `attributes` varchar(255) DEFAULT NULL,
-  PRIMARY KEY (`id`)
+  PRIMARY KEY (`id`),
+  KEY `tasks_perimeter_id_index` (`perimeter_id`),
+  KEY `tasks_name_index` (`name`),
+  CONSTRAINT `tasks_perimeter_id_foreign` FOREIGN KEY (`perimeter_id`) REFERENCES `perimeters` (`id`) ON UPDATE NO ACTION
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 DROP TABLE IF EXISTS `users`;
@@ -2531,16 +2740,20 @@ DROP TABLE IF EXISTS `vlans`;
 /*!40101 SET character_set_client = utf8mb4 */;
 CREATE TABLE `vlans` (
   `id` int(10) unsigned NOT NULL AUTO_INCREMENT,
+  `perimeter_id` int(10) unsigned NOT NULL DEFAULT 1,
   `ext_refs` varchar(255) DEFAULT NULL,
   `name` varchar(255) NOT NULL,
+  `type` varchar(255) DEFAULT NULL,
+  `attributes` varchar(255) DEFAULT NULL,
   `description` varchar(255) DEFAULT NULL,
   `vlan_id` int(11) DEFAULT NULL,
   `created_at` timestamp NULL DEFAULT NULL,
   `updated_at` timestamp NULL DEFAULT NULL,
   `deleted_at` timestamp NULL DEFAULT NULL,
-  `type` varchar(255) DEFAULT NULL,
-  `attributes` varchar(255) DEFAULT NULL,
-  PRIMARY KEY (`id`)
+  PRIMARY KEY (`id`),
+  KEY `vlans_perimeter_id_index` (`perimeter_id`),
+  KEY `vlans_name_index` (`name`),
+  CONSTRAINT `vlans_perimeter_id_foreign` FOREIGN KEY (`perimeter_id`) REFERENCES `perimeters` (`id`) ON UPDATE NO ACTION
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 DROP TABLE IF EXISTS `wans`;
@@ -2548,14 +2761,18 @@ DROP TABLE IF EXISTS `wans`;
 /*!40101 SET character_set_client = utf8mb4 */;
 CREATE TABLE `wans` (
   `id` int(10) unsigned NOT NULL AUTO_INCREMENT,
+  `perimeter_id` int(10) unsigned NOT NULL DEFAULT 1,
   `ext_refs` varchar(255) DEFAULT NULL,
   `name` varchar(255) DEFAULT NULL,
+  `type` varchar(255) DEFAULT NULL,
+  `attributes` varchar(255) DEFAULT NULL,
   `created_at` timestamp NULL DEFAULT NULL,
   `updated_at` timestamp NULL DEFAULT NULL,
   `deleted_at` timestamp NULL DEFAULT NULL,
-  `type` varchar(255) DEFAULT NULL,
-  `attributes` varchar(255) DEFAULT NULL,
-  PRIMARY KEY (`id`)
+  PRIMARY KEY (`id`),
+  KEY `wans_perimeter_id_index` (`perimeter_id`),
+  KEY `wans_name_index` (`name`),
+  CONSTRAINT `wans_perimeter_id_foreign` FOREIGN KEY (`perimeter_id`) REFERENCES `perimeters` (`id`) ON UPDATE NO ACTION
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 DROP TABLE IF EXISTS `wifi_terminals`;
@@ -2563,9 +2780,11 @@ DROP TABLE IF EXISTS `wifi_terminals`;
 /*!40101 SET character_set_client = utf8mb4 */;
 CREATE TABLE `wifi_terminals` (
   `id` int(10) unsigned NOT NULL AUTO_INCREMENT,
+  `perimeter_id` int(10) unsigned NOT NULL DEFAULT 1,
   `ext_refs` varchar(255) DEFAULT NULL,
   `name` varchar(255) NOT NULL,
   `type` varchar(255) DEFAULT NULL,
+  `attributes` varchar(255) DEFAULT NULL,
   `description` longtext DEFAULT NULL,
   `vendor` varchar(255) DEFAULT NULL,
   `product` varchar(255) DEFAULT NULL,
@@ -2576,12 +2795,14 @@ CREATE TABLE `wifi_terminals` (
   `created_at` timestamp NULL DEFAULT NULL,
   `updated_at` timestamp NULL DEFAULT NULL,
   `deleted_at` timestamp NULL DEFAULT NULL,
-  `attributes` varchar(255) DEFAULT NULL,
   PRIMARY KEY (`id`),
   KEY `site_fk_1485507` (`site_id`),
   KEY `building_fk_1485508` (`building_id`),
+  KEY `wifi_terminals_perimeter_id_index` (`perimeter_id`),
+  KEY `wifi_terminals_name_index` (`name`),
   CONSTRAINT `building_fk_1485508` FOREIGN KEY (`building_id`) REFERENCES `buildings` (`id`) ON DELETE NO ACTION ON UPDATE NO ACTION,
-  CONSTRAINT `site_fk_1485507` FOREIGN KEY (`site_id`) REFERENCES `sites` (`id`) ON DELETE NO ACTION ON UPDATE NO ACTION
+  CONSTRAINT `site_fk_1485507` FOREIGN KEY (`site_id`) REFERENCES `sites` (`id`) ON DELETE NO ACTION ON UPDATE NO ACTION,
+  CONSTRAINT `wifi_terminals_perimeter_id_foreign` FOREIGN KEY (`perimeter_id`) REFERENCES `perimeters` (`id`) ON UPDATE NO ACTION
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 DROP TABLE IF EXISTS `workstations`;
@@ -2589,6 +2810,7 @@ DROP TABLE IF EXISTS `workstations`;
 /*!40101 SET character_set_client = utf8mb4 */;
 CREATE TABLE `workstations` (
   `id` int(10) unsigned NOT NULL AUTO_INCREMENT,
+  `perimeter_id` int(10) unsigned NOT NULL DEFAULT 1,
   `ext_refs` varchar(255) DEFAULT NULL,
   `entity_id` int(10) unsigned DEFAULT NULL,
   `name` varchar(255) NOT NULL,
@@ -2600,6 +2822,7 @@ CREATE TABLE `workstations` (
   `building_id` int(10) unsigned DEFAULT NULL,
   `physical_switch_id` int(10) unsigned DEFAULT NULL,
   `type` varchar(255) DEFAULT NULL,
+  `attributes` varchar(255) DEFAULT NULL,
   `icon_id` int(10) unsigned DEFAULT NULL,
   `operating_system` varchar(255) DEFAULT NULL,
   `address_ip` varchar(255) DEFAULT NULL,
@@ -2628,7 +2851,6 @@ CREATE TABLE `workstations` (
   `created_at` timestamp NULL DEFAULT NULL,
   `updated_at` timestamp NULL DEFAULT NULL,
   `deleted_at` timestamp NULL DEFAULT NULL,
-  `attributes` varchar(255) DEFAULT NULL,
   PRIMARY KEY (`id`),
   KEY `site_fk_1485332` (`site_id`),
   KEY `building_fk_1485333` (`building_id`),
@@ -2638,6 +2860,8 @@ CREATE TABLE `workstations` (
   KEY `workstations_user_id_foreign` (`user_id`),
   KEY `workstations_domain_id_foreign` (`domain_id`),
   KEY `workstations_network_id_foreign` (`network_id`),
+  KEY `workstations_perimeter_id_index` (`perimeter_id`),
+  KEY `workstations_name_index` (`name`),
   CONSTRAINT `building_fk_1485333` FOREIGN KEY (`building_id`) REFERENCES `buildings` (`id`) ON DELETE NO ACTION ON UPDATE NO ACTION,
   CONSTRAINT `document_id_fk_129483` FOREIGN KEY (`icon_id`) REFERENCES `documents` (`id`) ON UPDATE NO ACTION,
   CONSTRAINT `physical_switch_fk_0938434` FOREIGN KEY (`physical_switch_id`) REFERENCES `physical_switches` (`id`) ON DELETE NO ACTION ON UPDATE NO ACTION,
@@ -2645,6 +2869,7 @@ CREATE TABLE `workstations` (
   CONSTRAINT `workstations_domain_id_foreign` FOREIGN KEY (`domain_id`) REFERENCES `domains` (`id`),
   CONSTRAINT `workstations_entity_id_foreign` FOREIGN KEY (`entity_id`) REFERENCES `entities` (`id`),
   CONSTRAINT `workstations_network_id_foreign` FOREIGN KEY (`network_id`) REFERENCES `networks` (`id`),
+  CONSTRAINT `workstations_perimeter_id_foreign` FOREIGN KEY (`perimeter_id`) REFERENCES `perimeters` (`id`) ON UPDATE NO ACTION,
   CONSTRAINT `workstations_user_id_foreign` FOREIGN KEY (`user_id`) REFERENCES `admin_users` (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
@@ -2653,15 +2878,19 @@ DROP TABLE IF EXISTS `zone_admins`;
 /*!40101 SET character_set_client = utf8mb4 */;
 CREATE TABLE `zone_admins` (
   `id` int(10) unsigned NOT NULL AUTO_INCREMENT,
+  `perimeter_id` int(10) unsigned NOT NULL DEFAULT 1,
   `ext_refs` varchar(255) DEFAULT NULL,
   `name` varchar(255) NOT NULL,
+  `type` varchar(255) DEFAULT NULL,
+  `attributes` varchar(255) DEFAULT NULL,
   `description` longtext DEFAULT NULL,
   `created_at` timestamp NULL DEFAULT NULL,
   `updated_at` timestamp NULL DEFAULT NULL,
   `deleted_at` timestamp NULL DEFAULT NULL,
-  `type` varchar(255) DEFAULT NULL,
-  `attributes` varchar(255) DEFAULT NULL,
-  PRIMARY KEY (`id`)
+  PRIMARY KEY (`id`),
+  KEY `zone_admins_perimeter_id_index` (`perimeter_id`),
+  KEY `zone_admins_name_index` (`name`),
+  CONSTRAINT `zone_admins_perimeter_id_foreign` FOREIGN KEY (`perimeter_id`) REFERENCES `perimeters` (`id`) ON UPDATE NO ACTION
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 DROP TABLE IF EXISTS `zone_zone`;
@@ -2681,6 +2910,7 @@ DROP TABLE IF EXISTS `zones`;
 /*!40101 SET character_set_client = utf8mb4 */;
 CREATE TABLE `zones` (
   `id` int(10) unsigned NOT NULL AUTO_INCREMENT,
+  `perimeter_id` int(10) unsigned NOT NULL DEFAULT 1,
   `ext_refs` varchar(255) DEFAULT NULL,
   `name` varchar(255) NOT NULL,
   `type` varchar(255) DEFAULT NULL,
@@ -2690,7 +2920,8 @@ CREATE TABLE `zones` (
   `updated_at` timestamp NULL DEFAULT NULL,
   `deleted_at` timestamp NULL DEFAULT NULL,
   PRIMARY KEY (`id`),
-  UNIQUE KEY `zones_name_unique` (`name`,`deleted_at`)
+  KEY `zones_perimeter_id_index` (`perimeter_id`),
+  CONSTRAINT `zones_perimeter_id_foreign` FOREIGN KEY (`perimeter_id`) REFERENCES `perimeters` (`id`) ON UPDATE NO ACTION
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 /*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
@@ -3081,7 +3312,13 @@ INSERT INTO `migrations` (`id`, `migration`, `batch`) VALUES (364,'2026_08_04_00
 INSERT INTO `migrations` (`id`, `migration`, `batch`) VALUES (365,'2026_08_11_000000_add_cairn_access_permission',49);
 INSERT INTO `migrations` (`id`, `migration`, `batch`) VALUES (366,'2026_09_02_000000_add_flow_label_to_users_table',49);
 INSERT INTO `migrations` (`id`, `migration`, `batch`) VALUES (367,'2026_09_08_000000_add_icon_to_storage_devices',49);
-INSERT INTO `migrations` (`id`, `migration`, `batch`) VALUES (368,'2026_09_09_000000_add_type_attributes_to_cartography_objects',49);
-INSERT INTO `migrations` (`id`, `migration`, `batch`) VALUES (369,'2026_09_09_000001_rename_nature_to_type_on_application_flows',49);
-INSERT INTO `migrations` (`id`, `migration`, `batch`) VALUES (370,'2026_09_10_000000_rename_entity_type_to_type_on_entities',49);
-INSERT INTO `migrations` (`id`, `migration`, `batch`) VALUES (371,'2026_09_10_000001_move_is_external_to_attributes_on_entities',49);
+INSERT INTO `migrations` (`id`, `migration`, `batch`) VALUES (378,'2026_09_09_000000_add_type_attributes_to_cartography_objects',50);
+INSERT INTO `migrations` (`id`, `migration`, `batch`) VALUES (379,'2026_09_09_000001_rename_nature_to_type_on_application_flows',50);
+INSERT INTO `migrations` (`id`, `migration`, `batch`) VALUES (380,'2026_09_10_000000_rename_entity_type_to_type_on_entities',50);
+INSERT INTO `migrations` (`id`, `migration`, `batch`) VALUES (381,'2026_09_10_000001_move_is_external_to_attributes_on_entities',50);
+INSERT INTO `migrations` (`id`, `migration`, `batch`) VALUES (382,'2026_09_14_100000_create_perimeters_table',50);
+INSERT INTO `migrations` (`id`, `migration`, `batch`) VALUES (383,'2026_09_14_100001_add_perimeter_id_to_roles_table',50);
+INSERT INTO `migrations` (`id`, `migration`, `batch`) VALUES (384,'2026_09_15_000000_add_perimeter_id_to_mapped_objects',50);
+INSERT INTO `migrations` (`id`, `migration`, `batch`) VALUES (385,'2026_09_16_000000_drop_unique_name_indexes_on_mapped_objects',50);
+INSERT INTO `migrations` (`id`, `migration`, `batch`) VALUES (386,'2026_09_16_000001_add_perimeter_id_to_admin_users_table',50);
+INSERT INTO `migrations` (`id`, `migration`, `batch`) VALUES (387,'2026_09_16_100000_add_name_indexes_to_frequently_sorted_tables',50);
