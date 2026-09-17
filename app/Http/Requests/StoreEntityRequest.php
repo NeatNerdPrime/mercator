@@ -8,7 +8,6 @@ use Symfony\Component\HttpFoundation\Response;
 
 class StoreEntityRequest extends BaseFormRequest
 {
-
     protected array $htmlFields = ['description', 'security_level', 'contact_point'];
 
     public function authorize(): bool
@@ -20,12 +19,15 @@ class StoreEntityRequest extends BaseFormRequest
 
     public function rules(): array
     {
+        $perimeterId = $this->input('perimeter_id') ?: auth()->user()?->activeOrDefaultPerimeterId();
+
         return [
+            'perimeter_id' => ['nullable', 'integer', Rule::in(auth()->user()?->perimeterIds() ?? [])],
             'name' => [
                 'min:3',
                 'max:64',
                 'required',
-                Rule::unique('entities')->whereNull('deleted_at'),
+                Rule::unique('entities')->where('perimeter_id', $perimeterId)->whereNull('deleted_at'),
             ],
             'iconFile' => ['nullable', 'file', 'mimes:png', 'max:65535'],
             'seurity_level' => [

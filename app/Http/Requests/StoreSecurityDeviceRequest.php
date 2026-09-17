@@ -9,7 +9,6 @@ use Symfony\Component\HttpFoundation\Response;
 
 class StoreSecurityDeviceRequest extends BaseFormRequest
 {
-
     protected array $htmlFields = ['description'];
 
     public function authorize(): bool
@@ -21,17 +20,20 @@ class StoreSecurityDeviceRequest extends BaseFormRequest
 
     public function rules(): array
     {
+        $perimeterId = $this->input('perimeter_id') ?: auth()->user()?->activeOrDefaultPerimeterId();
+
         return [
+            'perimeter_id' => ['nullable', 'integer', Rule::in(auth()->user()?->perimeterIds() ?? [])],
             'name' => [
                 'min:3',
                 'max:32',
                 'required',
-                Rule::unique('security_devices')->whereNull('deleted_at'),
+                Rule::unique('security_devices')->where('perimeter_id', $perimeterId)->whereNull('deleted_at'),
             ],
             'address_ip' => [
                 'nullable',
                 new IPList,
-            ]
+            ],
         ];
     }
 }

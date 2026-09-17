@@ -27,6 +27,9 @@
                         <th width="10">
 
                         </th>
+                        @if (auth()->user()->hasMultiplePerimeters())
+                            <th data-column="perimeter">{{ trans('cruds.perimeter.title_short') }}</th>
+                        @endif
                         <th>
                             {{ trans('cruds.applicationFlow.fields.name') }}
                         </th>
@@ -83,6 +86,9 @@
                             <td>
 
                             </td>
+                            @if (auth()->user()->hasMultiplePerimeters())
+                                <td>{{ $flow->perimeter->nom }}</td>
+                            @endif
                             <td>
                                 <x-show-link :model="$flow" />
                             </td>
@@ -175,6 +181,8 @@
     <script>
         @include('partials.datatable', array(
             'id' => '#dataTable',
+            'order' => auth()->user()->hasMultiplePerimeters() ? '[[2, "asc"]]' : '[[1, "asc"]]',
+            'hiddenColumns' => ['perimeter'],
             'title' => trans("cruds.applicationFlow.title_singular"),
             'URL' => route('admin.application-flows.massDestroy'),
             'canDelete' => auth()->user()->can('application_flow_delete') ? true : false,

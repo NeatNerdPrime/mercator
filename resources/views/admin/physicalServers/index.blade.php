@@ -27,6 +27,9 @@
                         <th width="10">
 
                         </th>
+                        @if (auth()->user()->hasMultiplePerimeters())
+                            <th data-column="perimeter">{{ trans('cruds.perimeter.title_short') }}</th>
+                        @endif
                         <th>
                             {{ trans('cruds.physicalServer.fields.name') }}
                         </th>
@@ -76,6 +79,9 @@
                             <td>
 
                             </td>
+                            @if (auth()->user()->hasMultiplePerimeters())
+                                <td>{{ $physicalServer->perimeter->nom }}</td>
+                            @endif
                             <td>
                                 <x-show-link :model="$physicalServer" />
                             </td>
@@ -160,11 +166,12 @@
     <script>
         @include('partials.datatable', array(
             'id' => '#dataTable',
+            'order' => auth()->user()->hasMultiplePerimeters() ? '[[2, "asc"]]' : '[[1, "asc"]]',
             'title' => trans("cruds.physicalServer.title_singular"),
             'URL' => route('admin.physical-servers.massDestroy'),
             'canDelete' => auth()->user()->can('physical_server_delete') ? true : false,
     'serverSidePagination' => true,
-    'hiddenColumns' => ['type', 'attributes', 'description', 'configuration', 'address_ip'],
+    'hiddenColumns' => ['perimeter', 'type', 'attributes', 'description', 'configuration', 'address_ip'],
 ));
     </script>
 @endsection

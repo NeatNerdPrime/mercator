@@ -7,9 +7,10 @@
     <tbody>
     <tr>
         <th width="10%">
-            {{ trans('cruds.certificate.fields.name') }}
+            {{ auth()->user()->hasMultiplePerimeters() ? trans('cruds.perimeter.title_short').' / ' : '' }}{{ trans('cruds.certificate.fields.name') }}
         </th>
         <td width="20%">
+                @if (auth()->user()->hasMultiplePerimeters()){{ $certificate->perimeter->nom }} / @endif
         @if($withLink)
             @canShow($certificate)
             <a href="{{ route('admin.certificates.show', $certificate->id) }}">{{ $certificate->name }}</a>

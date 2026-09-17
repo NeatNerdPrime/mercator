@@ -71,99 +71,64 @@ class InformationSystemView extends Controller
 
         $all_macroprocess = Cartographer::scopedQuery(MacroProcessus::query())->orderBy('name')->get();
 
+        // Relations consumed both by the view partials (admin/*/_details.blade.php) and by
+        // InformationSystemGraphBuilder, eager-loaded up front to avoid per-row N+1 queries.
+        $processWith = ['perimeter', 'macroProcess', 'activities', 'entities', 'information', 'applications', 'operations'];
+        $activityWith = ['perimeter', 'processes', 'operations', 'applications'];
+        $operationWith = ['perimeter', 'process', 'activities', 'actors', 'tasks'];
+        $taskWith = ['perimeter', 'operations'];
+        $actorWith = ['perimeter', 'operations'];
+        $informationWith = ['perimeter', 'children'];
+
         if ($macroprocess !== null) {
-            $macroProcessuses = MacroProcessus::where('macro_processuses.id', $macroprocess)->get();
+            $macroProcessuses = MacroProcessus::where('macro_processuses.id', $macroprocess)
+                ->with(['perimeter', 'processes'])
+                ->get();
+            $macroProcessusIds = $macroProcessuses->pluck('id');
 
-            // TODO : improve me
-            $processes = Cartographer::scopedQuery(Process::query())->get()->sortBy('name')
-                ->filter(function ($item) use ($macroProcessuses, $process) {
-                    if ($process !== null) {
-                        return $item->id === $process;
-                    }
-                    foreach ($macroProcessuses as $macroprocess) {
-                        foreach ($macroprocess->processes as $process) {
-                            if ($item->id === $process->id) {
-                                return true;
-                            }
-                        }
-                    }
+            $processesQuery = Cartographer::scopedQuery(Process::query())->with($processWith);
+            if ($process !== null) {
+                $processesQuery->where('id', $process);
+            } else {
+                $processesQuery->whereIn('macroprocess_id', $macroProcessusIds);
+            }
+            $processes = $processesQuery->orderBy('name')->get();
 
-                    return false;
-                });
+            $all_process = Cartographer::scopedQuery(Process::query())
+                ->whereIn('macroprocess_id', $macroProcessusIds)
+                ->orderBy('name')
+                ->get();
 
-            // TODO : improve me
-            $all_process = Cartographer::scopedQuery(Process::query())->get()->sortBy('name')
-                ->filter(function ($item) use ($macroProcessuses, $process) {
-                    foreach ($macroProcessuses as $macroprocess) {
-                        foreach ($macroprocess->processes as $process) {
-                            if ($item->id === $process->id) {
-                                return true;
-                            }
-                        }
-                    }
+            $processIds = $processes->pluck('id');
+            $activities = Cartographer::scopedQuery(Activity::query())
+                ->whereHas('processes', fn ($q) => $q->whereIn('processes.id', $processIds))
+                ->with($activityWith)
+                ->orderBy('name')
+                ->get();
 
-                    return false;
-                });
+            $activityIds = $activities->pluck('id');
+            $operations = Cartographer::scopedQuery(Operation::query())
+                ->whereHas('activities', fn ($q) => $q->whereIn('activities.id', $activityIds))
+                ->with($operationWith)
+                ->orderBy('name')
+                ->get();
 
-            // TODO : improve me
-            $activities = Cartographer::scopedQuery(Activity::query())->get()->sortBy('name')
-                ->filter(function ($item) use ($processes) {
-                    foreach ($item->processes as $p) {
-                        foreach ($processes as $process) {
-                            if ($p->id === $process->id) {
-                                return true;
-                            }
-                        }
-                    }
+            $operationIds = $operations->pluck('id');
+            $tasks = Cartographer::scopedQuery(Task::query())
+                ->whereHas('operations', fn ($q) => $q->whereIn('operations.id', $operationIds))
+                ->with($taskWith)
+                ->orderBy('name')
+                ->get();
 
-                    return false;
-                });
+            $actors = Cartographer::scopedQuery(Actor::query())
+                ->whereHas('operations', fn ($q) => $q->whereIn('operations.id', $operationIds))
+                ->with($actorWith)
+                ->orderBy('name')
+                ->get();
 
-            // TODO : improve me
-            $operations = Cartographer::scopedQuery(Operation::query())->get()->sortBy('name')
-                ->filter(function ($item) use ($activities) {
-                    foreach ($item->activities as $o) {
-                        foreach ($activities as $activity) {
-                            if ($o->id === $activity->id) {
-                                return true;
-                            }
-                        }
-                    }
-
-                    return false;
-                });
-
-            // TODO : improve me
-            $tasks = Cartographer::scopedQuery(Task::query())->get()->sortBy('name')
-                ->filter(function ($item) use ($operations) {
-                    foreach ($operations as $operation) {
-                        foreach ($operation->tasks as $task) {
-                            if ($item->id === $task->id) {
-                                return true;
-                            }
-                        }
-                    }
-
-                    return false;
-                });
-
-            // TODO : improve me
-            $actors = Cartographer::scopedQuery(Actor::query()->orderBy('name'))->get()
-                ->filter(function ($item) use ($operations) {
-                    foreach ($operations as $operation) {
-                        foreach ($operation->actors as $actor) {
-                            if ($item->id === $actor->id) {
-                                return true;
-                            }
-                        }
-                    }
-
-                    return false;
-                });
-
-            // Collecter les IDs des informations liés aux processus
-            $directIds = collect($processes)
-                ->flatMap(fn($process) => $process->information->pluck('id'))
+            // Collecter les IDs des informations liés aux processus (relation déjà eager-chargée ci-dessus)
+            $directIds = $processes
+                ->flatMap(fn ($process) => $process->information->pluck('id'))
                 ->unique();
 
             // Descendre récursivement dans les enfants
@@ -184,17 +149,18 @@ class InformationSystemView extends Controller
             }
 
             $informations = Information::query()->whereIn('id', $allIds)
+                ->with($informationWith)
                 ->orderBy('name')
                 ->get();
 
         } else {
-            $macroProcessuses = Cartographer::scopedQuery(MacroProcessus::query())->orderBy('name')->get();
-            $processes = Cartographer::scopedQuery(Process::query())->orderBy('name')->get();
-            $activities = Cartographer::scopedQuery(Activity::query())->orderBy('name')->get();
-            $operations = Cartographer::scopedQuery(Operation::query())->orderBy('name')->get();
-            $tasks = Cartographer::scopedQuery(Task::query())->orderBy('name')->get();
-            $actors = Cartographer::scopedQuery(Actor::query())->orderBy('name')->get();
-            $informations = Cartographer::scopedQuery(Information::query()->orderBy('name')->with('children'))->get();
+            $macroProcessuses = Cartographer::scopedQuery(MacroProcessus::query())->with(['perimeter', 'processes'])->orderBy('name')->get();
+            $processes = Cartographer::scopedQuery(Process::query())->with($processWith)->orderBy('name')->get();
+            $activities = Cartographer::scopedQuery(Activity::query())->with($activityWith)->orderBy('name')->get();
+            $operations = Cartographer::scopedQuery(Operation::query())->with($operationWith)->orderBy('name')->get();
+            $tasks = Cartographer::scopedQuery(Task::query())->with($taskWith)->orderBy('name')->get();
+            $actors = Cartographer::scopedQuery(Actor::query())->with($actorWith)->orderBy('name')->get();
+            $informations = Cartographer::scopedQuery(Information::query()->with($informationWith)->orderBy('name'))->get();
             $all_process = null;
         }
 

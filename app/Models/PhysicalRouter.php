@@ -6,15 +6,16 @@ use App\Contracts\HasPrefix;
 use App\Contracts\HasUniqueIdentifierContract;
 use App\Factories\PhysicalRouterFactory;
 use App\Traits\Auditable;
+use App\Traits\HasCartographers;
+use App\Traits\HasPerimeter;
 use App\Traits\HasUniqueIdentifier;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\Factory;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
-use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
-use App\Traits\HasCartographers;
 
 /**
  * App\PhysicalRouter
@@ -23,6 +24,7 @@ class PhysicalRouter extends Model implements HasPrefix, HasUniqueIdentifierCont
 {
     use Auditable, HasFactory, HasUniqueIdentifier, SoftDeletes;
     use HasCartographers;
+    use HasPerimeter;
 
     public $table = 'physical_routers';
 
@@ -31,6 +33,7 @@ class PhysicalRouter extends Model implements HasPrefix, HasUniqueIdentifierCont
     public static string $icon = '/images/router.png';
 
     protected $fillable = [
+        'perimeter_id',
         'ext_refs',
         'name',
         'description',

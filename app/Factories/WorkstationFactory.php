@@ -9,6 +9,7 @@ use App\Models\Entity;
 use App\Models\Network;
 use App\Models\Site;
 use App\Models\Workstation;
+use App\Support\FakerPatterns;
 use Illuminate\Database\Eloquent\Factories\Factory;
 use Illuminate\Support\Carbon;
 
@@ -19,11 +20,11 @@ class WorkstationFactory extends Factory
     public function definition(): array
     {
         return [
-            'name' => $this->faker->name(),
+            'name' => $this->faker->regexify(FakerPatterns::HOSTNAME),
             'description' => $this->faker->text(),
             'vendor' => $this->faker->word(),
             'product' => $this->faker->word(),
-            'version' => $this->faker->word(),
+            'version' => $this->faker->regexify(FakerPatterns::SEMVER),
             'physical_switch_id' => null,
             'type' => $this->faker->word(),
             'icon_id' => null,
@@ -42,10 +43,10 @@ class WorkstationFactory extends Factory
             'warranty' => $this->faker->word(),
             'warranty_start_date' => Carbon::now(),
             'warranty_period' => $this->faker->word(),
-            'agent_version' => $this->faker->word(),
+            'agent_version' => $this->faker->regexify(FakerPatterns::SEMVER),
             'update_source' => $this->faker->word(),
             'network_port_type' => $this->faker->word(),
-            'mac_address' => $this->faker->address(),
+            'mac_address' => $this->faker->regexify(FakerPatterns::MAC_ADDRESS),
             'purchase_date' => Carbon::now(),
             'fin_value' => $this->faker->randomFloat(),
             'created_at' => Carbon::now(),

@@ -16,19 +16,22 @@ class UpdateSecurityDeviceRequest extends BaseFormRequest
 
     public function rules(): array
     {
+        $perimeterId = $this->input('perimeter_id') ?: $this->route('security_device')?->perimeter_id;
+
         return [
+            'perimeter_id' => ['nullable', 'integer', Rule::in(auth()->user()?->perimeterIds() ?? [])],
             'name' => [
                 'min:3',
                 'max:32',
                 'required',
-                Rule::unique('security_devices')
+                Rule::unique('security_devices')->where('perimeter_id', $perimeterId)
                     ->ignore($this->route('security_device')->id ?? $this->id)
                     ->whereNull('deleted_at'),
             ],
             'address_ip' => [
                 'nullable',
                 new IPList,
-            ]
+            ],
         ];
     }
 }

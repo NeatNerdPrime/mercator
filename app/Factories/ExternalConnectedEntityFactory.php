@@ -5,6 +5,7 @@ namespace App\Factories;
 use App\Models\Entity;
 use App\Models\ExternalConnectedEntity;
 use App\Models\Network;
+use App\Support\FakerPatterns;
 use Illuminate\Database\Eloquent\Factories\Factory;
 use Illuminate\Support\Carbon;
 
@@ -15,7 +16,7 @@ class ExternalConnectedEntityFactory extends Factory
     public function definition(): array
     {
         return [
-            'name' => $this->faker->name(),
+            'name' => $this->faker->regexify(FakerPatterns::ORG_NAME),
             'description' => $this->faker->text(),
             'security' => $this->faker->word(),
             'type' => $this->faker->word(),

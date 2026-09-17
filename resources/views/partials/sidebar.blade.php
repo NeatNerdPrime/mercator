@@ -1,4 +1,33 @@
 <nav id="sidebar" class="sidebar">
+    @if (\App\Support\PerimeterSettings::isEnabled())
+        @php
+            $sidebarPerimeterIds = auth()->user()->perimeterIds();
+        @endphp
+        @if (count($sidebarPerimeterIds) >= 2)
+            <div class="perimeter-box px-0 pt-0">
+                <form id="active-perimeter-form" method="POST" action="{{ route('admin.perimeter.active') }}">
+                    @csrf
+                    <select name="perimeter" id="active-perimeter" class="form-control select2">
+                        <option value="0" {{ (int) session('active_perimeter', 0) === 0 ? 'selected' : '' }}>&nbsp;</option>
+                        @foreach (\App\Models\Perimeter::whereIn('id', $sidebarPerimeterIds)->orderBy('nom')->get() as $sidebarPerimeter)
+                            <option value="{{ $sidebarPerimeter->id }}"
+                                    {{ (int) session('active_perimeter', 0) === $sidebarPerimeter->id ? 'selected' : '' }}>
+                                {{ $sidebarPerimeter->nom }}
+                            </option>
+                        @endforeach
+                    </select>
+                </form>
+            </div>
+        {{--
+        @elseif (count($sidebarPerimeterIds) === 1)
+            <div class="perimeter-box px-2 pt-2">
+                <span class="badge bg-secondary">
+                    {{ \App\Models\Perimeter::find($sidebarPerimeterIds[0])->nom ?? '' }}
+                </span>
+            </div>
+        --}}
+        @endif
+    @endif
     <div class="search-box">
         <form id="search-form" action="/admin/global-search" method="GET">
             <input type="text" name="search" class="form-control" placeholder="Rechercher...">
@@ -565,3 +594,20 @@
         Version {{ app('mercator.version') }}
     </div>
 </nav>
+
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+    'use strict';
+    var form = document.getElementById('active-perimeter-form');
+    var $select = $('#active-perimeter');
+    if (! form || ! $select.length) return;
+
+    // Le select est initialisé en Select2 (voir app.js) : le changement doit
+    // être écouté via jQuery, pas addEventListener, pour être fiable avec le
+    // widget. Soumission immédiate et inconditionnelle — perte de saisie ou
+    // 403 éventuel sur la page rechargée sont assumés (résolution périmètre).
+    $select.on('change', function () {
+        form.submit();
+    });
+});
+</script>

@@ -1,14 +1,17 @@
 @props([
     'database',
     'withLink' => false,
+    'hasMultiplePerimeters' => null,
 ])
+@php($hasMultiplePerimeters ??= auth()->user()->hasMultiplePerimeters())
 <table class="table table-bordered table-striped table-report" id="{{ $database->getUID() }}">
     <tbody>
         <tr>
             <th style="width: 10%;">
-                {{ trans('cruds.database.fields.name') }}
+                {{ $hasMultiplePerimeters ? trans('cruds.perimeter.title_short').' / ' : '' }}{{ trans('cruds.database.fields.name') }}
             </th>
             <td style="width: 20%;">
+                @if ($hasMultiplePerimeters){{ $database->perimeter->nom }} / @endif
             @if ($withLink)
                 @canShow($database)
                 <a href="{{ route('admin.databases.show', $database) }}">

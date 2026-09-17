@@ -93,7 +93,7 @@ return new class extends Migration
         foreach (self::TYPE_TABLES as $tableName) {
             Schema::table($tableName, function (Blueprint $table) use ($tableName) {
                 if (! Schema::hasColumn($tableName, 'type')) {
-                    $table->string('type')->nullable();
+                    $table->string('type')->after('name')->nullable();
                 }
             });
         }
@@ -101,7 +101,7 @@ return new class extends Migration
         foreach (self::ATTRIBUTES_TABLES as $tableName) {
             Schema::table($tableName, function (Blueprint $table) use ($tableName) {
                 if (! Schema::hasColumn($tableName, 'attributes')) {
-                    $table->string('attributes')->nullable();
+                    $table->string('attributes')->after('type')->nullable();
                 }
             });
         }

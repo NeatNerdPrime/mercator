@@ -27,6 +27,9 @@
                         <th width="10">
 
                         </th>
+                        @if (auth()->user()->hasMultiplePerimeters())
+                            <th data-column="perimeter">{{ trans('cruds.perimeter.title_short') }}</th>
+                        @endif
                         <th>
                             {{ trans('cruds.relation.fields.name') }}
                         </th>
@@ -89,6 +92,9 @@
                             <td>
 
                             </td>
+                            @if (auth()->user()->hasMultiplePerimeters())
+                                <td>{{ $relation->perimeter->nom }}</td>
+                            @endif
             			    <td>
 
                 				<x-show-link :model="$relation" />
@@ -196,11 +202,12 @@
 <script>
 @include('partials.datatable', array(
     'id' => '#dataTable',
+            'order' => auth()->user()->hasMultiplePerimeters() ? '[[2, "asc"]]' : '[[1, "asc"]]',
     'title' => trans("cruds.relation.title_singular"),
     'URL' => route('admin.relations.massDestroy'),
     'canDelete' => auth()->user()->can('relation_delete') ? true : false,
     'serverSidePagination' => true,
-    'hiddenColumns' => ['description', 'order_number', 'reference', 'comments'],
+    'hiddenColumns' => ['perimeter', 'description', 'order_number', 'reference', 'comments'],
 ));
 </script>
 @endsection

@@ -42,33 +42,44 @@ class InformationSystemGraphBuilder
 
         $lines = ['digraph  {'];
 
+        // Precomputed id lookup sets: turns the O(n) Collection::contains() scan used below
+        // for every edge candidate into an O(1) isset() check.
+        $macroProcessusIds = array_flip($macroProcessuses->pluck('id')->all());
+        $activityIds = array_flip($activities->pluck('id')->all());
+        $operationIds = array_flip($operations->pluck('id')->all());
+        $taskIds = array_flip($tasks->pluck('id')->all());
+        $actorIds = array_flip($actors->pluck('id')->all());
+        $informationIds = array_flip($informations->pluck('id')->all());
+
         foreach ($macroProcessuses as $macroProcess) {
             $lines[] = $this->node('MP', $macroProcess->id, $macroProcess->name, $iconPath('/images/macroprocess.png'), $macroProcess->getUID(), $withHref);
         }
+
+        $canAccessInformation = Cartographer::canAccess(Information::class);
 
         foreach ($processes as $process) {
             $lines[] = $this->node('P', $process->id, $process->name, $iconPath('/images/process.png'), $process->getUID(), $withHref);
 
             foreach ($process->activities as $activity) {
-                if ($activities->contains('id', $activity->id)) {
+                if (isset($activityIds[$activity->id])) {
                     $lines[] = 'P'.$process->id.' -> A'.$activity->id;
                 }
             }
 
-            if (Cartographer::canAccess(Information::class)) {
+            if ($canAccessInformation) {
                 foreach ($process->information as $information) {
-                    if ($informations->contains('id', $information->id)) {
+                    if (isset($informationIds[$information->id])) {
                         $lines[] = 'P'.$process->id.' -> I'.$information->id;
                     }
                 }
             }
 
-            if ($process->macroprocess_id !== null && $macroProcessuses->contains('id', $process->macroprocess_id)) {
+            if ($process->macroprocess_id !== null && isset($macroProcessusIds[$process->macroprocess_id])) {
                 $lines[] = 'MP'.$process->macroprocess_id.' -> P'.$process->id;
             }
 
             foreach ($process->operations as $operation) {
-                if ($operations->contains('id', $operation->id)) {
+                if (isset($operationIds[$operation->id])) {
                     $lines[] = 'P'.$process->id.' -> O'.$operation->id;
                 }
             }
@@ -78,7 +89,7 @@ class InformationSystemGraphBuilder
             $lines[] = $this->node('A', $activity->id, $activity->name, $iconPath('/images/activity.png'), $activity->getUID(), $withHref);
 
             foreach ($activity->operations as $operation) {
-                if ($operations->contains('id', $operation->id)) {
+                if (isset($operationIds[$operation->id])) {
                     $lines[] = 'A'.$activity->id.' -> O'.$operation->id;
                 }
             }
@@ -88,13 +99,13 @@ class InformationSystemGraphBuilder
             $lines[] = $this->node('O', $operation->id, $operation->name, $iconPath('/images/operation.png'), $operation->getUID(), $withHref);
 
             foreach ($operation->tasks as $task) {
-                if ($tasks->contains('id', $task->id)) {
+                if (isset($taskIds[$task->id])) {
                     $lines[] = 'O'.$operation->id.' -> T'.$task->id;
                 }
             }
 
             foreach ($operation->actors as $actor) {
-                if ($actors->contains('id', $actor->id)) {
+                if (isset($actorIds[$actor->id])) {
                     $lines[] = 'O'.$operation->id.' -> ACT'.$actor->id;
                 }
             }
@@ -112,7 +123,7 @@ class InformationSystemGraphBuilder
             $lines[] = $this->node('I', $information->id, $information->name, $iconPath('/images/information.png'), $information->getUID(), $withHref);
 
             foreach ($information->children as $child) {
-                if ($informations->contains('id', $child->id)) {
+                if (isset($informationIds[$child->id])) {
                     $lines[] = 'I'.$information->id.' -> I'.$child->id;
                 }
             }

@@ -8,6 +8,7 @@ use App\Contracts\HasUniqueIdentifierContract;
 use App\Factories\DataProcessingFactory;
 use App\Traits\Auditable;
 use App\Traits\HasIcon;
+use App\Traits\HasPerimeter;
 use App\Traits\HasUniqueIdentifier;
 use Illuminate\Database\Eloquent\Factories\Factory;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -18,9 +19,10 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 /**
  * App\Actor
  */
-class DataProcessing extends Model implements HasPrefix, HasIconContract, HasUniqueIdentifierContract
+class DataProcessing extends Model implements HasIconContract, HasPrefix, HasUniqueIdentifierContract
 {
-    use Auditable, HasIcon, HasUniqueIdentifier, HasFactory, SoftDeletes;
+    use Auditable, HasFactory, HasIcon, HasUniqueIdentifier, SoftDeletes;
+    use HasPerimeter;
 
     public $table = 'data_processing';
 
@@ -51,6 +53,7 @@ class DataProcessing extends Model implements HasPrefix, HasIconContract, HasUni
     ];
 
     protected $fillable = [
+        'perimeter_id',
         'ext_refs',
         'name',
         'legal_basis',
@@ -73,7 +76,7 @@ class DataProcessing extends Model implements HasPrefix, HasIconContract, HasUni
         'data_collection_obligation',
         'data_subject_rights',
         'automated_decision_making',
-        'update_date'
+        'update_date',
     ];
 
     protected static function newFactory(): Factory

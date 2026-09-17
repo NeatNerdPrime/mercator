@@ -3,6 +3,7 @@
 namespace App\Factories;
 
 use App\Models\LogicalServer;
+use App\Support\FakerPatterns;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
 class LogicalServerFactory extends Factory
@@ -12,7 +13,7 @@ class LogicalServerFactory extends Factory
     public function definition(): array
     {
         return [
-            'name' => $this->faker->word,
+            'name' => $this->faker->regexify(FakerPatterns::HOSTNAME),
             'description' => $this->faker->sentence,
             'active' => $this->faker->boolean,
             'operating_system' => $this->faker->word,

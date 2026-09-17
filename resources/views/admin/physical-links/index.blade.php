@@ -27,6 +27,9 @@
                         <th width="10">
 
                         </th>
+                        @if (auth()->user()->hasMultiplePerimeters())
+                            <th data-column="perimeter">{{ trans('cruds.perimeter.title_short') }}</th>
+                        @endif
                         <th width='100'>
                             {{ trans('cruds.physicalLink.fields.type') }}
                         </th>
@@ -62,6 +65,9 @@
                             <td>
 
                             </td>
+                            @if (auth()->user()->hasMultiplePerimeters())
+                                <td>{{ $physicalLink->perimeter->nom }}</td>
+                            @endif
                             <td>
                                 <x-show-link :model="$physicalLink" :label="$physicalLink->type ?? ''" />
                             </td>
@@ -177,6 +183,8 @@
 <script>
 @include('partials.datatable', array(
     'id' => '#dataTable',
+            'order' => auth()->user()->hasMultiplePerimeters() ? '[[2, "asc"]]' : '[[1, "asc"]]',
+            'hiddenColumns' => ['perimeter'],
     'title' => trans("cruds.physicalLink.title_singular"),
     'URL' => route('admin.physical-links.massDestroy'),
     'canDelete' => auth()->user()->can('physical_link_delete') ? true : false,

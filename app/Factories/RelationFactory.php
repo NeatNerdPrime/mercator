@@ -4,6 +4,7 @@ namespace App\Factories;
 
 use App\Models\Entity;
 use App\Models\Relation;
+use App\Support\FakerPatterns;
 use Illuminate\Database\Eloquent\Factories\Factory;
 use Illuminate\Support\Carbon;
 
@@ -15,7 +16,7 @@ class RelationFactory extends Factory
     {
         return [
             'importance' => $this->faker->randomNumber(),
-            'name' => $this->faker->name(),
+            'name' => $this->faker->regexify(FakerPatterns::ORG_NAME),
             'type' => $this->faker->word(),
             'description' => $this->faker->text(),
             'attributes' => $this->faker->word(),

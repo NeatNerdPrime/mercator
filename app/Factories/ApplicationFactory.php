@@ -5,6 +5,7 @@ namespace App\Factories;
 use App\Models\Application;
 use App\Models\ApplicationBlock;
 use App\Models\Entity;
+use App\Support\FakerPatterns;
 use Illuminate\Database\Eloquent\Factories\Factory;
 use Illuminate\Support\Carbon;
 
@@ -15,7 +16,7 @@ class ApplicationFactory extends Factory
     public function definition(): array
     {
         return [
-            'name' => $this->faker->name(),
+            'name' => $this->faker->regexify(FakerPatterns::SYSTEM_NAME),
             'description' => $this->faker->text(),
             'vendor' => $this->faker->word(),
             'product' => $this->faker->word(),
@@ -33,7 +34,7 @@ class ApplicationFactory extends Factory
             'users' => $this->faker->word(),
             'editor' => $this->faker->word(),
             'documentation' => $this->faker->word(),
-            'version' => $this->faker->word(),
+            'version' => $this->faker->regexify(FakerPatterns::SEMVER),
             'rto' => $this->faker->randomNumber(),
             'rpo' => $this->faker->randomNumber(),
             'install_date' => Carbon::now(),

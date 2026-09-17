@@ -2,8 +2,6 @@
 
 namespace App\Http\Requests;
 
-use Illuminate\Foundation\Http\FormRequest;
-use App\Http\Requests\BaseFormRequest;
 use Illuminate\Validation\Rule;
 
 class UpdateSecurityControlRequest extends BaseFormRequest
@@ -15,12 +13,15 @@ class UpdateSecurityControlRequest extends BaseFormRequest
 
     public function rules()
     {
+        $perimeterId = $this->input('perimeter_id') ?: $this->route('security_control')?->perimeter_id;
+
         return [
+            'perimeter_id' => ['nullable', 'integer', Rule::in(auth()->user()?->perimeterIds() ?? [])],
             'name' => [
                 'min:3',
                 'max:255',
                 'required',
-                Rule::unique('security_controls')
+                Rule::unique('security_controls')->where('perimeter_id', $perimeterId)
                     ->ignore($this->route('security_control')->id ?? $this->id)
                     ->whereNull('deleted_at'),
             ],

@@ -4,8 +4,11 @@ namespace App\Providers;
 
 use App\Models\Cartographer;
 use App\Observers\CartographerActivityObserver;
+use App\Observers\PerimeterAssignmentObserver;
 use App\Support\MercatorSettings;
+use App\Support\ModelRegistry;
 use App\Support\MonarcSettings;
+use App\Support\PerimeterSettings;
 use Illuminate\Cache\RateLimiting\Limit;
 use Illuminate\Http\Request;
 use Illuminate\Pagination\Paginator;
@@ -34,6 +37,14 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
+        // Reset the per-boot memoization in PerimeterSettings: it is queried by
+        // PerimeterScope on every single query for a perimeter-scoped model, so
+        // caching it for the lifetime of this application instance (one HTTP
+        // request, or one test) avoids a DB round-trip per query — but it must
+        // not survive into the next boot (next request / next test), or a value
+        // changed or rolled back since would be served stale.
+        PerimeterSettings::resetCache();
+
         // Get version from file
         $versionFile = base_path('version.txt');
         $version = file_exists($versionFile) ? trim(file_get_contents($versionFile)) : '0.0.0';
@@ -89,6 +100,11 @@ class AppServiceProvider extends ServiceProvider
         // Observer: notify cartographers when they modify their own objects
         foreach (array_keys(Cartographer::cartographiableRoutesMap()) as $modelClass) {
             $modelClass::observe(CartographerActivityObserver::class);
+        }
+
+        // Observer: assign perimeter_id at creation when not explicitly submitted
+        foreach (ModelRegistry::PERIMETER_SCOPED_MODELS as $modelClass) {
+            $modelClass::observe(PerimeterAssignmentObserver::class);
         }
 
         // Directives Blade cartographes

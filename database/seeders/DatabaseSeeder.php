@@ -10,6 +10,7 @@ class DatabaseSeeder extends Seeder
     {
         // default seeder
         $this->call([
+            PerimetersTableSeeder::class,
             PermissionsTableSeeder::class,
             RolesTableSeeder::class,
             PermissionRoleTableSeeder::class,

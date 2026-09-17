@@ -97,6 +97,18 @@
                             @endif
                         </td>
                     </tr>
+                    @if ($perimetersEnabled)
+                        <tr>
+                            <td class="text-muted">{{ trans('panel.info.perimeters') }}</td>
+                            <td id="info-perimeters">
+                                @forelse ($perimeters as $perimeter)
+                                    <span class="badge bg-secondary me-1">{{ $perimeter }}</span>
+                                @empty
+                                    <span class="text-muted">—</span>
+                                @endforelse
+                            </td>
+                        </tr>
+                    @endif
                 </table>
             </div>
         </div>
@@ -139,6 +151,9 @@ document.getElementById('btn-copy-info').addEventListener('click', function () {
         'Rôles : '         + val('info-roles'),
         'Cartographe : '   + val('info-carto'),
     ];
+    if (document.getElementById('info-perimeters')) {
+        lines.push('Périmètres : ' + val('info-perimeters'));
+    }
     navigator.clipboard.writeText(lines.join('\n')).then(function () {
         var fb = document.getElementById('copy-feedback');
         fb.classList.remove('d-none');

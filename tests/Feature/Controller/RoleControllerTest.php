@@ -1,6 +1,7 @@
 
 <?php
 
+use App\Models\Perimeter;
 use App\Models\Role;
 use App\Models\User;
 use Database\Seeders\PermissionRoleTableSeeder;
@@ -22,7 +23,7 @@ beforeEach(function () {
         RoleUserTableSeeder::class,
     ]);
 
-    $this->user = User::query()->where('login','admin@admin.com')->first();
+    $this->user = User::query()->where('login', 'admin@admin.com')->first();
     $this->actingAs($this->user);
 
 });
@@ -127,6 +128,7 @@ describe('update', function () {
 
         $data = [
             'title' => 'Updated Name',
+            'perimeter_id' => Perimeter::DEFAULT_ID,
             'description' => fake()->sentence(),
         ];
 

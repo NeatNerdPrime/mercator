@@ -10,6 +10,7 @@ use App\Models\PhysicalServer;
 use App\Models\Router;
 use App\Models\StorageDevice;
 use App\Models\Workstation;
+use App\Support\FakerPatterns;
 use Illuminate\Database\Eloquent\Factories\Factory;
 use Illuminate\Support\Carbon;
 
@@ -23,8 +24,8 @@ class LogicalFlowFactory extends Factory
             'name' => $this->faker->name(),
             'source_ip_range' => $this->faker->ipv4(),
             'dest_ip_range' => $this->faker->ipv4(),
-            'source_port' => $this->faker->word(),
-            'dest_port' => $this->faker->word(),
+            'source_port' => $this->faker->regexify(FakerPatterns::PORT),
+            'dest_port' => $this->faker->regexify(FakerPatterns::PORT),
             'protocol' => $this->faker->word(),
             'description' => $this->faker->text(),
             'priority' => $this->faker->randomNumber(),

@@ -27,6 +27,9 @@
                         <th width="10">
 
                         </th>
+                        @if (auth()->user()->hasMultiplePerimeters())
+                            <th data-column="perimeter">{{ trans('cruds.perimeter.title_short') }}</th>
+                        @endif
                         <th>
                             {{ trans('cruds.logicalFlow.fields.name') }}
                         </th>
@@ -80,6 +83,9 @@
                             <td>
 
                             </td>
+                            @if (auth()->user()->hasMultiplePerimeters())
+                                <td>{{ $logicalFlow->perimeter->nom }}</td>
+                            @endif
                             <td>
                                 <x-show-link :model="$logicalFlow" />
                             </td>
@@ -228,11 +234,12 @@
 <script>
 @include('partials.datatable', array(
     'id' => '#dataTable',
+            'order' => auth()->user()->hasMultiplePerimeters() ? '[[2, "asc"]]' : '[[1, "asc"]]',
     'title' => trans("cruds.logicalFlow.title_singular"),
     'URL' => route('admin.logical-flows.massDestroy'),
     'canDelete' => auth()->user()->can('logical_flow_delete') ? true : false,
     'serverSidePagination' => true,
-    'hiddenColumns' => ['description'],
+    'hiddenColumns' => ['perimeter', 'description'],
 ));
 </script>
 @endsection

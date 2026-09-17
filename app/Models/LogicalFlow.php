@@ -7,6 +7,7 @@ use App\Contracts\HasUniqueIdentifierContract;
 use App\Factories\LogicalFlowFactory;
 use App\Traits\Auditable;
 use App\Traits\HasCartographers;
+use App\Traits\HasPerimeter;
 use App\Traits\HasUniqueIdentifier;
 use Illuminate\Database\Eloquent\Factories\Factory;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -62,6 +63,7 @@ class LogicalFlow extends Model implements HasPrefix, HasUniqueIdentifierContrac
 {
     use Auditable, HasFactory, HasUniqueIdentifier, SoftDeletes;
     use HasCartographers;
+    use HasPerimeter;
 
     public $table = 'logical_flows';
 
@@ -79,6 +81,7 @@ class LogicalFlow extends Model implements HasPrefix, HasUniqueIdentifierContrac
     ];
 
     protected $fillable = [
+        'perimeter_id',
         'ext_refs',
         'name',
         'type',

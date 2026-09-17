@@ -4,6 +4,7 @@ namespace App\Models;
 
 use App\Factories\SecurityControlFactory;
 use App\Traits\Auditable;
+use App\Traits\HasPerimeter;
 use Illuminate\Database\Eloquent\Factories\Factory;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
@@ -15,6 +16,7 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 class SecurityControl extends Model
 {
     use Auditable, HasFactory, SoftDeletes;
+    use HasPerimeter;
 
     public $table = 'security_controls';
 
@@ -30,6 +32,7 @@ class SecurityControl extends Model
     ];
 
     protected $fillable = [
+        'perimeter_id',
         'ext_refs',
         'name',
         'description',
@@ -39,5 +42,4 @@ class SecurityControl extends Model
     {
         return SecurityControlFactory::new();
     }
-
 }

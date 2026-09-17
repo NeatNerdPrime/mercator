@@ -3,6 +3,7 @@
 namespace App\Factories;
 
 use App\Models\Router;
+use App\Support\FakerPatterns;
 use Illuminate\Database\Eloquent\Factories\Factory;
 use Illuminate\Support\Carbon;
 
@@ -13,7 +14,7 @@ class RouterFactory extends Factory
     public function definition(): array
     {
         return [
-            'name' => $this->faker->name(),
+            'name' => $this->faker->regexify(FakerPatterns::HOSTNAME),
             'type' => $this->faker->word(),
             'description' => $this->faker->text(),
             'rules' => $this->faker->word(),

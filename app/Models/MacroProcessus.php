@@ -7,15 +7,16 @@ use App\Contracts\HasPrefix;
 use App\Contracts\HasUniqueIdentifierContract;
 use App\Factories\MacroProcessusFactory;
 use App\Traits\Auditable;
+use App\Traits\HasCartographers;
 use App\Traits\HasIcon;
+use App\Traits\HasPerimeter;
 use App\Traits\HasUniqueIdentifier;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\Factory;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
-use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
-use App\Traits\HasCartographers;
 
 /**
  * App\MacroProcessus
@@ -23,10 +24,11 @@ use App\Traits\HasCartographers;
  * @property string|null $type
  * @property string|null $attributes
  */
-class MacroProcessus extends Model implements HasPrefix, HasIconContract, HasUniqueIdentifierContract
+class MacroProcessus extends Model implements HasIconContract, HasPrefix, HasUniqueIdentifierContract
 {
-    use Auditable, HasIcon, HasFactory, HasUniqueIdentifier, SoftDeletes;
+    use Auditable, HasFactory, HasIcon, HasUniqueIdentifier, SoftDeletes;
     use HasCartographers;
+    use HasPerimeter;
 
     public $table = 'macro_processuses';
 
@@ -35,6 +37,7 @@ class MacroProcessus extends Model implements HasPrefix, HasIconContract, HasUni
     public static string $icon = '/images/macroprocess.png';
 
     protected $fillable = [
+        'perimeter_id',
         'ext_refs',
         'name',
         'type',

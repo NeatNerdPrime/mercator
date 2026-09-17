@@ -1,8 +1,39 @@
 <?php
 
+use App\Http\Middleware\Authenticate;
+use App\Http\Middleware\AuthenticateApiOrWeb;
+use App\Http\Middleware\AuthGates;
+use App\Http\Middleware\EncryptCookies;
+use App\Http\Middleware\EnsureActivePerimeter;
+use App\Http\Middleware\ForceJsonResponse;
+use App\Http\Middleware\ForceXForwardedProto;
+use App\Http\Middleware\LicenseWarning;
+use App\Http\Middleware\RedirectIfAuthenticated;
+use App\Http\Middleware\RefreshCartographerPermissions;
+use App\Http\Middleware\RefreshRolePermissions;
+use App\Http\Middleware\SecurityHeaders;
+use App\Http\Middleware\SetLocale;
+use App\Http\Middleware\UseCachedAuthUser;
+use App\Http\Middleware\VerifyCsrfToken;
+use Illuminate\Auth\Middleware\AuthenticateWithBasicAuth;
+use Illuminate\Auth\Middleware\Authorize;
+use Illuminate\Auth\Middleware\EnsureEmailIsVerified;
+use Illuminate\Auth\Middleware\RequirePassword;
+use Illuminate\Cookie\Middleware\AddQueuedCookiesToResponse;
 use Illuminate\Foundation\Application;
 use Illuminate\Foundation\Configuration\Exceptions;
 use Illuminate\Foundation\Configuration\Middleware;
+use Illuminate\Foundation\Http\Middleware\ConvertEmptyStringsToNull;
+use Illuminate\Foundation\Http\Middleware\PreventRequestsDuringMaintenance;
+use Illuminate\Foundation\Http\Middleware\TrimStrings;
+use Illuminate\Http\Middleware\HandleCors;
+use Illuminate\Http\Middleware\SetCacheHeaders;
+use Illuminate\Http\Middleware\ValidatePostSize;
+use Illuminate\Routing\Middleware\ThrottleRequests;
+use Illuminate\Routing\Middleware\ValidateSignature;
+use Illuminate\Session\Middleware\StartSession;
+use Illuminate\Validation\ValidationException;
+use Laravel\Passport\Http\Middleware\CreateFreshApiToken;
 use Symfony\Component\HttpFoundation\Request;
 
 return Application::configure(basePath: dirname(__DIR__))
@@ -16,52 +47,51 @@ return Application::configure(basePath: dirname(__DIR__))
 
         // Middleware globaux
         $middleware->use([
-            \Illuminate\Http\Middleware\HandleCors::class,
-            \Illuminate\Foundation\Http\Middleware\PreventRequestsDuringMaintenance::class,
-            \Illuminate\Http\Middleware\ValidatePostSize::class,
-            \Illuminate\Foundation\Http\Middleware\TrimStrings::class,
-            \Illuminate\Foundation\Http\Middleware\ConvertEmptyStringsToNull::class,
+            HandleCors::class,
+            PreventRequestsDuringMaintenance::class,
+            ValidatePostSize::class,
+            TrimStrings::class,
+            ConvertEmptyStringsToNull::class,
         ]);
 
         // Middlewares spécifiques au groupe 'web'
         $middleware->web(append: [
-            \App\Http\Middleware\ForceXForwardedProto::class,
-            \App\Http\Middleware\VerifyCsrfToken::class,
-            \App\Http\Middleware\UseCachedAuthUser::class,
-            \App\Http\Middleware\SetLocale::class,
-            \App\Http\Middleware\LicenseWarning::class,
-            \App\Http\Middleware\SecurityHeaders::class,
-            \Laravel\Passport\Http\Middleware\CreateFreshApiToken::class, // ✅
-            \App\Http\Middleware\RefreshCartographerPermissions::class,
-            \App\Http\Middleware\RefreshRolePermissions::class,
+            ForceXForwardedProto::class,
+            VerifyCsrfToken::class,
+            UseCachedAuthUser::class,
+            SetLocale::class,
+            LicenseWarning::class,
+            SecurityHeaders::class,
+            CreateFreshApiToken::class, // ✅
+            RefreshCartographerPermissions::class,
+            RefreshRolePermissions::class,
         ]);
 
-
         $middleware->api(prepend: [
-            \App\Http\Middleware\ForceJsonResponse::class,   // ✅ force les erreurs en JSON sur l'API
-            \App\Http\Middleware\EncryptCookies::class,      // ✅ déchiffre mercator_session et laravel_token
-            \Illuminate\Cookie\Middleware\AddQueuedCookiesToResponse::class,
-            \Illuminate\Session\Middleware\StartSession::class, // ✅ charge la session existante
-            "throttle:api",
+            ForceJsonResponse::class,   // ✅ force les erreurs en JSON sur l'API
+            EncryptCookies::class,      // ✅ déchiffre mercator_session et laravel_token
+            AddQueuedCookiesToResponse::class,
+            StartSession::class, // ✅ charge la session existante
+            'throttle:api',
         ]);
 
         $middleware->api(append: [
-            \App\Http\Middleware\UseCachedAuthUser::class,
+            UseCachedAuthUser::class,
         ]);
 
         // Alias de middlewares
         $middleware->alias([
-            'auth' => \App\Http\Middleware\Authenticate::class,
-            'auth.basic' => \Illuminate\Auth\Middleware\AuthenticateWithBasicAuth::class,
-            'cache.headers' => \Illuminate\Http\Middleware\SetCacheHeaders::class,
-            'can' => \Illuminate\Auth\Middleware\Authorize::class,
-            'guest' => \App\Http\Middleware\RedirectIfAuthenticated::class,
-            'signed' => \Illuminate\Routing\Middleware\ValidateSignature::class,
-            'throttle' => \Illuminate\Routing\Middleware\ThrottleRequests::class,
-            'password.confirm' => \Illuminate\Auth\Middleware\RequirePassword::class,
-            'verified' => \Illuminate\Auth\Middleware\EnsureEmailIsVerified::class,
-            'auth.multi' => \App\Http\Middleware\AuthenticateApiOrWeb::class,
-            'gates' => \App\Http\Middleware\AuthGates::class,  // ✅ Alias pour utilisation manuelle
+            'auth' => Authenticate::class,
+            'auth.basic' => AuthenticateWithBasicAuth::class,
+            'cache.headers' => SetCacheHeaders::class,
+            'can' => Authorize::class,
+            'guest' => RedirectIfAuthenticated::class,
+            'signed' => ValidateSignature::class,
+            'throttle' => ThrottleRequests::class,
+            'password.confirm' => RequirePassword::class,
+            'verified' => EnsureEmailIsVerified::class,
+            'auth.multi' => AuthenticateApiOrWeb::class,
+            'gates' => AuthGates::class,  // ✅ Alias pour utilisation manuelle
         ]);
 
         // Groupes de middlewares personnalisés
@@ -73,8 +103,9 @@ return Application::configure(basePath: dirname(__DIR__))
         $middleware->appendToGroup('web.protected', [
             'auth',
             'gates',
+            EnsureActivePerimeter::class,
         ]);
-        
+
         // Configurer les trusted proxies
         $middleware->trustProxies(
             at: '*',
@@ -85,25 +116,25 @@ return Application::configure(basePath: dirname(__DIR__))
         );
     })
     ->withExceptions(function (Exceptions $exceptions) {
-        $exceptions->render(function (\Throwable $e, \Illuminate\Http\Request $request) {
+        $exceptions->render(function (Throwable $e, Illuminate\Http\Request $request) {
             if ($request->is('api/*')) {
                 // ValidationException → 422 avec détail des erreurs
-                if ($e instanceof \Illuminate\Validation\ValidationException) {
+                if ($e instanceof ValidationException) {
                     return response()->json([
                         'message' => $e->getMessage(),
-                        'errors'  => $e->errors(),
-                        'code'    => 422,
+                        'errors' => $e->errors(),
+                        'code' => 422,
                     ], 422);
                 }
 
                 $status = method_exists($e, 'getStatusCode') ? $e->getStatusCode() : 500;
-                $message = ($status >= 500 && !config('app.debug'))
+                $message = ($status >= 500 && ! config('app.debug'))
                     ? 'Server Error'
                     : ($e->getMessage() ?: 'Server Error');
 
                 return response()->json([
                     'message' => $message,
-                    'code'    => $status,
+                    'code' => $status,
                 ], $status);
             }
         });

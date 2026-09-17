@@ -10,21 +10,24 @@ class StoreDataProcessingRequest extends BaseFormRequest
 {
     protected array $htmlFields = ['description', 'responsible', 'purpose', 'lawfulness', 'categories', 'recipients', 'transfert', 'retention'];
 
-    public function authorize() : bool
+    public function authorize(): bool
     {
         abort_if(Gate::denies('data_processing_create'), Response::HTTP_FORBIDDEN, '403 Forbidden');
 
         return true;
     }
 
-    public function rules() : array
+    public function rules(): array
     {
+        $perimeterId = $this->input('perimeter_id') ?: auth()->user()?->activeOrDefaultPerimeterId();
+
         return [
+            'perimeter_id' => ['nullable', 'integer', Rule::in(auth()->user()?->perimeterIds() ?? [])],
             'name' => [
                 'min:3',
                 'max:64',
                 'required',
-                Rule::unique('data_processing')->whereNull('deleted_at'),
+                Rule::unique('data_processing')->where('perimeter_id', $perimeterId)->whereNull('deleted_at'),
             ],
             'operations.*' => [
                 'integer',

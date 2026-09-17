@@ -8,6 +8,7 @@ use App\Traits\HasIcon;
 use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Factories\Factory;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
@@ -17,9 +18,9 @@ use Illuminate\Support\Facades\Hash;
 use Laravel\Passport\Contracts\OAuthenticatable;
 use Laravel\Passport\HasApiTokens;
 
-class User extends Authenticatable implements OAuthenticatable, HasIconContract
+class User extends Authenticatable implements HasIconContract, OAuthenticatable
 {
-    use HasApiTokens, HasIcon, HasFactory, Notifiable, SoftDeletes;
+    use HasApiTokens, HasFactory, HasIcon, Notifiable, SoftDeletes;
 
     protected $table = 'users';
 
@@ -27,7 +28,7 @@ class User extends Authenticatable implements OAuthenticatable, HasIconContract
 
     protected $hidden = [
         'remember_token',
-        'password'
+        'password',
     ];
 
     protected $casts = [
@@ -44,7 +45,7 @@ class User extends Authenticatable implements OAuthenticatable, HasIconContract
         'password',
         'granularity',
         'language',
-        'flow_label'
+        'flow_label',
     ];
 
     protected static function newFactory(): Factory
@@ -74,6 +75,78 @@ class User extends Authenticatable implements OAuthenticatable, HasIconContract
     public function roles(): BelongsToMany
     {
         return $this->belongsToMany(Role::class);
+    }
+
+    /**
+     * @var array<int, int>|null
+     */
+    private ?array $perimeterIdsCache = null;
+
+    /**
+     * Ensemble distinct des `perimeter_id` de ses rôles.
+     *
+     * Mémorisé sur l'instance : `hasMultiplePerimeters()` est appelé (souvent deux fois) par
+     * quasiment chaque partial `_details.blade.php` de l'appli — sans ce cache, une vue listant
+     * N objets ré-exécute la requête `roles()->pluck('perimeter_id')` N fois pour le même
+     * utilisateur (auth()->user() renvoie la même instance tout au long de la requête).
+     * `EnsureActivePerimeter` invalide ce cache en tout début de requête via
+     * resetPerimeterCache(), donc la mémorisation ne survit jamais à un changement de rôles
+     * entre deux requêtes (y compris dans les tests qui réutilisent le même User via actingAs).
+     *
+     * @return array<int, int>
+     */
+    public function perimeterIds(): array
+    {
+        if ($this->perimeterIdsCache === null) {
+            $this->perimeterIdsCache = $this->roles()->pluck('perimeter_id')->unique()->values()->all();
+        }
+
+        return $this->perimeterIdsCache;
+    }
+
+    /**
+     * Invalide le cache de perimeterIds(). Appelé par EnsureActivePerimeter en tout début de
+     * requête pour borner la mémorisation à la durée d'une seule requête.
+     */
+    public function resetPerimeterCache(): void
+    {
+        $this->perimeterIdsCache = null;
+    }
+
+    /**
+     * Vrai si l'utilisateur est responsable d'au moins 2 périmètres distincts.
+     * Utilisé par le sélecteur de périmètre actif et les colonnes de liste
+     * (incréments suivants).
+     */
+    public function hasMultiplePerimeters(): bool
+    {
+        return count($this->perimeterIds()) >= 2;
+    }
+
+    /**
+     * Périmètre de travail courant, mémorisé en session par
+     * EnsureActivePerimeter/PerimeterActiveController. `Perimeter::ALL_ID`
+     * (0) signifie « tous mes périmètres » (aucun filtre).
+     */
+    public function activePerimeterId(): int
+    {
+        return (int) session('active_perimeter', Perimeter::ALL_ID);
+    }
+
+    /**
+     * Périmètre par défaut pour un nouvel objet : le périmètre actif s'il en
+     * est un réel (pas « tous »), sinon le premier périmètre de l'utilisateur,
+     * sinon le périmètre par défaut. Utilisé par le sélecteur de création et
+     * PerimeterAssignmentObserver.
+     */
+    public function activeOrDefaultPerimeterId(): int
+    {
+        $active = $this->activePerimeterId();
+        if ($active !== Perimeter::ALL_ID && in_array($active, $this->perimeterIds(), true)) {
+            return $active;
+        }
+
+        return $this->perimeterIds()[0] ?? Perimeter::DEFAULT_ID;
     }
 
     private ?bool $isAdminCache = null;
@@ -138,7 +211,7 @@ class User extends Authenticatable implements OAuthenticatable, HasIconContract
         return $this->hasMany(Cartographer::class, 'user_id');
     }
 
-    public function isCartographerOf(\Illuminate\Database\Eloquent\Model $object): bool
+    public function isCartographerOf(Model $object): bool
     {
         return Cartographer::isAllowed($this, $object);
     }

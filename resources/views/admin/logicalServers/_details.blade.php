@@ -2,9 +2,10 @@
     <tbody>
     <tr>
         <th width="10%">
-            {{ trans('cruds.logicalServer.fields.name') }}
+            {{ auth()->user()->hasMultiplePerimeters() ? trans('cruds.perimeter.title_short').' / ' : '' }}{{ trans('cruds.logicalServer.fields.name') }}
         </th>
         <td>
+                @if (auth()->user()->hasMultiplePerimeters()){{ $logicalServer->perimeter->nom }} / @endif
             @if($withLink)
             @canShow($logicalServer)
             <a href="{{ route('admin.logical-servers.show', $logicalServer->id) }}">

@@ -25,6 +25,9 @@
                     <thead>
                     <tr>
                         <th width="10"></th>
+                        @if (auth()->user()->hasMultiplePerimeters())
+                            <th data-column="perimeter">{{ trans('cruds.perimeter.title_short') }}</th>
+                        @endif
                         <th>{{ trans('cruds.backup.fields.name') }}</th>
                         <th>{{ trans('cruds.backup.fields.type') }}</th>
                         <th>{{ trans('cruds.backup.fields.attributes') }}</th>
@@ -42,6 +45,9 @@
                         <tr data-entry-id="{{ $backup->id }}"
                             @if($backup->description === null) class="table-warning" @endif>
                             <td></td>
+                            @if (auth()->user()->hasMultiplePerimeters())
+                                <td>{{ $backup->perimeter->nom }}</td>
+                            @endif
                             <td>
                                 <x-show-link :model="$backup" />
                             </td>
@@ -102,6 +108,8 @@
     <script>
         @include('partials.datatable', [
             'id'        => '#dataTable',
+            'order' => auth()->user()->hasMultiplePerimeters() ? '[[2, "asc"]]' : '[[1, "asc"]]',
+            'hiddenColumns' => ['perimeter'],
             'title'     => trans('cruds.backup.title_singular'),
             'URL'       => route('admin.backups.massDestroy'),
             'canDelete' => auth()->user()->can('backup_delete') ? true : false,

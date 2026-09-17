@@ -1,14 +1,17 @@
 @props([
     'applicationService',
     'withLink' => false,
+    'hasMultiplePerimeters' => null,
 ])
+@php($hasMultiplePerimeters ??= auth()->user()->hasMultiplePerimeters())
 <table class="table table-bordered table-striped table-report" id="{{ $applicationService->getUID() }}">
     <tbody>
         <tr>
             <th width='10%'>
-                {{ trans('cruds.applicationService.fields.name') }}
+                {{ $hasMultiplePerimeters ? trans('cruds.perimeter.title_short').' / ' : '' }}{{ trans('cruds.applicationService.fields.name') }}
             </th>
             <td width="20%">
+                @if ($hasMultiplePerimeters){{ $applicationService->perimeter->nom }} / @endif
             @if ($withLink)
                 @canShow($applicationService)
                 <a href='{{ route("admin.application-services.show", $applicationService->id) }}'>{{ $applicationService->name }}</a>
@@ -52,6 +55,23 @@
                 {{ $applicationService->exposition }}
             </td>
         </tr>
+        <tr>
+            <th>
+                {{ trans('cruds.applicationService.fields.applications') }}
+            </th>
+            <td colspan="5">
+                @foreach($applicationService->applications as $application)
+                    @canShow($application)
+                        <a href="{{ route('admin.applications.show', $application->id) }}">{{ $application->name }}</a>
+                    @elsecanShow
+                        {{ $application->name }}
+                    @endcanShow
+                    @if ($applicationService->applications->last()!=$application)
+                        ,
+                    @endif
+                @endforeach
+            </td>
+        </tr>
         @canAccess(App\Models\ApplicationModule::class)
         <tr>
             <th>
@@ -64,7 +84,7 @@
                     @elsecanShow
                         {{ $module->name }}
                     @endcanShow
-                    @if ($applicationService->modules->last()!=$module)
+                    @if (!$loop->last)
                     ,
                     @endif
                 @endforeach

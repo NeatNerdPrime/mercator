@@ -49,3 +49,15 @@ _helm_chart/chart/charts
 _helm_chart/chart/Chart.lock
 auth.json
 
+# Dumps, backups, caches and one-off local artifacts
+*.sql
+*.sql.zip
+*.log
+.env.bak
+.php-cs-fixer.cache
+.phpactor.json
+database/data/venv/
+docs/_helm_chart/
+describe
+img.png
+

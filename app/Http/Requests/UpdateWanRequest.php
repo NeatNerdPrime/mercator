@@ -2,8 +2,6 @@
 
 namespace App\Http\Requests;
 
-use Illuminate\Foundation\Http\FormRequest;
-use App\Http\Requests\BaseFormRequest;
 use Illuminate\Validation\Rule;
 
 class UpdateWanRequest extends BaseFormRequest
@@ -15,11 +13,14 @@ class UpdateWanRequest extends BaseFormRequest
 
     public function rules()
     {
+        $perimeterId = $this->input('perimeter_id') ?: $this->route('wan')?->perimeter_id;
+
         return [
+            'perimeter_id' => ['nullable', 'integer', Rule::in(auth()->user()?->perimeterIds() ?? [])],
             'name' => [
                 'min:3',
                 'max:32',
-                Rule::unique('wans')
+                Rule::unique('wans')->where('perimeter_id', $perimeterId)
                     ->ignore($this->route('wan')->id ?? $this->id)
                     ->whereNull('deleted_at'),
             ],
@@ -27,13 +28,13 @@ class UpdateWanRequest extends BaseFormRequest
                 'array',
             ],
             'mans.*' => [
-                'integer', 'exists:mans,id'
+                'integer', 'exists:mans,id',
             ],
             'lans' => [
                 'array',
             ],
             'lans.*' => [
-                'integer', 'exists:lans,id'
+                'integer', 'exists:lans,id',
             ],
         ];
     }

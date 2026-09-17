@@ -16,7 +16,25 @@
 
                 {{-- Ligne 1 : nom, type, attributs --}}
                 <div class="row">
-                    <div class="col-md-5">
+                    @if (auth()->user()->hasMultiplePerimeters())
+                <div class="col-md-2">
+                    <div class="form-group">
+                        <label for="perimeter_id">{{ trans('cruds.perimeter.title_short') }}</label>
+                        <select class="form-control select2 {{ $errors->has('perimeter_id') ? 'is-invalid' : '' }}"
+                                name="perimeter_id" id="perimeter_id">
+                            @foreach (\App\Models\Perimeter::whereIn('id', auth()->user()->perimeterIds())->orderBy('nom')->get() as $perimeterOption)
+                                <option value="{{ $perimeterOption->id }}"
+                                        {{ (int) old('perimeter_id', $zone->perimeter_id) === $perimeterOption->id ? 'selected' : '' }}>
+                                    {{ $perimeterOption->nom }}
+                                </option>
+                            @endforeach
+                        </select>
+                        @if($errors->has('perimeter_id'))
+                            <div class="invalid-feedback">{{ $errors->first('perimeter_id') }}</div>
+                        @endif
+                    </div>
+                </div>
+                <div class="col-md-3">
                         <div class="form-group">
                             <label class="label-required" for="name">{{ trans('cruds.zone.fields.name') }}</label>
                             <input class="form-control {{ $errors->has('name') ? 'is-invalid' : '' }}"
@@ -26,6 +44,18 @@
                             <span class="help-block">{{ trans('cruds.zone.fields.name_helper') }}</span>
                         </div>
                     </div>
+            @else
+                <div class="col-md-5">
+                        <div class="form-group">
+                            <label class="label-required" for="name">{{ trans('cruds.zone.fields.name') }}</label>
+                            <input class="form-control {{ $errors->has('name') ? 'is-invalid' : '' }}"
+                                   type="text" name="name" id="name"
+                                   value="{{ old('name', $zone->name) }}" required autofocus/>
+                            @error('name') <div class="invalid-feedback">{{ $message }}</div> @enderror
+                            <span class="help-block">{{ trans('cruds.zone.fields.name_helper') }}</span>
+                        </div>
+                    </div>
+            @endif
                     <div class="col-md-2">
                         <div class="form-group">
                             <label for="type">{{ trans('cruds.zone.fields.type') }}</label>

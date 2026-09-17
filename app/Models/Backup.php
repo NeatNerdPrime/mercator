@@ -6,19 +6,21 @@ use App\Contracts\HasIconContract;
 use App\Contracts\HasUniqueIdentifierContract;
 use App\Factories\BackupFactory;
 use App\Traits\Auditable;
+use App\Traits\HasCartographers;
 use App\Traits\HasIcon;
+use App\Traits\HasPerimeter;
 use App\Traits\HasUniqueIdentifier;
 use Illuminate\Database\Eloquent\Factories\Factory;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
-use App\Traits\HasCartographers;
 
 class Backup extends Model implements HasIconContract, HasUniqueIdentifierContract
 {
-    use Auditable, HasIcon, HasUniqueIdentifier, HasFactory, SoftDeletes;
+    use Auditable, HasFactory, HasIcon, HasUniqueIdentifier, SoftDeletes;
     use HasCartographers;
+    use HasPerimeter;
 
     protected $table = 'backups';
 
@@ -27,6 +29,7 @@ class Backup extends Model implements HasIconContract, HasUniqueIdentifierContra
     public static string $icon = '/images/backup.png';
 
     protected $fillable = [
+        'perimeter_id',
         'ext_refs',
         'name',
         'type',
@@ -41,7 +44,7 @@ class Backup extends Model implements HasIconContract, HasUniqueIdentifierContra
 
     protected $casts = [
         'backup_frequency' => 'integer',
-        'backup_cycle'     => 'integer',
+        'backup_cycle' => 'integer',
         'backup_retention' => 'integer',
     ];
 

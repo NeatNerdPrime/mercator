@@ -25,6 +25,9 @@
                     <thead>
                     <tr>
                         <th width="10"></th>
+                        @if (auth()->user()->hasMultiplePerimeters())
+                            <th data-column="perimeter">{{ trans('cruds.perimeter.title_short') }}</th>
+                        @endif
                         <th>{{ trans('cruds.zone.fields.name') }}</th>
                         <th>{{ trans('cruds.zone.fields.type') }}</th>
                         <th>{{ trans('cruds.zone.fields.attributes') }}</th>
@@ -40,6 +43,9 @@
                         <tr data-entry-id="{{ $zone->id }}"
                             @if($zone->description === null) class="table-warning" @endif>
                             <td></td>
+                            @if (auth()->user()->hasMultiplePerimeters())
+                                <td>{{ $zone->perimeter->nom }}</td>
+                            @endif
                             <td>
                                 <x-show-link :model="$zone" />
                             </td>
@@ -103,6 +109,8 @@
     <script>
         @include('partials.datatable', [
             'id'        => '#dataTable',
+            'order' => auth()->user()->hasMultiplePerimeters() ? '[[2, "asc"]]' : '[[1, "asc"]]',
+            'hiddenColumns' => ['perimeter'],
             'title'     => trans('cruds.zone.title_singular'),
             'URL'       => route('admin.zones.massDestroy'),
             'canDelete' => auth()->user()->can('zone_delete') ? true : false,

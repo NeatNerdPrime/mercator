@@ -9,6 +9,7 @@ use App\Factories\EntityFactory;
 use App\Traits\Auditable;
 use App\Traits\HasCartographers;
 use App\Traits\HasIcon;
+use App\Traits\HasPerimeter;
 use App\Traits\HasUniqueIdentifier;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\Factory;
@@ -26,6 +27,7 @@ class Entity extends Model implements HasIconContract, HasPrefix, HasUniqueIdent
 {
     use Auditable, HasFactory, HasIcon, HasUniqueIdentifier, SoftDeletes;
     use HasCartographers;
+    use HasPerimeter;
 
     public $table = 'entities';
 
@@ -48,6 +50,7 @@ class Entity extends Model implements HasIconContract, HasPrefix, HasUniqueIdent
     ];
 
     protected $fillable = [
+        'perimeter_id',
         'ext_refs',
         'name',
         'type',
