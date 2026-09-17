@@ -1,15 +1,17 @@
 @props([
     'applicationService',
     'withLink' => false,
+    'hasMultiplePerimeters' => null,
 ])
+@php($hasMultiplePerimeters ??= auth()->user()->hasMultiplePerimeters())
 <table class="table table-bordered table-striped table-report" id="{{ $applicationService->getUID() }}">
     <tbody>
         <tr>
             <th width='10%'>
-                {{ auth()->user()->hasMultiplePerimeters() ? trans('cruds.perimeter.title_short').' / ' : '' }}{{ trans('cruds.applicationService.fields.name') }}
+                {{ $hasMultiplePerimeters ? trans('cruds.perimeter.title_short').' / ' : '' }}{{ trans('cruds.applicationService.fields.name') }}
             </th>
             <td width="20%">
-                @if (auth()->user()->hasMultiplePerimeters()){{ $applicationService->perimeter->nom }} / @endif
+                @if ($hasMultiplePerimeters){{ $applicationService->perimeter->nom }} / @endif
             @if ($withLink)
                 @canShow($applicationService)
                 <a href='{{ route("admin.application-services.show", $applicationService->id) }}'>{{ $applicationService->name }}</a>
@@ -65,7 +67,7 @@
                     @elsecanShow
                         {{ $module->name }}
                     @endcanShow
-                    @if ($applicationService->modules->last()!=$module)
+                    @if (!$loop->last)
                     ,
                     @endif
                 @endforeach

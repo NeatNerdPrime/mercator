@@ -8,6 +8,7 @@ use App\Observers\PerimeterAssignmentObserver;
 use App\Support\MercatorSettings;
 use App\Support\ModelRegistry;
 use App\Support\MonarcSettings;
+use App\Support\PerimeterSettings;
 use Illuminate\Cache\RateLimiting\Limit;
 use Illuminate\Http\Request;
 use Illuminate\Pagination\Paginator;
@@ -36,6 +37,14 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
+        // Reset the per-boot memoization in PerimeterSettings: it is queried by
+        // PerimeterScope on every single query for a perimeter-scoped model, so
+        // caching it for the lifetime of this application instance (one HTTP
+        // request, or one test) avoids a DB round-trip per query — but it must
+        // not survive into the next boot (next request / next test), or a value
+        // changed or rolled back since would be served stale.
+        PerimeterSettings::resetCache();
+
         // Get version from file
         $versionFile = base_path('version.txt');
         $version = file_exists($versionFile) ? trim(file_get_contents($versionFile)) : '0.0.0';

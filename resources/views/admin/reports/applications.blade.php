@@ -5,6 +5,7 @@
 @endsection
 
 @section('content')
+@php($hasMultiplePerimeters = auth()->user()->hasMultiplePerimeters())
 <div class="graph-card-sticky">
     <div class="card mb-3">
         <div class="card-header">
@@ -100,6 +101,7 @@
                             @include('admin.applicationBlocks._details', [
                                 'applicationBlock' => $applicationBlock,
                                 'withLink' => true,
+                                'hasMultiplePerimeters' => $hasMultiplePerimeters,
                             ])
                         </div>
                     </div>
@@ -125,6 +127,7 @@
                             @include('admin.applications._details', [
                                 'application' => $application,
                                 'withLink' => true,
+                                'hasMultiplePerimeters' => $hasMultiplePerimeters,
                             ])
                         </div>
                     </div>
@@ -150,6 +153,7 @@
                             @include('admin.applicationServices._details', [
                                 'applicationService' => $applicationService,
                                 'withLink' => true,
+                                'hasMultiplePerimeters' => $hasMultiplePerimeters,
                             ])
                         </div>
                     </div>
@@ -175,6 +179,7 @@
                             @include('admin.applicationModules._details', [
                                 'applicationModule' => $applicationModule,
                                 'withLink' => true,
+                                'hasMultiplePerimeters' => $hasMultiplePerimeters,
                             ])
                         </div>
                     </div>
@@ -200,6 +205,7 @@
                             @include('admin.databases._details', [
                                 'database' => $database,
                                 'withLink' => true,
+                                'hasMultiplePerimeters' => $hasMultiplePerimeters,
                             ])
                         </div>
                     </div>
@@ -226,6 +232,7 @@
                             @include('admin.application-flows._details', [
                                 'flux' => $flow,
                                 'withLink' => true,
+                                'hasMultiplePerimeters' => $hasMultiplePerimeters,
                             ])
                         </div>
                     </div>
