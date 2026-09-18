@@ -252,8 +252,6 @@ Si possible, créez des rôles pour des responsabilités précises :
 
 Cela facilite l'octroi d'accès partiels et l'audit de qui peut faire quoi.
 
----
-
 ## Dépannage
 
 ### « Un utilisateur ne voit pas des objets qu'il devrait voir »
@@ -304,18 +302,6 @@ Cela signifie que des utilisateurs sont encore assignés à ce rôle.
 3. Réassigner ces utilisateurs à un autre rôle (Administration → Utilisateurs)
 4. Une fois qu'aucun utilisateur n'est assigné, vous pouvez supprimer le rôle
 
-### « Un administrateur voit tout mais un lecteur ne voit rien »
-
-**Pour le lecteur :**
-
-1. Vérifier que le lecteur a au moins un rôle assigné (Administration → Utilisateurs → [utilisateur] → Rôles)
-2. Vérifier que le rôle a la permission « Consulter »
-3. Si les périmètres sont utilisés : vérifier que les objets sont dans le périmètre du rôle
-
-**Pour l'administrateur :**
-
-- Les administrateurs voient toujours tout, quels que soient le périmètre ou les permissions du rôle
-- C'est voulu (les administrateurs gèrent l'ensemble du système)
 
 ### « Les changements de rôles ne prennent pas effet »
 

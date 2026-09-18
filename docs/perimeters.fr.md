@@ -524,12 +524,6 @@ Vérifier :
 3. Les **assignations de cartographes** (si l'objet est isolé)
    - Vérifier si l'utilisateur est désigné comme cartographe
 
-### « Je vois le sélecteur de périmètre mais un seul périmètre est listé »
-
-✓ **Comportement attendu.** Le sélecteur affiche tous les périmètres dans lesquels vous avez un rôle.  
-✓ Si vous n'en voyez qu'un, vous n'avez de rôles que dans un seul périmètre.  
-✓ Demandez à un administrateur de vous assigner des rôles supplémentaires si nécessaire (voir la documentation *Rôles*).
-
 ### « Un flux a disparu après que j'ai déplacé un objet »
 
 Les flux ne sont **pas supprimés** lorsque vous déplacez un objet. Ils sont conservés et restent visibles pour les utilisateurs des périmètres concernés. Si le flux semble avoir disparu :
