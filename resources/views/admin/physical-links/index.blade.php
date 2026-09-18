@@ -42,12 +42,18 @@
                         <th>
                             {{ trans('cruds.physicalLink.fields.src') }}
                         </th>
+			<th>
+			    {{ trans('cruds.physicalLink.fields.bay_src') }}
+			</th>
                         <th width='100'>
                             {{ trans('cruds.physicalLink.fields.src_port') }}
                         </th>
                         <th>
                             {{ trans('cruds.physicalLink.fields.dest') }}
                         </th>
+			<th>
+			    {{ trans('cruds.physicalLink.fields.bay_src') }}
+			</th>
                         <th width='100'>
                             {{ trans('cruds.physicalLink.fields.dest_port') }}
                         </th>
@@ -107,6 +113,15 @@
                                     <x-show-link :model="$physicalLink->logicalServerSrc" />
                                 @endif
                             </td>
+			    <td>
+			        @if ($physicalLink->peripheralSrc!=null && $physicalLink->peripheralSrc->bay!=null)
+			            <x-show-link :model="$physicalLink->peripheralSrc->bay" />
+			        @elseif ($physicalLink->physicalServerSrc!=null && $physicalLink->physicalServerSrc->bay!=null)
+			            <x-show-link :model="$physicalLink->physicalServerSrc->bay" />
+			        @elseif ($physicalLink->physicalSwitchSrc!=null && $physicalLink->physicalSwitchSrc->bay!=null)
+			            <x-show-link :model="$physicalLink->physicalSwitchSrc->bay" />
+			        @endif
+			    </td>
                             <td>
                                 {{ $physicalLink->src_port }}
                             </td>
@@ -137,6 +152,15 @@
                                     <x-show-link :model="$physicalLink->logicalServerDest" />
                                 @endif
                             </td>
+			    <td>
+			        @if ($physicalLink->peripheralDest!=null && $physicalLink->peripheralDest->bay!=null)
+			            <x-show-link :model="$physicalLink->peripheralDest->bay" />
+			        @elseif ($physicalLink->physicalServerDest!=null && $physicalLink->physicalServerDest->bay!=null)
+			            <x-show-link :model="$physicalLink->physicalServerDest->bay" />
+			        @elseif ($physicalLink->physicalSwitchDest!=null && $physicalLink->physicalSwitchDest->bay!=null)
+			            <x-show-link :model="$physicalLink->physicalSwitchDest->bay" />
+			        @endif
+			    </td>
                             <td>
                                 {{ $physicalLink->dest_port }}
                             </td>
