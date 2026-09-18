@@ -50,8 +50,8 @@ return [
             'bays' => 12,
             'physical_servers' => 20,
             'peripherals' => 15,
-            'workstations' => 60,
-            'security_zones' => 4,
+            'workstations' => 100,
+            'security_zones' => 14,
         ],
 
         'large_enterprise' => [
@@ -65,8 +65,8 @@ return [
             'bays' => 40,
             'physical_servers' => 80,
             'peripherals' => 40,
-            'workstations' => 300,
-            'security_zones' => 8,
+            'workstations' => 800,
+            'security_zones' => 20,
         ],
 
         'load_test' => [
@@ -76,12 +76,12 @@ return [
             'servers' => 2000,
             'flows' => 1667,
             'sites' => 4,
-            'buildings' => 10,
+            'buildings' => 100,
             'bays' => 30,
             'physical_servers' => 100,
-            'peripherals' => 30,
-            'workstations' => 150,
-            'security_zones' => 6,
+            'peripherals' => 300,
+            'workstations' => 1500,
+            'security_zones' => 60,
         ],
     ],
 
