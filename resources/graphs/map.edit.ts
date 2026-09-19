@@ -1161,6 +1161,28 @@ function growAncestorBorders(cell: Cell): void {
     }
 }
 
+// Un border rétréci (resize utilisateur) libère les enfants qui se retrouvent
+// entièrement en dehors de son nouveau rectangle : ils sont ré-attachés au
+// parent du border (position absolue conservée) et ne suivront plus ses
+// déplacements. Les enfants seulement partiellement recouverts restent
+// attachés (le border regrandit ensuite pour les contenir, cf. CELLS_RESIZED).
+function releaseChildrenOutsideBorder(border: Cell): void {
+    const g = border.getGeometry();
+    const newParent = border.getParent();
+    if (!g || !newParent) return;
+
+    const outside = (border.children ?? []).filter((child) => {
+        if (child.isEdge()) return false;
+        const cg = child.getGeometry();
+        if (!cg) return false;
+        // Géométrie relative au border : le rectangle occupe [0,0]-[w,h].
+        return cg.x >= g.width || cg.x + cg.width <= 0 ||
+               cg.y >= g.height || cg.y + cg.height <= 0;
+    });
+
+    for (const child of outside) reparentCell(child, newParent);
+}
+
 // Un border agrandi (resize utilisateur) capture tout objet qu'il recouvre
 // désormais, même partiellement (icône, texte, autre border...). Boucle
 // jusqu'à stabilisation : capturer peut faire grandir le border (padding),
@@ -1674,8 +1696,9 @@ graph.addListener(InternalEvent.MOVE_CELLS, (_sender: unknown, evt: EventObject)
 
 // Redimensionnement (CELLS_RESIZED, non couvert par le listener MOVE_CELLS
 // ci-dessus) :
-// - un border directement redimensionné (rétréci y compris) doit toujours
-//   contenir tous ses enfants : on l'agrandit au minimum nécessaire si besoin ;
+// - un border rétréci libère ses enfants entièrement sortis du rectangle ;
+// - un border directement redimensionné doit ensuite contenir tous ses enfants
+//   restants : on l'agrandit au minimum nécessaire si besoin ;
 // - un enfant de border redimensionné fait grandir la chaîne parente ;
 // - agrandir un border par le haut ou la gauche déplace son origine : ses
 //   enfants (en coordonnées relatives) sont contre-décalés pour rester en place.
@@ -1706,9 +1729,16 @@ graph.addListener(InternalEvent.CELLS_RESIZED, (_sender: unknown, evt: EventObje
             }
         });
         for (const c of cells) {
-            // Capture les objets désormais recouverts (même partiellement) et
-            // fait grandir le border pour toujours les contenir entièrement.
-            if (isRectangleCell(c)) captureOverlappingObjects(c);
+            if (!isRectangleCell(c)) {
+                growAncestorBorders(c);
+                continue;
+            }
+            // Rétrécir un border ne doit pas être empêché : les enfants
+            // entièrement sortis du rectangle en sont détachés d'abord...
+            releaseChildrenOutsideBorder(c);
+            // ...puis il capture les objets désormais recouverts (même
+            // partiellement) et grandit pour contenir entièrement ses enfants.
+            captureOverlappingObjects(c);
             growAncestorBorders(c);
         }
     });
