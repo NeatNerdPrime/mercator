@@ -1074,8 +1074,10 @@ function isDescendantOf(cell: Cell, ancestor: Cell): boolean {
 
 // Plus petit border (par aire) contenant le point (x,y) en coordonnées MODÈLE
 // absolues. Exclut `exclude` et toute sa descendance (un border ne peut pas
-// devenir enfant de son propre enfant).
-function findContainingBorder(x: number, y: number, exclude: Cell | null): Cell | null {
+// devenir enfant de son propre enfant). `minArea` : n'accepte que les borders
+// strictement plus grands (un rectangle déplacé sur un plus petit doit le
+// capturer, pas être avalé par lui).
+function findContainingBorder(x: number, y: number, exclude: Cell | null, minArea = 0): Cell | null {
     let best: Cell | null = null;
     let bestArea = Infinity;
     const walk = (parent: Cell) => {
@@ -1085,7 +1087,7 @@ function findContainingBorder(x: number, y: number, exclude: Cell | null): Cell 
                 const g = c.getGeometry();
                 if (g && x >= tl.x && x <= tl.x + g.width && y >= tl.y && y <= tl.y + g.height) {
                     const area = g.width * g.height;
-                    if (area < bestArea) { bestArea = area; best = c; }
+                    if (area > minArea && area < bestArea) { bestArea = area; best = c; }
                 }
             }
             if (c.children?.length) walk(c);
@@ -1178,6 +1180,9 @@ function captureOverlappingObjects(border: Cell): void {
 
             const vg = v.getGeometry();
             if (!vg) continue;
+            // Un border plus grand (ou égal) ne peut pas être avalé par un plus
+            // petit : il devrait grandir pour le contenir.
+            if (isRectangleCell(v) && vg.width * vg.height >= g.width * g.height) continue;
             const vtl = absTopLeft(v);
             const overlap =
                 tl.x < vtl.x + vg.width && vtl.x < tl.x + g.width &&
@@ -1365,14 +1370,15 @@ container.addEventListener('drop', (event: DragEvent) => {
         graph.batchUpdate(() => {
             // Border ciblé par le point de drop : le nouveau border devient
             // son enfant plutôt que d'être inséré dans le parent par défaut.
-            const target = findContainingBorder(pt.x, pt.y, null);
+            const size: [number, number] = [150, 120];
+            const target = findContainingBorder(pt.x, pt.y, null, size[0] * size[1]);
             const dropParent = target ?? parent;
             const origin = absTopLeft(dropParent);
             const vertex = graph.insertVertex({
                 parent: dropParent,
                 value: '',
                 position: [pt.x - origin.x, pt.y - origin.y],
-                size: [150, 120],
+                size,
                 style: {
                     fillColor: '#fffacd',
                     strokeColor: '#000000',
@@ -1383,7 +1389,10 @@ container.addEventListener('drop', (event: DragEvent) => {
             });
             graph.orderCells(true, [vertex]);
             ensureBackgroundAtBottom();
-            if (target) growAncestorBorders(vertex);
+            // Les objets sur lesquels le rectangle est créé en deviennent les
+            // enfants (le rectangle grandit au besoin pour les contenir).
+            captureOverlappingObjects(vertex);
+            growAncestorBorders(vertex);
             graph.setSelectionCell(vertex);
         });
         return;
@@ -1638,7 +1647,10 @@ graph.addListener(InternalEvent.MOVE_CELLS, (_sender: unknown, evt: EventObject)
             const g = obj.getGeometry();
             if (!g) continue;
             const tl = absTopLeft(obj);
-            const target = findContainingBorder(tl.x + g.width / 2, tl.y + g.height / 2, obj);
+            const target = findContainingBorder(
+                tl.x + g.width / 2, tl.y + g.height / 2, obj,
+                isRectangleCell(obj) ? g.width * g.height : 0,
+            );
             const currentParent = obj.getParent();
 
             if (target && target !== currentParent) {
@@ -1648,6 +1660,14 @@ graph.addListener(InternalEvent.MOVE_CELLS, (_sender: unknown, evt: EventObject)
                 reparentCell(obj, root);
             }
         }
+
+        // Un border déplacé sur des objets les capture (même partiellement) :
+        // ils en deviennent les enfants et suivront ses déplacements.
+        for (const obj of movedObjects) {
+            if (!isRectangleCell(obj)) continue;
+            captureOverlappingObjects(obj);
+            growAncestorBorders(obj);
+        }
     });
     graph.refresh();
 });
@@ -1656,12 +1676,35 @@ graph.addListener(InternalEvent.MOVE_CELLS, (_sender: unknown, evt: EventObject)
 // ci-dessus) :
 // - un border directement redimensionné (rétréci y compris) doit toujours
 //   contenir tous ses enfants : on l'agrandit au minimum nécessaire si besoin ;
-// - un enfant de border redimensionné fait grandir la chaîne parente.
+// - un enfant de border redimensionné fait grandir la chaîne parente ;
+// - agrandir un border par le haut ou la gauche déplace son origine : ses
+//   enfants (en coordonnées relatives) sont contre-décalés pour rester en place.
 graph.addListener(InternalEvent.CELLS_RESIZED, (_sender: unknown, evt: EventObject) => {
     const cells = evt.getProperty('cells') as Cell[] | undefined;
+    const prev = evt.getProperty('prev') as (Geometry | null)[] | undefined;
     if (!cells) return;
 
     graph.batchUpdate(() => {
+        cells.forEach((c, i) => {
+            const before = prev?.[i];
+            const after = c.getGeometry();
+            if (isRectangleCell(c) && before && after) {
+                // Écart réel d'origine (et non celui demandé : MaxGraph peut
+                // borner x/y à 0 si les coordonnées négatives sont interdites).
+                const dx = after.x - before.x;
+                const dy = after.y - before.y;
+                if (dx !== 0 || dy !== 0) {
+                    for (const child of c.children ?? []) {
+                        if (child.isEdge()) continue;
+                        const cg = child.getGeometry()?.clone();
+                        if (!cg) continue;
+                        cg.x -= dx;
+                        cg.y -= dy;
+                        child.setGeometry(cg);
+                    }
+                }
+            }
+        });
         for (const c of cells) {
             // Capture les objets désormais recouverts (même partiellement) et
             // fait grandir le border pour toujours les contenir entièrement.
