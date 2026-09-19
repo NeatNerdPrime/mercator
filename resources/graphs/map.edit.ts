@@ -291,6 +291,10 @@ const MENU_OFFSET_Y = 100;
 
 const edgeContextMenu = document.getElementById('edge-context-menu') as HTMLDivElement | null;
 const edgeColorSelect = document.getElementById('edge-color-select') as HTMLInputElement | null;
+const shapeFillSelect = document.getElementById('edge-fill-select') as HTMLInputElement | null;
+const shapeTextColorSelect = document.getElementById('edge-text-color-select') as HTMLInputElement | null;
+const shapeFillGroup = document.getElementById('edge-fill-group') as HTMLDivElement | null;
+const shapeTextGroup = document.getElementById('edge-text-group') as HTMLDivElement | null;
 const thicknessSelect = document.getElementById('edge-thickness-select') as HTMLSelectElement | null;
 const dashSelect = document.getElementById('edge-dash-select') as HTMLSelectElement | null;
 const routingSelect = document.getElementById('edge-routing-select') as HTMLSelectElement | null;
@@ -305,18 +309,35 @@ const textUnderlineSelect = document.getElementById('text-underline-select') as 
 
 let selectedCell: Cell | null = null;
 let selectedEdgeCells: Cell[] = [];
+// true quand le menu est ouvert sur un rectangle (3 couleurs), false sur un lien.
+let shapeMenuOpen = false;
 
 function hideContextMenus(): void {
     if (textContextMenu) textContextMenu.style.display = 'none';
     if (edgeContextMenu) edgeContextMenu.style.display = 'none';
 }
 
-function showEdgeMenu(x: number, y: number, style: CellStateStyle): void {
+// <input type="color"> n'accepte que #rrggbb : normalise #rgb et remplace
+// toute autre valeur de style ('none', nom de couleur...) par `fallback`.
+function toHexColor(value: string | undefined | null, fallback: string): string {
+    if (!value) return fallback;
+    if (/^#[0-9a-f]{6}$/i.test(value)) return value.toLowerCase();
+    const short = /^#([0-9a-f])([0-9a-f])([0-9a-f])$/i.exec(value);
+    if (short) return `#${short[1]}${short[1]}${short[2]}${short[2]}${short[3]}${short[3]}`.toLowerCase();
+    return fallback;
+}
+
+function showEdgeMenu(x: number, y: number, style: CellStateStyle, shape = false): void {
     if (!edgeContextMenu || !textContextMenu) return;
+    shapeMenuOpen = shape;
     edgeContextMenu.style.display = 'flex';
     edgeContextMenu.style.left = `${x + MENU_OFFSET_X}px`;
     edgeContextMenu.style.top = `${y + MENU_OFFSET_Y}px`;
-    if (edgeColorSelect) edgeColorSelect.value = style.strokeColor ?? '#000000';
+    if (shapeFillGroup) shapeFillGroup.style.display = shape ? 'flex' : 'none';
+    if (shapeTextGroup) shapeTextGroup.style.display = shape ? 'flex' : 'none';
+    if (shapeFillSelect) shapeFillSelect.value = toHexColor(style.fillColor, '#ffffff');
+    if (shapeTextColorSelect) shapeTextColorSelect.value = toHexColor(style.fontColor, '#000000');
+    if (edgeColorSelect) edgeColorSelect.value = toHexColor(style.strokeColor, '#000000');
     if (thicknessSelect) thicknessSelect.value = String(style.strokeWidth ?? '1');
     if (dashSelect) {
         const dashed = (style as any).dashed;
@@ -360,15 +381,19 @@ function showTextMenu(x: number, y: number, style: CellStateStyle, cellStyle: Ap
     textUnderlineSelect?.classList.toggle('selected', !!(fontStyle & 4));
 }
 
+// Sommet sans texte ni image dont on peut modifier le trait/la couleur : un
+// rectangle (même s'il contient des objets) ou une forme sans enfant. Les
+// groupes (invisibles, avec enfants) en sont exclus.
+function isShapeStyleTarget(cell: Cell): boolean {
+    if (!cell.isVertex()) return false;
+    const cellValue = cell.value as string | null;
+    const hasText = !!cellValue && cellValue.trim() !== '';
+    if (hasText || styleOf(cell)?.image) return false;
+    return isRectangleCell(cell) || !cell.children || cell.children.length === 0;
+}
+
 function isEdgeStyleTarget(cell: Cell): boolean {
-    if (cell.isEdge()) return true;
-    if (cell.isVertex()) {
-        const cs = styleOf(cell);
-        const cellValue = cell.value as string | null;
-        const hasText = !!cellValue && cellValue.trim() !== '';
-        return !hasText && !cs?.image && (!cell.children || cell.children.length === 0);
-    }
-    return false;
+    return cell.isEdge() || isShapeStyleTarget(cell);
 }
 
 function distanceToSegment(px: number, py: number, ax: number, ay: number, bx: number, by: number): number {
@@ -468,14 +493,14 @@ graph.container.addEventListener('contextmenu', (event: MouseEvent) => {
             selectedCell = cell;
             selectedEdgeCells = [];
             showTextMenu(x, y, currentStyle, cellStyle);
-        } else if (!cellStyle?.image && (!cell.children || cell.children.length === 0)) {
+        } else if (isShapeStyleTarget(cell)) {
             selectedCell = cell;
             const allSelected = graph.getSelectionCells() as Cell[];
             const selectedIds = new Set(allSelected.map((c) => String(c.id)));
             selectedEdgeCells = selectedIds.has(String(cell.id)) && allSelected.length > 1
                 ? allSelected.filter((c) => isEdgeStyleTarget(c))
                 : [cell];
-            showEdgeMenu(x, y, currentStyle);
+            showEdgeMenu(x, y, currentStyle, true);
         } else {
             hideContextMenus();
         }
@@ -496,10 +521,12 @@ document.getElementById('apply-edge-style')?.addEventListener('click', (e) => {
         for (const cell of cells) {
             const style: CellStateStyle = { ...(cell.style ?? {}) };
 
-            if (cell.isEdge()) {
-                style.strokeColor = edgeColorSelect!.value;
-            } else {
-                style.fillColor = edgeColorSelect!.value;
+            style.strokeColor = edgeColorSelect!.value;
+            // Fond et texte ne concernent que les rectangles, et seulement
+            // quand le menu a été ouvert dessus (sinon ces champs sont masqués).
+            if (shapeMenuOpen && !cell.isEdge()) {
+                if (shapeFillSelect) style.fillColor = shapeFillSelect.value;
+                if (shapeTextColorSelect) style.fontColor = shapeTextColorSelect.value;
             }
             style.strokeWidth = thickness;
 
