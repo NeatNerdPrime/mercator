@@ -250,21 +250,12 @@
                                         <option value="dotted">&#xB7;&#xB7;&#xB7; Point</option>
                                         <option value="dash-dot">-&#xB7;-&#xB7; Trait+point</option>
                                     </select>
-                                </div>
-                                <div>
-                                    <label for="edge-thickness-select" style="margin-right: 5px;">Largeur</label>
                                     <select id="edge-thickness-select">
                                         <option value="1">1 px</option>
                                         <option value="2">2 px</option>
                                         <option value="3">3 px</option>
                                         <option value="4">4 px</option>
                                         <option value="5">5 px</option>
-                                    </select>
-                                    <label for="edge-routing-select" style="margin-right: 5px;">Routage</label>
-                                    <select id="edge-routing-select">
-                                        <option value="straight">&#x2192; Droite</option>
-                                        <option value="arc">&#x219D; Arc</option>
-                                        <option value="orthogonal">&#x21AA; Angles</option>
                                     </select>
                                 </div>
                                 <div>
