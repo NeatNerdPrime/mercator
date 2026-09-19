@@ -228,9 +228,21 @@
                             <!-- Contextual menu for edges -->
                             <div id="edge-context-menu"
                                  style="display: none; position: absolute; background: #fff; border: 1px solid #ccc; z-index: 1000; padding: 10px; flex-direction: column; gap: 6px;">
+                                <div style="display: flex; gap: 12px;">
+                                    <div id="edge-fill-group" style="display: none; flex-direction: column; align-items: center;">
+                                        <label for="edge-fill-select">Fond</label>
+                                        <input type="color" id="edge-fill-select" value="#ffffff">
+                                    </div>
+                                    <div style="display: flex; flex-direction: column; align-items: center;">
+                                        <label for="edge-color-select">Bord</label>
+                                        <input type="color" id="edge-color-select" name="favorite-color" value="#ff0000">
+                                    </div>
+                                    <div id="edge-text-group" style="display: none; flex-direction: column; align-items: center;">
+                                        <label for="edge-text-color-select">Texte</label>
+                                        <input type="color" id="edge-text-color-select" value="#000000">
+                                    </div>
+                                </div>
                                 <div>
-                                    <label for="edge-color-select" style="margin-right: 5px;">{{ trans('global.color') }}</label>
-                                    <input type="color" id="edge-color-select" name="favorite-color" value="#ff0000">
                                     <label for="edge-dash-select" style="margin-right: 5px;">Trait</label>
                                     <select id="edge-dash-select">
                                         <option value="solid">&#x2014;&#x2014;&#x2014; Continu</option>
