@@ -381,15 +381,18 @@ function showTextMenu(x: number, y: number, style: CellStateStyle, cellStyle: Ap
     textUnderlineSelect?.classList.toggle('selected', !!(fontStyle & 4));
 }
 
-// Sommet sans texte ni image dont on peut modifier le trait/la couleur : un
-// rectangle (même s'il contient des objets) ou une forme sans enfant. Les
-// groupes (invisibles, avec enfants) en sont exclus.
+// Sommet dont on peut modifier le trait/la couleur : un rectangle (même s'il
+// contient des objets ou porte un texte — c'est alors le menu rectangle qui
+// prime sur le menu texte, dont la couleur de texte est reprise) ou une forme
+// sans texte ni image ni enfant. Les groupes (invisibles, avec enfants) en
+// sont exclus.
 function isShapeStyleTarget(cell: Cell): boolean {
     if (!cell.isVertex()) return false;
+    if (isRectangleCell(cell)) return true;
     const cellValue = cell.value as string | null;
     const hasText = !!cellValue && cellValue.trim() !== '';
     if (hasText || styleOf(cell)?.image) return false;
-    return isRectangleCell(cell) || !cell.children || cell.children.length === 0;
+    return !cell.children || cell.children.length === 0;
 }
 
 function isEdgeStyleTarget(cell: Cell): boolean {
@@ -489,7 +492,9 @@ graph.container.addEventListener('contextmenu', (event: MouseEvent) => {
         const hasText = !!cellValue && cellValue.trim() !== '';
         const cellStyle = styleOf(cell);
 
-        if (hasText && textColorSelect && textFontSelect && textSizeSelect) {
+        // Le rectangle est testé en premier : son libellé ne doit pas
+        // faire basculer sur le menu de modification de texte.
+        if (!isRectangleCell(cell) && hasText && textColorSelect && textFontSelect && textSizeSelect) {
             selectedCell = cell;
             selectedEdgeCells = [];
             showTextMenu(x, y, currentStyle, cellStyle);
