@@ -237,6 +237,8 @@ Pour configurer Apache, modifiez les propriétés du répertoire mercator et acc
     sudo chown -R apache:apache /var/www/mercator
     sudo chmod -R 775 /var/www/mercator/storage
 
+> **Ne lancez pas `php artisan` en `root`.** Les fichiers de cache créés dans `storage/` (par exemple `storage/app/purifier`) appartiendraient alors à `root` et le serveur web ne pourrait plus y écrire (erreur *"Directory … storage/app/purifier not writable"*). Utilisez `sudo -u apache php artisan …`. Si le problème est déjà survenu, relancez les deux commandes ci-dessus.
+
 Vérifier si le module SELinux est activé (Pour que l'application soit accessible il faut que SELinux soit désactivé)
 
 	sestatus

@@ -354,6 +354,8 @@ répertoire de stockage avec la commande suivante
     sudo chown -R www-data:www-data /var/www/mercator
     sudo chmod -R 775 /var/www/mercator/storage
 
+> **Ne lancez pas `php artisan` en `root`.** Les fichiers de cache créés dans `storage/` (par exemple `storage/app/purifier`) appartiendraient alors à `root` et le serveur web ne pourrait plus y écrire (erreur *"Directory … storage/app/purifier not writable"*). Utilisez `sudo -u www-data php artisan …`. Si le problème est déjà survenu, relancez les deux commandes ci-dessus.
+
 Ensuite, créez un nouveau fichier de configuration d'hôte virtuel Apache pour servir l'application Mercator :
 
     sudo vi /etc/apache2/sites-available/mercator.conf
