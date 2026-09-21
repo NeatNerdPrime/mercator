@@ -6,9 +6,10 @@ Role is the main mechanism to grant list, read and write access to objects in Me
 
 A **role** is a set of **permissions** that controls what a user can do in Mercator:
 
-- **View** (read) — list and see details of objects
-- **Create** — add new objects of a specific type
-- **Edit** — modify existing objects
+- **List** — list objects
+- **View** — display objects and view their details
+- **Create** — add new objects of a given type
+- **Modify** — edit existing objects
 - **Delete** — remove objects
 
 Each user can hold **one or more roles**, and roles can be assigned to perimeters to partition access by establishment.

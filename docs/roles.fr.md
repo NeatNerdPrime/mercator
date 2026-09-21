@@ -6,7 +6,8 @@ Le rôle est le mécanisme principal pour accorder les droits de liste, de lectu
 
 Un **rôle** est un ensemble de **permissions** qui détermine ce qu'un utilisateur peut faire dans Mercator :
 
-- **Consulter** (lecture) — lister les objets et voir leur détail
+- **Lister** — lister les objets
+- **Consulter** — afficher les objets et voir leur détail
 - **Créer** — ajouter de nouveaux objets d'un type donné
 - **Modifier** — éditer des objets existants
 - **Supprimer** — retirer des objets
