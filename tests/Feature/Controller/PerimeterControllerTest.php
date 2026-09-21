@@ -39,37 +39,37 @@ describe('default perimeter seed', function () {
 
 describe('crud', function () {
     test('can create a perimeter with an auto-incremented id', function () {
-        $response = $this->post(route('admin.perimeters.store'), ['nom' => 'Site B']);
+        $response = $this->post(route('admin.perimeters.store'), ['name' => 'Site B']);
 
         $response->assertRedirect();
-        $this->assertDatabaseHas('perimeters', ['nom' => 'Site B']);
+        $this->assertDatabaseHas('perimeters', ['name' => 'Site B']);
 
-        $created = Perimeter::query()->where('nom', 'Site B')->first();
+        $created = Perimeter::query()->where('name', 'Site B')->first();
         expect($created->id)->toBeGreaterThan(1);
     });
 
     test('rejects a name shorter than 2 characters', function () {
-        $response = $this->post(route('admin.perimeters.store'), ['nom' => 'A']);
+        $response = $this->post(route('admin.perimeters.store'), ['name' => 'A']);
 
-        $response->assertSessionHasErrors('nom');
-        $this->assertDatabaseMissing('perimeters', ['nom' => 'A']);
+        $response->assertSessionHasErrors('name');
+        $this->assertDatabaseMissing('perimeters', ['name' => 'A']);
     });
 
     test('rejects a duplicate name', function () {
-        Perimeter::factory()->create(['nom' => 'Site B']);
+        Perimeter::factory()->create(['name' => 'Site B']);
 
-        $response = $this->post(route('admin.perimeters.store'), ['nom' => 'Site B']);
+        $response = $this->post(route('admin.perimeters.store'), ['name' => 'Site B']);
 
-        $response->assertSessionHasErrors('nom');
+        $response->assertSessionHasErrors('name');
     });
 
     test('can update a perimeter name', function () {
-        $perimeter = Perimeter::factory()->create(['nom' => 'Site B']);
+        $perimeter = Perimeter::factory()->create(['name' => 'Site B']);
 
-        $response = $this->put(route('admin.perimeters.update', $perimeter), ['nom' => 'Site B Renamed']);
+        $response = $this->put(route('admin.perimeters.update', $perimeter), ['name' => 'Site B Renamed']);
 
         $response->assertRedirect();
-        $this->assertDatabaseHas('perimeters', ['id' => $perimeter->id, 'nom' => 'Site B Renamed']);
+        $this->assertDatabaseHas('perimeters', ['id' => $perimeter->id, 'name' => 'Site B Renamed']);
     });
 
     test('can delete an unused, non-default perimeter', function () {
@@ -85,7 +85,7 @@ describe('crud', function () {
         $user = User::factory()->create();
         $this->actingAs($user);
 
-        $response = $this->post(route('admin.perimeters.store'), ['nom' => 'Site B']);
+        $response = $this->post(route('admin.perimeters.store'), ['name' => 'Site B']);
 
         $response->assertForbidden();
     });
@@ -101,10 +101,10 @@ describe('default perimeter protection', function () {
     });
 
     test('the default perimeter can be renamed', function () {
-        $response = $this->put(route('admin.perimeters.update', Perimeter::DEFAULT_ID), ['nom' => 'Siège']);
+        $response = $this->put(route('admin.perimeters.update', Perimeter::DEFAULT_ID), ['name' => 'Siège']);
 
         $response->assertRedirect();
-        $this->assertDatabaseHas('perimeters', ['id' => Perimeter::DEFAULT_ID, 'nom' => 'Siège']);
+        $this->assertDatabaseHas('perimeters', ['id' => Perimeter::DEFAULT_ID, 'name' => 'Siège']);
     });
 
     test('a perimeter in use by a role cannot be deleted', function () {

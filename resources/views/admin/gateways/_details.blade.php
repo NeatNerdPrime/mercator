@@ -5,7 +5,7 @@
                 {{ auth()->user()->hasMultiplePerimeters() ? trans('cruds.perimeter.title_short').' / ' : '' }}{{ trans('cruds.gateway.fields.name') }}
             </th>
             <td width="20%">
-                @if (auth()->user()->hasMultiplePerimeters()){{ $gateway->perimeter->nom }} / @endif
+                @if (auth()->user()->hasMultiplePerimeters()){{ $gateway->perimeter->name }} / @endif
                 {{ $gateway->name }}
             </td>
             <th width="10%">

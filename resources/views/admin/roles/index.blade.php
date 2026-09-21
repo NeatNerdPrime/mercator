@@ -47,7 +47,7 @@
                             <td>
                                 <x-show-link :model="$role" :label="$role->title ?? ''" />
                             </td>
-                            <td>{{ $role->perimeter->nom ?? '' }}</td>
+                            <td>{{ $role->perimeter->name ?? '' }}</td>
                             <td>{{ $role->users_count }}</td>
 <td>@php
       $cells = [];

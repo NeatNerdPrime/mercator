@@ -888,10 +888,10 @@ class ScenarioBuilder
 
         $this->phaseStart('Rôles par périmètre (admin, user, auditor)', count($perimeterIds));
 
-        foreach (DB::table('perimeters')->whereIn('id', $perimeterIds)->get(['id', 'nom']) as $perimeter) {
+        foreach (DB::table('perimeters')->whereIn('id', $perimeterIds)->get(['id', 'name']) as $perimeter) {
             foreach ($permissionIdsByPrefix as $prefix => $ids) {
                 $role = Role::query()->firstOrCreate([
-                    'title' => $prefix.'.perimeter.'.Str::slug($perimeter->nom),
+                    'title' => $prefix.'.perimeter.'.Str::slug($perimeter->name),
                     'perimeter_id' => $perimeter->id,
                 ]);
 
@@ -922,7 +922,7 @@ class ScenarioBuilder
     private function ensurePerimeters(int $total): array
     {
         $existingIds = DB::table('perimeters')->orderBy('id')->pluck('id')->all();
-        $existingNames = DB::table('perimeters')->pluck('nom')->all();
+        $existingNames = DB::table('perimeters')->pluck('name')->all();
 
         $missing = max(0, $total - count($existingIds));
 
@@ -930,7 +930,7 @@ class ScenarioBuilder
             return $existingIds;
         }
 
-        // array_unique en plus d'array_diff : `perimeters.nom` est unique en
+        // array_unique en plus d'array_diff : `perimeters.name` est unique en
         // base, un doublon accidentel dans PERIMETER_NAMES ne doit jamais
         // pouvoir faire échouer l'insertion en lot.
         $pool = array_values(array_unique(array_diff(self::PERIMETER_NAMES, $existingNames)));
@@ -943,7 +943,7 @@ class ScenarioBuilder
         for ($i = 0; $i < $missing; $i++) {
             $name = array_shift($pool) ?? $this->uniquePerimeterName($usedNames);
             $usedNames[] = $name;
-            $rows[] = ['nom' => $name, 'created_at' => $now, 'updated_at' => $now];
+            $rows[] = ['name' => $name, 'created_at' => $now, 'updated_at' => $now];
         }
 
         $this->phaseStart('Périmètres', count($rows));

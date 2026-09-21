@@ -61,7 +61,7 @@
 
                             </td>
                             @if (auth()->user()->hasMultiplePerimeters())
-                                <td>{{ $dnsserver->perimeter->nom }}</td>
+                                <td>{{ $dnsserver->perimeter->name }}</td>
                             @endif
                             <td>
                                 <x-show-link :model="$dnsserver" />

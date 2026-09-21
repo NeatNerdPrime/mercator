@@ -142,6 +142,10 @@ The role contains permissions: *permission_roles*.
 To retrieve the role↔permission associations, you must use **/api/roles/{id}?include=permissions** — the permissions linked to each role will be embedded in the role’s response.
 The list of permissions and their corresponding {id} values is available via the **/api/permissions** API.
 
+- <img src="/mercator/images/get.png" width="30"> /api/perimeters
+
+Perimeters (`name`: 2–32 characters, unique) require the **configure** permission for every action, like the administration screen. The default perimeter (id 1) and any perimeter still referenced by a role cannot be deleted (`422`). **/api/perimeters/{id}** also returns the ids of the roles attached to the perimeter (`roles`).
+
 - [<img src="/mercator/images/get.png" width="30"> /api/cartographers](./model.md#cartography)
 - [<img src="/mercator/images/get.png" width="30"> /api/permissions](./model.md#permissions) `READ ONLY`
 - [<img src="/mercator/images/get.png" width="30"> /api/documents](./model.md#documents)

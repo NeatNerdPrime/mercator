@@ -11,7 +11,7 @@
             {{ $hasMultiplePerimeters ? trans('cruds.perimeter.title_short').' / ' : '' }}{{ trans('cruds.applicationFlow.fields.name') }}
         </th>
         <td width="30%">
-                @if ($hasMultiplePerimeters){{ $flow->perimeter->nom }} / @endif
+                @if ($hasMultiplePerimeters){{ $flow->perimeter->name }} / @endif
         @if ($withLink)
         @canShow($flow)
         <a href="{{ route('admin.application-flows.show', $flow->id) }}">{{ $flow->name }}</a>

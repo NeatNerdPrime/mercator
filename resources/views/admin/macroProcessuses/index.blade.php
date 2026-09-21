@@ -80,7 +80,7 @@
 
                             </td>
                             @if (auth()->user()->hasMultiplePerimeters())
-                                <td>{{ $macroProcessus->perimeter->nom }}</td>
+                                <td>{{ $macroProcessus->perimeter->name }}</td>
                             @endif
                             <td>
                                 <x-show-link :model="$macroProcessus" />

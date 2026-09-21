@@ -7,7 +7,7 @@
     <tr>
         <th width="10%">{{ auth()->user()->hasMultiplePerimeters() ? trans('cruds.perimeter.title_short').' / ' : '' }}{{ trans('cruds.backup.fields.name') }}</th>
         <td width="30%">
-                @if (auth()->user()->hasMultiplePerimeters()){{ $backup->perimeter->nom }} / @endif
+                @if (auth()->user()->hasMultiplePerimeters()){{ $backup->perimeter->name }} / @endif
             @if($withLink)
                 @canShow($backup)
                 <a href="{{ route('admin.backups.show', $backup->id) }}">{{ $backup->name }}</a>

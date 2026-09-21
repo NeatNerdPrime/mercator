@@ -46,7 +46,7 @@
                             @if($backup->description === null) class="table-warning" @endif>
                             <td></td>
                             @if (auth()->user()->hasMultiplePerimeters())
-                                <td>{{ $backup->perimeter->nom }}</td>
+                                <td>{{ $backup->perimeter->name }}</td>
                             @endif
                             <td>
                                 <x-show-link :model="$backup" />

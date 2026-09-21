@@ -44,7 +44,7 @@ test('hides the perimeters row when the feature is disabled', function () {
 
 test('shows the user perimeters when the feature is enabled', function () {
     PerimeterSettings::setEnabled(true);
-    $perimeter = Perimeter::factory()->create(['nom' => 'Site B']);
+    $perimeter = Perimeter::factory()->create(['name' => 'Site B']);
     $role = Role::factory()->create(['perimeter_id' => $perimeter->id]);
     $this->user->roles()->attach($role);
 

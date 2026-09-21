@@ -56,7 +56,7 @@
                          @if ($task->description===null) class="table-warning" @endif >
                             <td></td>
                             @if (auth()->user()->hasMultiplePerimeters())
-                                <td>{{ $task->perimeter->nom }}</td>
+                                <td>{{ $task->perimeter->name }}</td>
                             @endif
                             <td>
                                 <x-show-link :model="$task" />

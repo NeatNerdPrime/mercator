@@ -84,7 +84,7 @@
 
                             </td>
                             @if (auth()->user()->hasMultiplePerimeters())
-                                <td>{{ $logicalFlow->perimeter->nom }}</td>
+                                <td>{{ $logicalFlow->perimeter->name }}</td>
                             @endif
                             <td>
                                 <x-show-link :model="$logicalFlow" />

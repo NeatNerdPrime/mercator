@@ -10,7 +10,7 @@
                 {{ ($hasMultiplePerimeters ?? auth()->user()->hasMultiplePerimeters()) ? trans('cruds.perimeter.title_short').' / ' : '' }}{{ trans('cruds.peripheral.fields.name') }}
             </th>
             <td width="20%">
-                @if (($hasMultiplePerimeters ?? auth()->user()->hasMultiplePerimeters())){{ $peripheral->perimeter->nom }} / @endif
+                @if (($hasMultiplePerimeters ?? auth()->user()->hasMultiplePerimeters())){{ $peripheral->perimeter->name }} / @endif
             @if($withLink)
                 @canShow($peripheral)
                     <a href="{{ route('admin.peripherals.show', $peripheral) }}">{{ $peripheral->name }}</a>

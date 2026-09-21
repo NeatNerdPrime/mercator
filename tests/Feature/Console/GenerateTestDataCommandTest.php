@@ -259,7 +259,7 @@ it('enables the perimeters feature and creates a fully-permissioned admin role p
     foreach ($perimeters as $perimeter) {
         $role = Role::query()
             ->where('perimeter_id', $perimeter->id)
-            ->where('title', 'admin.perimeter.'.Str::slug($perimeter->nom))
+            ->where('title', 'admin.perimeter.'.Str::slug($perimeter->name))
             ->first();
 
         expect($role)->not->toBeNull()
@@ -301,7 +301,7 @@ it('creates an auditor and a user role per perimeter, without administration per
     expect($perimeters)->toHaveCount(3);
 
     foreach ($perimeters as $perimeter) {
-        $slug = Str::slug($perimeter->nom);
+        $slug = Str::slug($perimeter->name);
 
         $user = Role::query()->where('perimeter_id', $perimeter->id)->where('title', 'user.perimeter.'.$slug)->first();
         $auditor = Role::query()->where('perimeter_id', $perimeter->id)->where('title', 'auditor.perimeter.'.$slug)->first();

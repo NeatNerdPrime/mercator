@@ -33,7 +33,7 @@
                             @foreach ($perimeters as $perimeter)
                                 <option value="{{ $perimeter->id }}"
                                         {{ (int) old('perimeter_id', $role->perimeter_id) === $perimeter->id ? 'selected' : '' }}>
-                                    {{ $perimeter->nom }}
+                                    {{ $perimeter->name }}
                                 </option>
                             @endforeach
                         </select>

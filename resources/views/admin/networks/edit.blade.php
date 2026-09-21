@@ -21,10 +21,10 @@
                         <label for="perimeter_id">{{ trans('cruds.perimeter.title_short') }}</label>
                         <select class="form-control select2 {{ $errors->has('perimeter_id') ? 'is-invalid' : '' }}"
                                 name="perimeter_id" id="perimeter_id">
-                            @foreach (\App\Models\Perimeter::whereIn('id', auth()->user()->perimeterIds())->orderBy('nom')->get() as $perimeterOption)
+                            @foreach (\App\Models\Perimeter::whereIn('id', auth()->user()->perimeterIds())->orderBy('name')->get() as $perimeterOption)
                                 <option value="{{ $perimeterOption->id }}"
                                         {{ (int) old('perimeter_id', $network->perimeter_id) === $perimeterOption->id ? 'selected' : '' }}>
-                                    {{ $perimeterOption->nom }}
+                                    {{ $perimeterOption->name }}
                                 </option>
                             @endforeach
                         </select>

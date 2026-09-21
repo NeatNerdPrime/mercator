@@ -10,7 +10,7 @@
                 {{ auth()->user()->hasMultiplePerimeters() ? trans('cruds.perimeter.title_short').' / ' : '' }}{{ trans('cruds.dhcpServer.fields.name') }}
             </th>
             <td>
-                @if (auth()->user()->hasMultiplePerimeters()){{ $dhcpServer->perimeter->nom }} / @endif
+                @if (auth()->user()->hasMultiplePerimeters()){{ $dhcpServer->perimeter->name }} / @endif
             @if($withLink)
                 @canShow($dhcpServer)
                     <a href="{{ route('admin.dhcp-servers.show', $dhcpServer) }}">{{ $dhcpServer->name }}</a>

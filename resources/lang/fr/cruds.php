@@ -1813,8 +1813,8 @@ return [
     'perimeter' => [
         'fields' => [
             'id' => '#',
-            'nom' => 'Nom',
-            'nom_helper' => 'Nom du périmètre',
+            'name' => 'Nom',
+            'name_helper' => 'Nom du périmètre',
         ],
         'title' => 'Périmètres',
         'title_short' => 'Périmètre',

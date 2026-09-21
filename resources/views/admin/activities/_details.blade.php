@@ -9,7 +9,7 @@
                 {{ auth()->user()->hasMultiplePerimeters() ? trans('cruds.perimeter.title_short').' / ' : '' }}{{ trans('cruds.activity.fields.name') }}
             </th>
             <td width="20%">
-                @if (auth()->user()->hasMultiplePerimeters()){{ $activity->perimeter->nom }} / @endif
+                @if (auth()->user()->hasMultiplePerimeters()){{ $activity->perimeter->name }} / @endif
             @if($withLink)
                 @canShow($activity)
                 <a href="{{ route('admin.activities.show', $activity->id) }}">{{ $activity->name }}</a>

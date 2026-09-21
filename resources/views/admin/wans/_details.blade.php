@@ -10,7 +10,7 @@
                 {{ auth()->user()->hasMultiplePerimeters() ? trans('cruds.perimeter.title_short').' / ' : '' }}{{ trans('cruds.wan.fields.name') }}
             </th>
             <td width="20%">
-                @if (auth()->user()->hasMultiplePerimeters()){{ $wan->perimeter->nom }} / @endif
+                @if (auth()->user()->hasMultiplePerimeters()){{ $wan->perimeter->name }} / @endif
             @if($withLink)
             @canShow($wan)
             <a href="{{ route('admin.wans.show', $wan) }}">{{ $wan->name }}</a>

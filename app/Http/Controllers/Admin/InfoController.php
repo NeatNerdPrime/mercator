@@ -26,7 +26,7 @@ class InfoController extends Controller
 
         $perimetersEnabled = PerimeterSettings::isEnabled();
         $perimeters = $perimetersEnabled
-            ? Perimeter::query()->whereIn('id', $user->perimeterIds())->orderBy('nom')->pluck('nom')->toArray()
+            ? Perimeter::query()->whereIn('id', $user->perimeterIds())->orderBy('name')->pluck('name')->toArray()
             : [];
 
         $memLimitRaw = ini_get('memory_limit');

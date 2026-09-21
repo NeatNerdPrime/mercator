@@ -25,7 +25,7 @@ class PerimetersTableSeeder extends Seeder
         if (! DB::table('perimeters')->where('id', Perimeter::DEFAULT_ID)->exists()) {
             DB::table('perimeters')->insert([
                 'id' => Perimeter::DEFAULT_ID,
-                'nom' => 'Défaut',
+                'name' => 'Défaut',
                 'created_at' => now(),
                 'updated_at' => now(),
             ]);

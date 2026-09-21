@@ -10,7 +10,7 @@
                 {{ auth()->user()->hasMultiplePerimeters() ? trans('cruds.perimeter.title_short').' / ' : '' }}{{ trans('cruds.dnsserver.fields.name') }}
             </th>
             <td>
-                @if (auth()->user()->hasMultiplePerimeters()){{ $dnsserver->perimeter->nom }} / @endif
+                @if (auth()->user()->hasMultiplePerimeters()){{ $dnsserver->perimeter->name }} / @endif
             @if ($withLink)
                 @canShow($dnsserver)
                     <a href="{{ route('admin.dnsservers.show', $dnsserver) }}">{{ $dnsserver->name }}</a>

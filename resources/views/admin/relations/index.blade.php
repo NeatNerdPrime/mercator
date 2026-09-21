@@ -93,7 +93,7 @@
 
                             </td>
                             @if (auth()->user()->hasMultiplePerimeters())
-                                <td>{{ $relation->perimeter->nom }}</td>
+                                <td>{{ $relation->perimeter->name }}</td>
                             @endif
             			    <td>
 

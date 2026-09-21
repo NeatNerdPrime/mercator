@@ -10,7 +10,7 @@
                 {{ auth()->user()->hasMultiplePerimeters() ? trans('cruds.perimeter.title_short').' / ' : '' }}{{ trans('cruds.network.fields.name') }}
             </th>
             <td width="20%">
-                @if (auth()->user()->hasMultiplePerimeters()){{ $network->perimeter->nom }} / @endif
+                @if (auth()->user()->hasMultiplePerimeters()){{ $network->perimeter->name }} / @endif
             @if ($withLink)
             @canShow($network)
             <a href="{{ route('admin.networks.show', $network->id) }}">{{ $network->name }}</a>
