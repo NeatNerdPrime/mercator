@@ -216,6 +216,19 @@ class CornerOnlyVertexHandler extends VertexHandler {
         return RESIZE_CORNER_INDICES.has(index);
     }
 
+    // Le mouseDown natif de MaxGraph teste `if (handle)` : l'indice 0 (coin
+    // haut-gauche, NW) est falsy, donc le resize par ce coin ne démarrait jamais
+    // et le clic retombait sur SelectionHandler, qui déplaçait la cellule.
+    mouseDown(_sender: unknown, me: InternalMouseEvent): void {
+        if (!me.isConsumed() && this.graph.isEnabled()) {
+            const handle = this.getHandleForEvent(me);
+            if (handle !== null) {
+                this.start(me.getGraphX(), me.getGraphY(), handle);
+                me.consume();
+            }
+        }
+    }
+
     // Le resize doit toujours conserver le ratio largeur/hauteur, pas
     // seulement quand Shift est maintenu — sauf pour les rectangles et les
     // textes, qui doivent pouvoir être étirés librement dans chaque direction.
