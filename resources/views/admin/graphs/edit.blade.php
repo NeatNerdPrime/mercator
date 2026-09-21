@@ -188,23 +188,22 @@
     align-items: center; /* centre les icônes */
     gap: 12px; /* espace entre les icônes */
                                 ">
-                                <i id="saveButton" title="Save"
+                                <i id="saveButton" title="{{ trans('cruds.graph.toolbar.save') }}"
                                    class="mapping-icon bi bi-floppy-fill {{ $id === '-1' ? 'disabled' : ''}}"></i>
-                                <i id="undoButton" title="Undo" class="mapping-icon bi bi-arrow-counterclockwise"></i>
-                                <i id="redoButton" title="Redo" class="mapping-icon bi bi-arrow-clockwise"></i>
-                                <i id="font-btn" title="Text" class="mapping-icon bi bi-fonts" draggable="true"></i>
-                                <i id="square-btn" title="Border" class="mapping-icon bi bi-bounding-box"
-                                   draggable="true"></i>
-                                <i id="group-btn" title="Group" class="mapping-icon bi bi-plus-square-dotted"></i>
-                                <i id="ungroup-btn" title="Ungroup" class="mapping-icon bi bi-dash-square-dotted"></i>
-                                <i id="zoom-in-btn" title="Zoom in" class="mapping-icon bi bi-zoom-in"></i>
-                                <i id="fit-btn" title="Recentrer" class="mapping-icon bi bi-crosshair"></i>
-                                <i id="zoom-out-btn" title="Zoom out" class="mapping-icon bi bi-zoom-out"></i>
-                                <i id="physics-btn" title="Physique" class="mapping-icon bi bi-magnet" aria-pressed="false"></i>
-                                <i id="grid-btn" title="Grille" class="mapping-icon bi bi-grid-3x3-gap" aria-pressed="false"></i>
-                                <i id="background-btn" title="Arrière-plan" class="mapping-icon bi bi-image"></i>
-                                <i id="update-btn" title="Update" class="mapping-icon bi bi-lightning-fill"></i>
-                                <i id="download-btn" title="Export" class="mapping-icon bi bi-download"></i>
+                                <i id="undoButton" title="{{ trans('cruds.graph.toolbar.undo') }}" class="mapping-icon bi bi-arrow-counterclockwise"></i>
+                                <i id="redoButton" title="{{ trans('cruds.graph.toolbar.redo') }}" class="mapping-icon bi bi-arrow-clockwise"></i>
+                                <i id="font-btn" title="{{ trans('cruds.graph.toolbar.text') }}" class="mapping-icon bi bi-fonts" draggable="true"></i>
+                                <i id="square-btn" title="{{ trans('cruds.graph.toolbar.rectangle') }}" class="mapping-icon bi bi-square" draggable="true"></i>
+                                <i id="group-btn" title="{{ trans('cruds.graph.toolbar.group') }}" class="mapping-icon bi bi-plus-square-dotted"></i>
+                                <i id="ungroup-btn" title="{{ trans('cruds.graph.toolbar.ungroup') }}" class="mapping-icon bi bi-dash-square-dotted"></i>
+                                <i id="zoom-in-btn" title="{{ trans('cruds.graph.toolbar.zoom_in') }}" class="mapping-icon bi bi-zoom-in"></i>
+                                <i id="fit-btn" title="{{ trans('cruds.graph.toolbar.fit') }}" class="mapping-icon bi bi-crosshair"></i>
+                                <i id="zoom-out-btn" title="{{ trans('cruds.graph.toolbar.zoom_out') }}" class="mapping-icon bi bi-zoom-out"></i>
+                                <i id="physics-btn" title="{{ trans('cruds.graph.toolbar.physics') }}" class="mapping-icon bi bi-magnet" aria-pressed="false"></i>
+                                <i id="grid-btn" title="{{ trans('cruds.graph.toolbar.grid') }}" class="mapping-icon bi bi-grid-3x3-gap" aria-pressed="false"></i>
+                                <i id="background-btn" title="{{ trans('cruds.graph.toolbar.background') }}" class="mapping-icon bi bi-image"></i>
+                                <i id="update-btn" title="{{ trans('cruds.graph.toolbar.update') }}" class="mapping-icon bi bi-lightning-fill"></i>
+                                <i id="download-btn" title="{{ trans('cruds.graph.toolbar.export') }}" class="mapping-icon bi bi-download"></i>
 
                             </div>
 
@@ -218,7 +217,7 @@
                                     @endforeach
                                 </div>
                                 <hr>
-                                <label for="background-input">Sélectionner un papier peint</label>
+                                <label for="background-input">{{ trans('cruds.graph.menu.select_background') }}</label>
                                 <input type="file" id="background-input" accept="image/*" class="d-none"/>
                                 <button type="button" id="background-input-btn">{{ trans('global.import') }}</button>
                                 <br>
@@ -228,31 +227,34 @@
                             <!-- Contextual menu for edges -->
                             <div id="edge-context-menu"
                                  style="display: none; position: absolute; background: #fff; border: 1px solid #ccc; z-index: 1000; padding: 10px; flex-direction: column; gap: 6px;">
-                                <div>
-                                    <label for="edge-color-select" style="margin-right: 5px;">{{ trans('global.color') }}</label>
-                                    <input type="color" id="edge-color-select" name="favorite-color" value="#ff0000">
-                                    <label for="edge-dash-select" style="margin-right: 5px;">Trait</label>
-                                    <select id="edge-dash-select">
-                                        <option value="solid">&#x2014;&#x2014;&#x2014; Continu</option>
-                                        <option value="dashed">- - - Pointillé</option>
-                                        <option value="dotted">&#xB7;&#xB7;&#xB7; Point</option>
-                                        <option value="dash-dot">-&#xB7;-&#xB7; Trait+point</option>
-                                    </select>
+                                <div style="display: flex; gap: 12px;">
+                                    <div id="edge-fill-group" style="display: none; flex-direction: column; align-items: center;">
+                                        <label for="edge-fill-select">{{ trans('cruds.graph.menu.fill') }}</label>
+                                        <input type="color" id="edge-fill-select" value="#ffffff">
+                                    </div>
+                                    <div style="display: flex; flex-direction: column; align-items: center;">
+                                        <label for="edge-color-select">{{ trans('cruds.graph.menu.border') }}</label>
+                                        <input type="color" id="edge-color-select" name="favorite-color" value="#ff0000">
+                                    </div>
+                                    <div id="edge-text-group" style="display: none; flex-direction: column; align-items: center;">
+                                        <label for="edge-text-color-select">{{ trans('cruds.graph.menu.text') }}</label>
+                                        <input type="color" id="edge-text-color-select" value="#000000">
+                                    </div>
                                 </div>
                                 <div>
-                                    <label for="edge-thickness-select" style="margin-right: 5px;">Largeur</label>
+                                    <label for="edge-dash-select" style="margin-right: 5px;">{{ trans('cruds.graph.menu.line') }}</label>
+                                    <select id="edge-dash-select">
+                                        <option value="solid">&#x2014;&#x2014;&#x2014; {{ trans('cruds.graph.menu.line_solid') }}</option>
+                                        <option value="dashed">- - - {{ trans('cruds.graph.menu.line_dashed') }}</option>
+                                        <option value="dotted">&#xB7;&#xB7;&#xB7; {{ trans('cruds.graph.menu.line_dotted') }}</option>
+                                        <option value="dash-dot">-&#xB7;-&#xB7; {{ trans('cruds.graph.menu.line_dash_dot') }}</option>
+                                    </select>
                                     <select id="edge-thickness-select">
                                         <option value="1">1 px</option>
                                         <option value="2">2 px</option>
                                         <option value="3">3 px</option>
                                         <option value="4">4 px</option>
                                         <option value="5">5 px</option>
-                                    </select>
-                                    <label for="edge-routing-select" style="margin-right: 5px;">Routage</label>
-                                    <select id="edge-routing-select">
-                                        <option value="straight">&#x2192; Droite</option>
-                                        <option value="arc">&#x219D; Arc</option>
-                                        <option value="orthogonal">&#x21AA; Angles</option>
                                     </select>
                                 </div>
                                 <div>
@@ -264,7 +266,7 @@
                             <div id="text-context-menu"
                                  style="display: none; position: absolute; background: #fff; border: 1px solid #ccc; z-index: 1000; padding: 10px; flex-direction: column; gap: 6px;">
                                 <div>
-                                    <label for="text-font-select" style="margin-right: 5px;">Font</label>
+                                    <label for="text-font-select" style="margin-right: 5px;">{{ trans('cruds.graph.menu.font') }}</label>
                                     <select id="text-font-select">
                                         <option>Arial</option>
                                         <option>Helvetica</option>
@@ -273,7 +275,7 @@
                                         <option>Verdana</option>
                                         <option>Georgia</option>
                                     </select>
-                                    <label for="text-size-select" style="margin-right: 5px;">Taille</label>
+                                    <label for="text-size-select" style="margin-right: 5px;">{{ trans('cruds.graph.menu.size') }}</label>
                                     <select id="text-size-select">
                                         <option value="8">8 px</option>
                                         <option value="10">10 px</option>

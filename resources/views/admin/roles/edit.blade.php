@@ -83,17 +83,19 @@
         </div>
 
         {{-- Application --}}
-        <div class="card-header">
-            <label class="form-check-label"><b>{{ trans('cruds.application.title_short') }}</b></label>
+        <div class="perm-section">
+        @include('admin.roles.partials._section_header', ['permission' => $permissions_sorted['application'], 'label' => trans('cruds.menu.application.title_short')])
+        <div class="card-body">
+            <div class="row">
+                @include('admin.roles.partials._group', ['permission' => $permissions_sorted['application_block'],   'label' => trans('cruds.applicationBlock.title')])
+                @include('admin.roles.partials._group', ['permission' => $permissions_sorted['application'],         'label' => trans('cruds.application.title')])
+                @include('admin.roles.partials._group', ['permission' => $permissions_sorted['application_service'], 'label' => trans('cruds.applicationService.title')])
+                @include('admin.roles.partials._group', ['permission' => $permissions_sorted['application_module'],  'label' => trans('cruds.applicationModule.title')])
+                @include('admin.roles.partials._group', ['permission' => $permissions_sorted['database'],            'label' => trans('cruds.database.title')])
+                @include('admin.roles.partials._group', ['permission' => $permissions_sorted['application_flow'],                'label' => trans('cruds.applicationFlow.title')])
+            </div>
         </div>
-        <div class="card-body"><div class="row">
-            @include('admin.roles.partials._group', ['permission' => $permissions_sorted['application_block'],   'label' => trans('cruds.applicationBlock.title')])
-            @include('admin.roles.partials._group', ['permission' => $permissions_sorted['application'],         'label' => trans('cruds.application.title')])
-            @include('admin.roles.partials._group', ['permission' => $permissions_sorted['application_service'], 'label' => trans('cruds.applicationService.title')])
-            @include('admin.roles.partials._group', ['permission' => $permissions_sorted['application_module'],  'label' => trans('cruds.applicationModule.title')])
-            @include('admin.roles.partials._group', ['permission' => $permissions_sorted['database'],            'label' => trans('cruds.database.title')])
-            @include('admin.roles.partials._group', ['permission' => $permissions_sorted['application_flow'],                'label' => trans('cruds.applicationFlow.title')])
-        </div></div>
+        </div>
 
         {{-- Administration --}}
         <div class="perm-section">

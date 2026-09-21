@@ -216,6 +216,19 @@ class CornerOnlyVertexHandler extends VertexHandler {
         return RESIZE_CORNER_INDICES.has(index);
     }
 
+    // Le mouseDown natif de MaxGraph teste `if (handle)` : l'indice 0 (coin
+    // haut-gauche, NW) est falsy, donc le resize par ce coin ne démarrait jamais
+    // et le clic retombait sur SelectionHandler, qui déplaçait la cellule.
+    mouseDown(_sender: unknown, me: InternalMouseEvent): void {
+        if (!me.isConsumed() && this.graph.isEnabled()) {
+            const handle = this.getHandleForEvent(me);
+            if (handle !== null) {
+                this.start(me.getGraphX(), me.getGraphY(), handle);
+                me.consume();
+            }
+        }
+    }
+
     // Le resize doit toujours conserver le ratio largeur/hauteur, pas
     // seulement quand Shift est maintenu — sauf pour les rectangles et les
     // textes, qui doivent pouvoir être étirés librement dans chaque direction.
@@ -291,6 +304,10 @@ const MENU_OFFSET_Y = 100;
 
 const edgeContextMenu = document.getElementById('edge-context-menu') as HTMLDivElement | null;
 const edgeColorSelect = document.getElementById('edge-color-select') as HTMLInputElement | null;
+const shapeFillSelect = document.getElementById('edge-fill-select') as HTMLInputElement | null;
+const shapeTextColorSelect = document.getElementById('edge-text-color-select') as HTMLInputElement | null;
+const shapeFillGroup = document.getElementById('edge-fill-group') as HTMLDivElement | null;
+const shapeTextGroup = document.getElementById('edge-text-group') as HTMLDivElement | null;
 const thicknessSelect = document.getElementById('edge-thickness-select') as HTMLSelectElement | null;
 const dashSelect = document.getElementById('edge-dash-select') as HTMLSelectElement | null;
 const routingSelect = document.getElementById('edge-routing-select') as HTMLSelectElement | null;
@@ -305,18 +322,35 @@ const textUnderlineSelect = document.getElementById('text-underline-select') as 
 
 let selectedCell: Cell | null = null;
 let selectedEdgeCells: Cell[] = [];
+// true quand le menu est ouvert sur un rectangle (3 couleurs), false sur un lien.
+let shapeMenuOpen = false;
 
 function hideContextMenus(): void {
     if (textContextMenu) textContextMenu.style.display = 'none';
     if (edgeContextMenu) edgeContextMenu.style.display = 'none';
 }
 
-function showEdgeMenu(x: number, y: number, style: CellStateStyle): void {
+// <input type="color"> n'accepte que #rrggbb : normalise #rgb et remplace
+// toute autre valeur de style ('none', nom de couleur...) par `fallback`.
+function toHexColor(value: string | undefined | null, fallback: string): string {
+    if (!value) return fallback;
+    if (/^#[0-9a-f]{6}$/i.test(value)) return value.toLowerCase();
+    const short = /^#([0-9a-f])([0-9a-f])([0-9a-f])$/i.exec(value);
+    if (short) return `#${short[1]}${short[1]}${short[2]}${short[2]}${short[3]}${short[3]}`.toLowerCase();
+    return fallback;
+}
+
+function showEdgeMenu(x: number, y: number, style: CellStateStyle, shape = false): void {
     if (!edgeContextMenu || !textContextMenu) return;
+    shapeMenuOpen = shape;
     edgeContextMenu.style.display = 'flex';
     edgeContextMenu.style.left = `${x + MENU_OFFSET_X}px`;
     edgeContextMenu.style.top = `${y + MENU_OFFSET_Y}px`;
-    if (edgeColorSelect) edgeColorSelect.value = style.strokeColor ?? '#000000';
+    if (shapeFillGroup) shapeFillGroup.style.display = shape ? 'flex' : 'none';
+    if (shapeTextGroup) shapeTextGroup.style.display = shape ? 'flex' : 'none';
+    if (shapeFillSelect) shapeFillSelect.value = toHexColor(style.fillColor, '#ffffff');
+    if (shapeTextColorSelect) shapeTextColorSelect.value = toHexColor(style.fontColor, '#000000');
+    if (edgeColorSelect) edgeColorSelect.value = toHexColor(style.strokeColor, '#000000');
     if (thicknessSelect) thicknessSelect.value = String(style.strokeWidth ?? '1');
     if (dashSelect) {
         const dashed = (style as any).dashed;
@@ -360,15 +394,22 @@ function showTextMenu(x: number, y: number, style: CellStateStyle, cellStyle: Ap
     textUnderlineSelect?.classList.toggle('selected', !!(fontStyle & 4));
 }
 
+// Sommet dont on peut modifier le trait/la couleur : un rectangle (même s'il
+// contient des objets ou porte un texte — c'est alors le menu rectangle qui
+// prime sur le menu texte, dont la couleur de texte est reprise) ou une forme
+// sans texte ni image ni enfant. Les groupes (invisibles, avec enfants) en
+// sont exclus.
+function isShapeStyleTarget(cell: Cell): boolean {
+    if (!cell.isVertex()) return false;
+    if (isRectangleCell(cell)) return true;
+    const cellValue = cell.value as string | null;
+    const hasText = !!cellValue && cellValue.trim() !== '';
+    if (hasText || styleOf(cell)?.image) return false;
+    return !cell.children || cell.children.length === 0;
+}
+
 function isEdgeStyleTarget(cell: Cell): boolean {
-    if (cell.isEdge()) return true;
-    if (cell.isVertex()) {
-        const cs = styleOf(cell);
-        const cellValue = cell.value as string | null;
-        const hasText = !!cellValue && cellValue.trim() !== '';
-        return !hasText && !cs?.image && (!cell.children || cell.children.length === 0);
-    }
-    return false;
+    return cell.isEdge() || isShapeStyleTarget(cell);
 }
 
 function distanceToSegment(px: number, py: number, ax: number, ay: number, bx: number, by: number): number {
@@ -464,18 +505,20 @@ graph.container.addEventListener('contextmenu', (event: MouseEvent) => {
         const hasText = !!cellValue && cellValue.trim() !== '';
         const cellStyle = styleOf(cell);
 
-        if (hasText && textColorSelect && textFontSelect && textSizeSelect) {
+        // Le rectangle est testé en premier : son libellé ne doit pas
+        // faire basculer sur le menu de modification de texte.
+        if (!isRectangleCell(cell) && hasText && textColorSelect && textFontSelect && textSizeSelect) {
             selectedCell = cell;
             selectedEdgeCells = [];
             showTextMenu(x, y, currentStyle, cellStyle);
-        } else if (!cellStyle?.image && (!cell.children || cell.children.length === 0)) {
+        } else if (isShapeStyleTarget(cell)) {
             selectedCell = cell;
             const allSelected = graph.getSelectionCells() as Cell[];
             const selectedIds = new Set(allSelected.map((c) => String(c.id)));
             selectedEdgeCells = selectedIds.has(String(cell.id)) && allSelected.length > 1
                 ? allSelected.filter((c) => isEdgeStyleTarget(c))
                 : [cell];
-            showEdgeMenu(x, y, currentStyle);
+            showEdgeMenu(x, y, currentStyle, true);
         } else {
             hideContextMenus();
         }
@@ -496,10 +539,12 @@ document.getElementById('apply-edge-style')?.addEventListener('click', (e) => {
         for (const cell of cells) {
             const style: CellStateStyle = { ...(cell.style ?? {}) };
 
-            if (cell.isEdge()) {
-                style.strokeColor = edgeColorSelect!.value;
-            } else {
-                style.fillColor = edgeColorSelect!.value;
+            style.strokeColor = edgeColorSelect!.value;
+            // Fond et texte ne concernent que les rectangles, et seulement
+            // quand le menu a été ouvert dessus (sinon ces champs sont masqués).
+            if (shapeMenuOpen && !cell.isEdge()) {
+                if (shapeFillSelect) style.fillColor = shapeFillSelect.value;
+                if (shapeTextColorSelect) style.fontColor = shapeTextColorSelect.value;
             }
             style.strokeWidth = thickness;
 
@@ -1047,8 +1092,10 @@ function isDescendantOf(cell: Cell, ancestor: Cell): boolean {
 
 // Plus petit border (par aire) contenant le point (x,y) en coordonnées MODÈLE
 // absolues. Exclut `exclude` et toute sa descendance (un border ne peut pas
-// devenir enfant de son propre enfant).
-function findContainingBorder(x: number, y: number, exclude: Cell | null): Cell | null {
+// devenir enfant de son propre enfant). `minArea` : n'accepte que les borders
+// strictement plus grands (un rectangle déplacé sur un plus petit doit le
+// capturer, pas être avalé par lui).
+function findContainingBorder(x: number, y: number, exclude: Cell | null, minArea = 0): Cell | null {
     let best: Cell | null = null;
     let bestArea = Infinity;
     const walk = (parent: Cell) => {
@@ -1058,7 +1105,7 @@ function findContainingBorder(x: number, y: number, exclude: Cell | null): Cell 
                 const g = c.getGeometry();
                 if (g && x >= tl.x && x <= tl.x + g.width && y >= tl.y && y <= tl.y + g.height) {
                     const area = g.width * g.height;
-                    if (area < bestArea) { bestArea = area; best = c; }
+                    if (area > minArea && area < bestArea) { bestArea = area; best = c; }
                 }
             }
             if (c.children?.length) walk(c);
@@ -1079,7 +1126,7 @@ function reparentCell(cell: Cell, newParent: Cell): void {
     if (geo) {
         geo.x = childAbs.x - parentAbs.x;
         geo.y = childAbs.y - parentAbs.y;
-        cell.setGeometry(geo);
+        model.setGeometry(cell, geo);
     }
     if (isRectangleCell(cell)) graph.orderCells(true, [cell]);
     ensureBackgroundAtBottom();
@@ -1132,6 +1179,43 @@ function growAncestorBorders(cell: Cell): void {
     }
 }
 
+// Un border rétréci (resize utilisateur) libère les enfants qui se retrouvent
+// entièrement en dehors de son nouveau rectangle : ils sont ré-attachés au
+// parent du border (position absolue conservée) et ne suivront plus ses
+// déplacements. Les enfants seulement partiellement recouverts restent
+// attachés (le border regrandit ensuite pour les contenir, cf. CELLS_RESIZED).
+function releaseChildrenOutsideBorder(border: Cell): void {
+    const g = border.getGeometry();
+    const newParent = border.getParent();
+    if (!g || !newParent) return;
+
+    const outside = (border.children ?? []).filter((child) => {
+        if (child.isEdge()) return false;
+        const cg = child.getGeometry();
+        if (!cg) return false;
+        // Géométrie relative au border : le rectangle occupe [0,0]-[w,h].
+        return cg.x >= g.width || cg.x + cg.width <= 0 ||
+               cg.y >= g.height || cg.y + cg.height <= 0;
+    });
+
+    for (const child of outside) reparentCell(child, newParent);
+}
+
+// Remet un border (et ses ancêtres border) derrière les objets et les liens de
+// leur parent. Un border doit toujours rester en arrière-plan, mais un ordre
+// hérité d'une ancienne sauvegarde peut le placer devant des liens : invisible
+// tant qu'il ne les recouvre pas, il les cacherait dès qu'on l'agrandit ou le
+// déplace sur eux. Les autres borders frères gardent leur ordre relatif.
+function keepBorderBehind(border: Cell): void {
+    for (let c: Cell | null = border; c && isRectangleCell(c); c = c.getParent()) {
+        const parent = c.getParent();
+        if (!parent) break;
+        const siblings = parent.children ?? [];
+        const firstObject = siblings.findIndex((s) => !isRectangleCell(s) && !isBackgroundCell(s));
+        if (firstObject !== -1 && siblings.indexOf(c) > firstObject) model.add(parent, c, firstObject);
+    }
+}
+
 // Un border agrandi (resize utilisateur) capture tout objet qu'il recouvre
 // désormais, même partiellement (icône, texte, autre border...). Boucle
 // jusqu'à stabilisation : capturer peut faire grandir le border (padding),
@@ -1151,6 +1235,9 @@ function captureOverlappingObjects(border: Cell): void {
 
             const vg = v.getGeometry();
             if (!vg) continue;
+            // Un border plus grand (ou égal) ne peut pas être avalé par un plus
+            // petit : il devrait grandir pour le contenir.
+            if (isRectangleCell(v) && vg.width * vg.height >= g.width * g.height) continue;
             const vtl = absTopLeft(v);
             const overlap =
                 tl.x < vtl.x + vg.width && vtl.x < tl.x + g.width &&
@@ -1338,14 +1425,15 @@ container.addEventListener('drop', (event: DragEvent) => {
         graph.batchUpdate(() => {
             // Border ciblé par le point de drop : le nouveau border devient
             // son enfant plutôt que d'être inséré dans le parent par défaut.
-            const target = findContainingBorder(pt.x, pt.y, null);
+            const size: [number, number] = [150, 120];
+            const target = findContainingBorder(pt.x, pt.y, null, size[0] * size[1]);
             const dropParent = target ?? parent;
             const origin = absTopLeft(dropParent);
             const vertex = graph.insertVertex({
                 parent: dropParent,
                 value: '',
                 position: [pt.x - origin.x, pt.y - origin.y],
-                size: [150, 120],
+                size,
                 style: {
                     fillColor: '#fffacd',
                     strokeColor: '#000000',
@@ -1356,7 +1444,10 @@ container.addEventListener('drop', (event: DragEvent) => {
             });
             graph.orderCells(true, [vertex]);
             ensureBackgroundAtBottom();
-            if (target) growAncestorBorders(vertex);
+            // Les objets sur lesquels le rectangle est créé en deviennent les
+            // enfants (le rectangle grandit au besoin pour les contenir).
+            captureOverlappingObjects(vertex);
+            growAncestorBorders(vertex);
             graph.setSelectionCell(vertex);
         });
         return;
@@ -1440,12 +1531,50 @@ if (zoomOutButton) zoomOutButton.addEventListener('click', () => graph.zoomOut()
 //-------------------------------------------------------------------------
 // Suppression avec Delete / Backspace ou le bouton "Delete"
 
+// Supprimer un rectangle ne supprime pas son contenu : les enfants non
+// sélectionnés sont ré-attachés au plus proche ancêtre qui survit (position
+// absolue conservée) avant la suppression. Les liens enfants (dont les points
+// d'inflexion sont relatifs au parent) sont décalés en conséquence.
+function releaseChildrenOfDeletedRectangles(cells: Cell[]): void {
+    const doomed = new Set<Cell>(cells);
+
+    for (const cell of cells) {
+        if (!isRectangleCell(cell)) continue;
+
+        let newParent: Cell | null = cell.getParent();
+        while (newParent && doomed.has(newParent)) newParent = newParent.getParent();
+        if (!newParent) continue;
+
+        for (const child of [...(cell.children ?? [])]) {
+            if (doomed.has(child)) continue;
+
+            if (child.isEdge()) {
+                const shiftX = absTopLeft(cell).x - absTopLeft(newParent).x;
+                const shiftY = absTopLeft(cell).y - absTopLeft(newParent).y;
+                model.add(newParent, child);
+                const geo = child.getGeometry()?.clone();
+                if (geo) {
+                    geo.points = geo.points?.map((p) => new Point(p.x + shiftX, p.y + shiftY)) ?? null;
+                    if (geo.sourcePoint) geo.sourcePoint = new Point(geo.sourcePoint.x + shiftX, geo.sourcePoint.y + shiftY);
+                    if (geo.targetPoint) geo.targetPoint = new Point(geo.targetPoint.x + shiftX, geo.targetPoint.y + shiftY);
+                    model.setGeometry(child, geo);
+                }
+            } else {
+                reparentCell(child, newParent);
+            }
+        }
+    }
+}
+
 function deleteSelectedCells(): void {
     const cells = graph.getSelectionCells().filter((c) => !isBackgroundCell(c));
     if (cells.length === 0) return;
 
     const affectedPairs = collectAffectedPairs(cells);
-    graph.removeCells(cells);
+    graph.batchUpdate(() => {
+        releaseChildrenOfDeletedRectangles(cells);
+        graph.removeCells(cells);
+    });
     refreshParallelEdges(affectedPairs);
 }
 
@@ -1611,7 +1740,10 @@ graph.addListener(InternalEvent.MOVE_CELLS, (_sender: unknown, evt: EventObject)
             const g = obj.getGeometry();
             if (!g) continue;
             const tl = absTopLeft(obj);
-            const target = findContainingBorder(tl.x + g.width / 2, tl.y + g.height / 2, obj);
+            const target = findContainingBorder(
+                tl.x + g.width / 2, tl.y + g.height / 2, obj,
+                isRectangleCell(obj) ? g.width * g.height : 0,
+            );
             const currentParent = obj.getParent();
 
             if (target && target !== currentParent) {
@@ -1621,24 +1753,65 @@ graph.addListener(InternalEvent.MOVE_CELLS, (_sender: unknown, evt: EventObject)
                 reparentCell(obj, root);
             }
         }
+
+        // Un border déplacé sur des objets les capture (même partiellement) :
+        // ils en deviennent les enfants et suivront ses déplacements.
+        for (const obj of movedObjects) {
+            if (!isRectangleCell(obj)) continue;
+            keepBorderBehind(obj);
+            captureOverlappingObjects(obj);
+            growAncestorBorders(obj);
+        }
     });
     graph.refresh();
 });
 
 // Redimensionnement (CELLS_RESIZED, non couvert par le listener MOVE_CELLS
 // ci-dessus) :
-// - un border directement redimensionné (rétréci y compris) doit toujours
-//   contenir tous ses enfants : on l'agrandit au minimum nécessaire si besoin ;
-// - un enfant de border redimensionné fait grandir la chaîne parente.
+// - un border rétréci libère ses enfants entièrement sortis du rectangle ;
+// - un border directement redimensionné doit ensuite contenir tous ses enfants
+//   restants : on l'agrandit au minimum nécessaire si besoin ;
+// - un enfant de border redimensionné fait grandir la chaîne parente ;
+// - agrandir un border par le haut ou la gauche déplace son origine : ses
+//   enfants (en coordonnées relatives) sont contre-décalés pour rester en place.
 graph.addListener(InternalEvent.CELLS_RESIZED, (_sender: unknown, evt: EventObject) => {
     const cells = evt.getProperty('cells') as Cell[] | undefined;
+    const prev = evt.getProperty('prev') as (Geometry | null)[] | undefined;
     if (!cells) return;
 
     graph.batchUpdate(() => {
+        cells.forEach((c, i) => {
+            const before = prev?.[i];
+            const after = c.getGeometry();
+            if (isRectangleCell(c) && before && after) {
+                // Écart réel d'origine (et non celui demandé : MaxGraph peut
+                // borner x/y à 0 si les coordonnées négatives sont interdites).
+                const dx = after.x - before.x;
+                const dy = after.y - before.y;
+                if (dx !== 0 || dy !== 0) {
+                    for (const child of c.children ?? []) {
+                        if (child.isEdge()) continue;
+                        const cg = child.getGeometry()?.clone();
+                        if (!cg) continue;
+                        cg.x -= dx;
+                        cg.y -= dy;
+                        child.setGeometry(cg);
+                    }
+                }
+            }
+        });
         for (const c of cells) {
-            // Capture les objets désormais recouverts (même partiellement) et
-            // fait grandir le border pour toujours les contenir entièrement.
-            if (isRectangleCell(c)) captureOverlappingObjects(c);
+            if (!isRectangleCell(c)) {
+                growAncestorBorders(c);
+                continue;
+            }
+            // Rétrécir un border ne doit pas être empêché : les enfants
+            // entièrement sortis du rectangle en sont détachés d'abord...
+            releaseChildrenOutsideBorder(c);
+            keepBorderBehind(c);
+            // ...puis il capture les objets désormais recouverts (même
+            // partiellement) et grandit pour contenir entièrement ses enfants.
+            captureOverlappingObjects(c);
             growAncestorBorders(c);
         }
     });
