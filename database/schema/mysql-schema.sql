@@ -552,6 +552,7 @@ CREATE TABLE `applications` (
   `ext_refs` varchar(255) DEFAULT NULL,
   `name` varchar(255) NOT NULL,
   `description` longtext DEFAULT NULL,
+  `comments` longtext DEFAULT NULL,
   `vendor` varchar(255) DEFAULT NULL,
   `product` varchar(255) DEFAULT NULL,
   `security_need_c` int(11) DEFAULT NULL,
@@ -1977,11 +1978,11 @@ DROP TABLE IF EXISTS `perimeters`;
 /*!40101 SET character_set_client = utf8mb4 */;
 CREATE TABLE `perimeters` (
   `id` int(10) unsigned NOT NULL AUTO_INCREMENT,
-  `nom` varchar(32) NOT NULL,
+  `name` varchar(32) NOT NULL,
   `created_at` timestamp NULL DEFAULT NULL,
   `updated_at` timestamp NULL DEFAULT NULL,
   PRIMARY KEY (`id`),
-  UNIQUE KEY `perimeters_nom_unique` (`nom`)
+  UNIQUE KEY `perimeters_name_unique` (`name`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 DROP TABLE IF EXISTS `peripherals`;
@@ -3322,3 +3323,5 @@ INSERT INTO `migrations` (`id`, `migration`, `batch`) VALUES (384,'2026_09_15_00
 INSERT INTO `migrations` (`id`, `migration`, `batch`) VALUES (385,'2026_09_16_000000_drop_unique_name_indexes_on_mapped_objects',50);
 INSERT INTO `migrations` (`id`, `migration`, `batch`) VALUES (386,'2026_09_16_000001_add_perimeter_id_to_admin_users_table',50);
 INSERT INTO `migrations` (`id`, `migration`, `batch`) VALUES (387,'2026_09_16_100000_add_name_indexes_to_frequently_sorted_tables',50);
+INSERT INTO `migrations` (`id`, `migration`, `batch`) VALUES (388,'2026_09_15_113000_add_comments_to_applications',51);
+INSERT INTO `migrations` (`id`, `migration`, `batch`) VALUES (389,'2026_09_21_000000_rename_nom_to_name_in_perimeters_table',52);
