@@ -66,6 +66,14 @@
                 </tr>
         @endif
         <tr>
+            <th>
+                {{ trans('cruds.application.fields.comments') }}
+            </th>
+            <td colspan="6">
+                {!! nl2br(e($application->comments)) !!}
+            </td>
+        </tr>
+        <tr>
             <th width="10%">
                 {{ trans('cruds.application.fields.application_block') }}
             </th>

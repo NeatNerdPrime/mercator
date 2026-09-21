@@ -59,6 +59,9 @@
 			<th data-column="status"> 
 			    {{ trans('cruds.application.fields.status') }}
 			</th>
+                        <th data-column="comments">
+                            {{ trans('cruds.application.fields.comments') }}
+                        </th>
                         <th>
                         </th>
                     </tr>
@@ -132,6 +135,9 @@
 			    <td> 
    				{{ $application->status }}
 			    </td>
+                            <td>
+                                {!! nl2br(e($application->comments)) !!}
+                            </td>
                             <td nowrap>
                                 @can('application_show')
                                     <a class="btn btn-xs btn-primary" href="{{ route('admin.applications.show', $application->id) }}">
@@ -174,7 +180,7 @@
     'URL' => route('admin.applications.massDestroy'),
     'canDelete' => (bool) auth()->user()->can('application_delete'),
     'serverSidePagination' => true,
-    'hiddenColumns' => ['perimeter', 'vendor', 'editor', 'functional_referent', 'status'],
+    'hiddenColumns' => ['perimeter', 'vendor', 'editor', 'functional_referent', 'status', 'comments'],
     ));
 </script>
 @endsection
