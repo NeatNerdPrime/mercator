@@ -8,10 +8,11 @@ return new class extends Migration
 {
     public function up(): void
     {
-        if (!Schema::hasTable('external_connected_entities'))
+        if (!Schema::hasColumn('external_connected_entities', 'security')) {
             Schema::table('external_connected_entities', function (Blueprint $table) {
                 $table->text('security')->nullable()->after('description');
             });
+        }
 
         if (!Schema::hasTable('document_external_connected_entity'))
             Schema::create('document_external_connected_entity', function (Blueprint $table) {
