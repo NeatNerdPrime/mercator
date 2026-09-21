@@ -193,8 +193,7 @@
                                 <i id="undoButton" title="Undo" class="mapping-icon bi bi-arrow-counterclockwise"></i>
                                 <i id="redoButton" title="Redo" class="mapping-icon bi bi-arrow-clockwise"></i>
                                 <i id="font-btn" title="Text" class="mapping-icon bi bi-fonts" draggable="true"></i>
-                                <i id="square-btn" title="Border" class="mapping-icon bi bi-bounding-box"
-                                   draggable="true"></i>
+                                <i id="square-btn" title="Rect" class="mapping-icon bi bi-square" draggable="true"></i>
                                 <i id="group-btn" title="Group" class="mapping-icon bi bi-plus-square-dotted"></i>
                                 <i id="ungroup-btn" title="Ungroup" class="mapping-icon bi bi-dash-square-dotted"></i>
                                 <i id="zoom-in-btn" title="Zoom in" class="mapping-icon bi bi-zoom-in"></i>

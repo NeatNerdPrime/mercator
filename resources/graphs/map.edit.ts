@@ -1188,6 +1188,21 @@ function releaseChildrenOutsideBorder(border: Cell): void {
     for (const child of outside) reparentCell(child, newParent);
 }
 
+// Remet un border (et ses ancêtres border) derrière les objets et les liens de
+// leur parent. Un border doit toujours rester en arrière-plan, mais un ordre
+// hérité d'une ancienne sauvegarde peut le placer devant des liens : invisible
+// tant qu'il ne les recouvre pas, il les cacherait dès qu'on l'agrandit ou le
+// déplace sur eux. Les autres borders frères gardent leur ordre relatif.
+function keepBorderBehind(border: Cell): void {
+    for (let c: Cell | null = border; c && isRectangleCell(c); c = c.getParent()) {
+        const parent = c.getParent();
+        if (!parent) break;
+        const siblings = parent.children ?? [];
+        const firstObject = siblings.findIndex((s) => !isRectangleCell(s) && !isBackgroundCell(s));
+        if (firstObject !== -1 && siblings.indexOf(c) > firstObject) model.add(parent, c, firstObject);
+    }
+}
+
 // Un border agrandi (resize utilisateur) capture tout objet qu'il recouvre
 // désormais, même partiellement (icône, texte, autre border...). Boucle
 // jusqu'à stabilisation : capturer peut faire grandir le border (padding),
@@ -1692,6 +1707,7 @@ graph.addListener(InternalEvent.MOVE_CELLS, (_sender: unknown, evt: EventObject)
         // ils en deviennent les enfants et suivront ses déplacements.
         for (const obj of movedObjects) {
             if (!isRectangleCell(obj)) continue;
+            keepBorderBehind(obj);
             captureOverlappingObjects(obj);
             growAncestorBorders(obj);
         }
@@ -1741,6 +1757,7 @@ graph.addListener(InternalEvent.CELLS_RESIZED, (_sender: unknown, evt: EventObje
             // Rétrécir un border ne doit pas être empêché : les enfants
             // entièrement sortis du rectangle en sont détachés d'abord...
             releaseChildrenOutsideBorder(c);
+            keepBorderBehind(c);
             // ...puis il capture les objets désormais recouverts (même
             // partiellement) et grandit pour contenir entièrement ses enfants.
             captureOverlappingObjects(c);
