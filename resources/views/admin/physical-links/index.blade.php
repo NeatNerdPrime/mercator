@@ -30,28 +30,34 @@
                         @if (auth()->user()->hasMultiplePerimeters())
                             <th data-column="perimeter">{{ trans('cruds.perimeter.title_short') }}</th>
                         @endif
-                        <th width='100'>
-                            {{ trans('cruds.physicalLink.fields.type') }}
-                        </th>
-                        <th width='20'>
+                        <th width='20' id="color">
                             {{ trans('cruds.physicalLink.fields.color') }}
                         </th>
-                        <th>
+                        <th width='100' id="type">
+                            {{ trans('cruds.physicalLink.fields.type') }}
+                        </th>
+                        <th data-column="attributes">
                             {{ trans('cruds.physicalLink.fields.attributes') }}
                         </th>
                         <th>
                             {{ trans('cruds.physicalLink.fields.description') }}
                         </th>
-                        <th>
+                        <th data-column="src">
                             {{ trans('cruds.physicalLink.fields.src') }}
+                        </th>
+                        <th data-column="src_bay">
+                            {{ trans('cruds.physicalLink.fields.bay_src') }}
                         </th>
                         <th width='100'>
                             {{ trans('cruds.physicalLink.fields.src_port') }}
                         </th>
-                        <th>
+                        <th data-column="dest_bay">
                             {{ trans('cruds.physicalLink.fields.dest') }}
                         </th>
-                        <th width='100'>
+                        <th>
+                            {{ trans('cruds.physicalLink.fields.bay_dest') }}
+                        </th>
+                        <th data-column="dest" width='100'>
                             {{ trans('cruds.physicalLink.fields.dest_port') }}
                         </th>
                         <th width='200'>
@@ -69,12 +75,12 @@
                                 <td>{{ $physicalLink->perimeter->nom }}</td>
                             @endif
                             <td>
-                                <x-show-link :model="$physicalLink" :label="$physicalLink->type ?? ''" />
-                            </td>
-                            <td>
                                 <a href="{{ route('admin.physical-links.show', $physicalLink->id) }}">
                                 <div style="width: 40px; height: 40px; background-color: {{ $physicalLink->color }}; border: 1px solid #ccc; border-radius: 4px;"></div>
                                 </a>
+                            </td>
+                            <td>
+                                <x-show-link :model="$physicalLink" :label="$physicalLink->type ?? ''" />
                             </td>
                             <td>
                                 @foreach(explode(' ', $physicalLink->attributes ?? '') as $attribute)
@@ -114,6 +120,15 @@
                                 @endif
                             </td>
                             <td>
+                                @if ($physicalLink->peripheralSrc!=null && $physicalLink->peripheralSrc->bay!=null)
+                                    <x-show-link :model="$physicalLink->peripheralSrc->bay" />
+                                @elseif ($physicalLink->physicalServerSrc!=null && $physicalLink->physicalServerSrc->bay!=null)
+                                    <x-show-link :model="$physicalLink->physicalServerSrc->bay" />
+                                @elseif ($physicalLink->physicalSwitchSrc!=null && $physicalLink->physicalSwitchSrc->bay!=null)
+                                    <x-show-link :model="$physicalLink->physicalSwitchSrc->bay" />
+                                @endif
+                            </td>
+                            <td>
                                 {{ $physicalLink->src_port }}
                             </td>
                             <td>
@@ -143,6 +158,15 @@
                                     <x-show-link :model="$physicalLink->logicalServerDest" />
                                 @endif
                             </td>
+			    <td>
+			        @if ($physicalLink->peripheralDest!=null && $physicalLink->peripheralDest->bay!=null)
+			            <x-show-link :model="$physicalLink->peripheralDest->bay" />
+			        @elseif ($physicalLink->physicalServerDest!=null && $physicalLink->physicalServerDest->bay!=null)
+			            <x-show-link :model="$physicalLink->physicalServerDest->bay" />
+			        @elseif ($physicalLink->physicalSwitchDest!=null && $physicalLink->physicalSwitchDest->bay!=null)
+			            <x-show-link :model="$physicalLink->physicalSwitchDest->bay" />
+			        @endif
+			    </td>
                             <td>
                                 {{ $physicalLink->dest_port }}
                             </td>
@@ -188,7 +212,8 @@
     'title' => trans("cruds.physicalLink.title_singular"),
     'URL' => route('admin.physical-links.massDestroy'),
     'canDelete' => auth()->user()->can('physical_link_delete') ? true : false,
-    'serverSidePagination' => true
+    'serverSidePagination' => true,
+    'hiddenColumns' => ['color', 'attributes', 'type', 'src_bay','dest_bay'],
 ));
 </script>
 @endsection

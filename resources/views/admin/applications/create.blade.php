@@ -121,6 +121,24 @@
                         </div>
                     </div>
                 </div>
+		<div class="row">
+		    <div class="col-md-9">
+		        <div class="form-group">
+		            <label for="comments">{{ trans('cruds.application.fields.comments') }}</label>
+		            <textarea
+		                class="form-control {{ $errors->has('comments') ? 'is-invalid' : '' }}"
+		                name="comments"
+		                id="comments"
+		                rows="5">{{ old('comments', $application->comments ?? '') }}</textarea>
+		            @if($errors->has('comments'))
+		                <div class="invalid-feedback">
+		                    {{ $errors->first('comments') }}
+		                </div>
+		            @endif
+		            <span class="help-block">{{ trans('cruds.application.fields.comments_helper') }}</span>
+		        </div>
+		    </div>
+		</div>
                 <!------------------------------------------------------------------------------------------------------------->
 
                 @if (config('mercator.parameters.application_documents'))
