@@ -1113,7 +1113,7 @@ function reparentCell(cell: Cell, newParent: Cell): void {
     if (geo) {
         geo.x = childAbs.x - parentAbs.x;
         geo.y = childAbs.y - parentAbs.y;
-        cell.setGeometry(geo);
+        model.setGeometry(cell, geo);
     }
     if (isRectangleCell(cell)) graph.orderCells(true, [cell]);
     ensureBackgroundAtBottom();
@@ -1518,12 +1518,50 @@ if (zoomOutButton) zoomOutButton.addEventListener('click', () => graph.zoomOut()
 //-------------------------------------------------------------------------
 // Suppression avec Delete / Backspace ou le bouton "Delete"
 
+// Supprimer un rectangle ne supprime pas son contenu : les enfants non
+// sélectionnés sont ré-attachés au plus proche ancêtre qui survit (position
+// absolue conservée) avant la suppression. Les liens enfants (dont les points
+// d'inflexion sont relatifs au parent) sont décalés en conséquence.
+function releaseChildrenOfDeletedRectangles(cells: Cell[]): void {
+    const doomed = new Set<Cell>(cells);
+
+    for (const cell of cells) {
+        if (!isRectangleCell(cell)) continue;
+
+        let newParent: Cell | null = cell.getParent();
+        while (newParent && doomed.has(newParent)) newParent = newParent.getParent();
+        if (!newParent) continue;
+
+        for (const child of [...(cell.children ?? [])]) {
+            if (doomed.has(child)) continue;
+
+            if (child.isEdge()) {
+                const shiftX = absTopLeft(cell).x - absTopLeft(newParent).x;
+                const shiftY = absTopLeft(cell).y - absTopLeft(newParent).y;
+                model.add(newParent, child);
+                const geo = child.getGeometry()?.clone();
+                if (geo) {
+                    geo.points = geo.points?.map((p) => new Point(p.x + shiftX, p.y + shiftY)) ?? null;
+                    if (geo.sourcePoint) geo.sourcePoint = new Point(geo.sourcePoint.x + shiftX, geo.sourcePoint.y + shiftY);
+                    if (geo.targetPoint) geo.targetPoint = new Point(geo.targetPoint.x + shiftX, geo.targetPoint.y + shiftY);
+                    model.setGeometry(child, geo);
+                }
+            } else {
+                reparentCell(child, newParent);
+            }
+        }
+    }
+}
+
 function deleteSelectedCells(): void {
     const cells = graph.getSelectionCells().filter((c) => !isBackgroundCell(c));
     if (cells.length === 0) return;
 
     const affectedPairs = collectAffectedPairs(cells);
-    graph.removeCells(cells);
+    graph.batchUpdate(() => {
+        releaseChildrenOfDeletedRectangles(cells);
+        graph.removeCells(cells);
+    });
     refreshParallelEdges(affectedPairs);
 }
 
