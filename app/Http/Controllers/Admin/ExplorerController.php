@@ -109,11 +109,13 @@ class ExplorerController extends Controller
             $first = true;
             $count = 0;
             $attributes = [];
-            $this->nodeWriter = function (array $node) use (&$first, &$count, &$attributes): void {
+            $emitted = [];
+            $this->nodeWriter = function (array $node) use (&$first, &$count, &$attributes, &$emitted): void {
                 if (! $first) {
                     echo ',';
                 }
                 $first = false;
+                $emitted[$node['id']] = true;
                 echo json_encode($node, JSON_UNESCAPED_UNICODE);
                 // Collect unique, non-empty attribute tokens while streaming
                 if (! empty($node['attributes'])) {
@@ -144,7 +146,7 @@ class ExplorerController extends Controller
 
             ksort($attributes);
             echo '],"edges":';
-            echo json_encode($this->edges, JSON_UNESCAPED_UNICODE);
+            echo json_encode($this->edgesBetweenNodes($this->edges, $emitted), JSON_UNESCAPED_UNICODE);
             echo ',"attributes":';
             echo json_encode(array_keys($attributes), JSON_UNESCAPED_UNICODE);
             echo '}';
@@ -166,24 +168,22 @@ class ExplorerController extends Controller
     {
         abort_if(Gate::denies('explore_access'), Response::HTTP_FORBIDDEN, '403 Forbidden');
 
-        $tables = [
-            'applications', 'logical_servers', 'clusters', 'entities',
-            'buildings', 'physical_security_devices', 'relations', 'security_devices', 'application_flows',
+        // Uniquement les attributs des objets que l'utilisateur peut voir (type + périmètre).
+        $models = [
+            Application::class, LogicalServer::class, Cluster::class, Entity::class,
+            Building::class, PhysicalSecurityDevice::class, Relation::class,
+            SecurityDevice::class, ApplicationFlow::class,
         ];
         $allAttributes = collect();
-        foreach ($tables as $table) {
-            try {
-                $rows = DB::table($table)
-                    ->select('attributes')
-                    ->whereNull('deleted_at')
-                    ->whereNotNull('attributes')
-                    ->where('attributes', '!=', '')
-                    ->get();
-                $allAttributes = $allAttributes->merge(
-                    collect($rows)->flatMap(fn ($r) => array_map('trim', explode(' ', $r->attributes)))->filter()
-                );
-            } catch (\Exception $e) {
-            }
+        foreach ($models as $model) {
+            $values = Cartographer::scopedQueryByClass($model)
+                ->whereNotNull('attributes')
+                ->where('attributes', '!=', '')
+                ->pluck('attributes');
+
+            $allAttributes = $allAttributes->merge(
+                $values->flatMap(fn ($value) => array_map('trim', explode(' ', $value)))->filter()
+            );
         }
         $result = $allAttributes->unique()->sort()->values();
 
@@ -211,7 +211,26 @@ class ExplorerController extends Controller
         // Sort elements by name
         usort($this->nodes, fn ($a, $b) => strcmp($a['label'], $b['label']));
 
-        return [$this->nodes, $this->edges];
+        return [$this->nodes, $this->edgesBetweenNodes($this->edges, array_flip(array_column($this->nodes, 'id')))];
+    }
+
+    /**
+     * Ne garde que les arêtes dont les deux extrémités sont des nœuds effectivement présents.
+     * Les nœuds sont filtrés par droit d'accès (type + périmètre), mais les liaisons viennent de
+     * tables de jointure brutes : sans ce filtre, une arête pointerait vers un objet caché et
+     * révélerait son existence et son identifiant.
+     *
+     * @param  array<int, array<string, mixed>>  $edges
+     * @param  array<string, mixed>  $nodeIds  identifiants de nœuds en clés
+     * @return array<int, array<string, mixed>>
+     */
+    private function edgesBetweenNodes(array $edges, array $nodeIds): array
+    {
+        return array_values(array_filter(
+            $edges,
+            fn (array $edge) => $edge['from'] !== null && $edge['to'] !== null
+                && isset($nodeIds[$edge['from']], $nodeIds[$edge['to']])
+        ));
     }
 
     /**

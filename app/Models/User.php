@@ -111,6 +111,63 @@ class User extends Authenticatable implements HasIconContract, OAuthenticatable
     public function resetPerimeterCache(): void
     {
         $this->perimeterIdsCache = null;
+        $this->permissionsByPerimeterCache = null;
+    }
+
+    /**
+     * @var array<int, list<string>>|null
+     */
+    private ?array $permissionsByPerimeterCache = null;
+
+    /**
+     * Permissions de l'utilisateur regroupées par périmètre : chaque rôle ne porte ses
+     * permissions que dans SON périmètre. Deux rôles dans deux périmètres ne se cumulent donc
+     * jamais (lecteur dans P2 + rédacteur dans P1 = lecture seule dans P2).
+     * Mémorisé sur l'instance, invalidé par resetPerimeterCache().
+     *
+     * @return array<int, list<string>>
+     */
+    public function permissionsByPerimeter(): array
+    {
+        return $this->permissionsByPerimeterCache
+            ??= self::groupPermissionsByPerimeter($this->roles()->with('permissions')->get());
+    }
+
+    /**
+     * Données de session relatives aux rôles/permissions, partagées par le login local, le SSO
+     * et RefreshRolePermissions. `auth_permissions` (union à plat) reste exposé pour les
+     * consommateurs qui ne raisonnent pas par périmètre (fonctionnalité désactivée).
+     *
+     * @return array<string, mixed>
+     */
+    public function sessionPermissionData(): array
+    {
+        $this->load('roles.permissions');
+        $byPerimeter = $this->permissionsByPerimeterCache = self::groupPermissionsByPerimeter($this->roles);
+
+        return [
+            'auth_role_ids' => $this->roles->pluck('id')->all(),
+            'auth_permissions' => collect($byPerimeter)->flatten()->unique()->values()->all(),
+            'auth_permissions_by_perimeter' => $byPerimeter,
+            'auth_permissions_at' => now()->timestamp,
+        ];
+    }
+
+    /**
+     * @param  \Illuminate\Support\Collection<int, Role>  $roles  rôles avec `permissions` chargées
+     * @return array<int, list<string>>
+     */
+    private static function groupPermissionsByPerimeter(\Illuminate\Support\Collection $roles): array
+    {
+        $byPerimeter = [];
+        foreach ($roles as $role) {
+            $titles = $role->permissions->pluck('title')->all();
+            $byPerimeter[(int) $role->perimeter_id] = array_values(array_unique(
+                array_merge($byPerimeter[(int) $role->perimeter_id] ?? [], $titles)
+            ));
+        }
+
+        return $byPerimeter;
     }
 
     /**

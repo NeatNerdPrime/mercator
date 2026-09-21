@@ -115,18 +115,8 @@ class SsoController extends Controller
         // Connecter l'utilisateur
         Auth::login($existingUser);
 
-        // Charger les rôles et permissions pour la session
-        $existingUser->loadMissing('roles.permissions');
-
-        session([
-            'auth_role_ids' => $existingUser->roles->pluck('id')->all(),
-            'auth_permissions' => $existingUser->roles
-                ->flatMap->permissions
-                ->pluck('title')
-                ->unique()
-                ->values()
-                ->all(),
-        ]);
+        // Charger les rôles et permissions (par périmètre) pour la session
+        session($existingUser->sessionPermissionData());
 
         // Audit log
         try {

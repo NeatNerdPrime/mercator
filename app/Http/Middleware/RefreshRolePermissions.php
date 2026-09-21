@@ -15,19 +15,7 @@ class RefreshRolePermissions
             $sessionAt  = session('auth_permissions_at', 0);
 
             if ($sessionAt < $lastUpdate) {
-                $user = $request->user();
-                $user->load('roles.permissions');
-
-                session([
-                    'auth_role_ids'       => $user->roles->pluck('id')->all(),
-                    'auth_permissions'    => $user->roles
-                        ->flatMap->permissions
-                        ->pluck('title')
-                        ->unique()
-                        ->values()
-                        ->all(),
-                    'auth_permissions_at' => now()->timestamp,
-                ]);
+                session($request->user()->sessionPermissionData());
             }
         }
 

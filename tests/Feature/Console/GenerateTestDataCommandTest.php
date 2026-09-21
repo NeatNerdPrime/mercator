@@ -237,7 +237,9 @@ it('does not enable the perimeters feature nor create per-perimeter roles for a 
     ])->run();
 
     expect(PerimeterSettings::isEnabled())->toBeFalse()
-        ->and(Role::query()->where('title', 'like', 'admin.perimeter.%')->count())->toBe(0);
+        ->and(Role::query()->where('title', 'like', 'admin.perimeter.%')->count())->toBe(0)
+        ->and(Role::query()->where('title', 'like', 'user.perimeter.%')->count())->toBe(0)
+        ->and(Role::query()->where('title', 'like', 'auditor.perimeter.%')->count())->toBe(0);
 });
 
 it('enables the perimeters feature and creates a fully-permissioned admin role per perimeter', function () {
@@ -265,6 +267,74 @@ it('enables the perimeters feature and creates a fully-permissioned admin role p
     }
 });
 
+it('creates an auditor and a user role per perimeter, without administration permissions', function () {
+    Permission::query()->insert([
+        ['title' => 'user_management_access'],
+        ['title' => 'role_access'],
+        ['title' => 'role_edit'],
+        ['title' => 'user_create'],
+        ['title' => 'configuration_access'],
+        ['title' => 'module_manage'],
+        ['title' => 'cartographer_show'],
+        ['title' => 'entity_access'],
+        ['title' => 'entity_show'],
+        ['title' => 'entity_create'],
+        ['title' => 'entity_edit'],
+        ['title' => 'entity_delete'],
+        ['title' => 'application_access'],
+        ['title' => 'application_edit'],
+        ['title' => 'configure'],
+    ]);
+
+    $this->artisan('mercator:generate-test-data', [
+        '--perimeters' => 3,
+        '--applications' => 0,
+        '--force' => true,
+    ])->run();
+
+    $adminOnly = [
+        'user_management_access', 'role_access', 'role_edit', 'user_create',
+        'configuration_access', 'module_manage', 'cartographer_show',
+    ];
+
+    $perimeters = Perimeter::query()->get();
+    expect($perimeters)->toHaveCount(3);
+
+    foreach ($perimeters as $perimeter) {
+        $slug = Str::slug($perimeter->nom);
+
+        $user = Role::query()->where('perimeter_id', $perimeter->id)->where('title', 'user.perimeter.'.$slug)->first();
+        $auditor = Role::query()->where('perimeter_id', $perimeter->id)->where('title', 'auditor.perimeter.'.$slug)->first();
+
+        expect($user)->not->toBeNull()->and($auditor)->not->toBeNull();
+
+        $userPermissions = $user->permissions()->pluck('title')->all();
+        $auditorPermissions = $auditor->permissions()->pluck('title')->all();
+
+        expect($userPermissions)
+            ->toContain('entity_create', 'entity_edit', 'entity_delete', 'application_edit', 'configure')
+            ->not->toContain(...$adminOnly)
+            ->and($auditorPermissions)
+            ->toEqualCanonicalizing(['entity_access', 'entity_show', 'application_access']);
+    }
+});
+
+it('does not attach admin@admin.com to the user and auditor perimeter roles', function () {
+    User::factory()->create(['login' => 'admin@admin.com']);
+
+    $this->artisan('mercator:generate-test-data', [
+        '--perimeters' => 2,
+        '--applications' => 0,
+        '--force' => true,
+    ])->run();
+
+    $admin = User::query()->where('login', 'admin@admin.com')->first();
+
+    expect($admin->roles()->where('title', 'like', 'admin.perimeter.%')->count())->toBe(2)
+        ->and($admin->roles()->where('title', 'like', 'user.perimeter.%')->count())->toBe(0)
+        ->and($admin->roles()->where('title', 'like', 'auditor.perimeter.%')->count())->toBe(0);
+});
+
 it('does not duplicate per-perimeter admin roles when run twice', function () {
     $options = [
         '--perimeters' => 2,
@@ -275,7 +345,9 @@ it('does not duplicate per-perimeter admin roles when run twice', function () {
     $this->artisan('mercator:generate-test-data', $options)->run();
     $this->artisan('mercator:generate-test-data', array_merge($options, ['--perimeters' => 2]))->run();
 
-    expect(Role::query()->where('title', 'like', 'admin.perimeter.%')->count())->toBe(2);
+    expect(Role::query()->where('title', 'like', 'admin.perimeter.%')->count())->toBe(2)
+        ->and(Role::query()->where('title', 'like', 'user.perimeter.%')->count())->toBe(2)
+        ->and(Role::query()->where('title', 'like', 'auditor.perimeter.%')->count())->toBe(2);
 });
 
 it('attaches the admin@admin.com user to every new admin.perimeter role without detaching its existing roles', function () {

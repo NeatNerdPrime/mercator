@@ -2,8 +2,8 @@
 
 namespace App\Scopes;
 
-use App\Models\Perimeter;
 use App\Models\PhysicalLink;
+use App\Support\PerimeterPermissions;
 use App\Support\PerimeterSettings;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
@@ -30,24 +30,40 @@ class PhysicalLinkPerimeterScope implements Scope
             return;
         }
 
-        $active = $user->activePerimeterId();
-        if ($active === Perimeter::ALL_ID) {
+        // Périmètres où l'utilisateur voit ce type d'objet (rôle + `<modèle>_access`).
+        $perimeterIds = PerimeterPermissions::visiblePerimeterIds($user, $model);
+        if ($perimeterIds === null) {
+            return;
+        }
+
+        $this->constrain($builder, $model, $perimeterIds);
+    }
+
+    /**
+     * Visible dès que le périmètre propre, celui de la source ou celui de la destination
+     * figure parmi $perimeterIds.
+     *
+     * @param  list<int>  $perimeterIds
+     */
+    public function constrain(Builder $builder, Model $model, array $perimeterIds): void
+    {
+        if (! $model instanceof PhysicalLink) {
             return;
         }
 
         $table = $model->getTable();
 
-        $builder->where(function (Builder $query) use ($model, $table, $active) {
-            $query->where("{$table}.perimeter_id", $active);
+        $builder->where(function (Builder $query) use ($model, $table, $perimeterIds) {
+            $query->whereIn("{$table}.perimeter_id", $perimeterIds);
 
             foreach ($model::perimeterRelations() as $column => $relationName) {
                 $relatedTable = $model->{$relationName}()->getRelated()->getTable();
 
-                $query->orWhereExists(function (QueryBuilder $sub) use ($relatedTable, $column, $table, $active) {
+                $query->orWhereExists(function (QueryBuilder $sub) use ($relatedTable, $column, $table, $perimeterIds) {
                     $sub->selectRaw('1')
                         ->from($relatedTable)
                         ->whereColumn("{$relatedTable}.id", "{$table}.{$column}")
-                        ->where("{$relatedTable}.perimeter_id", $active);
+                        ->whereIn("{$relatedTable}.perimeter_id", $perimeterIds);
                 });
             }
         });

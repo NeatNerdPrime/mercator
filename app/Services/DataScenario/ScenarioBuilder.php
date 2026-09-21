@@ -32,11 +32,12 @@ use InvalidArgumentException;
  * volontairement via `cross_perimeter_flow_probability`.
  *
  * Dès que plus d'un périmètre est en jeu, la fonctionnalité périmètres est
- * activée (voir PerimeterSettings) et un rôle administrateur dédié
- * (`admin.perimeter.<slug>`, disposant de toutes les permissions) est créé
- * pour chaque périmètre, afin de pouvoir immédiatement s'y connecter et le
- * distinguer des autres ; le compte admin@admin.com (s'il existe) est
- * rattaché à chacun de ces rôles. L'infrastructure physique (sites,
+ * activée (voir PerimeterSettings) et trois rôles dédiés sont créés pour
+ * chaque périmètre, afin de pouvoir immédiatement s'y connecter et le
+ * distinguer des autres : `admin.perimeter.<slug>` (toutes les permissions),
+ * `user.perimeter.<slug>` (toutes sauf l'administration) et
+ * `auditor.perimeter.<slug>` (consultation seule, sans l'administration) ;
+ * le compte admin@admin.com (s'il existe) est rattaché aux rôles admin. L'infrastructure physique (sites,
  * bâtiments, baies, serveurs physiques, périphériques) est chaînée de façon
  * cohérente : un bâtiment référence un site de son propre périmètre, une
  * baie référence le même site que son bâtiment, un serveur physique/
@@ -368,6 +369,13 @@ class ScenarioBuilder
     private const ADMIN_LOGIN = 'admin@admin.com';
 
     /**
+     * Permissions d'administration, exclues des rôles user.perimeter.* et
+     * auditor.perimeter.* : gestion des utilisateurs, rôles et permissions,
+     * configuration, modules et cartographes.
+     */
+    private const ADMIN_PERMISSION_PATTERN = '/^(user_management_access|configuration_access|module_manage|(permission|role|user|cartographer)_(access|create|edit|show|delete))$/';
+
+    /**
      * @param  array{databases_per_application: array{min:int,max:int}, buildings_per_zone: array{min:int,max:int}, floors_per_site: array{min:int,max:int}, locals_per_floor: array{min:int,max:int}, subnetworks_per_network: array{min:int,max:int}, application_blocks_per_perimeter: array{min:int,max:int}, zone_admins_per_site: array{min:int,max:int}, domains_per_site: array{min:int,max:int}, application_services_per_application: array{min:int,max:int}, application_modules_per_service: array{min:int,max:int}, macro_processes_per_perimeter: array{min:int,max:int}, processes_per_macro_process: array{min:int,max:int}, activities_per_process: array{min:int,max:int}, operations_per_activity: array{min:int,max:int}, tasks_per_operation: array{min:int,max:int}, actors_per_perimeter: array{min:int,max:int}, actor_operations_per_actor: array{min:int,max:int}, informations_per_perimeter: array{min:int,max:int}, informations_per_database: array{min:int,max:int}, informations_per_flow: array{min:int,max:int}, entities_per_perimeter: int, relations_per_entity: array{min:int,max:int}, data_processing_per_perimeter: array{min:int,max:int}, data_processing_links_per_type: array{min:int,max:int}, cross_perimeter_flow_probability: float, wifi_terminal_probability: float}  $tuning
      */
     public function __construct(
@@ -454,6 +462,8 @@ class ScenarioBuilder
             'perimeters_created' => max(0, $counts['perimeters'] - $existing),
             'perimeters_feature_enabled' => $multiPerimeter,
             'admin_roles_created' => $multiPerimeter ? $perimetersTotal : 0,
+            'user_roles_created' => $multiPerimeter ? $perimetersTotal : 0,
+            'auditor_roles_created' => $multiPerimeter ? $perimetersTotal : 0,
             'admin_user_linked' => $multiPerimeter && User::query()->where('login', self::ADMIN_LOGIN)->exists(),
             'applications' => $counts['applications'],
             'application_blocks' => $applicationBlocksEstimate,
@@ -769,6 +779,8 @@ class ScenarioBuilder
             'perimeters_created' => count($perimeterIds) - $existingPerimeterCount,
             'perimeters_feature_enabled' => $access['enabled'],
             'admin_roles_created' => $access['roles_created'],
+            'user_roles_created' => $access['user_roles_created'],
+            'auditor_roles_created' => $access['auditor_roles_created'],
             'admin_user_linked' => $access['admin_user_linked'],
             'applications' => count($appIds),
             'application_blocks' => count($applicationBlockIds),
@@ -834,41 +846,58 @@ class ScenarioBuilder
     }
 
     /**
-     * Active la fonctionnalité périmètres et crée, pour chaque périmètre, un
-     * rôle administrateur dédié (`admin.perimeter.<slug>`) disposant de
-     * toutes les permissions — uniquement lorsque plus d'un périmètre est en
-     * jeu (sinon la notion même de "changer de périmètre" n'a pas de sens).
-     * Idempotent : réexécuter la commande sur les mêmes périmètres retrouve
-     * les rôles déjà créés (et rafraîchit leurs permissions) au lieu d'en
-     * dupliquer. Si le compte administrateur canonique (voir ADMIN_LOGIN)
-     * existe, il est rattaché à chacun de ces rôles (sans jamais lui retirer
-     * ses rôles existants) afin de pouvoir immédiatement se connecter à
-     * n'importe quel périmètre généré.
+     * Active la fonctionnalité périmètres et crée, pour chaque périmètre, trois
+     * rôles dédiés — uniquement lorsque plus d'un périmètre est en jeu (sinon
+     * la notion même de "changer de périmètre" n'a pas de sens) :
+     *
+     *  - `admin.perimeter.<slug>` : toutes les permissions ;
+     *  - `user.perimeter.<slug>` : toutes les permissions sauf l'administration
+     *    (voir ADMIN_PERMISSION_PATTERN) ;
+     *  - `auditor.perimeter.<slug>` : tout voir (`*_access` et `*_show`), rien
+     *    modifier, sans l'administration.
+     *
+     * Chacune de ces permissions n'est valable que dans le périmètre du rôle
+     * (voir PerimeterPermissions). Idempotent : réexécuter la commande sur les
+     * mêmes périmètres retrouve les rôles déjà créés (et rafraîchit leurs
+     * permissions) au lieu d'en dupliquer. Si le compte administrateur
+     * canonique (voir ADMIN_LOGIN) existe, il est rattaché aux rôles admin (sans
+     * jamais lui retirer ses rôles existants) afin de pouvoir immédiatement se
+     * connecter à n'importe quel périmètre généré.
      *
      * @param  list<int>  $perimeterIds
-     * @return array{enabled: bool, roles_created: int, admin_user_linked: bool}
+     * @return array{enabled: bool, roles_created: int, user_roles_created: int, auditor_roles_created: int, admin_user_linked: bool}
      */
     private function enableMultiPerimeterAccess(array $perimeterIds): array
     {
         if (count($perimeterIds) <= 1) {
-            return ['enabled' => false, 'roles_created' => 0, 'admin_user_linked' => false];
+            return ['enabled' => false, 'roles_created' => 0, 'user_roles_created' => 0, 'auditor_roles_created' => 0, 'admin_user_linked' => false];
         }
 
         PerimeterSettings::setEnabled(true);
 
-        $permissionIds = Permission::query()->pluck('id');
-        $roleIds = [];
+        $permissions = Permission::query()->get(['id', 'title']);
+        $nonAdmin = $permissions->reject(fn (Permission $p) => preg_match(self::ADMIN_PERMISSION_PATTERN, $p->title) === 1);
 
-        $this->phaseStart('Rôles admin par périmètre', count($perimeterIds));
+        $permissionIdsByPrefix = [
+            'admin' => $permissions->pluck('id'),
+            'user' => $nonAdmin->pluck('id'),
+            'auditor' => $nonAdmin->filter(fn (Permission $p) => preg_match('/_(access|show)$/', $p->title) === 1)->pluck('id'),
+        ];
+
+        $roleIds = ['admin' => [], 'user' => [], 'auditor' => []];
+
+        $this->phaseStart('Rôles par périmètre (admin, user, auditor)', count($perimeterIds));
 
         foreach (DB::table('perimeters')->whereIn('id', $perimeterIds)->get(['id', 'nom']) as $perimeter) {
-            $role = Role::query()->firstOrCreate([
-                'title' => 'admin.perimeter.'.Str::slug($perimeter->nom),
-                'perimeter_id' => $perimeter->id,
-            ]);
+            foreach ($permissionIdsByPrefix as $prefix => $ids) {
+                $role = Role::query()->firstOrCreate([
+                    'title' => $prefix.'.perimeter.'.Str::slug($perimeter->nom),
+                    'perimeter_id' => $perimeter->id,
+                ]);
 
-            $role->permissions()->sync($permissionIds);
-            $roleIds[] = $role->id;
+                $role->permissions()->sync($ids);
+                $roleIds[$prefix][] = $role->id;
+            }
 
             $this->tick();
         }
@@ -876,9 +905,15 @@ class ScenarioBuilder
         $this->phaseEnd();
 
         $adminUser = User::query()->where('login', self::ADMIN_LOGIN)->first();
-        $adminUser?->roles()->syncWithoutDetaching($roleIds);
+        $adminUser?->roles()->syncWithoutDetaching($roleIds['admin']);
 
-        return ['enabled' => true, 'roles_created' => count($roleIds), 'admin_user_linked' => $adminUser !== null];
+        return [
+            'enabled' => true,
+            'roles_created' => count($roleIds['admin']),
+            'user_roles_created' => count($roleIds['user']),
+            'auditor_roles_created' => count($roleIds['auditor']),
+            'admin_user_linked' => $adminUser !== null,
+        ];
     }
 
     /**
