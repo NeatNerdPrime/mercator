@@ -69,7 +69,7 @@
 
                             </td>
                             @if (auth()->user()->hasMultiplePerimeters())
-                                <td>{{ $cluster->perimeter->nom }}</td>
+                                <td>{{ $cluster->perimeter->name }}</td>
                             @endif
                             <td>
                                 <x-show-link :model="$cluster" />

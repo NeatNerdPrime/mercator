@@ -29,7 +29,7 @@ class PerimeterController extends Controller
         abort_if(Gate::denies('configure'), Response::HTTP_FORBIDDEN, '403 Forbidden');
 
         $data = $request->validate([
-            'nom' => ['required', 'string', 'min:2', 'max:32', 'unique:perimeters,nom'],
+            'name' => ['required', 'string', 'min:2', 'max:32', 'unique:perimeters,name'],
         ]);
 
         Perimeter::query()->create($data);
@@ -42,12 +42,12 @@ class PerimeterController extends Controller
         abort_if(Gate::denies('configure'), Response::HTTP_FORBIDDEN, '403 Forbidden');
 
         $data = $request->validate([
-            'nom' => [
+            'name' => [
                 'required',
                 'string',
                 'min:2',
                 'max:32',
-                Rule::unique('perimeters', 'nom')->ignore($perimeter->id),
+                Rule::unique('perimeters', 'name')->ignore($perimeter->id),
             ],
         ]);
 

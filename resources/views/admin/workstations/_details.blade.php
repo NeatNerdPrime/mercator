@@ -10,7 +10,7 @@
                 {{ ($hasMultiplePerimeters ?? auth()->user()->hasMultiplePerimeters()) ? trans('cruds.perimeter.title_short').' / ' : '' }}{{ trans('cruds.workstation.fields.name') }}
             </th>
             <td width="20%">
-                @if (($hasMultiplePerimeters ?? auth()->user()->hasMultiplePerimeters())){{ $workstation->perimeter->nom }} / @endif
+                @if (($hasMultiplePerimeters ?? auth()->user()->hasMultiplePerimeters())){{ $workstation->perimeter->name }} / @endif
             @if($withLink)
                 @canShow($workstation)
                     <a href="{{ route('admin.workstations.show', $workstation->id) }}">

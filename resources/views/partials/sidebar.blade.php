@@ -9,10 +9,10 @@
                     @csrf
                     <select name="perimeter" id="active-perimeter" class="form-control select2">
                         <option value="0" {{ (int) session('active_perimeter', 0) === 0 ? 'selected' : '' }}>&nbsp;</option>
-                        @foreach (\App\Models\Perimeter::whereIn('id', $sidebarPerimeterIds)->orderBy('nom')->get() as $sidebarPerimeter)
+                        @foreach (\App\Models\Perimeter::whereIn('id', $sidebarPerimeterIds)->orderBy('name')->get() as $sidebarPerimeter)
                             <option value="{{ $sidebarPerimeter->id }}"
                                     {{ (int) session('active_perimeter', 0) === $sidebarPerimeter->id ? 'selected' : '' }}>
-                                {{ $sidebarPerimeter->nom }}
+                                {{ $sidebarPerimeter->name }}
                             </option>
                         @endforeach
                     </select>
@@ -22,7 +22,7 @@
         @elseif (count($sidebarPerimeterIds) === 1)
             <div class="perimeter-box px-2 pt-2">
                 <span class="badge bg-secondary">
-                    {{ \App\Models\Perimeter::find($sidebarPerimeterIds[0])->nom ?? '' }}
+                    {{ \App\Models\Perimeter::find($sidebarPerimeterIds[0])->name ?? '' }}
                 </span>
             </div>
         --}}

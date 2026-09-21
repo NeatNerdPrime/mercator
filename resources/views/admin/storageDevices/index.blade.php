@@ -74,7 +74,7 @@
 
                             </td>
                             @if (auth()->user()->hasMultiplePerimeters())
-                                <td>{{ $storageDevice->perimeter->nom }}</td>
+                                <td>{{ $storageDevice->perimeter->name }}</td>
                             @endif
                             <td>
                                 <x-show-link :model="$storageDevice" />

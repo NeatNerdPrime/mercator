@@ -72,7 +72,7 @@
 
                             </td>
                             @if (auth()->user()->hasMultiplePerimeters())
-                                <td>{{ $wifiTerminal->perimeter->nom }}</td>
+                                <td>{{ $wifiTerminal->perimeter->name }}</td>
                             @endif
                             <td>
                                 <x-show-link :model="$wifiTerminal" />

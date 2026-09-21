@@ -44,7 +44,7 @@
                             @if($zone->description === null) class="table-warning" @endif>
                             <td></td>
                             @if (auth()->user()->hasMultiplePerimeters())
-                                <td>{{ $zone->perimeter->nom }}</td>
+                                <td>{{ $zone->perimeter->name }}</td>
                             @endif
                             <td>
                                 <x-show-link :model="$zone" />

@@ -11,7 +11,7 @@
                 {{ $hasMultiplePerimeters ? trans('cruds.perimeter.title_short').' / ' : '' }}{{ trans('cruds.database.fields.name') }}
             </th>
             <td style="width: 20%;">
-                @if ($hasMultiplePerimeters){{ $database->perimeter->nom }} / @endif
+                @if ($hasMultiplePerimeters){{ $database->perimeter->name }} / @endif
             @if ($withLink)
                 @canShow($database)
                 <a href="{{ route('admin.databases.show', $database) }}">

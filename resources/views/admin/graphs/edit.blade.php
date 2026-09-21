@@ -194,8 +194,10 @@
                                 <i id="redoButton" title="{{ trans('cruds.graph.toolbar.redo') }}" class="mapping-icon bi bi-arrow-clockwise"></i>
                                 <i id="font-btn" title="{{ trans('cruds.graph.toolbar.text') }}" class="mapping-icon bi bi-fonts" draggable="true"></i>
                                 <i id="square-btn" title="{{ trans('cruds.graph.toolbar.rectangle') }}" class="mapping-icon bi bi-square" draggable="true"></i>
+                                {{--
                                 <i id="group-btn" title="{{ trans('cruds.graph.toolbar.group') }}" class="mapping-icon bi bi-plus-square-dotted"></i>
                                 <i id="ungroup-btn" title="{{ trans('cruds.graph.toolbar.ungroup') }}" class="mapping-icon bi bi-dash-square-dotted"></i>
+                                --}}
                                 <i id="zoom-in-btn" title="{{ trans('cruds.graph.toolbar.zoom_in') }}" class="mapping-icon bi bi-zoom-in"></i>
                                 <i id="fit-btn" title="{{ trans('cruds.graph.toolbar.fit') }}" class="mapping-icon bi bi-crosshair"></i>
                                 <i id="zoom-out-btn" title="{{ trans('cruds.graph.toolbar.zoom_out') }}" class="mapping-icon bi bi-zoom-out"></i>
@@ -204,7 +206,6 @@
                                 <i id="background-btn" title="{{ trans('cruds.graph.toolbar.background') }}" class="mapping-icon bi bi-image"></i>
                                 <i id="update-btn" title="{{ trans('cruds.graph.toolbar.update') }}" class="mapping-icon bi bi-lightning-fill"></i>
                                 <i id="download-btn" title="{{ trans('cruds.graph.toolbar.export') }}" class="mapping-icon bi bi-download"></i>
-
                             </div>
 
                             <!-- Contextual menu for background -->

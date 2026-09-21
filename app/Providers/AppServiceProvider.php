@@ -8,6 +8,7 @@ use App\Observers\PerimeterAssignmentObserver;
 use App\Support\MercatorSettings;
 use App\Support\ModelRegistry;
 use App\Support\MonarcSettings;
+use App\Support\PerimeterPermissions;
 use App\Support\PerimeterSettings;
 use Illuminate\Cache\RateLimiting\Limit;
 use Illuminate\Http\Request;
@@ -44,6 +45,7 @@ class AppServiceProvider extends ServiceProvider
         // not survive into the next boot (next request / next test), or a value
         // changed or rolled back since would be served stale.
         PerimeterSettings::resetCache();
+        PerimeterPermissions::resetCache();
 
         // Get version from file
         $versionFile = base_path('version.txt');

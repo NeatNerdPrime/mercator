@@ -72,7 +72,7 @@
 
                             </td>
                             @if (auth()->user()->hasMultiplePerimeters())
-                                <td>{{ $physicalLink->perimeter->nom }}</td>
+                                <td>{{ $physicalLink->perimeter->name }}</td>
                             @endif
                             <td>
                                 <a href="{{ route('admin.physical-links.show', $physicalLink->id) }}">

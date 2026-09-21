@@ -28,6 +28,18 @@ trait HasPerimeter
         return PerimeterScope::class;
     }
 
+    /**
+     * Restreint $query aux objets visibles depuis l'un de ces périmètres, avec la même règle que
+     * le global scope du modèle (y compris les scopes à relations d'ApplicationFlow/PhysicalLink).
+     *
+     * @param  \Illuminate\Database\Eloquent\Builder<static>  $query
+     * @param  list<int>  $perimeterIds
+     */
+    public static function constrainToPerimeters(\Illuminate\Database\Eloquent\Builder $query, array $perimeterIds): void
+    {
+        (new (static::perimeterScopeClass()))->constrain($query, new static, $perimeterIds);
+    }
+
     public function perimeter(): BelongsTo
     {
         return $this->belongsTo(Perimeter::class);

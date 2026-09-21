@@ -57,7 +57,7 @@
 
                             </td>
                             @if (auth()->user()->hasMultiplePerimeters())
-                                <td>{{ $dhcpServer->perimeter->nom }}</td>
+                                <td>{{ $dhcpServer->perimeter->name }}</td>
                             @endif
                             <td>
                                 <x-show-link :model="$dhcpServer" />

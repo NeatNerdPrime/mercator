@@ -9,7 +9,7 @@
                 {{ auth()->user()->hasMultiplePerimeters() ? trans('cruds.perimeter.title_short').' / ' : '' }}{{ trans('cruds.adminUser.fields.user_id') }}
             </th>
             <td colspan="3">
-            @if (auth()->user()->hasMultiplePerimeters()){{ $adminUser->perimeter->nom }} / @endif
+            @if (auth()->user()->hasMultiplePerimeters()){{ $adminUser->perimeter->name }} / @endif
             @if ($withLink)
                 @canShow($adminUser)
                 <a href="{{ route('admin.admin-users.show', $adminUser->id) }}">{{ $adminUser->user_id }}</a>

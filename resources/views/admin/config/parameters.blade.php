@@ -913,7 +913,7 @@
                         <thead class="table-light">
                             <tr>
                                 <th>{{ trans('cruds.perimeter.fields.id') }}</th>
-                                <th>{{ trans('cruds.perimeter.fields.nom') }}</th>
+                                <th>{{ trans('cruds.perimeter.fields.name') }}</th>
                                 <th>&nbsp;</th>
                             </tr>
                         </thead>
@@ -921,7 +921,7 @@
                             @foreach ($perimeters as $perimeter)
                                 <tr>
                                     <td>{{ $perimeter->id }}</td>
-                                    <td>{{ $perimeter->nom }}</td>
+                                    <td>{{ $perimeter->name }}</td>
                                     <td nowrap>
                                         <button type="button" class="btn btn-xs btn-info"
                                                 data-bs-toggle="modal" data-bs-target="#editPerimeterModal{{ $perimeter->id }}">
@@ -961,11 +961,11 @@
                                                 </div>
                                                 <div class="modal-body">
                                                     <div class="form-group mb-3">
-                                                        <label class="label-required" for="nom{{ $perimeter->id }}">
-                                                            {{ trans('cruds.perimeter.fields.nom') }}
+                                                        <label class="label-required" for="name{{ $perimeter->id }}">
+                                                            {{ trans('cruds.perimeter.fields.name') }}
                                                         </label>
                                                         <input class="form-control" type="text" minlength="2" maxlength="32"
-                                                               name="nom" id="nom{{ $perimeter->id }}" value="{{ $perimeter->nom }}" required/>
+                                                               name="name" id="name{{ $perimeter->id }}" value="{{ $perimeter->name }}" required/>
                                                     </div>
                                                 </div>
                                                 <div class="modal-footer">
@@ -995,11 +995,11 @@
                         </div>
                         <div class="modal-body">
                             <div class="form-group mb-3">
-                                <label class="label-required" for="new_perimeter_nom">
-                                    {{ trans('cruds.perimeter.fields.nom') }}
+                                <label class="label-required" for="new_perimeter_name">
+                                    {{ trans('cruds.perimeter.fields.name') }}
                                 </label>
                                 <input class="form-control" type="text" minlength="2" maxlength="32"
-                                       name="nom" id="new_perimeter_nom" required/>
+                                       name="name" id="new_perimeter_name" required/>
                             </div>
                         </div>
                         <div class="modal-footer">

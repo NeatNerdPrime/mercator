@@ -86,6 +86,12 @@ describe('Cartographer::scopedQuery perimeter filtering', function () {
     });
 
     test('feature enabled, specific perimeter active: only that perimeter is returned', function () {
+        // A perimeter can only be active if the user holds a role in it, and that role must
+        // itself grant entity_access there (permissions are per perimeter).
+        $roleB = Role::factory()->create(['perimeter_id' => $this->perimeterB->id]);
+        $roleB->permissions()->sync($this->fullAccessRole->permissions()->pluck('permissions.id')->all());
+        $this->user->roles()->attach($roleB);
+
         PerimeterSettings::setEnabled(true);
         $this->actingAs($this->user);
         session(['active_perimeter' => $this->perimeterB->id]);
@@ -96,15 +102,16 @@ describe('Cartographer::scopedQuery perimeter filtering', function () {
             ->and($ids)->not->toContain($this->entityDefault->id);
     });
 
-    test('feature enabled, "tous" (0) active: sees all objects within permission scope', function () {
+    test('feature enabled, "tous" (0) active: sees all of ITS perimeters, not the ones it has no role in', function () {
         PerimeterSettings::setEnabled(true);
         $this->actingAs($this->user);
         session(['active_perimeter' => Perimeter::ALL_ID]);
 
+        // The 'User' role lives in the default perimeter only; perimeterB is not one of its own.
         $ids = Cartographer::scopedQuery(Entity::query())->pluck('id');
 
         expect($ids)->toContain($this->entityDefault->id)
-            ->and($ids)->toContain($this->entityB->id);
+            ->and($ids)->not->toContain($this->entityB->id);
     });
 
     test('admin with a specific perimeter active is restricted to it too', function () {

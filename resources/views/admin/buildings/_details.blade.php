@@ -9,7 +9,7 @@
             {{ ($hasMultiplePerimeters ?? auth()->user()->hasMultiplePerimeters()) ? trans('cruds.perimeter.title_short').' / ' : '' }}{{ trans('cruds.building.fields.name') }}
         </th>
         <td width="20%">
-                @if (($hasMultiplePerimeters ?? auth()->user()->hasMultiplePerimeters())){{ $building->perimeter->nom }} / @endif
+                @if (($hasMultiplePerimeters ?? auth()->user()->hasMultiplePerimeters())){{ $building->perimeter->name }} / @endif
         @if($withLink)
         @canShow($building)
         <a href="{{ route('admin.buildings.show', $building->id) }}">{{ $building->name }}</a>

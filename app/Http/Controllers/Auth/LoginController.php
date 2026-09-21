@@ -43,18 +43,7 @@ class LoginController extends Controller
      */
     protected function authenticated(Request $request, User $user): void
     {
-        $user->loadMissing('roles.permissions');
-
-        session([
-            'auth_role_ids'       => $user->roles->pluck('id')->all(),
-            'auth_permissions'    => $user->roles
-                ->flatMap->permissions
-                ->pluck('title')
-                ->unique()
-                ->values()
-                ->all(),
-            'auth_permissions_at' => now()->timestamp,
-        ]);
+        session($user->sessionPermissionData());
 
         AuditLog::query()->create([
             'description'  => 'Login',

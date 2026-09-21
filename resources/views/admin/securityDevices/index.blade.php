@@ -69,7 +69,7 @@
 
                             </td>
                             @if (auth()->user()->hasMultiplePerimeters())
-                                <td>{{ $securityDevice->perimeter->nom }}</td>
+                                <td>{{ $securityDevice->perimeter->name }}</td>
                             @endif
                             <td>
                                 <x-show-link :model="$securityDevice" />

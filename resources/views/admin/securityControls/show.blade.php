@@ -38,7 +38,7 @@
                         {{ auth()->user()->hasMultiplePerimeters() ? trans('cruds.perimeter.title_short').' / ' : '' }}{{ trans('cruds.securityControl.fields.name') }}
                     </th>
                     <td>
-                @if (auth()->user()->hasMultiplePerimeters()){{ $securityControl->perimeter->nom }} / @endif
+                @if (auth()->user()->hasMultiplePerimeters()){{ $securityControl->perimeter->name }} / @endif
                         {{ $securityControl->name }}
                     </td>
                 </tr>

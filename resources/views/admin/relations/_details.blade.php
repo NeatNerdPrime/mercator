@@ -9,7 +9,7 @@
                 {{ auth()->user()->hasMultiplePerimeters() ? trans('cruds.perimeter.title_short').' / ' : '' }}{{ trans('cruds.relation.fields.name') }}
             </th>
             <td width="23%">
-                @if (auth()->user()->hasMultiplePerimeters()){{ $relation->perimeter->nom }} / @endif
+                @if (auth()->user()->hasMultiplePerimeters()){{ $relation->perimeter->name }} / @endif
             @if ($withLink)
             @canShow($relation)
             <a href="{{ route('admin.relations.show', $relation->id) }}">{{ $relation->name }}</a>

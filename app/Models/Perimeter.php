@@ -24,7 +24,10 @@ class Perimeter extends Model
      */
     public const ALL_ID = 0;
 
-    protected $fillable = ['nom'];
+    protected $fillable = ['name'];
+
+    public static array $searchable = [
+    ];
 
     protected static function newFactory(): Factory
     {

@@ -4,6 +4,7 @@ namespace App\Providers;
 
 use App\Models\Cartographer;
 use App\Models\User;
+use App\Support\PerimeterPermissions;
 use Illuminate\Foundation\Support\Providers\AuthServiceProvider as ServiceProvider;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\Str;
@@ -25,9 +26,18 @@ class AuthServiceProvider extends ServiceProvider
         $this->registerPolicies();
 
         // 🧠 Hook global appelé AVANT toutes les autres règles Gate
-        Gate::before(function ($user, string $ability) {
+        Gate::before(function ($user, string $ability, array $arguments = []) {
             if (! $user) {
                 return null;
+            }
+
+            // 0. Périmètres activés : les permissions ne valent que dans le périmètre de leur
+            //    rôle (décision ferme, y compris face aux Gates par permission d'AuthGates).
+            if ($user instanceof User) {
+                $decision = PerimeterPermissions::decide($user, $ability, $arguments);
+                if ($decision !== null) {
+                    return $decision;
+                }
             }
 
             // 1. Session web (chemin rapide — set at login)
@@ -67,12 +77,8 @@ class AuthServiceProvider extends ServiceProvider
         Gate::define('edit-object', function (User $user, \Illuminate\Database\Eloquent\Model $object) {
             $ability = Str::snake(class_basename($object)) . '_edit';
 
-            // Session-based check (set at login)
-            if (in_array($ability, session('auth_permissions', []), true)) {
-                return true;
-            }
-            // Role-based gate fallback (covers API / test context where session is absent)
-            if (Gate::forUser($user)->check($ability)) {
+            // Permission de rôle, évaluée dans le périmètre de l'objet (voir Gate::before)
+            if (Gate::forUser($user)->check($ability, $object)) {
                 return true;
             }
 
@@ -82,12 +88,8 @@ class AuthServiceProvider extends ServiceProvider
         Gate::define('show-object', function (User $user, \Illuminate\Database\Eloquent\Model $object) {
             $ability = Str::snake(class_basename($object)) . '_show';
 
-            // Session-based check (set at login)
-            if (in_array($ability, session('auth_permissions', []), true)) {
-                return true;
-            }
-            // Role-based gate fallback (covers API / test context where session is absent)
-            if (Gate::forUser($user)->check($ability)) {
+            // Permission de rôle, évaluée dans le périmètre de l'objet (voir Gate::before)
+            if (Gate::forUser($user)->check($ability, $object)) {
                 return true;
             }
 

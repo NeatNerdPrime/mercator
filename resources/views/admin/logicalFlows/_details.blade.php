@@ -5,7 +5,7 @@
             {{ auth()->user()->hasMultiplePerimeters() ? trans('cruds.perimeter.title_short').' / ' : '' }}{{ trans('cruds.logicalFlow.fields.name') }}
         </th>
         <td>
-                @if (auth()->user()->hasMultiplePerimeters()){{ $logicalFlow->perimeter->nom }} / @endif
+                @if (auth()->user()->hasMultiplePerimeters()){{ $logicalFlow->perimeter->name }} / @endif
             {{ $logicalFlow->name ?? "NONAME" }}
         </td>
         <th width='10%'>

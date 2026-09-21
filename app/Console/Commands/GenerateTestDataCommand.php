@@ -175,7 +175,7 @@ class GenerateTestDataCommand extends Command
         ]);
 
         if ($counts['perimeters'] > 1) {
-            $this->info('Plus d\'un périmètre : la fonctionnalité périmètres sera activée, un rôle admin.perimeter.<nom> sera créé pour chacun, et le compte admin@admin.com (s\'il existe) y sera rattaché.');
+            $this->info('Plus d\'un périmètre : la fonctionnalité périmètres sera activée, les rôles admin.perimeter.<nom>, user.perimeter.<nom> et auditor.perimeter.<nom> seront créés pour chacun, et le compte admin@admin.com (s\'il existe) sera rattaché aux rôles admin.');
         }
 
         if (! $dryRun && ! $this->option('force') && ! $this->confirm('Confirmer la génération de ces données de test ?', true)) {
@@ -258,6 +258,8 @@ class GenerateTestDataCommand extends Command
             ['Périmètres (total / créés)', "{$result['perimeters_total']} / {$result['perimeters_created']}"],
             ['Fonctionnalité périmètres activée', $result['perimeters_feature_enabled'] ? 'Oui' : 'Non'],
             ['Rôles admin.perimeter.* créés', $result['admin_roles_created']],
+            ['Rôles user.perimeter.* créés', $result['user_roles_created']],
+            ['Rôles auditor.perimeter.* créés', $result['auditor_roles_created']],
             ['Compte admin@admin.com rattaché aux rôles', $result['admin_user_linked'] ? 'Oui' : 'Non'],
             ['Applications créées', $result['applications']],
             ['Groupes applicatifs créés', $result['application_blocks']],

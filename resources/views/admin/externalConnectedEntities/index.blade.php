@@ -85,7 +85,7 @@
 
                             </td>
                             @if (auth()->user()->hasMultiplePerimeters())
-                                <td>{{ $externalConnectedEntity->perimeter->nom }}</td>
+                                <td>{{ $externalConnectedEntity->perimeter->name }}</td>
                             @endif
                             <td>
                                 <x-show-link :model="$externalConnectedEntity" />

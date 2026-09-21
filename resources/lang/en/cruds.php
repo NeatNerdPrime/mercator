@@ -1799,8 +1799,8 @@ return [
     'perimeter' => [
         'fields' => [
             'id' => '#',
-            'nom' => 'Name',
-            'nom_helper' => 'Perimeter name',
+            'name' => 'Name',
+            'name_helper' => 'Perimeter name',
         ],
         'title' => 'Perimeters',
         'title_short' => 'Perimeter',

@@ -358,6 +358,9 @@ Route::middleware(['api.protected'])->group(function () {
     // Roles
     Route::resource('roles', API\RoleController::class);
 
+    // Perimeters
+    Route::resource('perimeters', API\PerimeterController::class);
+
     // Cartographers
     Route::post('cartographers/mass-store', [API\CartographerController::class, 'massStore'])->name('cartographers.mass-store');
     Route::put('cartographers/mass-update', [API\CartographerController::class, 'massUpdate'])->name('cartographers.mass-update');

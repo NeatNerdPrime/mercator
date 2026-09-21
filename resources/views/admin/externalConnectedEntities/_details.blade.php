@@ -10,7 +10,7 @@
             {{ auth()->user()->hasMultiplePerimeters() ? trans('cruds.perimeter.title_short').' / ' : '' }}{{ trans('cruds.externalConnectedEntity.fields.name') }}
         </th>
         <td width="20%">
-                @if (auth()->user()->hasMultiplePerimeters()){{ $externalConnectedEntity->perimeter->nom }} / @endif
+                @if (auth()->user()->hasMultiplePerimeters()){{ $externalConnectedEntity->perimeter->name }} / @endif
         @if($withLink)
             @canShow($externalConnectedEntity)
                 <a href="{{ route('admin.external-connected-entities.show', $externalConnectedEntity) }}">{{ $externalConnectedEntity->name }}</a>

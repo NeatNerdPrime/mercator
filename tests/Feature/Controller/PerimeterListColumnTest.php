@@ -39,7 +39,7 @@ test('the perimetre column is absent for a mono-perimetre user', function () {
 });
 
 test('the perimetre column is present, first, and hidden by default for a multi-perimetre user', function () {
-    $perimeterB = Perimeter::factory()->create(['nom' => 'Site B']);
+    $perimeterB = Perimeter::factory()->create(['name' => 'Site B']);
     $roleB = Role::factory()->create(['perimeter_id' => $perimeterB->id]);
     $this->admin->roles()->attach($roleB);
 

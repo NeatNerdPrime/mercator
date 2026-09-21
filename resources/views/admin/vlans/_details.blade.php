@@ -10,7 +10,7 @@
                 {{ auth()->user()->hasMultiplePerimeters() ? trans('cruds.perimeter.title_short').' / ' : '' }}{{ trans('cruds.vlan.fields.name') }}
             </th>
             <td>
-                @if (auth()->user()->hasMultiplePerimeters()){{ $vlan->perimeter->nom }} / @endif
+                @if (auth()->user()->hasMultiplePerimeters()){{ $vlan->perimeter->name }} / @endif
             @if ($withLink)
             @canShow($vlan)
             <a href=" {{ route('admin.vlans.show', $vlan) }}">{{ $vlan->name }}</a>

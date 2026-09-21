@@ -3,6 +3,9 @@
 namespace App\Models;
 
 use App\Support\ModelRegistry;
+use App\Support\PerimeterPermissions;
+use App\Support\PerimeterSettings;
+use App\Traits\HasPerimeter;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -227,6 +230,11 @@ class Cartographer extends Model
             return $query;
         }
 
+        // Périmètres activés : chaque rôle n'ouvre l'accès que dans son propre périmètre.
+        if (PerimeterSettings::isEnabled() && in_array(HasPerimeter::class, class_uses_recursive($class), true)) {
+            return self::perimeterScopedQuery($query, $user, $class, Str::snake(class_basename($class)).'_access');
+        }
+
         // Accès complet si l'utilisateur a la permission via son rôle.
         // On passe par userHasRolePermission() et non Gate::allows() car AuthServiceProvider
         // accorde _access via Gate aux cartographes (règle 2b), ce qui fausserait le filtre.
@@ -244,6 +252,37 @@ class Cartographer extends Model
         }
 
         return $query->whereRaw('0 = 1');
+    }
+
+    /**
+     * Objets des périmètres où l'utilisateur a la permission `_access` (par le rôle de CE
+     * périmètre), plus ceux dont il est cartographe, quel que soit leur périmètre.
+     *
+     * @template T of \Illuminate\Database\Eloquent\Model
+     *
+     * @param  Builder<T>  $query
+     * @param  class-string<T>  $class
+     * @return Builder<T>
+     */
+    private static function perimeterScopedQuery(Builder $query, User $user, string $class, string $permission): Builder
+    {
+        $perimeterIds = PerimeterPermissions::perimeterIdsWith($user, $permission);
+        $ids = self::allowedIdsFor($user, $class);
+
+        if ($perimeterIds === [] && $ids === []) {
+            return $query->whereRaw('0 = 1');
+        }
+
+        $table = $query->getModel()->getTable();
+
+        return $query->where(function (Builder $q) use ($class, $perimeterIds, $ids, $table) {
+            if ($perimeterIds !== []) {
+                $class::constrainToPerimeters($q, $perimeterIds);
+            }
+            if ($ids !== []) {
+                $q->orWhereIn("{$table}.id", $ids);
+            }
+        });
     }
 
     /**

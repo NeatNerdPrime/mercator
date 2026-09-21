@@ -235,6 +235,8 @@ add this line to the crontab
       sudo chown -R apache:apache /var/www/mercator
       sudo chmod -R 775 /var/www/mercator/storage
 
+ > **Do not run `php artisan` as `root`.** Cache files created in `storage/` (for example `storage/app/purifier`) would be owned by `root` and the web server could no longer write to them (error *"Directory … storage/app/purifier not writable"*). Use `sudo -u apache php artisan …`. If the problem has already occurred, run the two commands above again.
+
  Check if the SELinux module is activated (For the application to be accessible, SELinux must be deactivated)
 
  status

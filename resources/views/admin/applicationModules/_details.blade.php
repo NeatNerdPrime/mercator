@@ -11,7 +11,7 @@
                 {{ $hasMultiplePerimeters ? trans('cruds.perimeter.title_short').' / ' : '' }}{{ trans('cruds.applicationModule.fields.name') }}
             </th>
             <td width="20%">
-                @if ($hasMultiplePerimeters){{ $applicationModule->perimeter->nom }} / @endif
+                @if ($hasMultiplePerimeters){{ $applicationModule->perimeter->name }} / @endif
             @if ($withLink)
                 @canShow($applicationModule)
                 <a href='{{ route("admin.application-modules.show", $applicationModule->id) }}'>{{ $applicationModule->name }}</a>

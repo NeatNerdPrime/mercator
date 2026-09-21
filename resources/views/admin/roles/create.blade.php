@@ -30,7 +30,7 @@
                             @foreach ($perimeters as $perimeter)
                                 <option value="{{ $perimeter->id }}"
                                         {{ (int) old('perimeter_id', \App\Models\Perimeter::DEFAULT_ID) === $perimeter->id ? 'selected' : '' }}>
-                                    {{ $perimeter->nom }}
+                                    {{ $perimeter->name }}
                                 </option>
                             @endforeach
                         </select>
