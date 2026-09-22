@@ -74,7 +74,11 @@ class AuthServiceProvider extends ServiceProvider
             return null;
         });
 
-        Gate::define('edit-object', function (User $user, \Illuminate\Database\Eloquent\Model $object) {
+        Gate::define('edit-object', function (User $user, ?\Illuminate\Database\Eloquent\Model $object = null) {
+            if (! $object) {
+                return false;
+            }
+
             $ability = Str::snake(class_basename($object)) . '_edit';
 
             // Permission de rôle, évaluée dans le périmètre de l'objet (voir Gate::before)
@@ -85,7 +89,11 @@ class AuthServiceProvider extends ServiceProvider
             return Cartographer::isAllowed($user, $object);
         });
 
-        Gate::define('show-object', function (User $user, \Illuminate\Database\Eloquent\Model $object) {
+        Gate::define('show-object', function (User $user, ?\Illuminate\Database\Eloquent\Model $object = null) {
+            if (! $object) {
+                return false;
+            }
+
             $ability = Str::snake(class_basename($object)) . '_show';
 
             // Permission de rôle, évaluée dans le périmètre de l'objet (voir Gate::before)
