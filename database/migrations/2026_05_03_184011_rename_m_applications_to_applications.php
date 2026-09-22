@@ -7,33 +7,52 @@ use Illuminate\Support\Facades\Schema;
 
 return new class extends Migration
 {
+    /**
+     * Drop whatever foreign key constraint(s) currently exist on $table.$column,
+     * regardless of what they happen to be named. Historical migrations hardcoded
+     * FK names that don't always match what's actually in the database (some were
+     * created via ->index() and never became the real constraint name, others were
+     * renamed outside of migrations), so we look the real name up instead of
+     * assuming it.
+     */
+    private function dropForeignKeysOnColumn(string $table, string $column): void
+    {
+        $constraints = DB::select(
+            'SELECT CONSTRAINT_NAME FROM information_schema.KEY_COLUMN_USAGE
+             WHERE TABLE_SCHEMA = DATABASE() AND TABLE_NAME = ? AND COLUMN_NAME = ? AND REFERENCED_TABLE_NAME IS NOT NULL',
+            [$table, $column]
+        );
+
+        foreach ($constraints as $constraint) {
+            Schema::table($table, fn (Blueprint $t) => $t->dropForeign($constraint->CONSTRAINT_NAME));
+        }
+    }
+
     public function up(): void
     {
         $isSqlite = DB::connection()->getDriverName() === 'sqlite';
 
         // --- Drop FK constraints ---
         if (! $isSqlite) {
-            Schema::table('activity_m_application',            fn(Blueprint $t) => $t->dropForeign('activity_m_application_m_application_id_foreign'));
-            Schema::table('admin_user_m_application',          fn(Blueprint $t) => $t->dropForeign('admin_user_m_application_m_application_id_foreign'));
-            Schema::table('application_service_m_application', fn(Blueprint $t) => $t->dropForeign('m_application_id_fk_1482585'));
-            Schema::table('cartographer_m_application',        fn(Blueprint $t) => $t->dropForeign('cartographer_m_application_m_application_id_foreign'));
-            Schema::table('certificate_m_application',         fn(Blueprint $t) => $t->dropForeign('certificate_m_application_m_application_id_foreign'));
-            Schema::table('container_m_application',           fn(Blueprint $t) => $t->dropForeign('container_m_application_m_application_id_foreign'));
-            Schema::table('database_m_application',            fn(Blueprint $t) => $t->dropForeign('m_application_id_fk_1482586'));
-            Schema::table('data_processing_m_application',     fn(Blueprint $t) => $t->dropForeign('applications_id_fk_0483434'));
-            Schema::table('entity_m_application',              fn(Blueprint $t) => $t->dropForeign('m_application_id_fk_1488611'));
-            Schema::table('logical_server_m_application',      fn(Blueprint $t) => $t->dropForeign('m_application_id_fk_1488616'));
-            Schema::table('m_application_peripheral',          fn(Blueprint $t) => $t->dropForeign('m_application_id_fk_9878654'));
-            Schema::table('m_application_physical_server',     fn(Blueprint $t) => $t->dropForeign('m_application_id_fk_5483543'));
-            Schema::table('m_application_process',             fn(Blueprint $t) => $t->dropForeign('m_application_id_fk_1482573'));
-            Schema::table('m_application_security_device',     fn(Blueprint $t) => $t->dropForeign('m_application_id_fk_41923483'));
-            Schema::table('m_application_workstation',         fn(Blueprint $t) => $t->dropForeign('m_application_id_fk_1486547'));
-            Schema::table('security_control_m_application',    fn(Blueprint $t) => $t->dropForeign('m_application_id_fk_304958543'));
-            Schema::table('fluxes', function (Blueprint $t): void {
-                $t->dropForeign('application_source_fk_1485545');
-                $t->dropForeign('application_dest_fk_1485549');
-            });
-            Schema::table('m_application_events', fn(Blueprint $t) => $t->dropForeign('m_application_events_m_application_id_foreign'));
+            $this->dropForeignKeysOnColumn('activity_m_application',            'm_application_id');
+            $this->dropForeignKeysOnColumn('admin_user_m_application',          'm_application_id');
+            $this->dropForeignKeysOnColumn('application_service_m_application', 'm_application_id');
+            $this->dropForeignKeysOnColumn('cartographer_m_application',        'm_application_id');
+            $this->dropForeignKeysOnColumn('certificate_m_application',         'm_application_id');
+            $this->dropForeignKeysOnColumn('container_m_application',           'm_application_id');
+            $this->dropForeignKeysOnColumn('database_m_application',            'm_application_id');
+            $this->dropForeignKeysOnColumn('data_processing_m_application',     'm_application_id');
+            $this->dropForeignKeysOnColumn('entity_m_application',              'm_application_id');
+            $this->dropForeignKeysOnColumn('logical_server_m_application',      'm_application_id');
+            $this->dropForeignKeysOnColumn('m_application_peripheral',          'm_application_id');
+            $this->dropForeignKeysOnColumn('m_application_physical_server',     'm_application_id');
+            $this->dropForeignKeysOnColumn('m_application_process',             'm_application_id');
+            $this->dropForeignKeysOnColumn('m_application_security_device',     'm_application_id');
+            $this->dropForeignKeysOnColumn('m_application_workstation',         'm_application_id');
+            $this->dropForeignKeysOnColumn('security_control_m_application',    'm_application_id');
+            $this->dropForeignKeysOnColumn('fluxes', 'application_source_id');
+            $this->dropForeignKeysOnColumn('fluxes', 'application_dest_id');
+            $this->dropForeignKeysOnColumn('m_application_events', 'm_application_id');
         }
 
         // --- Rename main table ---
