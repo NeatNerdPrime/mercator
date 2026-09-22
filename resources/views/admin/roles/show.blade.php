@@ -126,6 +126,7 @@
         @include('admin.roles.partials._group', ['permission' => $permissions_sorted['site'],                     'label' => trans('cruds.site.title')])
         @include('admin.roles.partials._group', ['permission' => $permissions_sorted['building'],                 'label' => trans('cruds.building.title')])
         @include('admin.roles.partials._group', ['permission' => $permissions_sorted['bay'],                      'label' => trans('cruds.bay.title')])
+        @include('admin.roles.partials._group', ['permission' => $permissions_sorted['zone'],                     'label' => trans('cruds.zone.title')])
         @include('admin.roles.partials._group', ['permission' => $permissions_sorted['physical_server'],          'label' => trans('cruds.physicalServer.title')])
         @include('admin.roles.partials._group', ['permission' => $permissions_sorted['workstation'],              'label' => trans('cruds.workstation.title')])
         @include('admin.roles.partials._group', ['permission' => $permissions_sorted['storage_device'],           'label' => trans('cruds.storageDevice.title')])
