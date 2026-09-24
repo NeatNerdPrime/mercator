@@ -24,6 +24,12 @@ class GdprGraphBuilder
 
         $lines = ['digraph  {'];
 
+        // O(1) isset() lookups instead of Collection::contains('id', ...), a linear scan with
+        // data_get() per element, called for every process/data processing link below.
+        $macroProcessIds = $macroProcessuses->pluck('id')->flip()->all();
+        $dataProcessingIds = $dataProcessings->pluck('id')->flip()->all();
+        $applicationIds = $applications->pluck('id')->flip()->all();
+
         foreach ($macroProcessuses as $macroProcess) {
             $lines[] = DotNode::withImage('MP'.$macroProcess->id, $iconPath('/images/macroprocess.png'), [e($macroProcess->name)]);
         }
@@ -31,12 +37,12 @@ class GdprGraphBuilder
         foreach ($processes as $process) {
             $lines[] = DotNode::withImage('P'.$process->id, $iconPath('/images/process.png'), [e($process->name)]);
 
-            if ($process->macroprocess_id !== null && $macroProcessuses->contains('id', $process->macroprocess_id)) {
+            if ($process->macroprocess_id !== null && isset($macroProcessIds[$process->macroprocess_id])) {
                 $lines[] = 'MP'.$process->macroprocess_id.' -> P'.$process->id;
             }
 
             foreach ($process->dataProcesses as $dp) {
-                if ($dataProcessings->contains('id', $dp->id)) {
+                if (isset($dataProcessingIds[$dp->id])) {
                     $lines[] = 'P'.$process->id.' -> DP'.$dp->id;
                 }
             }
@@ -47,7 +53,7 @@ class GdprGraphBuilder
             $lines[] = DotNode::withImage('DP'.$dp->id, $iconPath('/images/dataprocessing.png'), [e($dp->name)], $href);
 
             foreach ($dp->applications as $app) {
-                if ($applications->contains('id', $app->id)) {
+                if (isset($applicationIds[$app->id])) {
                     $lines[] = 'DP'.$dp->id.' -> APP'.$app->id;
                 }
             }

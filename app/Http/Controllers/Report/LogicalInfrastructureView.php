@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Report;
 
 use App\Http\Controllers\Controller;
+use App\Http\Controllers\Report\Concerns\AutoloadsRelations;
 use App\Models\Cartographer;
 use App\Models\Certificate;
 use App\Models\Cluster;
@@ -35,6 +36,8 @@ use Symfony\Component\HttpFoundation\Response;
 
 class LogicalInfrastructureView extends Controller
 {
+    use AutoloadsRelations;
+
     /**
      * Generates data for the logical infrastructure report and returns the report view.
      *
@@ -384,6 +387,13 @@ class LogicalInfrastructureView extends Controller
             }
 
             $showIp = (bool) $request->session()->get('show_ip');
+
+            $this->autoloadRelations(
+                $networks, $subnetworks, $gateways, $externalConnectedEntities, $vlans, $networkSwitches,
+                $clusters, $logicalServers, $dhcpServers, $dnsservers, $certificates, $containers, $routers,
+                $securityDevices, $workstations, $wifiTerminals, $phones, $peripherals, $physicalSecurityDevices,
+                $storageDevices
+            );
 
             $graphBuilder = new LogicalInfrastructureGraphBuilder;
             $dotSrc = $graphBuilder->buildDot(

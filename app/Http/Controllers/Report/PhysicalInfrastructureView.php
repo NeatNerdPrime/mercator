@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Report;
 
 use App\Http\Controllers\Controller;
+use App\Http\Controllers\Report\Concerns\AutoloadsRelations;
 use App\Models\Cartographer;
 use Gate;
 use Illuminate\Http\Request;
@@ -23,6 +24,8 @@ use Symfony\Component\HttpFoundation\Response;
 
 class PhysicalInfrastructureView extends Controller
 {
+    use AutoloadsRelations;
+
     public function generate(Request $request)
     {
         $allowed = Gate::allows('explore_access') || Cartographer::canAccessAny([
@@ -302,6 +305,11 @@ class PhysicalInfrastructureView extends Controller
             $wifiTerminals = Cartographer::scopedQuery(WifiTerminal::query())->orderBy('name')->get();
             $physicalSecurityDevices = Cartographer::scopedQuery(PhysicalSecurityDevice::query())->orderBy('name')->get();
         }
+
+        $this->autoloadRelations(
+            $sites, $buildings, $bays, $physicalServers, $workstations, $storageDevices, $peripherals,
+            $phones, $physicalSwitches, $physicalRouters, $wifiTerminals, $physicalSecurityDevices
+        );
 
         $graphBuilder = new PhysicalInfrastructureGraphBuilder;
         $dotSrc = $graphBuilder->buildLocationDot(

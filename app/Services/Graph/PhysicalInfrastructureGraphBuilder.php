@@ -46,6 +46,13 @@ class PhysicalInfrastructureGraphBuilder
 
         $lines = ['digraph  {'];
 
+        // O(1) isset() lookups instead of Collection::contains('id', ...), a linear scan with
+        // data_get() per element, called inside the loops below (O(n*m) on large sites).
+        $siteIds = $this->idSet($sites);
+        $buildingIds = $this->idSet($buildings);
+        $bayIds = $this->idSet($bays);
+        $workstationIds = $this->idSet($workstations);
+
         if (Cartographer::canAccess(Site::class) && ! $buildingSelected) {
             foreach ($sites as $site) {
                 $image = $iconResolver($site->icon_id, '/images/site.png');
@@ -59,27 +66,27 @@ class PhysicalInfrastructureGraphBuilder
                 $lines[] = DotNode::withImage('B'.$building->id, $image, [e($building->name)], $this->href($building, $withHref));
 
                 if ($building->building_id !== null) {
-                    if ($buildings->contains('id', $building->building_id)) {
+                    if (isset($buildingIds[$building->building_id])) {
                         $lines[] = 'B'.$building->building_id.' -> B'.$building->id;
                     }
-                } elseif (! $buildingSelected && $building->site_id !== null && $sites->contains('id', $building->site_id)) {
+                } elseif (! $buildingSelected && $building->site_id !== null && isset($siteIds[$building->site_id])) {
                     $lines[] = 'S'.$building->site_id.' -> B'.$building->id;
                 }
 
                 foreach ($building->bays as $bay) {
-                    if ($bays->contains('id', $bay->id)) {
+                    if (isset($bayIds[$bay->id])) {
                         $lines[] = 'B'.$building->id.' -> BAY'.$bay->id;
                     }
                 }
 
                 if (Cartographer::canAccess(Workstation::class)) {
-                    if ($building->workstations()->count() >= 5) {
-                        $groupWorkstation = $building->workstations()->first();
-                        $lines[] = DotNode::withImage('WG'.$groupWorkstation->id, $iconResolver(null, '/images/workstation.png'), [$building->workstations()->count().' '.e(trans('cruds.workstation.title'))], $this->href($groupWorkstation, $withHref));
+                    if ($building->workstations->count() >= 5) {
+                        $groupWorkstation = $building->workstations->first();
+                        $lines[] = DotNode::withImage('WG'.$groupWorkstation->id, $iconResolver(null, '/images/workstation.png'), [$building->workstations->count().' '.e(trans('cruds.workstation.title'))], $this->href($groupWorkstation, $withHref));
                         $lines[] = 'B'.$building->id.' -> WG'.$groupWorkstation->id;
                     } else {
                         foreach ($building->workstations as $workstation) {
-                            if ($workstations->contains('id', $workstation->id)) {
+                            if (isset($workstationIds[$workstation->id])) {
                                 $image = $iconResolver($workstation->icon_id, '/images/workstation.png');
                                 $lines[] = DotNode::withImage('W'.$workstation->id, $image, [e($workstation->name)], $this->href($workstation, $withHref));
                                 $lines[] = 'B'.$building->id.' -> W'.$workstation->id;
@@ -92,7 +99,7 @@ class PhysicalInfrastructureGraphBuilder
 
         if (Cartographer::canAccess(Workstation::class)) {
             foreach ($workstations as $workstation) {
-                if ($workstation->building_id === null && $workstation->site_id !== null && $sites->contains('id', $workstation->site_id)) {
+                if ($workstation->building_id === null && $workstation->site_id !== null && isset($siteIds[$workstation->site_id])) {
                     $image = $iconResolver($workstation->icon_id, '/images/workstation.png');
                     $lines[] = DotNode::withImage('W'.$workstation->id, $image, [e($workstation->name)], $this->href($workstation, $withHref));
                     $lines[] = 'S'.$workstation->site_id.' -> W'.$workstation->id;
@@ -104,7 +111,7 @@ class PhysicalInfrastructureGraphBuilder
             foreach ($bays as $bay) {
                 $lines[] = DotNode::withImage('BAY'.$bay->id, $iconResolver(null, '/images/bay.png'), [e($bay->name)], $this->href($bay, $withHref));
 
-                if ($bay->building_id === null && $bay->site_id !== null && $sites->contains('id', $bay->site_id)) {
+                if ($bay->building_id === null && $bay->site_id !== null && isset($siteIds[$bay->site_id])) {
                     $lines[] = 'S'.$bay->site_id.' -> BAY'.$bay->id;
                 }
             }
@@ -113,7 +120,7 @@ class PhysicalInfrastructureGraphBuilder
         if (Cartographer::canAccess(PhysicalServer::class)) {
             foreach ($physicalServers as $pServer) {
                 $lines[] = DotNode::withImage('PSERVER'.$pServer->id, $iconResolver(null, '/images/server.png'), [e($pServer->name)], $this->href($pServer, $withHref));
-                $lines[] = $this->attachToLocation('PSERVER'.$pServer->id, $pServer->bay, $pServer->building, $pServer->site, $bays, $buildings, $sites);
+                $lines[] = $this->attachToLocation('PSERVER'.$pServer->id, $pServer->bay, $pServer->building, $pServer->site, $bayIds, $buildingIds, $siteIds);
             }
         }
 
@@ -121,7 +128,7 @@ class PhysicalInfrastructureGraphBuilder
             foreach ($storageDevices as $storageDevice) {
                 $image = $iconResolver($storageDevice->icon_id, '/images/storage.png');
                 $lines[] = DotNode::withImage('SD'.$storageDevice->id, $image, [e($storageDevice->name)], $this->href($storageDevice, $withHref));
-                $lines[] = $this->attachToLocation('SD'.$storageDevice->id, $storageDevice->bay, $storageDevice->building, $storageDevice->site, $bays, $buildings, $sites);
+                $lines[] = $this->attachToLocation('SD'.$storageDevice->id, $storageDevice->bay, $storageDevice->building, $storageDevice->site, $bayIds, $buildingIds, $siteIds);
             }
         }
 
@@ -129,14 +136,14 @@ class PhysicalInfrastructureGraphBuilder
             foreach ($peripherals as $peripheral) {
                 $image = $iconResolver($peripheral->icon_id, '/images/peripheral.png');
                 $lines[] = DotNode::withImage('PER'.$peripheral->id, $image, [e($peripheral->name)], $this->href($peripheral, $withHref));
-                $lines[] = $this->attachToLocation('PER'.$peripheral->id, $peripheral->bay, $peripheral->building, $peripheral->site, $bays, $buildings, $sites);
+                $lines[] = $this->attachToLocation('PER'.$peripheral->id, $peripheral->bay, $peripheral->building, $peripheral->site, $bayIds, $buildingIds, $siteIds);
             }
         }
 
         if (Cartographer::canAccess(Phone::class)) {
             foreach ($phones as $phone) {
                 $lines[] = DotNode::withImage('PHONE'.$phone->id, $iconResolver(null, '/images/phone.png'), [e($phone->name)], $this->href($phone, $withHref));
-                $lines[] = $this->attachToLocation('PHONE'.$phone->id, null, $phone->building, $phone->site, $bays, $buildings, $sites);
+                $lines[] = $this->attachToLocation('PHONE'.$phone->id, null, $phone->building, $phone->site, $bayIds, $buildingIds, $siteIds);
             }
         }
 
@@ -144,21 +151,21 @@ class PhysicalInfrastructureGraphBuilder
             foreach ($physicalSwitches as $switch) {
                 $image = $iconResolver($switch->icon_id, '/images/switch.png');
                 $lines[] = DotNode::withImage('SWITCH'.$switch->id, $image, [e($switch->name)], $this->href($switch, $withHref));
-                $lines[] = $this->attachToLocation('SWITCH'.$switch->id, $switch->bay, $switch->building, $switch->site, $bays, $buildings, $sites);
+                $lines[] = $this->attachToLocation('SWITCH'.$switch->id, $switch->bay, $switch->building, $switch->site, $bayIds, $buildingIds, $siteIds);
             }
         }
 
         if (Cartographer::canAccess(PhysicalRouter::class)) {
             foreach ($physicalRouters as $router) {
                 $lines[] = DotNode::withImage('ROUTER'.$router->id, $iconResolver(null, '/images/router.png'), [e($router->name)], $this->href($router, $withHref));
-                $lines[] = $this->attachToLocation('ROUTER'.$router->id, $router->bay, $router->building, $router->site, $bays, $buildings, $sites);
+                $lines[] = $this->attachToLocation('ROUTER'.$router->id, $router->bay, $router->building, $router->site, $bayIds, $buildingIds, $siteIds);
             }
         }
 
         if (Cartographer::canAccess(WifiTerminal::class)) {
             foreach ($wifiTerminals as $wifiTerminal) {
                 $lines[] = DotNode::withImage('WIFI'.$wifiTerminal->id, $iconResolver(null, '/images/wifi.png'), [e($wifiTerminal->name)], $this->href($wifiTerminal, $withHref));
-                $lines[] = $this->attachToLocation('WIFI'.$wifiTerminal->id, null, $wifiTerminal->building, $wifiTerminal->site, $bays, $buildings, $sites);
+                $lines[] = $this->attachToLocation('WIFI'.$wifiTerminal->id, null, $wifiTerminal->building, $wifiTerminal->site, $bayIds, $buildingIds, $siteIds);
             }
         }
 
@@ -166,7 +173,7 @@ class PhysicalInfrastructureGraphBuilder
             foreach ($physicalSecurityDevices as $physicalSecurityDevice) {
                 $image = $iconResolver($physicalSecurityDevice->icon_id, '/images/security.png');
                 $lines[] = DotNode::withImage('PSD'.$physicalSecurityDevice->id, $image, [e($physicalSecurityDevice->name)], $this->href($physicalSecurityDevice, $withHref));
-                $lines[] = $this->attachToLocation('PSD'.$physicalSecurityDevice->id, $physicalSecurityDevice->bay, $physicalSecurityDevice->building, $physicalSecurityDevice->site, $bays, $buildings, $sites);
+                $lines[] = $this->attachToLocation('PSD'.$physicalSecurityDevice->id, $physicalSecurityDevice->bay, $physicalSecurityDevice->building, $physicalSecurityDevice->site, $bayIds, $buildingIds, $siteIds);
             }
         }
 
@@ -219,15 +226,20 @@ class PhysicalInfrastructureGraphBuilder
         return $manifest;
     }
 
-    private function attachToLocation(string $nodeId, ?Bay $bay, ?Building $building, ?Site $site, Collection $bays, Collection $buildings, Collection $sites): string
+    /**
+     * @param  array<int, true>  $bayIds
+     * @param  array<int, true>  $buildingIds
+     * @param  array<int, true>  $siteIds
+     */
+    private function attachToLocation(string $nodeId, ?Bay $bay, ?Building $building, ?Site $site, array $bayIds, array $buildingIds, array $siteIds): string
     {
-        if ($bay !== null && $bays->contains('id', $bay->id)) {
+        if ($bay !== null && isset($bayIds[$bay->id])) {
             return 'BAY'.$bay->id.' -> '.$nodeId;
         }
-        if ($building !== null && $buildings->contains('id', $building->id)) {
+        if ($building !== null && isset($buildingIds[$building->id])) {
             return 'B'.$building->id.' -> '.$nodeId;
         }
-        if ($site !== null && $sites->contains('id', $site->id)) {
+        if ($site !== null && isset($siteIds[$site->id])) {
             return 'S'.$site->id.' -> '.$nodeId;
         }
 
@@ -285,6 +297,18 @@ class PhysicalInfrastructureGraphBuilder
 
         $lines = ['digraph  {', 'fontcolor=black;', ''];
 
+        // Group devices by bay and by site once, instead of filtering each whole collection
+        // with Collection::where() (a linear scan with data_get() per element) for every bay
+        // and every site in the loops below.
+        $byBay = fn (Collection $items) => $items->groupBy('bay_id')->all();
+        $bySite = fn (Collection $items) => $items->groupBy('site_id')->all();
+        $baysBySite = $bySite($bays);
+        [$serversByBay, $storageByBay, $peripheralsByBay, $switchesByBay, $routersByBay, $securityByBay] =
+            array_map($byBay, [$physicalServers, $storageDevices, $peripherals, $physicalSwitches, $physicalRouters, $physicalSecurityDevices]);
+        [$serversBySite, $workstationsBySite, $storageBySite, $peripheralsBySite, $phonesBySite, $switchesBySite, $routersBySite, $wifiBySite, $securityBySite] =
+            array_map($bySite, [$physicalServers, $workstations, $storageDevices, $peripherals, $phones, $physicalSwitches, $physicalRouters, $wifiTerminals, $physicalSecurityDevices]);
+        $none = new Collection;
+
         foreach ($sites as $site) {
             $lines[] = 'subgraph SITE_'.$site->id.'  {';
             $lines[] = 'cluster=true;';
@@ -297,32 +321,32 @@ class PhysicalInfrastructureGraphBuilder
                 $lines[] = $this->buildBuildingCluster($rootBuilding, $siteBuildings, [], $physicalServers, $workstations, $storageDevices, $peripherals, $phones, $physicalSwitches, $physicalRouters, $wifiTerminals, $physicalSecurityDevices, $iconResolver);
             }
 
-            foreach ($bays->where('site_id', $site->id)->whereNull('building_id') as $bay) {
+            foreach (($baysBySite[$site->id] ?? $none)->whereNull('building_id') as $bay) {
                 $lines[] = 'subgraph BAY_'.$bay->id.' {';
                 $lines[] = 'cluster=true;';
                 $lines[] = 'label="'.e($bay->name).'"';
                 $lines[] = 'bgcolor = "'.$this->nextColor().'"';
 
-                foreach ($physicalServers->where('bay_id', $bay->id) as $pServer) {
+                foreach ($serversByBay[$bay->id] ?? [] as $pServer) {
                     $image = $iconResolver($pServer->icon_id, '/images/server.png');
                     $lines[] = DotNode::withImage('PSERVER'.$pServer->id, $image, [e($pServer->name)], $this->href($pServer, true));
                 }
-                foreach ($storageDevices->where('bay_id', $bay->id) as $storageDevice) {
+                foreach ($storageByBay[$bay->id] ?? [] as $storageDevice) {
                     $image = $iconResolver($storageDevice->icon_id, '/images/storage.png');
                     $lines[] = DotNode::withImage('SD'.$storageDevice->id, $image, [e($storageDevice->name)], $this->href($storageDevice, true));
                 }
-                foreach ($peripherals->where('bay_id', $bay->id) as $peripheral) {
+                foreach ($peripheralsByBay[$bay->id] ?? [] as $peripheral) {
                     $image = $iconResolver($peripheral->icon_id, '/images/peripheral.png');
                     $lines[] = DotNode::withImage('PER'.$peripheral->id, $image, [e($peripheral->name)], $this->href($peripheral, true));
                 }
-                foreach ($physicalSwitches->where('bay_id', $bay->id) as $switch) {
+                foreach ($switchesByBay[$bay->id] ?? [] as $switch) {
                     $image = $iconResolver($switch->icon_id, '/images/switch.png');
                     $lines[] = DotNode::withImage('SWITCH'.$switch->id, $image, [e($switch->name)], $this->href($switch, true));
                 }
-                foreach ($physicalRouters->where('bay_id', $bay->id) as $router) {
+                foreach ($routersByBay[$bay->id] ?? [] as $router) {
                     $lines[] = DotNode::withImage('ROUTER'.$router->id, $iconResolver(null, '/images/router.png'), [e($router->name)], $this->href($router, true));
                 }
-                foreach ($physicalSecurityDevices->where('bay_id', $bay->id) as $physicalSecurityDevice) {
+                foreach ($securityByBay[$bay->id] ?? [] as $physicalSecurityDevice) {
                     $image = $iconResolver($physicalSecurityDevice->icon_id, '/images/security.png');
                     $lines[] = DotNode::withImage('PSD'.$physicalSecurityDevice->id, $image, [e($physicalSecurityDevice->name)], $this->href($physicalSecurityDevice, true));
                 }
@@ -330,36 +354,36 @@ class PhysicalInfrastructureGraphBuilder
                 $lines[] = '}';
             }
 
-            foreach ($physicalServers->where('site_id', $site->id)->whereNull('building_id')->whereNull('bay_id') as $pServer) {
+            foreach (($serversBySite[$site->id] ?? $none)->whereNull('building_id')->whereNull('bay_id') as $pServer) {
                 $image = $iconResolver($pServer->icon_id, '/images/server.png');
                 $lines[] = DotNode::withImage('PSERVER'.$pServer->id, $image, [e($pServer->name)], $this->href($pServer, true));
             }
-            foreach ($workstations->where('site_id', $site->id)->whereNull('building_id') as $workstation) {
+            foreach (($workstationsBySite[$site->id] ?? $none)->whereNull('building_id') as $workstation) {
                 $image = $iconResolver($workstation->icon_id, '/images/workstation.png');
                 $lines[] = DotNode::withImage('WORK'.$workstation->id, $image, [e($workstation->name)], $this->href($workstation, true));
             }
-            foreach ($storageDevices->where('site_id', $site->id)->whereNull('building_id')->whereNull('bay_id') as $storageDevice) {
+            foreach (($storageBySite[$site->id] ?? $none)->whereNull('building_id')->whereNull('bay_id') as $storageDevice) {
                 $image = $iconResolver($storageDevice->icon_id, '/images/storage.png');
                 $lines[] = DotNode::withImage('SD'.$storageDevice->id, $image, [e($storageDevice->name)], $this->href($storageDevice, true));
             }
-            foreach ($peripherals->where('site_id', $site->id)->whereNull('building_id')->whereNull('bay_id') as $peripheral) {
+            foreach (($peripheralsBySite[$site->id] ?? $none)->whereNull('building_id')->whereNull('bay_id') as $peripheral) {
                 $image = $iconResolver($peripheral->icon_id, '/images/peripheral.png');
                 $lines[] = DotNode::withImage('PER'.$peripheral->id, $image, [e($peripheral->name)], $this->href($peripheral, true));
             }
-            foreach ($phones->where('site_id', $site->id)->whereNull('building_id') as $phone) {
+            foreach (($phonesBySite[$site->id] ?? $none)->whereNull('building_id') as $phone) {
                 $lines[] = DotNode::withImage('PHONE'.$phone->id, $iconResolver(null, '/images/phone.png'), [e($phone->name)], $this->href($phone, true));
             }
-            foreach ($physicalSwitches->where('site_id', $site->id)->whereNull('building_id')->whereNull('bay_id') as $switch) {
+            foreach (($switchesBySite[$site->id] ?? $none)->whereNull('building_id')->whereNull('bay_id') as $switch) {
                 $image = $iconResolver($switch->icon_id, '/images/switch.png');
                 $lines[] = DotNode::withImage('SWITCH'.$switch->id, $image, [e($switch->name)], $this->href($switch, true));
             }
-            foreach ($physicalRouters->where('site_id', $site->id)->whereNull('building_id')->whereNull('bay_id') as $router) {
+            foreach (($routersBySite[$site->id] ?? $none)->whereNull('building_id')->whereNull('bay_id') as $router) {
                 $lines[] = DotNode::withImage('ROUTER'.$router->id, $iconResolver(null, '/images/router.png'), [e($router->name)], $this->href($router, true));
             }
-            foreach ($wifiTerminals->where('site_id', $site->id)->whereNull('building_id') as $wifiTerminal) {
+            foreach (($wifiBySite[$site->id] ?? $none)->whereNull('building_id') as $wifiTerminal) {
                 $lines[] = DotNode::withImage('WIFI'.$wifiTerminal->id, $iconResolver(null, '/images/wifi.png'), [e($wifiTerminal->name)], $this->href($wifiTerminal, true));
             }
-            foreach ($physicalSecurityDevices->where('site_id', $site->id)->whereNull('building_id')->whereNull('bay_id') as $physicalSecurityDevice) {
+            foreach (($securityBySite[$site->id] ?? $none)->whereNull('building_id')->whereNull('bay_id') as $physicalSecurityDevice) {
                 $image = $iconResolver($physicalSecurityDevice->icon_id, '/images/security.png');
                 $lines[] = DotNode::withImage('PSD'.$physicalSecurityDevice->id, $image, [e($physicalSecurityDevice->name)], $this->href($physicalSecurityDevice, true));
             }
@@ -377,9 +401,21 @@ class PhysicalInfrastructureGraphBuilder
         // is.
         $declaredNodeIds = $this->extractDeclaredNodeIds($lines);
 
+        $endpointIds = [
+            'peripheral' => ['PER', $this->idSet($peripherals)],
+            'physical_router' => ['ROUTER', $this->idSet($physicalRouters)],
+            'phone' => ['PHONE', $this->idSet($phones)],
+            'physical_security_device' => ['PSD', $this->idSet($physicalSecurityDevices)],
+            'physical_server' => ['PSERVER', $this->idSet($physicalServers)],
+            'physical_switch' => ['SWITCH', $this->idSet($physicalSwitches)],
+            'storage_device' => ['SD', $this->idSet($storageDevices)],
+            'wifi_terminal' => ['WIFI', $this->idSet($wifiTerminals)],
+            'workstation' => ['WORK', $this->idSet($workstations)],
+        ];
+
         foreach ($physicalLinks as $link) {
-            $srcNode = $this->resolveLinkEndpoint($link, 'src', $peripherals, $physicalRouters, $phones, $physicalSecurityDevices, $physicalServers, $physicalSwitches, $storageDevices, $wifiTerminals, $workstations);
-            $destNode = $this->resolveLinkEndpoint($link, 'dest', $peripherals, $physicalRouters, $phones, $physicalSecurityDevices, $physicalServers, $physicalSwitches, $storageDevices, $wifiTerminals, $workstations);
+            $srcNode = $this->resolveLinkEndpoint($link, 'src', $endpointIds);
+            $destNode = $this->resolveLinkEndpoint($link, 'dest', $endpointIds);
 
             $isPhysicalLink = $link->router_src_id === null
                 && $link->router_dest_id === null
@@ -555,39 +591,32 @@ class PhysicalInfrastructureGraphBuilder
         return implode("\n", $lines);
     }
 
-    private function resolveLinkEndpoint(
-        PhysicalLink $link,
-        string $side,
-        Collection $peripherals,
-        Collection $physicalRouters,
-        Collection $phones,
-        Collection $physicalSecurityDevices,
-        Collection $physicalServers,
-        Collection $physicalSwitches,
-        Collection $storageDevices,
-        Collection $wifiTerminals,
-        Collection $workstations
-    ): ?string {
-        $checks = [
-            ['peripheral_'.$side.'_id', 'PER', $peripherals],
-            ['physical_router_'.$side.'_id', 'ROUTER', $physicalRouters],
-            ['phone_'.$side.'_id', 'PHONE', $phones],
-            ['physical_security_device_'.$side.'_id', 'PSD', $physicalSecurityDevices],
-            ['physical_server_'.$side.'_id', 'PSERVER', $physicalServers],
-            ['physical_switch_'.$side.'_id', 'SWITCH', $physicalSwitches],
-            ['storage_device_'.$side.'_id', 'SD', $storageDevices],
-            ['wifi_terminal_'.$side.'_id', 'WIFI', $wifiTerminals],
-            ['workstation_'.$side.'_id', 'WORK', $workstations],
-        ];
-
-        foreach ($checks as [$field, $prefix, $collection]) {
-            $id = $link->{$field};
-            if ($id !== null && $collection->contains('id', $id)) {
+    /**
+     * @param  array<string, array{0: string, 1: array<int, true>}>  $endpointIds  device type => [node prefix, id set], in resolution order
+     */
+    private function resolveLinkEndpoint(PhysicalLink $link, string $side, array $endpointIds): ?string
+    {
+        foreach ($endpointIds as $type => [$prefix, $ids]) {
+            $id = $link->{$type.'_'.$side.'_id'};
+            if ($id !== null && isset($ids[$id])) {
                 return $prefix.$id;
             }
         }
 
         return null;
+    }
+
+    /**
+     * @return array<int, true>
+     */
+    private function idSet(iterable $items): array
+    {
+        $set = [];
+        foreach ($items as $item) {
+            $set[$item->id] = true;
+        }
+
+        return $set;
     }
 
     private function nextColor(): string

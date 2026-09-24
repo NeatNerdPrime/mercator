@@ -23,9 +23,30 @@ LDAP_ENABLED=true
 LDAP_FALLBACK_LOCAL=true
 ```
 
+Valeur par défaut : `true` (s'applique si la variable est absente du `.env`).
+
+Lorsque cette option est active, Mercator essaie le **mot de passe local** stocké dans sa base dès que l'authentification LDAP échoue, **quelle qu'en soit la raison** :
+
+* serveur LDAP injoignable, échec du compte de service, erreur TLS
+* utilisateur introuvable dans la base de recherche, ou non membre de `LDAP_GROUP`
+* plusieurs entrées LDAP correspondent à l'identifiant
+* **mauvais mot de passe LDAP** (l'annuaire a refusé l'authentification)
+
+Un mot de passe local valide reste donc toujours une autre façon de se connecter, même lorsque l'annuaire rejette le mot de passe. Positionnez `LDAP_FALLBACK_LOCAL=false` si les comptes LDAP ne doivent s'authentifier qu'auprès de l'annuaire (les comptes purement locaux, comme `admin`, ne peuvent alors plus se connecter tant que LDAP est activé).
+
+Seul cas où le mot de passe local n'est **pas** essayé : l'annuaire accepte le mot de passe, mais aucun utilisateur Mercator n'a ce `login` et l'auto-provisionnement est désactivé. La connexion est alors refusée.
+
+#### Déroulement de la connexion
+
+1. `LDAP_ENABLED=false` → authentification locale uniquement.
+2. Recherche LDAP de l'identifiant, puis authentification avec le DN et le mot de passe de l'utilisateur.
+3. Succès LDAP → connexion de l'utilisateur Mercator ayant le même `login` (créé si `LDAP_AUTO_PROVISION=true`, refusé sinon).
+4. Échec LDAP → authentification locale si `LDAP_FALLBACK_LOCAL=true`, refus sinon.
+
 ### Créer automatiquement les utilisateurs Mercator depuis LDAP
 
 Si l'utilisateur LDAP existe mais qu'aucun utilisateur Mercator correspondant n'est trouvé, Mercator peut créer automatiquement le compte local correspondant.
+La correspondance se fait **uniquement** sur le champ `login` de Mercator, qui doit être identique à l'identifiant saisi sur la page de connexion.
 
 ```
 LDAP_AUTO_PROVISION=true
@@ -37,6 +58,9 @@ Le compte local sera créé avec le rôle suivant :
 LDAP_AUTO_PROVISION_ROLE=user
 ```
 
+La valeur doit correspondre exactement au titre du rôle (sensible à la casse). Si le rôle n'existe pas, l'utilisateur est créé sans rôle et un avertissement est journalisé.
+Les comptes auto-provisionnés reçoivent un mot de passe local aléatoire : ils ne peuvent pas utiliser le repli local.
+
 ---
 
 ### Paramètres de connexion LDAP
@@ -46,11 +70,15 @@ LDAP_HOST=ldap.example.com
 LDAP_USERNAME="CN=ldap-reader,OU=Service Accounts,DC=example,DC=com"
 LDAP_PASSWORD="secret"
 LDAP_PORT=389
+LDAP_BASE_DN="DC=example,DC=com"
+LDAP_TIMEOUT=5
 LDAP_SSL=false
 LDAP_TLS=false
 ```
 
 Ces valeurs sont transmises directement à la couche de connexion LDAPRecord de Laravel.
+
+Les mots de passe sont vérifiés auprès du seul serveur défini dans `LDAP_HOST`. Avec Active Directory, si ce contrôleur de domaine n'a pas encore reçu un changement de mot de passe (réplication en retard ou en échec), il n'accepte que l'**ancien** mot de passe de l'utilisateur.
 
 ---
 
@@ -62,7 +90,7 @@ Définit l'emplacement où les utilisateurs doivent être recherchés :
 LDAP_USERS_BASE_DN="OU=Users,DC=example,DC=com"
 ```
 
-Si vide, Mercator recherche dans l'ensemble de l'annuaire.
+Si vide, Mercator recherche à partir de `LDAP_BASE_DN`.
 
 ---
 
@@ -74,7 +102,9 @@ Définit les attributs LDAP pouvant être utilisés comme identifiant de connexi
 LDAP_LOGIN_ATTRIBUTES=sAMAccountName,uid,mail
 ```
 
-Mercator essaiera ces attributs avec un filtre OR.
+Valeur par défaut : `uid,cn,mail,sAMAccountName,userPrincipalName`.
+
+Mercator essaiera ces attributs avec un filtre OR. Une **seule** entrée LDAP doit correspondre : si plusieurs entrées correspondent (par exemple un utilisateur et un contact partageant le même `mail` ou `cn`), la connexion est refusée. Gardez cette liste aussi courte que possible (par exemple `sAMAccountName` sur Active Directory).
 
 ---
 
@@ -212,7 +242,35 @@ SESSION_LIFETIME=120
 
 ## Journalisation
 
-Mercator utilise le système de journalisation de Laravel. Pour activer la journalisation LDAPRecord :
+Mercator utilise le système de journalisation de Laravel. Les journaux de l'application sont écrits dans :
+
+```
+storage/logs/laravel.log
+```
+
+Tous les niveaux (y compris `debug`) sont déjà écrits dans ce fichier : il n'y a pas de niveau à augmenter.
+
+### Diagnostic des connexions
+
+Chaque tentative de connexion est tracée dans `laravel.log` avec des messages préfixés par `[auth]`, l'identifiant saisi et l'adresse IP du client (jamais le mot de passe) :
+
+| Message | Signification |
+|---------|---------------|
+| `Login succeeded.` | Connexion acceptée (rôles et nombre de permissions) |
+| `Login succeeded but user has no role.` | Connexion acceptée, mais toutes les pages répondront 403 |
+| `LDAP user not found (or not member of LDAP_GROUP).` | Aucune entrée trouvée : vérifier la base de recherche, le filtre et le groupe |
+| `LDAP identifier collision: multiple entries match.` | Plusieurs entrées correspondent : les DN sont listés |
+| `LDAP bind refused for user.` | L'annuaire a refusé le mot de passe (voir `ad_reason` et `host`) |
+| `LDAP service bind / connection failed.` | Serveur injoignable, erreur TLS ou compte de service (`LDAP_USERNAME`) refusé |
+| `LDAP OK but no local user with this login.` | Annuaire OK mais aucun utilisateur Mercator avec ce `login` |
+| `Login refused: local authentication failed.` | Échec du repli local (`unknown login` ou `wrong local password`) |
+| `Login locked out: too many attempts.` | Trop de tentatives pour cet identifiant depuis cette IP |
+
+Pour Active Directory, `ad_reason` décode le sous-code du message de diagnostic : `52e` identifiants invalides, `525` utilisateur introuvable, `530`/`531` connexion non autorisée (horaire/poste), `532` mot de passe expiré, `533` compte désactivé, `701` compte expiré, `773` changement de mot de passe obligatoire, `775` compte verrouillé.
+
+### Journalisation LDAPRecord
+
+Pour tracer également toutes les opérations LDAP (recherche, authentification) :
 
 ```
 LDAP_LOGGING=true
@@ -225,6 +283,8 @@ storage/logs/ldap.log
 ```
 
 Si aucun fichier n'apparaît, vérifiez les permissions du répertoire.
+
+📢 *Note : si la configuration est en cache (`php artisan config:cache`), les modifications du `.env` ne s'appliquent qu'après `php artisan config:clear` (ou un nouveau `config:cache`).*
 
 ---
 
@@ -277,7 +337,7 @@ volumes:
 | Fonctionnalité | Variable | Défaut | Notes |
 |----------------|----------|--------|-------|
 | Activer LDAP | `LDAP_ENABLED` | false | Active la connexion LDAP |
-| Repli local | `LDAP_FALLBACK_LOCAL` | false | Autorise la connexion locale en cas d'échec LDAP |
+| Repli local | `LDAP_FALLBACK_LOCAL` | true | Essaie le mot de passe local dès que LDAP échoue, y compris sur un mauvais mot de passe LDAP |
 | Auto-provisionnement | `LDAP_AUTO_PROVISION` | false | Crée l'utilisateur en base lors de la première connexion LDAP |
 | Rôle auto-provisionnement | `LDAP_AUTO_PROVISION_ROLE` | null | Rôle attribué aux utilisateurs nouvellement créés |
 | Serveur LDAP | `LDAP_HOST` | ldap.example.com | Pour la connexion au serveur LDAP |
@@ -286,10 +346,12 @@ volumes:
 | Port du serveur LDAP | `LDAP_PORT` | 389 | Pour la connexion au serveur LDAP |
 | Chiffrement SSL | `LDAP_SSL` | false | Pour la connexion au serveur LDAP |
 | Chiffrement TLS | `LDAP_TLS` | false | Pour la connexion au serveur LDAP |
+| Base DN LDAP | `LDAP_BASE_DN` | dc=local,dc=com | Base de recherche par défaut |
+| Délai LDAP | `LDAP_TIMEOUT` | 5 | Délai de connexion en secondes |
 | Groupes imbriqués | `LDAP_NESTED_GROUPS` | false | AD uniquement |
 | Groupe requis | `LDAP_GROUP` | "" | Restreint la connexion |
 | Base de recherche LDAP | `LDAP_USERS_BASE_DN` | "" | Base de recherche |
-| Attributs de connexion | `LDAP_LOGIN_ATTRIBUTES` | `sAMAccountName` | Liste séparée par des virgules |
+| Attributs de connexion | `LDAP_LOGIN_ATTRIBUTES` | `uid,cn,mail,sAMAccountName,userPrincipalName` | Liste séparée par des virgules |
 | Journalisation LDAP | `LDAP_LOGGING` | false | Écrit dans `ldap.log` |
 | Limite d'appels API | `API_RATE_LIMIT` | 60 | Nombre de requêtes API autorisées dans la fenêtre de temps |
 | Intervalle de limite API | `API_RATE_LIMIT_DECAY` | 1 | Durée en minutes de la fenêtre de limite de taux |

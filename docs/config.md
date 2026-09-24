@@ -23,9 +23,30 @@ LDAP_ENABLED=true
 LDAP_FALLBACK_LOCAL=true
 ```
 
+Default: `true` (applies when the variable is missing from `.env`).
+
+When enabled, Mercator tries the **local password** stored in its database whenever LDAP authentication fails, **whatever the reason**:
+
+* LDAP server unreachable, service account bind failure, TLS error
+* user not found in the search base, or not a member of `LDAP_GROUP`
+* several LDAP entries match the identifier
+* **wrong LDAP password** (the directory refused the bind)
+
+A valid local password is therefore always an alternative way to log in, even when the directory rejects the password. Set `LDAP_FALLBACK_LOCAL=false` if LDAP accounts must only authenticate against the directory (local-only accounts such as `admin` can then no longer log in while LDAP is enabled).
+
+The only case where the local password is **not** tried: the directory accepts the password but no Mercator user has this `login` and auto-provisioning is disabled. The login is then refused.
+
+#### Login flow
+
+1. `LDAP_ENABLED=false` → local authentication only.
+2. LDAP search for the identifier, then bind with the user's DN and password.
+3. LDAP success → the Mercator user with the same `login` is logged in (created if `LDAP_AUTO_PROVISION=true`, refused otherwise).
+4. LDAP failure → local authentication if `LDAP_FALLBACK_LOCAL=true`, refused otherwise.
+
 ### Automatically create Mercator users from LDAP
 
 If the LDAP user exists but no matching Mercator user is found, Mercator can auto-create the corresponding local account.
+The match is made **only** on the Mercator `login` field, which must equal the identifier typed on the login page.
 
 ```
 LDAP_AUTO_PROVISION=true
@@ -37,6 +58,9 @@ The local account will be created with the following role:
 LDAP_AUTO_PROVISION_ROLE=user
 ```
 
+The value must match the role title exactly (case-sensitive). If the role does not exist, the user is created without a role and a warning is logged.
+Auto-provisioned accounts get a random local password: they cannot use the local fallback.
+
 ---
 
 ### LDAP Connection Settings
@@ -46,11 +70,15 @@ LDAP_HOST=ldap.example.com
 LDAP_USERNAME="CN=ldap-reader,OU=Service Accounts,DC=example,DC=com"
 LDAP_PASSWORD="secret"
 LDAP_PORT=389
+LDAP_BASE_DN="DC=example,DC=com"
+LDAP_TIMEOUT=5
 LDAP_SSL=false
 LDAP_TLS=false
 ```
 
 These values are passed directly to Laravel's LDAPRecord connection layer.
+
+Passwords are checked against the single server set in `LDAP_HOST`. With Active Directory, if this domain controller has not yet received a password change (replication delay or failure), it only accepts the user's **previous** password.
 
 ---
 
@@ -62,7 +90,7 @@ Define where users should be searched:
 LDAP_USERS_BASE_DN="OU=Users,DC=example,DC=com"
 ```
 
-If empty, Mercator searches the entire directory.
+If empty, Mercator searches from `LDAP_BASE_DN`.
 
 ---
 
@@ -74,7 +102,9 @@ Defines which LDAP attributes can be used as a login identifier:
 LDAP_LOGIN_ATTRIBUTES=sAMAccountName,uid,mail
 ```
 
-Mercator will try these attributes with an OR filter.
+Default: `uid,cn,mail,sAMAccountName,userPrincipalName`.
+
+Mercator will try these attributes with an OR filter. Exactly **one** LDAP entry must match: if several entries match (for example a user and a contact sharing the same `mail` or `cn`), the login is refused. Keep this list as short as possible (e.g. `sAMAccountName` on Active Directory).
 
 ---
 
@@ -212,7 +242,35 @@ SESSION_LIFETIME=120
 
 ## Logging
 
-Mercator uses Laravel's logging system. To activate LDAPRecord logging:
+Mercator uses Laravel's logging system. Application logs are written to:
+
+```
+storage/logs/laravel.log
+```
+
+All levels (including `debug`) are already written to this file: there is no level to raise.
+
+### Login troubleshooting
+
+Every login attempt is traced in `laravel.log` with messages prefixed by `[auth]`, the identifier typed and the client IP (never the password):
+
+| Message | Meaning |
+|---------|---------|
+| `Login succeeded.` | Login accepted (roles and number of permissions) |
+| `Login succeeded but user has no role.` | Login accepted, but every page will return 403 |
+| `LDAP user not found (or not member of LDAP_GROUP).` | No entry found: check search base, filter and group |
+| `LDAP identifier collision: multiple entries match.` | Several entries match: the DNs are listed |
+| `LDAP bind refused for user.` | The directory refused the password (see `ad_reason` and `host`) |
+| `LDAP service bind / connection failed.` | Server unreachable, TLS error or service account (`LDAP_USERNAME`) refused |
+| `LDAP OK but no local user with this login.` | Directory OK but no Mercator user with this `login` |
+| `Login refused: local authentication failed.` | Local fallback failed (`unknown login` or `wrong local password`) |
+| `Login locked out: too many attempts.` | Too many attempts for this identifier from this IP |
+
+For Active Directory, `ad_reason` decodes the sub-code of the diagnostic message: `52e` invalid credentials, `525` user not found, `530`/`531` logon not permitted (time/workstation), `532` password expired, `533` account disabled, `701` account expired, `773` user must reset password, `775` account locked out.
+
+### LDAPRecord logging
+
+To also trace every LDAP operation (search, bind):
 
 ```
 LDAP_LOGGING=true
@@ -225,6 +283,8 @@ storage/logs/ldap.log
 ```
 
 If no file appears, ensure directory permissions are correct.
+
+📢 *Note: if the configuration is cached (`php artisan config:cache`), changes to `.env` only apply after `php artisan config:clear` (or a new `config:cache`).*
 
 ---
 
@@ -277,7 +337,7 @@ volumes:
 | Feature | Variable | Default | Notes |
 |---------|----------|---------|-------|
 | Enable LDAP | `LDAP_ENABLED` | false | Activates LDAP login |
-| Local fallback | `LDAP_FALLBACK_LOCAL` | false | Allows local login when LDAP fails |
+| Local fallback | `LDAP_FALLBACK_LOCAL` | true | Tries the local password whenever LDAP fails, including a wrong LDAP password |
 | Auto-provision | `LDAP_AUTO_PROVISION` | false | Creates user in DB on first LDAP login |
 | Auto-provision role | `LDAP_AUTO_PROVISION_ROLE` | null | Role assigned to newly created users |
 | LDAP Server | `LDAP_HOST` | ldap.example.com | For connecting to the LDAP server |
@@ -286,10 +346,12 @@ volumes:
 | LDAP Server Port | `LDAP_PORT` | 389 | For connecting to the LDAP server |
 | SSL Encryption | `LDAP_SSL` | false | For connecting to the LDAP server |
 | TLS Encryption | `LDAP_TLS` | false | For connecting to the LDAP server |
+| LDAP base DN | `LDAP_BASE_DN` | dc=local,dc=com | Default search base |
+| LDAP timeout | `LDAP_TIMEOUT` | 5 | Connection timeout in seconds |
 | Nested groups | `LDAP_NESTED_GROUPS` | false | AD only |
 | Required group | `LDAP_GROUP` | "" | Restricts login |
 | LDAP user base | `LDAP_USERS_BASE_DN` | "" | Search base |
-| Login attributes | `LDAP_LOGIN_ATTRIBUTES` | `sAMAccountName` | CSV list |
+| Login attributes | `LDAP_LOGIN_ATTRIBUTES` | `uid,cn,mail,sAMAccountName,userPrincipalName` | CSV list |
 | LDAP logging | `LDAP_LOGGING` | false | Writes to `ldap.log` |
 | API call limit | `API_RATE_LIMIT` | 60 | Number of API requests allowed within the decay interval |
 | API call interval | `API_RATE_LIMIT_DECAY` | 1 | Duration in minutes for the rate limit window |
