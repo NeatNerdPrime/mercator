@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Report;
 
 use App\Http\Controllers\Controller;
+use App\Http\Controllers\Report\Concerns\AutoloadsRelations;
 use App\Models\AdminUser;
 use App\Models\Annuaire;
 use App\Models\Cartographer;
@@ -16,6 +17,8 @@ use Symfony\Component\HttpFoundation\Response;
 
 class AdministrationView extends Controller
 {
+    use AutoloadsRelations;
+
     /**
      * Build the administration report view populated with zones, annuaires, forests, domains, and admin users.
      *
@@ -38,6 +41,8 @@ class AdministrationView extends Controller
         $forests = Cartographer::scopedQuery(ForestAd::query())->get();
         $domains = Cartographer::scopedQuery(Domain::query())->get();
         $adminUsers = Cartographer::scopedQuery(AdminUser::query())->get();
+
+        $this->autoloadRelations($zones, $annuaires, $forests, $domains, $adminUsers);
 
         $graphBuilder = new AdministrationGraphBuilder;
 
