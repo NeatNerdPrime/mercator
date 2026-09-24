@@ -25,7 +25,15 @@ return new class extends Migration
                 }
             });
 
-            Schema::table('entities', function (Blueprint $table) {
+            // SQLite cannot drop a column that is still referenced by an index
+            $indexes = collect(Schema::getIndexes('entities'))
+                ->filter(fn ($index) => ! $index['primary'] && in_array('is_external', $index['columns'], true))
+                ->pluck('name');
+
+            Schema::table('entities', function (Blueprint $table) use ($indexes) {
+                foreach ($indexes as $index) {
+                    $table->dropIndex($index);
+                }
                 $table->dropColumn('is_external');
             });
         }
