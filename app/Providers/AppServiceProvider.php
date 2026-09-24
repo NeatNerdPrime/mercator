@@ -3,6 +3,7 @@
 namespace App\Providers;
 
 use App\Models\Cartographer;
+use App\Models\Graph;
 use App\Observers\CartographerActivityObserver;
 use App\Observers\PerimeterAssignmentObserver;
 use App\Support\MercatorSettings;
@@ -46,6 +47,7 @@ class AppServiceProvider extends ServiceProvider
         // changed or rolled back since would be served stale.
         PerimeterSettings::resetCache();
         PerimeterPermissions::resetCache();
+        Graph::resetBpmnIndex();
 
         // Get version from file
         $versionFile = base_path('version.txt');

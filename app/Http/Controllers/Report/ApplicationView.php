@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Report;
 
 use App\Http\Controllers\Controller;
+use App\Http\Controllers\Report\Concerns\AutoloadsRelations;
 use App\Models\Application;
 use App\Models\ApplicationBlock;
 use App\Models\ApplicationFlow;
@@ -18,6 +19,8 @@ use Symfony\Component\HttpFoundation\Response;
 
 class ApplicationView extends Controller
 {
+    use AutoloadsRelations;
+
     /**
      * Prepare data for the applications report view based on the requested application block and application.
      *
@@ -118,6 +121,8 @@ class ApplicationView extends Controller
             $flows = Cartographer::scopedQuery(ApplicationFlow::query())->with(self::flowEagerLoads())->orderBy('name')->get();
             $all_applications = null;
         }
+
+        $this->autoloadRelations($applicationBlocks, $applications, $applicationServices, $applicationModules, $databases, $flows);
 
         $graphBuilder = new ApplicationGraphBuilder;
 

@@ -29,7 +29,15 @@ class EcosystemView extends Controller
                    $request->perimeter : $this::SANITIZED_PERIMETER;
         $typeFilter = $request->type ??= 'All';
 
-        $entitiesGroups = Cartographer::scopedQuery(Entity::query())->get()->groupBy('type');
+        // Relations consumed by admin/entities/_details and admin/relations/_details,
+        // eager-loaded up front to avoid per-row N+1 queries.
+        $entitiesGroups = Cartographer::scopedQuery(Entity::query())
+            ->with([
+                'perimeter', 'parentEntity', 'entities', 'processes', 'respApplications', 'databases',
+                'sourceRelations.destination', 'destinationRelations.source',
+            ])
+            ->get()
+            ->groupBy('type');
         $entities = collect([]);
         $entityTypes = collect([]);
         $isTypeExists = false; /* sanitize type: si type inconnu pas d'entités */
@@ -56,7 +64,10 @@ class EcosystemView extends Controller
                 });
         }
 
-        $relations = Cartographer::scopedQuery(Relation::query())->orderBy('name')->get();
+        $relations = Cartographer::scopedQuery(Relation::query())
+            ->with(['perimeter', 'source', 'destination'])
+            ->orderBy('name')
+            ->get();
         if ($has_filter) {
             /**
              * Le "group by" semble résoudre les entités on doit travailler avec les ids ..

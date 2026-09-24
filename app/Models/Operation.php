@@ -93,12 +93,7 @@ class Operation extends Model implements HasIconContract, HasPrefix, HasUniqueId
 
     public function graphs(): Collection
     {
-        return once(fn () => Graph::query()
-            ->select('id', 'name')
-            ->where('class', '=', '2')
-            ->whereLike('content', '%"#'.$this->getUID().'"%')
-            ->get()
-        );
+        return Graph::bpmnGraphsReferencing($this->getUID());
     }
 
     /** @param Builder<static> $query */

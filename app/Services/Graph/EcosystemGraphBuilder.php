@@ -23,17 +23,21 @@ class EcosystemGraphBuilder
         $lines = [];
         $lines[] = 'digraph  {';
 
+        // O(1) isset() lookups instead of Collection::contains('id', ...), a linear scan
+        // with data_get() per element, called for every entity and twice per relation.
+        $entityIds = $entities->pluck('id')->flip()->all();
+
         foreach ($entities as $entity) {
             $href = $withHref ? ' href="#'.$entity->getUID().'"' : '';
             $lines[] = DotNode::withImage('E'.$entity->id, $iconResolver($entity), [$this->escapeLabel($entity->name)], $href);
 
-            if ($entity->parentEntity !== null && $entities->contains('id', $entity->parentEntity->id)) {
+            if ($entity->parentEntity !== null && isset($entityIds[$entity->parentEntity->id])) {
                 $lines[] = 'E'.$entity->parentEntity->id.' -> E'.$entity->id;
             }
         }
 
         foreach ($relations as $relation) {
-            if ($entities->contains('id', $relation->source_id) && $entities->contains('id', $relation->destination_id)) {
+            if (isset($entityIds[$relation->source_id], $entityIds[$relation->destination_id])) {
                 $href = $withHref ? ' href="#'.$relation->getUID().'"' : '';
                 $lines[] = 'E'.$relation->source_id.' -> E'.$relation->destination_id.' [label="'.$this->escapeLabel($relation->name).'"'.$href.']';
             }

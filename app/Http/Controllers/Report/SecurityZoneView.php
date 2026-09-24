@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Report;
 
 use App\Http\Controllers\Controller;
+use App\Http\Controllers\Report\Concerns\AutoloadsRelations;
 use App\Models\Cartographer;
 use App\Models\Zone;
 use App\Services\Graph\SecurityZoneGraphBuilder;
@@ -12,6 +13,8 @@ use Symfony\Component\HttpFoundation\Response;
 
 class SecurityZoneView extends Controller
 {
+    use AutoloadsRelations;
+
     public function generate(Request $request)
     {
         $allowed = Gate::allows('zone_access') || Cartographer::canAccess(\App\Models\Zone::class);
@@ -35,6 +38,8 @@ class SecurityZoneView extends Controller
 
         $buildings  = $zones->flatMap(fn($z) => $z->buildings)->unique('id')->sortBy('name');
         $adminUsers = $zones->flatMap(fn($z) => $z->adminUsers)->unique('id')->sortBy('user_id');
+
+        $this->autoloadRelations($zones, $buildings, $adminUsers);
 
         $graphBuilder = new SecurityZoneGraphBuilder;
         $dotSrc = $graphBuilder->buildDot($zones, $buildings, $adminUsers);

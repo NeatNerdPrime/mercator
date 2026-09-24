@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Report;
 
 use App\Http\Controllers\Controller;
+use App\Http\Controllers\Report\Concerns\AutoloadsRelations;
 use App\Models\Cartographer;
 use Gate;
 use Illuminate\Http\Request;
@@ -16,6 +17,8 @@ use Symfony\Component\HttpFoundation\Response;
 
 class GDPRView extends Controller
 {
+    use AutoloadsRelations;
+
     /*
     * GDPR
     */
@@ -145,6 +148,8 @@ class GDPRView extends Controller
             $appQuery->whereRaw('0 = 1');
         }
         $applications = $appQuery->get();
+
+        $this->autoloadRelations($macroProcessuses, $processes, $dataProcessings, $applications);
 
         $graphBuilder = new GdprGraphBuilder;
 
