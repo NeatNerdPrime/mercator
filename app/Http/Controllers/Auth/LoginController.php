@@ -13,8 +13,10 @@ use Illuminate\Http\Response;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Str;
+use Illuminate\Validation\ValidationException;
 use LdapRecord\Auth\BindException;
 use LdapRecord\Container;
+use LdapRecord\DetailedError;
 use LdapRecord\Models\Entry as LdapEntry;
 
 class LoginController extends Controller
@@ -22,6 +24,23 @@ class LoginController extends Controller
     use AuthenticatesUsers;
 
     protected string $redirectTo = '/home';
+
+    /**
+     * Sous-codes Active Directory renvoyés dans le message de diagnostic d'un bind refusé
+     * (ex. "80090308: LdapErr: DSID-0C09044E, comment: AcceptSecurityContext error, data 775, v4563").
+     */
+    private const AD_BIND_SUBCODES = [
+        '525' => 'user not found',
+        '52e' => 'invalid credentials',
+        '530' => 'logon not permitted at this time',
+        '531' => 'logon not permitted from this workstation',
+        '532' => 'password expired',
+        '533' => 'account disabled',
+        '568' => 'too many security IDs (token size)',
+        '701' => 'account expired',
+        '773' => 'user must reset password',
+        '775' => 'account locked out',
+    ];
 
     public function __construct()
     {
@@ -43,19 +62,32 @@ class LoginController extends Controller
      */
     protected function authenticated(Request $request, User $user): void
     {
-        session($user->sessionPermissionData());
+        $permissionData = $user->sessionPermissionData();
+        session($permissionData);
+
+        $context = [
+            'user_id' => $user->id,
+            'roles' => $permissionData['auth_role_ids'],
+            'permissions' => count($permissionData['auth_permissions']),
+        ];
+        if ($permissionData['auth_role_ids'] === []) {
+            // Connexion acceptée mais toutes les pages répondront 403 : ressenti comme un échec.
+            $this->authLog('warning', 'Login succeeded but user has no role.', $request, $context);
+        } else {
+            $this->authLog('info', 'Login succeeded.', $request, $context);
+        }
 
         AuditLog::query()->create([
-            'description'  => 'Login',
-            'subject_id'   => $user->id,
+            'description' => 'Login',
+            'subject_id' => $user->id,
             'subject_type' => User::class,
-            'user_id'      => $user->id,
-            'properties'   => [
+            'user_id' => $user->id,
+            'properties' => [
                 'user_agent' => $request->userAgent(),
-                'method'     => $request->method(),
-                'url'        => $request->fullUrl(),
+                'method' => $request->method(),
+                'url' => $request->fullUrl(),
             ],
-            'host'         => $request->ip(),
+            'host' => $request->ip(),
         ]);
     }
 
@@ -111,17 +143,27 @@ class LoginController extends Controller
                 }
             }
 
+            $searchContext = [
+                'identifier' => $appUsername,
+                'base_dn' => $base !== '' ? $base : config('ldap.connections.'.config('ldap.default').'.base_dn'),
+                'filter' => $loginFilter,
+                'group' => $group !== '' ? $group : null,
+                'nested' => $useNested,
+            ];
+
             // Collision guard
             $results = $query->limit(2)->get();
             if ($results->count() === 0) {
-                Log::debug('LDAP user not found for identifier.', ['identifier' => $appUsername]);
+                // Utilisateur absent de la base de recherche, ou hors du groupe LDAP_GROUP.
+                Log::warning('LDAP user not found (or not member of LDAP_GROUP).', $searchContext);
 
                 return null;
             }
             if ($results->count() > 1) {
-                Log::warning('LDAP identifier collision: multiple entries match.', [
-                    'identifier' => $appUsername,
-                    'attributes' => $attrs,
+                // Aucun filtre objectClass : un contact, un groupe ou un second compte partageant
+                // le même cn/mail/uid suffit à provoquer la collision.
+                Log::warning('LDAP identifier collision: multiple entries match.', $searchContext + [
+                    'dns' => $results->map(fn (LdapEntry $e) => $e->getDn())->all(),
                 ]);
 
                 return null;
@@ -133,20 +175,44 @@ class LoginController extends Controller
             $connection = Container::getConnection();
             $dn = $ldapUser->getDn();
 
-            if ($dn && $connection->auth()->attempt($dn, $password, true)) {
+            if (! $dn) {
+                Log::warning('LDAP entry found without DN.', $searchContext);
+
+                return null;
+            }
+
+            // attempt() avale la BindException : on relit l'erreur détaillée sur la connexion
+            // (toujours disponible car stayBound=true évite le re-bind du compte de service).
+            if ($connection->auth()->attempt($dn, $password, true)) {
+                Log::debug('LDAP bind succeeded.', ['identifier' => $appUsername, 'dn' => $dn]);
+
                 return $ldapUser;
             }
 
+            $ldap = $connection->getLdapConnection();
+            Log::warning('LDAP bind refused for user.', [
+                'identifier' => $appUsername,
+                'dn' => $dn,
+                'host' => $ldap->getHost(),
+            ] + $this->describeLdapError($ldap->getDetailedError()));
+
             return null;
         } catch (BindException $e) {
-            Log::warning('LDAP bind failed', [
-                'error'      => $e->getMessage(),
-                'diagnostic' => $e->getDetailedError()?->getDiagnosticMessage(),
-            ]);
+            // Levée hors de attempt() : typiquement le bind du compte de service (LDAP_USERNAME)
+            // ou la connexion au serveur (injoignable, certificat TLS invalide/expiré).
+            Log::error('LDAP service bind / connection failed.', [
+                'identifier' => $appUsername,
+                'host' => config('ldap.connections.'.config('ldap.default').'.hosts'),
+                'error' => $e->getMessage(),
+            ] + $this->describeLdapError($e->getDetailedError()));
 
             return null;
         } catch (\Throwable $e) {
-            Log::error('LDAP error: '.$e->getMessage());
+            Log::error('LDAP error: '.$e->getMessage(), [
+                'identifier' => $appUsername,
+                'exception' => get_class($e),
+                'file' => $e->getFile().':'.$e->getLine(),
+            ]);
 
             return null;
         }
@@ -157,14 +223,20 @@ class LoginController extends Controller
      */
     protected function attemptLogin(Request $request): bool
     {
-        $useLdap        = (bool) config('ldap.enabled');
-        $fallbackLocal  = (bool) config('app.ldap_fallback_local');
-        $autoProvision  = (bool) config('app.ldap_auto_provision');
+        $useLdap = (bool) config('ldap.enabled');
+        $fallbackLocal = (bool) config('app.ldap_fallback_local');
+        $autoProvision = (bool) config('app.ldap_auto_provision');
 
         $credentials = $request->only($this->username(), 'password'); // ['login' => ..., 'password' => ...]
-        $identifier  = (string) ($credentials[$this->username()] ?? '');
-        $password    = (string) ($credentials['password'] ?? '');
-        $remember    = $request->boolean('remember');
+        $identifier = (string) ($credentials[$this->username()] ?? '');
+        $password = (string) ($credentials['password'] ?? '');
+        $remember = $request->boolean('remember');
+
+        $this->authLog('debug', 'Login attempt.', $request, [
+            'ldap' => $useLdap,
+            'fallback_local' => $fallbackLocal,
+            'auto_provision' => $autoProvision,
+        ]);
 
         if ($useLdap) {
             $ldapUser = $this->ldapBindAndGetUser($identifier, $password);
@@ -173,17 +245,31 @@ class LoginController extends Controller
                 // Mapping local UNIQUEMENT par 'login'
                 $local = User::where('login', $identifier)->first();
 
+                if (! $local) {
+                    // Aide au diagnostic : un compte local existe-t-il sous un autre identifiant
+                    // (ex. saisie de l'e-mail alors que le login local est le sAMAccountName) ?
+                    $mail = $ldapUser->getFirstAttribute('mail');
+                    $this->authLog('info', 'LDAP OK but no local user with this login.', $request, [
+                        'ldap_dn' => $ldapUser->getDn(),
+                        'ldap_mail' => $mail,
+                        'local_user_by_email' => $mail ? User::where('email', $mail)->value('login') : null,
+                        'auto_provision' => $autoProvision,
+                    ]);
+                }
+
                 if (! $local && $autoProvision) {
                     $local = User::create([
-                        'name'     => $ldapUser->getFirstAttribute('cn') ?: $identifier,
-                        'email'    => $ldapUser->getFirstAttribute('mail') ?: 'user@localhost.local',
-                        'login'    => $identifier,
+                        'name' => $ldapUser->getFirstAttribute('cn') ?: $identifier,
+                        'email' => $ldapUser->getFirstAttribute('mail') ?: 'user@localhost.local',
+                        'login' => $identifier,
                         'password' => Hash::make(Str::random(32)), // inutilisable en local par défaut
                     ]);
 
                     // Assignation du rôle par défaut
                     // filled() rejette null ET les chaînes vides (ex: LDAP_AUTO_PROVISION_ROLE='')
                     $roleName = config('app.ldap_auto_provision_role');
+
+                    $this->authLog('info', 'LDAP auto-provision: local user created.', $request, ['user_id' => $local->id]);
 
                     if (filled($roleName)) {
                         // first() au lieu de firstOrFail() : évite le crash 404 si le rôle
@@ -201,8 +287,8 @@ class LoginController extends Controller
                                 // L'utilisateur est déjà persisté : on isole l'échec de
                                 // l'assignation pour ne pas bloquer la connexion.
                                 Log::error('LDAP auto-provision: failed to assign role.', [
-                                    'user'  => $identifier,
-                                    'role'  => $roleName,
+                                    'user' => $identifier,
+                                    'role' => $roleName,
                                     'error' => $e->getMessage(),
                                 ]);
                             }
@@ -227,23 +313,95 @@ class LoginController extends Controller
                 }
 
                 // LDAP OK mais pas d'utilisateur local et pas d'auto-provision
+                $this->authLog('warning', 'Login refused: LDAP OK but no local user and auto-provision disabled.', $request);
+
                 return false;
             }
 
             // LDAP KO → éventuel fallback local (toujours via 'login')
             if (! $fallbackLocal) {
+                $this->authLog('warning', 'Login refused: LDAP failed and local fallback disabled.', $request);
+
                 return false;
             }
         }
 
         // Auth locale (Laravel) — utilisera ['login' => ..., 'password' => ...]
-        return $this->guard()->attempt(
+        $ok = $this->guard()->attempt(
             $this->credentials($request), // credentials() retournera login + password car username() = 'login'
             $remember
         );
+
+        if (! $ok) {
+            $local = User::where('login', $identifier)->first(['id', 'deleted_at']);
+            $this->authLog('warning', 'Login refused: local authentication failed.', $request, [
+                'after_ldap' => $useLdap,
+                'local_user_exists' => $local !== null,
+                'reason' => $local === null ? 'unknown login' : 'wrong local password',
+            ]);
+        }
+
+        return $ok;
     }
 
-    public function logout(Request $request): RedirectResponse | Response
+    /**
+     * Trace les verrouillages temporaires (trop de tentatives pour ce login depuis cette IP).
+     *
+     * @throws ValidationException
+     */
+    protected function sendLockoutResponse(Request $request): never
+    {
+        $seconds = $this->limiter()->availableIn($this->throttleKey($request));
+
+        $this->authLog('warning', 'Login locked out: too many attempts.', $request, [
+            'retry_after_seconds' => $seconds,
+        ]);
+
+        throw ValidationException::withMessages([
+            $this->username() => [trans('auth.throttle', [
+                'seconds' => $seconds,
+                'minutes' => ceil($seconds / 60),
+            ])],
+        ])->status(Response::HTTP_TOO_MANY_REQUESTS);
+    }
+
+    /**
+     * Log de connexion avec le contexte commun (identifiant saisi, IP) — jamais le mot de passe.
+     *
+     * @param  array<string, mixed>  $context
+     */
+    private function authLog(string $level, string $message, Request $request, array $context = []): void
+    {
+        Log::log($level, '[auth] '.$message, [
+            'identifier' => (string) $request->input($this->username()),
+            'ip' => $request->ip(),
+        ] + $context);
+    }
+
+    /**
+     * @return array<string, mixed>
+     */
+    private function describeLdapError(?DetailedError $error): array
+    {
+        if ($error === null) {
+            return [];
+        }
+
+        $diagnostic = $error->getDiagnosticMessage();
+        $adCode = null;
+        if ($diagnostic && preg_match('/data ([0-9a-f]{3,4})/i', $diagnostic, $m)) {
+            $adCode = strtolower($m[1]);
+        }
+
+        return [
+            'ldap_code' => $error->getErrorCode(),
+            'ldap_error' => $error->getErrorMessage(),
+            'diagnostic' => $diagnostic,
+            'ad_reason' => $adCode !== null ? (self::AD_BIND_SUBCODES[$adCode] ?? 'AD code '.$adCode) : null,
+        ];
+    }
+
+    public function logout(Request $request): RedirectResponse|Response
     {
         $userId = auth()->id();
 
@@ -253,16 +411,16 @@ class LoginController extends Controller
 
         try {
             AuditLog::query()->create([
-                'description'  => 'Logout',
-                'subject_id'   => $userId,
+                'description' => 'Logout',
+                'subject_id' => $userId,
                 'subject_type' => User::class,
-                'user_id'      => $userId,
-                'properties'   => [
+                'user_id' => $userId,
+                'properties' => [
                     'user_agent' => $request->userAgent(),
-                    'method'     => $request->method(),
-                    'url'        => $request->fullUrl(),
+                    'method' => $request->method(),
+                    'url' => $request->fullUrl(),
                 ],
-                'host'         => $request->ip(),
+                'host' => $request->ip(),
             ]);
         } catch (\Throwable $e) {
             Log::warning('Failed to create logout audit log', ['error' => $e->getMessage()]);
