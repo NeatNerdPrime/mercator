@@ -10,7 +10,34 @@
         Zones réseau
     </div>
     <div class="card-body">
-        <div id="graph" class="graphviz"></div>
+        <div id="graph-container">
+            <div id="graph" class="graphviz"></div>
+            <div class="graph-resize-handle"></div>
+        </div>
+
+        <div class="row p-1">
+            <div class="col-4">
+                @php
+                    $engines = ['dot', 'fdp', 'osage', 'circo'];
+                    $engine  = request()->get('engine', 'osage');
+                    if (! in_array($engine, $engines, true)) {
+                        $engine = 'osage';
+                    }
+                @endphp
+
+                <label class="inline-flex items-center ps-1 pe-1">
+                    <a href="#" id="downloadSvg"><i class="bi bi-download"></i></a>
+                </label>
+                <label class="inline-flex items-center">Rendu :</label>
+                @foreach($engines as $value)
+                    <label class="inline-flex items-center ps-1">
+                        <input type="radio" name="engine" value="{{ $value }}"
+                               @checked($engine === $value)>
+                        <span>{{ $value }}</span>
+                    </label>
+                @endforeach
+            </div>
+        </div>
     </div>
 </div>
 @endsection
@@ -80,11 +107,7 @@ $dot .= "}\n";
 
 <script>
 document.addEventListener('graphvizReady', () => {
-    document.getElementById("graph").innerHTML = window.graphviz.layout(
-        @json($dot),
-        "svg",
-        "osage"
-    );
+    window.initGraphvizReport({ dotSrc: @json($dot), engine: @json($engine) });
 });
 </script>
 @parent

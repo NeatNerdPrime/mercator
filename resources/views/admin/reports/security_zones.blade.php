@@ -49,8 +49,7 @@
                         @foreach($engines as $value)
                             <label class="inline-flex items-center ps-1">
                                 <input type="radio" name="engine" value="{{ $value }}"
-                                       @checked($engine === $value)
-                                       onchange="this.form.submit();">
+                                       @checked($engine === $value)>
                                 <span>{{ $value }}</span>
                             </label>
                         @endforeach
@@ -129,12 +128,7 @@
 let dotSrc = `{!! $dotSrc !!}`;
 
 document.addEventListener('graphvizReady', () => {
-    document.getElementById('graph').innerHTML = window.graphviz.layout(
-        dotSrc,
-        'svg',
-        '{{ $engine }}',
-        { images: @json($imageManifest) }
-    );
+    window.initGraphvizReport({ dotSrc, engine: @json($engine), images: @json($imageManifest) });
 
     // Download SVG
     document.getElementById('downloadSvg').addEventListener('click', (e) => {

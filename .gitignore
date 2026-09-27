@@ -60,3 +60,6 @@ database/data/venv/
 describe
 img.png
 
+
+# PHP CS Fixer configuration
+/.php-cs-fixer.php
