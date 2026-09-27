@@ -43,7 +43,6 @@
                                     name="engine"
                                     value="{{ $value }}"
                                     @checked($engine === $value)
-                                    onchange="this.form.submit();"
                             >
                             <span>{{ $value }}</span>
                         </label>
@@ -183,12 +182,7 @@
 let dotSrc = `{!! $dotSrc !!}`;
 
 document.addEventListener('graphvizReady', () => {
-    document.getElementById("graph").innerHTML = window.graphviz.layout(
-        dotSrc,
-        "svg",
-        "{{ $engine }}",
-        { images: @json($imageManifest) }
-    );
+    window.initGraphvizReport({ dotSrc, engine: @json($engine), images: @json($imageManifest) });
 });
 </script>
 @parent

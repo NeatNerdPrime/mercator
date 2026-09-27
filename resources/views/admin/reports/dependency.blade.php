@@ -15,6 +15,8 @@
 
         {{-- Les filtres (vue[], attr[]) sont transmis via l'URL pour être restaurés au rechargement --}}
         <form method="GET" action="{{ url()->current() }}" id="dependency-form">
+            {{-- Moteur courant (mis à jour côté client par les radios sous le graphe) --}}
+            <input type="hidden" name="engine" id="dependency-engine" value="{{ request('engine', 'dot') }}">
 
             <div class="card-body">
 
@@ -207,7 +209,6 @@
                             name="engine"
                             value="{{ $eng }}"
                             @checked(request('engine', 'dot') === $eng)
-                            onchange="document.getElementById('engine-form').submit();"
                     >
                     <span>{{ $eng }}</span>
                 </label>
@@ -481,20 +482,20 @@
         const dotSrc      = buildDotSource(subgraph.nodes, subgraph.edges, PARAMS.node);
         const uniqueImages = [...new Set(subgraph.nodes.map(n => n.image).filter(Boolean))];
 
-        document.getElementById('graph').innerHTML = window.graphviz.layout(
+        window.renderGraphviz(
             dotSrc,
-            "svg",
             PARAMS.engine,
             {
                 images: uniqueImages.map(img => ({ path: img, width: '64px', height: '64px' }))
             }
-        );
-        resetZoom();
+        ).then(() => {
+            resetZoom();
 
-        show('graph-container');
-        show('graph-footer');
-        document.getElementById('graph-resize-handle').style.setProperty('display', 'block');
-        requestAnimationFrame(() => adjustGraphHeight());
+            show('graph-container');
+            show('graph-footer');
+            document.getElementById('graph-resize-handle').style.setProperty('display', 'block');
+            requestAnimationFrame(() => adjustGraphHeight());
+        });
     }
 
     // ─── Hauteur dynamique du conteneur de graphe ─────────────────────────────
@@ -559,6 +560,13 @@
         });
 
         loadGraphData();
+
+        // Changement de moteur : nouveau rendu côté client, sans rechargement
+        window.bindGraphvizEngineRadios((engine) => {
+            PARAMS.engine = engine;
+            document.getElementById('dependency-engine').value = engine;
+            renderDependencyGraph();
+        });
 
         const handle    = document.getElementById('graph-resize-handle');
         const container = document.getElementById('graph-container');

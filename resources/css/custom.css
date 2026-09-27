@@ -594,6 +594,12 @@ table .navbar-brand-full {
     display: inline-block;
 }
 
+/* Curseur d'attente pendant le calcul Graphviz (renderGraphviz), y compris sur liens/boutons */
+html.graph-busy,
+html.graph-busy * {
+    cursor: wait !important;
+}
+
 .graph-resize-handle {
     height: 8px;
     cursor: ns-resize;
