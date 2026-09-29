@@ -6,7 +6,7 @@ Cette documentation explique ce qu'est un périmètre, comment il se combine ave
 
 ## Introduction — Qu'est-ce qu'un périmètre ?
 
-Un **périmètre** est une partie de la cartographie. Chaque objet (serveur, application, réseau, site…) appartient à **un seul et un seul** périmètre. Par défaut, tous les objets appartiennent au **périmètre par défaut** (id = 1).
+Un **périmètre** regroupe un sous-ensemble des objets de la cartographie. Chaque objet (serveur, application, réseau, site…) n'appartient jamais qu'à un seul périmètre (par défaut le périmètre n° 1).
 
 Les périmètres permettent de :
 
@@ -15,7 +15,7 @@ Les périmètres permettent de :
 - Identifier **les flux et les liens physiques** qui relient les entités
 - Partitionner la visibilité et le contrôle d'accès par entité
 
-**Note :** la gestion des périmètres est une **fonctionnalité optionnelle**. Tant que vous ne l'activez pas, tous les objets restent dans le périmètre par défaut et aucun filtrage n'est appliqué.
+**Note :** la gestion des périmètres est une **fonctionnalité optionnelle**. Tant que vous ne l'activez pas, tous les objets restent dans le périmètre par défaut et aucun filtrage ou partitionnement de la cartographie n'est appliqué.
 
 !!! info "Trois mécanismes de contrôle d'accès"
     Mercator combine trois notions complémentaires :

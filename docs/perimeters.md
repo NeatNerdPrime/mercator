@@ -6,16 +6,16 @@ This documentation explains what a perimeter is, how it combines with roles, and
 
 ## Introduction — What is a perimeter?
 
-A **perimeter** is a part of the cartography. Every object (server, application, network, site…) belongs to **one and only one** perimeter. By default, all objects belong to the **default perimeter** (id = 1).
+A **perimeter** groups a subset of the objects in the cartography. Each object (server, application, network, site…) belongs to one and only one perimeter (by default, perimeter no. 1).
 
 Perimeters allow you to:
 
-- Host the cartography of **several entities** in a single instance
+- Host the cartography of **multiple entities** in a single instance
 - Let each entity **manage its own objects** independently
-- Identify **the flows and physical links** that connect entities
+- Identify the **flows and physical links** connecting entities
 - Partition visibility and access control by entity
 
-**Note:** perimeter management is an **optional feature**. Until you enable it, all objects remain in the default perimeter and no filtering is applied.
+**Note:** perimeter management is an **optional feature**. Until you enable it, all objects remain in the default perimeter and no filtering or partitioning of the cartography is applied.
 
 !!! info "Three access control mechanisms"
     Mercator combines three complementary notions:
