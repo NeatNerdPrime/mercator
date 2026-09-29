@@ -161,7 +161,7 @@
                         {{ trans('cruds.application.fields.urls') }}
                     </th>
                     <td colspan="5">
-                        @foreach(array_filter(array_map('trim', explode(',', $application->urls ?? ''))) as $url)
+                        @foreach(array_filter(array_map('trim', explode(',', \App\Rules\UrlList::normalize($application->urls) ?? ''))) as $url)
                             <a href="{{ $url }}" target="_blank" rel="noopener noreferrer">{{ $url }}</a>@if(!$loop->last), @endif
                         @endforeach
                     </td>
@@ -205,7 +205,7 @@
                         {{ trans('cruds.application.fields.documentation') }}
                     </th>
                     <td colspan="5">
-                        @foreach(array_filter(array_map('trim', explode(',', $application->documentation ?? ''))) as $doc)
+                        @foreach(array_filter(array_map('trim', explode(',', \App\Rules\UrlList::normalize($application->documentation) ?? ''))) as $doc)
                             <a href="{{ $doc }}" target="_blank" rel="noopener noreferrer">{{ $doc }}</a>@if(!$loop->last), @endif
                         @endforeach
                     </td>

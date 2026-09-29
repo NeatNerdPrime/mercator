@@ -18,6 +18,17 @@ class StoreApplicationRequest extends BaseFormRequest
         return true;
     }
 
+    protected function prepareForValidation(): void
+    {
+        parent::prepareForValidation();
+
+        foreach (['urls', 'documentation'] as $field) {
+            if (is_string($this->input($field))) {
+                $this->merge([$field => UrlList::normalize($this->input($field))]);
+            }
+        }
+    }
+
     public function rules(): array
     {
         $perimeterId = $this->input('perimeter_id') ?: auth()->user()?->activeOrDefaultPerimeterId();
@@ -82,8 +93,8 @@ class StoreApplicationRequest extends BaseFormRequest
             'urls' => [
                 'nullable',
                 new UrlList,
-	    ],
-	    'documentation' => [
+            ],
+            'documentation' => [
                 'nullable',
                 new UrlList,
             ],

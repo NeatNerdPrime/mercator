@@ -31,6 +31,26 @@ class UrlList implements ValidationRule
         }
     }
 
+    /**
+     * Convert Windows UNC paths (\\server\share\path) to file:// URLs
+     * (file://server/share/path), leaving other entries untouched.
+     */
+    public static function normalize(?string $value): ?string
+    {
+        if ($value === null) {
+            return null;
+        }
+
+        return implode(',', array_map(function (string $url) {
+            $trimmed = trim($url);
+            if (! str_starts_with($trimmed, '\\\\')) {
+                return $url;
+            }
+
+            return str_replace($trimmed, 'file://'.str_replace('\\', '/', substr($trimmed, 2)), $url);
+        }, explode(',', $value)));
+    }
+
     public function message(): string
     {
         return 'Invalid URL List';

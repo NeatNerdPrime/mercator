@@ -1,6 +1,6 @@
 # Les périmètres dans Mercator
 
-Les périmètres sont le mécanisme principal pour partitionner la cartographie. Ils permettent de cartographier **plusieurs établissements (ou entités, sites, unités métier) dans une seule instance de Mercator**, tout en laissant chacun gérer ses propres objets et en conservant la possibilité de créer des liens entre des objets de périmètres différents. Cette documentation explique ce qu'est un périmètre, comment il se combine avec les rôles, et comment les utilisateurs travaillent au sein de leur périmètre.
+Les périmètres permettent de cartographier plusieurs entités (établissements, sites, unités métier) dans une seule instance de Mercator. Chaque entité gère ses propres objets, tout en pouvant les relier à ceux des autres périmètres. Cette documentation explique ce qu'est un périmètre, comment il se combine avec les rôles, et comment les utilisateurs travaillent au sein de leur périmètre.
 
 ## Introduction — Qu'est-ce qu'un périmètre ?
 
@@ -8,18 +8,18 @@ Un **périmètre** est une partition de la cartographie dans laquelle chaque obj
 
 Les périmètres permettent de :
 
-- Héberger la cartographie de **plusieurs établissements** dans une seule instance
-- Laisser chaque établissement **gérer ses propres objets** de manière indépendante
-- Continuer à **identifier les flux et les liens** qui traversent les établissements
-- Partitionner la visibilité et le contrôle d'accès par établissement
+- Héberger la cartographie de **plusieurs entités** dans une seule instance
+- Laisser chaque entité **gérer ses propres objets** de manière indépendante
+- Identifier **les flux et les liens physiques** qui relient les entités
+- Partitionner la visibilité et le contrôle d'accès par entité
 
 **Note :** la gestion des périmètres est une **fonctionnalité optionnelle**. Tant que vous ne l'activez pas, tous les objets restent dans le périmètre par défaut et aucun filtrage n'est appliqué.
 
 !!! info "Trois mécanismes de contrôle d'accès"
     Mercator combine trois notions complémentaires :
     
-    - Le **rôle** définit *ce que* l'utilisateur peut faire (voir la documentation *Rôles*)
-    - Le **périmètre** définit *sur les objets de quel établissement* ces droits s'appliquent
+    - Le **périmètre** définit *sur les objets de quel entité* ces droits s'appliquent 
+    - Le (rôle)[roles.md] définit *ce que* l'utilisateur peut faire dans un périmètre
     - L'assignation d'un **cartographe** délègue la responsabilité d'**objets individuels précis**, indépendamment du périmètre (voir la documentation *Cartographes*)
     
     Les rôles et les périmètres fonctionnent ensemble : les permissions d'un utilisateur dans un périmètre sont déterminées par son rôle dans ce périmètre.
@@ -53,7 +53,8 @@ Lorsque vous **activez** la gestion des périmètres depuis **Administration →
 - Les administrateurs peuvent **créer de nouveaux périmètres** (id > 1)
 - Les administrateurs peuvent **déplacer des objets** entre périmètres
 
-**Important :** activer la fonctionnalité ne modifie pas les données existantes. Tous les objets restent assignés au périmètre par défaut (id = 1). Le partitionnement ne prend effet que lorsque vous créez de nouveaux périmètres et réassignez des objets.
+!!! note "Important"
+    Activer les périmètres ne modifie pas les données existantes. Tous les objets restent assignés au périmètre par défaut (id = 1). Le  partitionnement ne prend effet que lorsque vous créez de nouveaux périmètres et réassignez des objets dasn ceux-ci.
 
 ### Le périmètre par défaut
 
