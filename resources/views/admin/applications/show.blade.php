@@ -161,9 +161,7 @@
                         {{ trans('cruds.application.fields.urls') }}
                     </th>
                     <td colspan="5">
-                        @foreach(array_filter(array_map('trim', explode(',', $application->urls ?? ''))) as $url)
-                            <a href="{{ $url }}" target="_blank" rel="noopener noreferrer">{{ $url }}</a>@if(!$loop->last), @endif
-                        @endforeach
+                        @include('partials.url-list', ['value' => $application->urls])
                     </td>
                 </tr>
                 <tr>
@@ -205,9 +203,7 @@
                         {{ trans('cruds.application.fields.documentation') }}
                     </th>
                     <td colspan="5">
-                        @foreach(array_filter(array_map('trim', explode(',', $application->documentation ?? ''))) as $doc)
-                            <a href="{{ $doc }}" target="_blank" rel="noopener noreferrer">{{ $doc }}</a>@if(!$loop->last), @endif
-                        @endforeach
+                        @include('partials.url-list', ['value' => $application->documentation])
                     </td>
                 </tr>
                 <tr>
@@ -724,6 +720,32 @@
                 ret += '</ul>';
                 return ret;
             }
+
+            // navigator.clipboard is only available in secure contexts (https, localhost)
+            function copyText(text) {
+                if (navigator.clipboard && window.isSecureContext) {
+                    return navigator.clipboard.writeText(text);
+                }
+                const textarea = document.createElement('textarea');
+                textarea.value = text;
+                textarea.style.position = 'fixed';
+                textarea.style.opacity = '0';
+                document.body.appendChild(textarea);
+                textarea.select();
+                const copied = document.execCommand('copy');
+                document.body.removeChild(textarea);
+                return copied ? Promise.resolve() : Promise.reject();
+            }
+
+            document.querySelectorAll('.copy-path-button').forEach(function (button) {
+                button.addEventListener('click', function () {
+                    const icon = button.querySelector('i');
+                    copyText(button.dataset.path).then(function () {
+                        icon.className = 'bi bi-clipboard-check';
+                        setTimeout(function () { icon.className = 'bi bi-clipboard'; }, 1500);
+                    });
+                });
+            });
 
             $('.events_list_button').on('click', function (e) {
                 e.preventDefault();

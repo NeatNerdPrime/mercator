@@ -62,6 +62,7 @@ return [
     'code' => 'Code',
     'color' => 'Color',
     'copyUrl' => 'Copy URL',
+    'copyPath' => 'Copy path',
     'companies' => 'Companies',
     'company' => 'Society',
     'company_name' => 'Company name',

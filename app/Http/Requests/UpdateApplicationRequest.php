@@ -14,6 +14,17 @@ class UpdateApplicationRequest extends BaseFormRequest
         return $this->authorizeEdit();
     }
 
+    protected function prepareForValidation(): void
+    {
+        parent::prepareForValidation();
+
+        foreach (['urls', 'documentation'] as $field) {
+            if (is_string($this->input($field))) {
+                $this->merge([$field => UrlList::normalize($this->input($field))]);
+            }
+        }
+    }
+
     public function rules(): array
     {
         $perimeterId = $this->input('perimeter_id') ?: $this->route('application')?->perimeter_id;
@@ -82,8 +93,8 @@ class UpdateApplicationRequest extends BaseFormRequest
             'urls' => [
                 'nullable',
                 new UrlList,
-	    ],
-	    'documentation' => [
+            ],
+            'documentation' => [
                 'nullable',
                 new UrlList,
             ],
