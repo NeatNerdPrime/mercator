@@ -1,10 +1,12 @@
 # Les périmètres dans Mercator
 
-Les périmètres permettent de cartographier plusieurs entités (établissements, sites, unités métier) dans une seule instance de Mercator. Chaque entité gère ses propres objets, tout en pouvant les relier à ceux des autres périmètres. Cette documentation explique ce qu'est un périmètre, comment il se combine avec les rôles, et comment les utilisateurs travaillent au sein de leur périmètre.
+Les périmètres permettent de cartographier plusieurs entités (établissements, sites, unités métier) dans une seule instance de Mercator. Chaque entité gère ses propres objets, tout en pouvant les relier à ceux des autres périmètres. 
+
+Cette documentation explique ce qu'est un périmètre, comment il se combine avec les rôles, et comment les utilisateurs travaillent au sein de leur périmètre.
 
 ## Introduction — Qu'est-ce qu'un périmètre ?
 
-Un **périmètre** est une partition de la cartographie dans laquelle chaque objet nommé (serveur, application, réseau, site…) appartient à **exactement un périmètre**. Par défaut, tous les objets appartiennent au **périmètre par défaut** (id = 1).
+Un **périmètre** est une partie de la cartographie. Chaque objet (serveur, application, réseau, site…) appartient à **un seul et un seul** périmètre. Par défaut, tous les objets appartiennent au **périmètre par défaut** (id = 1).
 
 Les périmètres permettent de :
 
@@ -19,10 +21,10 @@ Les périmètres permettent de :
     Mercator combine trois notions complémentaires :
     
     - Le **périmètre** définit *sur les objets de quel entité* ces droits s'appliquent 
-    - Le (rôle)[roles.md] définit *ce que* l'utilisateur peut faire dans un périmètre
-    - L'assignation d'un **cartographe** délègue la responsabilité d'**objets individuels précis**, indépendamment du périmètre (voir la documentation *Cartographes*)
+    - Le [rôle](roles.md) définit *ce que* l'utilisateur peut faire dans un périmètre
+    - L'assignation d'un [cartographe](cartographers.md) délègue la responsabilité d'**objets individuels précis**, indépendamment du périmètre
     
-    Les rôles et les périmètres fonctionnent ensemble : les permissions d'un utilisateur dans un périmètre sont déterminées par son rôle dans ce périmètre.
+    Les rôles et les périmètres fonctionnent ensemble : les permissions d'un utilisateur dans un périmètre sont déterminées par son **rôle** dans ce **périmètre**.
 
 !!! note "Modèle technique"
     - Chaque objet porte un entier `perimeter_id` (jamais NULL, toujours ≥ 1)
@@ -54,7 +56,7 @@ Lorsque vous **activez** la gestion des périmètres depuis **Administration →
 - Les administrateurs peuvent **déplacer des objets** entre périmètres
 
 !!! note "Important"
-    Activer les périmètres ne modifie pas les données existantes. Tous les objets restent assignés au périmètre par défaut (id = 1). Le  partitionnement ne prend effet que lorsque vous créez de nouveaux périmètres et réassignez des objets dasn ceux-ci.
+    Activer les périmètres ne modifie pas les données existantes. Tous les objets restent assignés au périmètre par défaut (id = 1). Le  partitionnement ne prend effet que lorsque vous créez de nouveaux périmètres et réassignez des objets dans ceux-ci.
 
 ### Le périmètre par défaut
 
@@ -63,8 +65,6 @@ Lorsque vous **activez** la gestion des périmètres depuis **Administration →
 - Porte un nom que vous définissez (initialement « Default »)
 - Ne peut pas être renommé avec une chaîne vide
 - Est le périmètre de tous les objets tant que vous ne les déplacez pas explicitement
-
----
 
 ## Activer la gestion des périmètres
 
