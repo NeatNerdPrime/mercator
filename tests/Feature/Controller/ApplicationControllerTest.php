@@ -85,6 +85,21 @@ describe('show', function () {
         $response->assertSee($name);
     });
 
+    test('renders web URLs as links and network paths with a copy button', function () {
+        $application = Application::factory()->create([
+            'urls' => 'https://app.example.com',
+            'documentation' => '//srv/Mon Partage/doc.pdf',
+        ]);
+
+        $response = $this->get(route('admin.applications.show', $application->id));
+
+        $response->assertOk();
+        $response->assertSee('<a href="https://app.example.com"', false);
+        $response->assertSee('\\\\srv\\Mon Partage\\doc.pdf');
+        $response->assertSee('copy-path-button', false);
+        $response->assertDontSee('href="//srv', false);
+    });
+
     test('denies access without permission', function () {
         $user = User::factory()->create();
         $this->actingAs($user);
@@ -138,6 +153,31 @@ describe('update', function () {
 
         $response->assertRedirect(route('admin.applications.index'));
         $this->assertDatabaseHas('applications', ['name' => 'Updated Name']);
+    });
+
+    test('stores network paths in UNC form', function () {
+        $application = Application::factory()->create();
+
+        $response = $this->put(route('admin.applications.update', $application), [
+            'name' => $application->name,
+            'urls' => 'https://app.example.com',
+            'documentation' => '//srv/Mon Partage/Procédures/doc.pdf, \\\\srv\\partage$\\guide v2.pdf',
+        ]);
+
+        $response->assertRedirect(route('admin.applications.index'));
+        expect($application->fresh()->documentation)
+            ->toBe('\\\\srv\\Mon Partage\\Procédures\\doc.pdf,\\\\srv\\partage$\\guide v2.pdf');
+    });
+
+    test('rejects invalid documentation paths', function () {
+        $application = Application::factory()->create();
+
+        $response = $this->put(route('admin.applications.update', $application), [
+            'name' => $application->name,
+            'documentation' => 'not a path',
+        ]);
+
+        $response->assertSessionHasErrors('documentation');
     });
 });
 
